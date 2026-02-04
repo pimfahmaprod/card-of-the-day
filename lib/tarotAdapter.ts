@@ -1,81 +1,31 @@
 /**
- * Adapter to convert existing tarot_cards.json structure
- * to our Valentine's Day app structure
+ * Valentine's Day Tarot Adapter
+ * Major Arcana only - ใครจะเข้ามาในชีวิตคุณช่วงวาเลนไทน์
  */
 
 import { TarotCard, TarotCardRaw } from '@/types/tarot';
-import tarotData from '@/tarot_cards.json';
-
-/**
- * Extract share quote from love reading
- * Takes the first meaningful sentence as the share quote
- */
-function extractShareQuote(loveReading: string): string {
-  const sentences = loveReading
-    .split(/[.!?]/)
-    .map(s => s.trim())
-    .filter(s => s.length > 20 && s.length < 150);
-
-  return sentences[0] || loveReading.substring(0, 120) + '...';
-}
-
-/**
- * Split love reading into single and in_relationship interpretations
- * The existing data often has both contexts in one reading
- */
-function splitLoveReading(loveReading: string): {
-  single: string;
-  in_relationship: string;
-} {
-  // Check if reading explicitly mentions both contexts
-  const parts = loveReading.split(/\n\nส่วนคนมีคู่|สำหรับคนมีคู่/);
-
-  if (parts.length > 1) {
-    return {
-      single: parts[0].trim(),
-      in_relationship: parts[1].trim(),
-    };
-  }
-
-  // If no explicit split, use context clues to determine or use the same for both
-  if (loveReading.includes('คนโสด') || loveReading.includes('พบเจอคนใหม่')) {
-    return {
-      single: loveReading,
-      in_relationship: loveReading.replace(/คนโสด/g, 'คุณ'),
-    };
-  }
-
-  // Default: use the same reading for both contexts
-  return {
-    single: loveReading,
-    in_relationship: loveReading,
-  };
-}
+import valentineData from '@/valentine_tarot.json';
 
 /**
  * Convert raw tarot card data to our app format
  */
 export function adaptTarotCard(rawCard: TarotCardRaw): TarotCard {
-  const loveReading = rawCard.readings.love || rawCard.readings.card_of_the_day || '';
-  const { single, in_relationship } = splitLoveReading(loveReading);
-
   return {
-    card_id: rawCard.card_id,
-    card_name: rawCard.card_name,
-    image_path: `/images/tarot/${rawCard.card_name}.png`,
-    interpretations: {
-      single,
-      in_relationship,
-    },
-    share_quote: extractShareQuote(loveReading),
+    id: rawCard.id,
+    name: rawCard.name,
+    image: rawCard.image,
+    image_path: `/images/tarot/${rawCard.image}`,
+    interpretation: rawCard.interpretation,
+    personality: rawCard.personality,
+    quote: rawCard.quote,
   };
 }
 
 /**
- * Load and adapt all tarot cards
+ * Load and adapt all tarot cards (Major Arcana only - 22 cards)
  */
 export function getAllTarotCards(): TarotCard[] {
-  const rawCards = tarotData.tarot_cards as TarotCardRaw[];
+  const rawCards = valentineData.cards as TarotCardRaw[];
   return rawCards.map(adaptTarotCard);
 }
 

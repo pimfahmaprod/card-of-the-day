@@ -16,9 +16,8 @@ export default function ResultScreen({ card, relationshipStatus, onReset }: Resu
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const shareCardRef = useRef<HTMLDivElement>(null);
 
-  const interpretation = relationshipStatus === 'single'
-    ? card.interpretations.single
-    : card.interpretations.in_relationship;
+  // Use the same interpretation for both statuses
+  const interpretation = card.interpretation;
 
   const handleShare = async (platform: 'facebook' | 'tiktok' | 'instagram') => {
     setIsGeneratingImage(true);
@@ -42,12 +41,12 @@ export default function ResultScreen({ card, relationshipStatus, onReset }: Resu
           await navigator.share({
             files: [file],
             title: 'Valentine Tarot',
-            text: card.share_quote,
+            text: card.quote,
           });
         } else {
           // Fallback: download image
           const link = document.createElement('a');
-          link.download = `valentine-tarot-${card.card_name}.png`;
+          link.download = `valentine-tarot-${card.name}.png`;
           link.href = dataUrl;
           link.click();
 
@@ -105,7 +104,7 @@ export default function ResultScreen({ card, relationshipStatus, onReset }: Resu
           className="text-center"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-gradient mb-2">
-            {card.card_name}
+            {card.name}
           </h2>
           <p className="text-sm text-valentine-purple/60">
             {relationshipStatus === 'single' ? 'สำหรับคนโสด' : 'สำหรับคนมีคู่'}
@@ -144,7 +143,7 @@ export default function ResultScreen({ card, relationshipStatus, onReset }: Resu
           <div className="absolute top-4 left-4 text-4xl text-valentine-gold/30">"</div>
           <div className="absolute bottom-4 right-4 text-4xl text-valentine-gold/30">"</div>
           <p className="text-lg md:text-xl text-valentine-darkpurple font-medium italic leading-relaxed">
-            {card.share_quote}
+            {card.quote}
           </p>
         </motion.div>
 
@@ -271,7 +270,7 @@ export default function ResultScreen({ card, relationshipStatus, onReset }: Resu
             </div>
 
             <h2 className="text-7xl font-bold text-gradient">
-              {card.card_name}
+              {card.name}
             </h2>
 
             <div className="px-20 py-16 rounded-3xl" style={{
@@ -279,7 +278,7 @@ export default function ResultScreen({ card, relationshipStatus, onReset }: Resu
               border: '4px solid rgba(255, 215, 0, 0.5)',
             }}>
               <p className="text-5xl text-valentine-darkpurple font-medium italic leading-relaxed">
-                "{card.share_quote}"
+                "{card.quote}"
               </p>
             </div>
 

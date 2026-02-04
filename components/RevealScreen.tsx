@@ -180,7 +180,7 @@ export default function RevealScreen({ card, onRevealComplete }: RevealScreenPro
           className="mt-8 text-center"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-gradient">
-            {card.card_name}
+            {card.name}
           </h2>
         </motion.div>
       )}

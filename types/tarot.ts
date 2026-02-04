@@ -5,26 +5,22 @@
 export type RelationshipStatus = 'single' | 'in_relationship';
 
 export interface TarotCard {
-  card_id: string;
-  card_name: string;
+  id: number;
+  name: string;
+  image: string;
   image_path: string;
-  interpretations: {
-    single: string;
-    in_relationship: string;
-  };
-  share_quote: string;
+  interpretation: string;
+  personality: string;
+  quote: string;
 }
 
 export interface TarotCardRaw {
-  card_id: string;
-  card_name: string;
-  readings: {
-    love?: string;
-    card_of_the_day?: string;
-    work?: string;
-    finance?: string;
-    health?: string;
-  };
+  id: number;
+  name: string;
+  image: string;
+  interpretation: string;
+  personality: string;
+  quote: string;
 }
 
 export interface AppState {

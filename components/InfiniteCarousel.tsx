@@ -179,7 +179,7 @@ export default function InfiniteCarousel({ cards, onSelectCard }: InfiniteCarous
 
             return (
               <motion.div
-                key={`${card.card_id}-${index}`}
+                key={`${card.id}-${index}`}
                 className="flex-shrink-0 cursor-pointer"
                 style={{
                   transform: `translateY(${verticalOffset}px)`,
