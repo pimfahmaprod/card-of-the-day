@@ -109,7 +109,7 @@ export default function InfiniteCarousel({ cards, onSelectCard }: InfiniteCarous
               >
                 <div className="relative">
                   {/* Card face-down with image */}
-                  <div className="w-[160px] h-[260px] md:w-[180px] md:h-[300px] rounded-2xl overflow-hidden card-glow relative bg-transparent">
+                  <div className="w-[168px] h-[300px] rounded-2xl overflow-hidden card-glow relative bg-transparent">
                     <Image
                       src="/images/card_back.png"
                       alt="Card Back"
@@ -117,7 +117,7 @@ export default function InfiniteCarousel({ cards, onSelectCard }: InfiniteCarous
                       className="object-cover"
                       style={{
                         objectPosition: 'center',
-                        scale: '1.15',
+                        scale: '1.24',
                       }}
                       priority
                     />
