@@ -1042,7 +1042,7 @@ function closeResult() {
         commentToggleBtn.classList.remove('commented');
         commentToggleBtn.disabled = false;
         const btnText = commentToggleBtn.querySelector('span');
-        if (btnText) btnText.textContent = 'คุณอยากบอกแม่หมอว่า ...';
+        if (btnText) btnText.textContent = 'น้อมรับคำทำนาย';
         // Restore original text bubble icon
         const svgIcon = commentToggleBtn.querySelector('svg');
         if (svgIcon) {
@@ -1239,7 +1239,7 @@ async function checkCardComments(cardId) {
 
     // Default state: hide view button, show normal text
     viewCommentsBtn.style.display = 'none';
-    commentToggleBtnText.textContent = 'คุณอยากบอกแม่หมอว่า ...';
+    commentToggleBtnText.textContent = 'น้อมรับคำทำนาย';
 
     // Check if Firebase is available
     if (!window.cardCounter || !window.cardCounter.fetchCommentsByCardId) {
@@ -1252,11 +1252,11 @@ async function checkCardComments(cardId) {
         if (comments && comments.length > 0) {
             // Card has comments: show both buttons
             viewCommentsBtn.style.display = 'inline-flex';
-            commentToggleBtnText.textContent = 'คุณอยากบอกแม่หมอว่า ...';
+            commentToggleBtnText.textContent = 'น้อมรับคำทำนาย';
         } else {
             // Card has no comments: hide view button, change text
             viewCommentsBtn.style.display = 'none';
-            commentToggleBtnText.textContent = 'เป็นคนแรกที่บอกแม่หมอ';
+            commentToggleBtnText.textContent = 'น้อมรับคำทำนายคนแรก';
         }
     } catch (error) {
         console.warn('Failed to check card comments:', error);
@@ -1585,6 +1585,12 @@ function openCommentsPanel() {
     commentsOverlay.classList.add('show');
     document.body.style.overflow = 'hidden';
 
+    // Push state for back button handling on mobile
+    if (!window.commentsPanelHistoryPushed) {
+        history.pushState({ commentsPanel: true }, '', '');
+        window.commentsPanelHistoryPushed = true;
+    }
+
     // Track comments panel opened
     if (window.cardCounter) {
         window.cardCounter.trackCommentsPanel('opened');
@@ -1657,13 +1663,24 @@ function updateCommentsPanelUser() {
     }
 }
 
-function closeCommentsPanel() {
+function closeCommentsPanel(fromBackButton = false) {
     const commentsPanel = document.getElementById('commentsPanel');
     const commentsOverlay = document.getElementById('commentsOverlay');
+
+    // Only close if panel is actually open
+    if (!commentsPanel.classList.contains('show')) return;
 
     commentsPanel.classList.remove('show');
     commentsOverlay.classList.remove('show');
     document.body.style.overflow = '';
+
+    // Handle history state - go back if not triggered by back button
+    if (window.commentsPanelHistoryPushed && !fromBackButton) {
+        window.commentsPanelHistoryPushed = false;
+        history.back();
+    } else {
+        window.commentsPanelHistoryPushed = false;
+    }
 
     // Track comments panel closed
     if (window.cardCounter) {
@@ -1679,6 +1696,14 @@ function closeCommentsPanel() {
         window.cardCounter.unsubscribeFromNewComments();
     }
 }
+
+// Handle browser back button for comments panel
+window.addEventListener('popstate', () => {
+    const commentsPanel = document.getElementById('commentsPanel');
+    if (commentsPanel && commentsPanel.classList.contains('show')) {
+        closeCommentsPanel(true);
+    }
+});
 
 // Handle new comment from real-time listener
 function handleNewComment(comment) {

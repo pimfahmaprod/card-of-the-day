@@ -143,21 +143,6 @@
 
         <!-- Comment Section -->
         <div class="comment-section">
-            <div class="comment-buttons-row">
-                <button class="comment-toggle-btn" id="commentToggleBtn" onclick="toggleCommentForm()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    <span id="commentToggleBtnText">คุณอยากบอกแม่หมอว่า ...</span>
-                </button>
-                <button class="view-comments-btn" id="viewCommentsBtn" onclick="viewCardComments()" style="display: none;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                    <span>ส่อง</span>
-                </button>
-            </div>
             <div class="comment-form" id="commentForm">
                 <div class="comment-input-group" id="commentNameGroup">
                     <label for="commentName">ชื่อของคุณ</label>
@@ -214,6 +199,21 @@
         </div>
 
         <div class="retry-row">
+            <button class="comment-toggle-btn accept-btn" id="commentToggleBtn" onclick="toggleCommentForm()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span id="commentToggleBtnText">น้อมรับคำทำนาย</span>
+            </button>
+            <button class="view-comments-btn" id="viewCommentsBtn" onclick="viewCardComments()" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>ส่อง</span>
+            </button>
+        </div>
+        <div class="retry-row retry-row-bottom">
             <span class="retry-text">ยังไม่เอาจริง</span>
             <button class="result-close" id="resultClose">จับใหม่</button>
         </div>
