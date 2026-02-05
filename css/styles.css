@@ -423,6 +423,41 @@ body {
 }
 
 /* Brand on Landing */
+/* Total Counter on Landing Page */
+.total-counter {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: rgba(114, 47, 55, 0.08);
+    border: 1px solid rgba(114, 47, 55, 0.15);
+    border-radius: 20px;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+.total-counter.show {
+    opacity: 1;
+}
+
+.total-counter-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--burgundy);
+    opacity: 0.6;
+}
+
+#totalPickCount {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 400;
+    font-size: 0.85rem;
+    color: var(--burgundy);
+    opacity: 0.7;
+}
+
 .landing-brand {
     position: absolute;
     bottom: 30px;
@@ -762,6 +797,44 @@ header {
 
 .result-interpretation::-webkit-scrollbar-thumb:hover {
     background: rgba(114, 47, 55, 0.5);
+}
+
+/* Pick Counter */
+.pick-counter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 15px auto;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, rgba(201, 162, 39, 0.1), rgba(114, 47, 55, 0.08));
+    border: 1px solid rgba(201, 162, 39, 0.3);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--burgundy);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    max-width: fit-content;
+}
+
+.pick-counter.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.pick-counter-icon {
+    font-size: 1rem;
+}
+
+.pick-counter-text {
+    font-weight: 300;
+}
+
+#pickCountNumber {
+    font-weight: 500;
+    color: var(--gold);
+    font-size: 1rem;
 }
 
 .retry-row {

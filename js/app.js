@@ -734,6 +734,11 @@ function selectCard(cardId, cardElement) {
                 document.getElementById('resultInterpretation').textContent = card.interpretation;
                 document.getElementById('resultPanel').classList.add('active');
                 isAnimating = false;
+
+                // Increment and display card pick counter
+                if (window.cardCounter && window.cardCounter.increment) {
+                    window.cardCounter.increment(card.id);
+                }
             }, 800);
         }, 500);
     }, 600);
@@ -745,6 +750,10 @@ function closeResult() {
     isAnimating = true;
 
     const cardGrid = document.getElementById('cardGrid');
+
+    // Hide counter
+    const pickCounter = document.getElementById('pickCounter');
+    if (pickCounter) pickCounter.classList.remove('show');
 
     // Hide result panel
     document.getElementById('resultPanel').classList.remove('active');

@@ -43,6 +43,16 @@
             <span class="card-click-hint loading-state">กำลังโหลด...</span>
         </div>
         <p class="landing-instruction">ใครจะเข้ามาในชีวิตคุณช่วงวาเลนไทน์?</p>
+
+        <!-- Total Pick Counter -->
+        <div class="total-counter" id="totalCounter">
+            <svg class="total-counter-icon" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="10" height="14" rx="1" transform="rotate(-15 7 11)" fill="currentColor"/>
+                <rect x="12" y="4" width="10" height="14" rx="1" transform="rotate(15 17 11)" fill="none"/>
+            </svg>
+            <span id="totalPickCount">-</span>
+        </div>
+
         <p class="landing-brand">Pimfahmaprod</p>
     </div>
 
@@ -95,6 +105,12 @@
         <p class="result-quote" id="resultQuote"></p>
         <p class="result-interpretation" id="resultInterpretation"></p>
 
+        <!-- Card Pick Counter -->
+        <div class="pick-counter" id="pickCounter">
+            <span class="pick-counter-icon">🔮</span>
+            <span class="pick-counter-text">ไพ่ใบนี้ถูกจับไปแล้ว <span id="pickCountNumber">-</span> ครั้ง</span>
+        </div>
+
         <!-- Save Image Buttons -->
         <div class="save-section">
             <div class="save-row">
@@ -142,7 +158,12 @@
     <!-- Copy Toast -->
     <div class="copy-toast" id="copyToast">คัดลอกลิงก์แล้ว!</div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <!-- Scripts -->
     <script src="js/app.js"></script>
+    <script src="js/counter.js"></script>
 </body>
 </html>
