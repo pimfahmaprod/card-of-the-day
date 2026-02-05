@@ -2570,7 +2570,7 @@ footer {
 
     /* Ensure footer is always visible on mobile */
     .main-page .container {
-        padding-bottom: 60px;
+        padding-bottom: 50px;
     }
 
     .main-page footer {
@@ -2578,26 +2578,27 @@ footer {
         bottom: 0;
         left: 0;
         right: 0;
-        background: linear-gradient(to top, var(--cream) 80%, transparent);
-        padding: 15px 10px 10px;
+        background: transparent;
+        padding: 8px 10px;
         z-index: 100;
     }
 
     .footer-social {
-        margin-bottom: 5px;
+        margin-bottom: 4px;
     }
 
     .footer-social svg {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
     }
 
     .social-icons a {
-        opacity: 0.7;
+        opacity: 0.6;
     }
 
     .brand {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
+        opacity: 0.5;
     }
 
     .center-card-container {
