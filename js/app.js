@@ -1266,6 +1266,11 @@ async function submitComment() {
                 if (svgIcon) {
                     svgIcon.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
                 }
+
+                // Auto-open comments panel to show user's comment
+                setTimeout(() => {
+                    openCommentsPanel();
+                }, 300);
             }, 1500);
         } else {
             submitBtn.disabled = false;
@@ -1338,6 +1343,9 @@ function updateCommentsCountBadge(count) {
     }
 }
 
+// Track displayed comment IDs to avoid duplicates
+let displayedCommentIds = new Set();
+
 function openCommentsPanel() {
     const commentsPanel = document.getElementById('commentsPanel');
     const commentsOverlay = document.getElementById('commentsOverlay');
@@ -1349,7 +1357,13 @@ function openCommentsPanel() {
     // Reset and load comments
     commentsLastKey = null;
     commentsHasMore = true;
+    displayedCommentIds.clear();
     loadComments(true);
+
+    // Subscribe to real-time new comments
+    if (window.cardCounter && window.cardCounter.subscribeToNewComments) {
+        window.cardCounter.subscribeToNewComments(handleNewComment);
+    }
 }
 
 function closeCommentsPanel() {
@@ -1359,6 +1373,51 @@ function closeCommentsPanel() {
     commentsPanel.classList.remove('show');
     commentsOverlay.classList.remove('show');
     document.body.style.overflow = '';
+
+    // Unsubscribe from real-time updates
+    if (window.cardCounter && window.cardCounter.unsubscribeFromNewComments) {
+        window.cardCounter.unsubscribeFromNewComments();
+    }
+}
+
+// Handle new comment from real-time listener
+function handleNewComment(comment) {
+    // Skip if already displayed
+    if (displayedCommentIds.has(comment.id)) return;
+
+    const commentsList = document.getElementById('commentsList');
+    if (!commentsList) return;
+
+    // Remove empty message if exists
+    const emptyMsg = commentsList.querySelector('.comments-empty');
+    if (emptyMsg) {
+        emptyMsg.remove();
+    }
+
+    // Create and prepend new comment card at the top
+    const card = createCommentCard(comment);
+    card.classList.add('new-comment');
+
+    // Insert at top (after loading element if visible)
+    const loadingEl = document.getElementById('commentsLoading');
+    if (loadingEl && loadingEl.style.display !== 'none') {
+        loadingEl.after(card);
+    } else if (commentsList.firstChild) {
+        commentsList.insertBefore(card, commentsList.firstChild);
+    } else {
+        commentsList.appendChild(card);
+    }
+
+    // Track this comment as displayed
+    displayedCommentIds.add(comment.id);
+
+    // Scroll to top to show new comment
+    commentsList.scrollTop = 0;
+
+    // Remove animation class after animation
+    setTimeout(() => {
+        card.classList.remove('new-comment');
+    }, 500);
 }
 
 async function loadComments(reset = false) {
@@ -1398,8 +1457,12 @@ async function loadComments(reset = false) {
 
     // Show newest at top, oldest at bottom (default order from fetchComments)
     result.comments.forEach(comment => {
+        // Skip if already displayed (from real-time update)
+        if (displayedCommentIds.has(comment.id)) return;
+
         const card = createCommentCard(comment);
         commentsList.appendChild(card);
+        displayedCommentIds.add(comment.id);
     });
 
     commentsLastKey = result.lastKey;

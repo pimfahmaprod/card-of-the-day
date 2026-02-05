@@ -317,6 +317,44 @@ function subscribeToCommentsCount(callback) {
     });
 }
 
+// Subscribe to real-time new comments (for live updates)
+let commentsListener = null;
+function subscribeToNewComments(callback) {
+    if (!isFirebaseInitialized || !database) return null;
+
+    // Unsubscribe previous listener if exists
+    unsubscribeFromNewComments();
+
+    const commentsRef = database.ref('comments');
+    // Listen for new children added
+    commentsListener = commentsRef.orderByKey().limitToLast(1);
+
+    let isFirstLoad = true;
+    commentsListener.on('child_added', (snapshot) => {
+        // Skip first load (it's the existing last comment)
+        if (isFirstLoad) {
+            isFirstLoad = false;
+            return;
+        }
+
+        const comment = {
+            id: snapshot.key,
+            ...snapshot.val()
+        };
+        callback(comment);
+    });
+
+    return commentsListener;
+}
+
+// Unsubscribe from new comments listener
+function unsubscribeFromNewComments() {
+    if (commentsListener) {
+        commentsListener.off();
+        commentsListener = null;
+    }
+}
+
 // Fetch comments from Firebase (for lazy loading)
 async function fetchComments(lastKey = null, limit = 10) {
     if (!isFirebaseInitialized || !database) {
@@ -375,5 +413,7 @@ window.cardCounter = {
     submitComment: submitCommentToFirebase,
     fetchComments: fetchComments,
     getCommentsCount: getCommentsCount,
-    subscribeToCommentsCount: subscribeToCommentsCount
+    subscribeToCommentsCount: subscribeToCommentsCount,
+    subscribeToNewComments: subscribeToNewComments,
+    unsubscribeFromNewComments: unsubscribeFromNewComments
 };
