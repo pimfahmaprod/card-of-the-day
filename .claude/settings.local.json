@@ -5,7 +5,11 @@
       "Bash(git push:*)",
       "Bash(git config:*)",
       "Bash(cmdkey /list:*)",
-      "Bash(python -m http.server:*)"
+      "Bash(python -m http.server:*)",
+      "WebFetch(domain:pixabay.com)",
+      "WebFetch(domain:www.chosic.com)",
+      "WebFetch(domain:www.bensound.com)",
+      "WebFetch(domain:freesound.org)"
     ]
   }
 }
