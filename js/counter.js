@@ -398,6 +398,105 @@ async function fetchComments(lastKey = null, limit = 10) {
     }
 }
 
+// Fetch comments by cardId (for related comments)
+async function fetchCommentsByCardId(cardId, excludeCommentId = null, limit = 5) {
+    if (!isFirebaseInitialized || !database) {
+        return [];
+    }
+
+    try {
+        const commentsRef = database.ref('comments');
+        const query = commentsRef.orderByChild('cardId').equalTo(cardId).limitToLast(limit + 1);
+
+        const snapshot = await query.once('value');
+        const data = snapshot.val();
+
+        if (!data) {
+            return [];
+        }
+
+        // Convert to array, exclude the current comment, and reverse (newest first)
+        const comments = Object.entries(data)
+            .map(([key, value]) => ({ id: key, ...value }))
+            .filter(c => c.id !== excludeCommentId)
+            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+            .slice(0, limit);
+
+        return comments;
+    } catch (error) {
+        console.warn('Failed to fetch comments by cardId:', error.message);
+        return [];
+    }
+}
+
+// Submit reply to a comment
+async function submitReply(commentId, userId, userName, replyText) {
+    if (!isFirebaseInitialized || !database) {
+        return { success: false, error: 'Firebase not initialized' };
+    }
+
+    try {
+        const repliesRef = database.ref(`replies/${commentId}`);
+        const newReplyRef = repliesRef.push();
+
+        await newReplyRef.set({
+            userId: userId,
+            userName: userName.trim(),
+            text: replyText.trim(),
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        console.log('Reply submitted:', newReplyRef.key);
+        return { success: true, id: newReplyRef.key };
+    } catch (error) {
+        console.warn('Failed to submit reply:', error.message);
+        return { success: false, error: error.message };
+    }
+}
+
+// Fetch replies for a comment
+async function fetchReplies(commentId) {
+    if (!isFirebaseInitialized || !database) {
+        return [];
+    }
+
+    try {
+        const repliesRef = database.ref(`replies/${commentId}`);
+        const snapshot = await repliesRef.orderByChild('timestamp').once('value');
+        const data = snapshot.val();
+
+        if (!data) {
+            return [];
+        }
+
+        // Convert to array (oldest first for replies)
+        const replies = Object.entries(data)
+            .map(([key, value]) => ({ id: key, ...value }))
+            .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+        return replies;
+    } catch (error) {
+        console.warn('Failed to fetch replies:', error.message);
+        return [];
+    }
+}
+
+// Get reply count for a comment
+async function getReplyCount(commentId) {
+    if (!isFirebaseInitialized || !database) {
+        return 0;
+    }
+
+    try {
+        const repliesRef = database.ref(`replies/${commentId}`);
+        const snapshot = await repliesRef.once('value');
+        return snapshot.numChildren();
+    } catch (error) {
+        console.warn('Failed to get reply count:', error.message);
+        return 0;
+    }
+}
+
 // Export for use in app.js
 window.cardCounter = {
     increment: handleCardPickCounter,
@@ -410,8 +509,12 @@ window.cardCounter = {
     trackRetry: trackRetry,
     submitComment: submitCommentToFirebase,
     fetchComments: fetchComments,
+    fetchCommentsByCardId: fetchCommentsByCardId,
     getCommentsCount: getCommentsCount,
     subscribeToCommentsCount: subscribeToCommentsCount,
     subscribeToNewComments: subscribeToNewComments,
-    unsubscribeFromNewComments: unsubscribeFromNewComments
+    unsubscribeFromNewComments: unsubscribeFromNewComments,
+    submitReply: submitReply,
+    fetchReplies: fetchReplies,
+    getReplyCount: getReplyCount
 };

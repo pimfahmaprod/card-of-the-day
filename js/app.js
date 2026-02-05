@@ -1347,6 +1347,12 @@ function updateCommentsCountBadge(count) {
 // Track displayed comment IDs to avoid duplicates
 let displayedCommentIds = new Set();
 
+// Track the newest comment timestamp from initial load (to filter real-time updates)
+let newestCommentTimestamp = 0;
+
+// Track currently expanded comment card
+let expandedCommentCard = null;
+
 function openCommentsPanel() {
     const commentsPanel = document.getElementById('commentsPanel');
     const commentsOverlay = document.getElementById('commentsOverlay');
@@ -1355,11 +1361,29 @@ function openCommentsPanel() {
     commentsOverlay.classList.add('show');
     document.body.style.overflow = 'hidden';
 
+    // Update user name display
+    updateCommentsPanelUser();
+
     // Reset and load comments (subscription happens after load completes)
     commentsLastKey = null;
     commentsHasMore = true;
     displayedCommentIds.clear();
+    newestCommentTimestamp = 0;
     loadComments(true);
+}
+
+function updateCommentsPanelUser() {
+    const userElement = document.getElementById('commentsPanelUser');
+    if (!userElement) return;
+
+    const savedName = getSavedUserName();
+    if (savedName) {
+        userElement.textContent = savedName;
+        userElement.classList.remove('anonymous');
+    } else {
+        userElement.textContent = 'Anonymous';
+        userElement.classList.add('anonymous');
+    }
 }
 
 function closeCommentsPanel() {
@@ -1369,6 +1393,9 @@ function closeCommentsPanel() {
     commentsPanel.classList.remove('show');
     commentsOverlay.classList.remove('show');
     document.body.style.overflow = '';
+
+    // Reset expanded card state
+    expandedCommentCard = null;
 
     // Unsubscribe from real-time updates
     if (window.cardCounter && window.cardCounter.unsubscribeFromNewComments) {
@@ -1380,6 +1407,11 @@ function closeCommentsPanel() {
 function handleNewComment(comment) {
     // Skip if already displayed
     if (displayedCommentIds.has(comment.id)) return;
+
+    // Skip older comments that are coming from child_added for existing data
+    // Only prepend comments that are truly new (timestamp > newestCommentTimestamp)
+    const commentTimestamp = comment.timestamp || 0;
+    if (commentTimestamp <= newestCommentTimestamp) return;
 
     const commentsList = document.getElementById('commentsList');
     if (!commentsList) return;
@@ -1407,6 +1439,9 @@ function handleNewComment(comment) {
     // Track this comment as displayed
     displayedCommentIds.add(comment.id);
 
+    // Update newest timestamp
+    newestCommentTimestamp = commentTimestamp;
+
     // Scroll to top to show new comment
     commentsList.scrollTop = 0;
 
@@ -1427,6 +1462,7 @@ async function loadComments(reset = false) {
         commentsList.innerHTML = '';
         commentsList.appendChild(loadingEl);
         loadingEl.style.display = 'block';
+        expandedCommentCard = null; // Reset expanded card state
         commentsLastKey = null;
     }
 
@@ -1441,6 +1477,9 @@ async function loadComments(reset = false) {
     loadingEl.style.display = 'none';
 
     if (result.comments.length === 0 && reset) {
+        // Set timestamp to current time so older existing comments won't be prepended
+        newestCommentTimestamp = Date.now();
+
         commentsList.innerHTML = `
             <div class="comments-empty">
                 <div class="comments-empty-icon">💬</div>
@@ -1454,6 +1493,11 @@ async function loadComments(reset = false) {
             window.cardCounter.subscribeToNewComments(handleNewComment);
         }
         return;
+    }
+
+    // Track the newest comment timestamp for real-time filtering
+    if (reset && result.comments.length > 0) {
+        newestCommentTimestamp = result.comments[0].timestamp || Date.now();
     }
 
     // Show newest at top, oldest at bottom (default order from fetchComments)
@@ -1509,11 +1553,54 @@ function createCommentCard(comment) {
         ${imageHtml}
         <div class="comment-card-content">
             <div class="comment-card-header">
-                <span class="comment-card-name">${escapeHtml(comment.userName || 'ไม่ระบุชื่อ')}</span>
+                <span class="comment-card-name">${escapeHtml(comment.userName || 'Anonymous')}</span>
                 <span class="comment-card-tarot">${escapeHtml(comment.cardName || 'ไพ่ทาโรต์')}</span>
             </div>
             <div class="comment-card-text">${escapeHtml(comment.comment || '')}</div>
             <div class="comment-card-date">${dateStr}</div>
+
+            <!-- Expanded content: Interpretation first -->
+            <div class="comment-card-full">
+                <div class="comment-card-full-title">คำทำนาย</div>
+                <div class="comment-card-full-interpretation"></div>
+            </div>
+
+            <!-- Replies section -->
+            <div class="comment-card-replies-section">
+                <div class="comment-card-replies-title">การตอบกลับ</div>
+                <div class="replies-list"></div>
+                <button class="replies-empty-btn" style="display: none;">✦ ตอบกลับคนแรก</button>
+
+                <!-- Reply button and form at bottom -->
+                <div class="comment-card-actions">
+                    <button class="reply-btn" data-comment-id="${comment.id}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                        </svg>
+                        <span>ตอบกลับ</span>
+                        <span class="reply-count" style="display: none;">0</span>
+                    </button>
+                </div>
+                <div class="reply-form">
+                    <div class="reply-input-wrapper">
+                        <input type="text" class="reply-input" placeholder="เขียนตอบกลับ..." maxlength="150">
+                        <button class="reply-submit-btn" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related comments at the end -->
+            <div class="comment-card-related">
+                <div class="comment-card-related-title">ความคิดเห็นอื่นๆ บนไพ่ใบนี้</div>
+                <div class="related-comments-list">
+                    <div class="related-comment-loading">กำลังโหลด...</div>
+                </div>
+            </div>
         </div>
     `;
 
@@ -1522,7 +1609,237 @@ function createCommentCard(comment) {
         card.classList.add('with-image');
     }
 
+    // Store comment data for expand functionality
+    card.dataset.commentId = comment.id;
+    card.dataset.cardId = comment.cardId;
+    card.dataset.cardName = comment.cardName || '';
+
+    // Setup reply functionality
+    setupReplyFeature(card, comment);
+
+    // Load reply count
+    loadReplyCount(card, comment.id);
+
+    // Add click handler for expand/collapse
+    card.addEventListener('click', (e) => {
+        // Don't expand if clicking on interactive elements
+        if (e.target.closest('.reply-btn') ||
+            e.target.closest('.reply-form') ||
+            e.target.closest('.replies-list') ||
+            e.target.closest('.comment-card-replies-section') ||
+            e.target.closest('.comment-card-related')) {
+            return;
+        }
+        e.stopPropagation();
+        toggleCommentCardExpand(card, comment);
+    });
+
     return card;
+}
+
+// Setup reply feature for a comment card
+function setupReplyFeature(card, comment) {
+    const replyBtn = card.querySelector('.reply-btn');
+    const replyForm = card.querySelector('.reply-form');
+    const replyInput = card.querySelector('.reply-input');
+    const replySubmitBtn = card.querySelector('.reply-submit-btn');
+    const repliesEmptyBtn = card.querySelector('.replies-empty-btn');
+
+    // Toggle reply form
+    replyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        replyForm.classList.toggle('show');
+        if (replyForm.classList.contains('show')) {
+            replyInput.focus();
+        }
+    });
+
+    // "Reply first" button - same as reply button
+    if (repliesEmptyBtn) {
+        repliesEmptyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            replyForm.classList.add('show');
+            replyInput.focus();
+        });
+    }
+
+    // Enable/disable submit button based on input
+    replyInput.addEventListener('input', () => {
+        replySubmitBtn.disabled = replyInput.value.trim().length === 0;
+    });
+
+    // Submit reply
+    replySubmitBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const text = replyInput.value.trim();
+        if (!text) return;
+
+        replySubmitBtn.disabled = true;
+        replyInput.disabled = true;
+
+        const userId = getUserId();
+        const userName = getSavedUserName() || 'Anonymous';
+
+        if (window.cardCounter && window.cardCounter.submitReply) {
+            const result = await window.cardCounter.submitReply(comment.id, userId, userName, text);
+
+            if (result.success) {
+                // Clear input and hide form
+                replyInput.value = '';
+                replyForm.classList.remove('show');
+
+                // Reload replies
+                await loadReplies(card, comment.id);
+
+                showToast('ตอบกลับสำเร็จ');
+            } else {
+                showToast('เกิดข้อผิดพลาด กรุณาลองใหม่');
+            }
+        }
+
+        replySubmitBtn.disabled = false;
+        replyInput.disabled = false;
+    });
+
+    // Enter key to submit
+    replyInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !replySubmitBtn.disabled) {
+            replySubmitBtn.click();
+        }
+    });
+}
+
+// Load reply count for a comment
+async function loadReplyCount(card, commentId) {
+    if (!window.cardCounter || !window.cardCounter.getReplyCount) return;
+
+    const count = await window.cardCounter.getReplyCount(commentId);
+    const replyCountEl = card.querySelector('.reply-count');
+
+    if (count > 0) {
+        replyCountEl.textContent = count;
+        replyCountEl.style.display = 'inline';
+    }
+}
+
+// Load replies for a comment
+async function loadReplies(card, commentId) {
+    if (!window.cardCounter || !window.cardCounter.fetchReplies) return;
+
+    const repliesList = card.querySelector('.replies-list');
+    const repliesEmptyBtn = card.querySelector('.replies-empty-btn');
+
+    repliesList.innerHTML = '<div class="related-comment-loading">กำลังโหลด...</div>';
+    if (repliesEmptyBtn) repliesEmptyBtn.style.display = 'none';
+
+    const replies = await window.cardCounter.fetchReplies(commentId);
+
+    if (replies.length > 0) {
+        repliesList.innerHTML = replies.map(reply => {
+            const replyDate = reply.timestamp ? new Date(reply.timestamp) : new Date();
+            const replyDateStr = formatCommentDate(replyDate);
+            return `
+                <div class="reply-item">
+                    <div class="reply-header">
+                        <span class="reply-name">${escapeHtml(reply.userName || 'Anonymous')}</span>
+                        <span class="reply-date">${replyDateStr}</span>
+                    </div>
+                    <div class="reply-text">${escapeHtml(reply.text || '')}</div>
+                </div>
+            `;
+        }).join('');
+
+        // Update count on reply button
+        const replyCountEl = card.querySelector('.reply-count');
+        if (replyCountEl) {
+            replyCountEl.textContent = replies.length;
+            replyCountEl.style.display = 'inline';
+        }
+
+        if (repliesEmptyBtn) repliesEmptyBtn.style.display = 'none';
+    } else {
+        repliesList.innerHTML = '';
+        if (repliesEmptyBtn) repliesEmptyBtn.style.display = 'block';
+    }
+}
+
+async function toggleCommentCardExpand(card, comment) {
+    // If clicking the same card that's expanded, collapse it
+    if (expandedCommentCard === card) {
+        collapseCommentCard(card);
+        expandedCommentCard = null;
+        return;
+    }
+
+    // Collapse previously expanded card
+    if (expandedCommentCard) {
+        collapseCommentCard(expandedCommentCard);
+    }
+
+    // Expand the clicked card
+    await expandCommentCard(card, comment);
+    expandedCommentCard = card;
+
+    // Scroll the card into view smoothly
+    setTimeout(() => {
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+}
+
+async function expandCommentCard(card, comment) {
+    card.classList.add('expanded');
+
+    // Load full interpretation from tarotData
+    const interpretationEl = card.querySelector('.comment-card-full-interpretation');
+    if (tarotData && tarotData.cards) {
+        const tarotCard = tarotData.cards.find(c => c.id === comment.cardId || c.name === comment.cardName);
+        if (tarotCard) {
+            interpretationEl.textContent = tarotCard.interpretation;
+        } else {
+            interpretationEl.textContent = 'ไม่พบคำทำนายสำหรับไพ่ใบนี้';
+        }
+    } else {
+        interpretationEl.textContent = 'กำลังโหลดข้อมูล...';
+    }
+
+    // Auto-load replies
+    await loadReplies(card, comment.id);
+
+    // Load related comments
+    const relatedListEl = card.querySelector('.related-comments-list');
+    relatedListEl.innerHTML = '<div class="related-comment-loading">กำลังโหลด...</div>';
+
+    if (window.cardCounter && window.cardCounter.fetchCommentsByCardId) {
+        const relatedComments = await window.cardCounter.fetchCommentsByCardId(
+            comment.cardId,
+            comment.id,
+            5
+        );
+
+        if (relatedComments.length > 0) {
+            relatedListEl.innerHTML = relatedComments.map(rc => {
+                const rcDate = rc.timestamp ? new Date(rc.timestamp) : new Date();
+                const rcDateStr = formatCommentDate(rcDate);
+                return `
+                    <div class="related-comment">
+                        <div class="related-comment-header">
+                            <span class="related-comment-name">${escapeHtml(rc.userName || 'Anonymous')}</span>
+                            <span class="related-comment-date">${rcDateStr}</span>
+                        </div>
+                        <div class="related-comment-text">${escapeHtml(rc.comment || '')}</div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            relatedListEl.innerHTML = '<div class="related-comment-empty">ยังไม่มีความคิดเห็นอื่นบนไพ่ใบนี้</div>';
+        }
+    } else {
+        relatedListEl.innerHTML = '<div class="related-comment-empty">ไม่สามารถโหลดความคิดเห็นได้</div>';
+    }
+}
+
+function collapseCommentCard(card) {
+    card.classList.remove('expanded');
 }
 
 function formatCommentDate(date) {

@@ -23,6 +23,22 @@
     "cardPicks": {
       ".read": true,
       ".write": true
+    },
+    "userPicks": {
+      ".read": true,
+      ".write": true
+    },
+    "buttonClicks": {
+      ".read": true,
+      ".write": true
+    },
+    "comments": {
+      ".read": true,
+      ".write": true
+    },
+    "replies": {
+      ".read": true,
+      ".write": true
     }
   }
 }
