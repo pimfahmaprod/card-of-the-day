@@ -1032,21 +1032,22 @@ function closeResult() {
 
     const cardGrid = document.getElementById('cardGrid');
 
-    // Reset comment form and buttons
-    const commentForm = document.getElementById('commentForm');
+    // Reset accept actions container and buttons
+    const acceptActions = document.getElementById('acceptActions');
     const commentToggleBtn = document.getElementById('commentToggleBtn');
     const viewCommentsBtn = document.getElementById('viewCommentsBtn');
-    if (commentForm) commentForm.classList.remove('show');
+    if (acceptActions) acceptActions.style.display = 'none';
     if (commentToggleBtn) {
+        commentToggleBtn.style.display = 'inline-flex';
         commentToggleBtn.classList.remove('active');
         commentToggleBtn.classList.remove('commented');
         commentToggleBtn.disabled = false;
         const btnText = commentToggleBtn.querySelector('span');
         if (btnText) btnText.textContent = 'น้อมรับคำทำนาย';
-        // Restore original text bubble icon
+        // Restore original checkmark icon
         const svgIcon = commentToggleBtn.querySelector('svg');
         if (svgIcon) {
-            svgIcon.innerHTML = '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>';
+            svgIcon.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
         }
     }
     // Reset view comments button
@@ -1198,35 +1199,32 @@ function saveUserName(name) {
     localStorage.setItem(SAVED_NAME_KEY, name.trim());
 }
 
-function toggleCommentForm() {
-    const form = document.getElementById('commentForm');
+function toggleAcceptActions() {
+    const acceptActions = document.getElementById('acceptActions');
     const btn = document.getElementById('commentToggleBtn');
     const nameGroup = document.getElementById('commentNameGroup');
     const savedName = getSavedUserName();
 
-    form.classList.toggle('show');
-    btn.classList.toggle('active');
+    // Show accept actions and hide the button
+    acceptActions.style.display = 'block';
+    btn.style.display = 'none';
 
-    if (form.classList.contains('show')) {
-        // Track comment form opened
-        if (window.cardCounter) {
-            window.cardCounter.trackCommentFormStart();
-        }
-        // Check if name is already saved
-        if (savedName && nameGroup) {
-            nameGroup.style.display = 'none';
-        } else if (nameGroup) {
-            nameGroup.style.display = 'block';
-        }
-    } else {
-        // Track comment form abandoned (if had content)
-        const commentInput = document.getElementById('commentText');
-        if (commentInput && commentInput.value.trim() && window.cardCounter) {
-            window.cardCounter.trackCommentFormAbandon();
-        }
-        // Reset form when closing
-        resetCommentForm();
+    // Track accept action
+    if (window.cardCounter) {
+        window.cardCounter.trackCommentFormStart();
     }
+
+    // Check if name is already saved
+    if (savedName && nameGroup) {
+        nameGroup.style.display = 'none';
+    } else if (nameGroup) {
+        nameGroup.style.display = 'block';
+    }
+}
+
+// Legacy function alias
+function toggleCommentForm() {
+    toggleAcceptActions();
 }
 
 // Check if current card has comments and update button visibility
@@ -1372,23 +1370,13 @@ async function submitComment() {
     const submitBtn = document.getElementById('commentSubmitBtn');
     const submitText = document.getElementById('commentSubmitText');
 
-    // Use saved name or input value
+    // Use saved name or input value, default to "Anonymous"
     const savedName = getSavedUserName();
-    const userName = savedName || nameInput.value.trim();
-    const commentText = commentInput.value.trim();
+    const userName = savedName || nameInput.value.trim() || 'Anonymous';
 
-    // Validation
-    if (!userName) {
-        showToast('กรุณาใส่ชื่อของคุณ');
-        nameInput.focus();
-        return;
-    }
-
-    if (!commentText) {
-        showToast('กรุณาใส่ความคิดเห็น');
-        commentInput.focus();
-        return;
-    }
+    // Use input text or placeholder as default
+    const defaultComment = 'น้อมรับคำทำนายจากแม่หมอพิมพ์ฟ้า';
+    const commentText = commentInput.value.trim() || defaultComment;
 
     if (!currentCardData) {
         showToast('เกิดข้อผิดพลาด กรุณาลองใหม่');
@@ -1417,8 +1405,10 @@ async function submitComment() {
                 window.cardCounter.trackCommentFormSubmit();
             }
 
-            // Save name for future comments
-            saveUserName(userName);
+            // Save name for future comments (only if not Anonymous)
+            if (userName !== 'Anonymous') {
+                saveUserName(userName);
+            }
 
             submitBtn.classList.add('success');
             submitText.textContent = 'ส่งสำเร็จ!';
@@ -1426,19 +1416,15 @@ async function submitComment() {
 
             // Close form and disable button for this round
             setTimeout(() => {
-                const form = document.getElementById('commentForm');
+                const acceptActions = document.getElementById('acceptActions');
                 const toggleBtn = document.getElementById('commentToggleBtn');
 
-                form.classList.remove('show');
+                if (acceptActions) acceptActions.style.display = 'none';
                 toggleBtn.classList.remove('active');
                 toggleBtn.classList.add('commented');
                 toggleBtn.disabled = true;
-                toggleBtn.querySelector('span').textContent = 'บอกแม่หมอแล้ว';
-                // Change icon to checkmark
-                const svgIcon = toggleBtn.querySelector('svg');
-                if (svgIcon) {
-                    svgIcon.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
-                }
+                toggleBtn.querySelector('span').textContent = 'น้อมรับแล้ว';
+                // Icon is already checkmark, keep it
 
                 // Auto-open comments panel to show user's comment
                 setTimeout(() => {
