@@ -27,14 +27,14 @@ let audioContext = null;
 // Initialize sound effects
 function initSoundEffects() {
     soundEffects.cardFlip = new Audio('audio/card_select.mp3');
-    soundEffects.cardFlip.volume = 0.35;
+    soundEffects.cardFlip.volume = 0.18;
 
     soundEffects.cardSpread = new Audio('audio/card_spread.mp3');
     soundEffects.cardSpread.volume = 1.0;
     soundEffects.cardSpread.gainBoost = 2.5; // Amplify 250%
 
     soundEffects.cardSelect = new Audio('audio/card_select.mp3');
-    soundEffects.cardSelect.volume = 0.35;
+    soundEffects.cardSelect.volume = 0.18;
 }
 
 // Play a sound effect with optional gain boost
