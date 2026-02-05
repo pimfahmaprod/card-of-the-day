@@ -2568,12 +2568,36 @@ footer {
         height: 100px;
     }
 
-    footer {
-        padding: 5px 10px;
+    /* Ensure footer is always visible on mobile */
+    .main-page .container {
+        padding-bottom: 60px;
+    }
+
+    .main-page footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, var(--cream) 80%, transparent);
+        padding: 15px 10px 10px;
+        z-index: 100;
+    }
+
+    .footer-social {
+        margin-bottom: 5px;
+    }
+
+    .footer-social svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .social-icons a {
+        opacity: 0.7;
     }
 
     .brand {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
 
     .center-card-container {
