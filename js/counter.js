@@ -214,11 +214,53 @@ if (document.readyState === 'loading') {
     initializeApp();
 }
 
+// Track button clicks (save, share, retry)
+async function trackButtonClick(category, action) {
+    if (!isFirebaseInitialized || !database) {
+        return null;
+    }
+
+    try {
+        const buttonRef = database.ref(`buttonClicks/${category}/${action}`);
+
+        const result = await buttonRef.transaction((currentCount) => {
+            return (currentCount || 0) + 1;
+        });
+
+        if (result.committed) {
+            console.log(`Tracked: ${category}/${action} = ${result.snapshot.val()}`);
+            return result.snapshot.val();
+        }
+        return null;
+    } catch (error) {
+        console.warn('Failed to track button click:', error.message);
+        return null;
+    }
+}
+
+// Track save image button
+function trackSaveImage(format) {
+    return trackButtonClick('save', format);
+}
+
+// Track share button
+function trackShare(platform) {
+    return trackButtonClick('share', platform);
+}
+
+// Track retry button
+function trackRetry() {
+    return trackButtonClick('actions', 'retry');
+}
+
 // Export for use in app.js
 window.cardCounter = {
     increment: handleCardPickCounter,
     getCount: getCardCount,
     getTotal: getTotalPicks,
     updateDisplay: updateCounterDisplay,
-    isEnabled: () => isFirebaseInitialized
+    isEnabled: () => isFirebaseInitialized,
+    trackSaveImage: trackSaveImage,
+    trackShare: trackShare,
+    trackRetry: trackRetry
 };

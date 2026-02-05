@@ -21,6 +21,9 @@ const soundEffects = {
     cardSelect: null
 };
 
+// Web Audio API context for amplification
+let audioContext = null;
+
 // Initialize sound effects
 function initSoundEffects() {
     soundEffects.cardFlip = new Audio('audio/card_select.mp3');
@@ -28,21 +31,66 @@ function initSoundEffects() {
 
     soundEffects.cardSpread = new Audio('audio/card_spread.mp3');
     soundEffects.cardSpread.volume = 1.0;
+    soundEffects.cardSpread.gainBoost = 2.5; // Amplify 250%
 
     soundEffects.cardSelect = new Audio('audio/card_select.mp3');
     soundEffects.cardSelect.volume = 0.35;
 }
 
-// Play a sound effect
+// Play a sound effect with optional gain boost
 function playSoundEffect(soundName) {
     if (isMuted) return;
 
     const sound = soundEffects[soundName];
     if (sound) {
-        sound.currentTime = 0;
-        sound.play().catch(err => {
-            console.log('Sound effect play failed:', err.message);
+        // If sound has gain boost, use Web Audio API
+        if (sound.gainBoost && sound.gainBoost > 1) {
+            playWithGainBoost(sound, sound.gainBoost);
+        } else {
+            sound.currentTime = 0;
+            sound.play().catch(err => {
+                console.log('Sound effect play failed:', err.message);
+            });
+        }
+    }
+}
+
+// Play audio with amplification using Web Audio API
+function playWithGainBoost(audioElement, gainValue) {
+    try {
+        // Create audio context if not exists
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // Resume context if suspended
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+
+        // Clone the audio to allow overlapping plays
+        const tempAudio = new Audio(audioElement.src);
+
+        // Create media element source
+        const source = audioContext.createMediaElementSource(tempAudio);
+
+        // Create gain node for amplification
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = gainValue;
+
+        // Connect: source -> gain -> destination
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // Play
+        tempAudio.play().catch(err => {
+            console.log('Amplified sound play failed:', err.message);
         });
+    } catch (err) {
+        // Fallback to normal playback
+        console.log('Web Audio API failed, using fallback:', err.message);
+        audioElement.currentTime = 0;
+        audioElement.play().catch(e => console.log('Fallback play failed:', e.message));
     }
 }
 
@@ -208,6 +256,7 @@ function markPageReady() {
         if (brand) {
             brand.classList.add('revealed');
         }
+
     }, 600);
 }
 
@@ -924,6 +973,9 @@ function closeResult() {
     if (isAnimating) return;
     isAnimating = true;
 
+    // Track retry
+    if (window.cardCounter) window.cardCounter.trackRetry();
+
     const cardGrid = document.getElementById('cardGrid');
 
     // Hide counter
@@ -1014,6 +1066,9 @@ function tryWebShare() {
 }
 
 function shareToFacebook() {
+    // Track share
+    if (window.cardCounter) window.cardCounter.trackShare('messenger');
+
     // Share to Facebook Messenger
     const text = getShareText() + '\n\n' + siteUrl;
     navigator.clipboard.writeText(text).then(() => {
@@ -1027,12 +1082,18 @@ function shareToFacebook() {
 }
 
 function shareToLine() {
+    // Track share
+    if (window.cardCounter) window.cardCounter.trackShare('line');
+
     // LINE already opens chat/messaging
     const text = encodeURIComponent(getShareText() + '\n' + siteUrl);
     window.open(`https://line.me/R/share?text=${text}`, '_blank', 'width=600,height=400');
 }
 
 function copyLink() {
+    // Track share
+    if (window.cardCounter) window.cardCounter.trackShare('copylink');
+
     const text = getShareText() + '\n\n' + siteUrl;
     navigator.clipboard.writeText(text).then(() => {
         showToast('คัดลอกข้อความแล้ว!');
@@ -1047,6 +1108,9 @@ function saveImage(platform) {
         showToast('กรุณาเลือกไพ่ก่อน');
         return;
     }
+
+    // Track save image
+    if (window.cardCounter) window.cardCounter.trackSaveImage(platform);
 
     const sizes = {
         'ig-story': { width: 1080, height: 1920 },
