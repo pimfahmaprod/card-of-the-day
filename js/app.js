@@ -1526,14 +1526,27 @@ async function checkUserHasComments() {
     const meTab = commentsTabs.querySelector('[data-tab="me"]');
     if (!meTab) return;
 
-    const userId = getUserId();
-    if (!window.cardCounter || !window.cardCounter.fetchCommentsByUserId) {
-        meTab.style.display = 'none';
+    // Hide by default first
+    meTab.style.display = 'none';
+
+    // Check if user has a saved name - if not, don't show the tab
+    const savedName = getSavedUserName();
+    if (!savedName) {
         return;
     }
 
+    // Check if Firebase is ready
+    if (!window.cardCounter || !window.cardCounter.fetchCommentsByUserId) {
+        return;
+    }
+
+    // Check if user has any comments
+    const userId = getUserId();
     const userComments = await window.cardCounter.fetchCommentsByUserId(userId, 1);
-    meTab.style.display = userComments.length > 0 ? '' : 'none';
+
+    if (userComments.length > 0) {
+        meTab.style.display = '';
+    }
 }
 
 function updateCommentsPanelUser() {

@@ -1614,6 +1614,11 @@ footer {
     border-radius: 2px;
 }
 
+/* Hide "Me" tab by default - shown by JS if user has comments */
+.comments-tab[data-tab="me"] {
+    display: none;
+}
+
 .comments-list {
     flex: 1;
     overflow-y: auto;
