@@ -642,12 +642,12 @@ function shuffleArray(array) {
     return shuffled;
 }
 
-// Expand cards to 78
+// Expand cards to 78 (or use all if already 78)
 function expandCardsTo78(cards) {
     const targetCount = 78;
-    const baseCount = cards.length; // 22
-    const timesEach = Math.floor(targetCount / baseCount); // 3
-    const remainder = targetCount % baseCount; // 12
+    const baseCount = cards.length; // 78 cards total (full tarot deck)
+    const timesEach = Math.floor(targetCount / baseCount); // 1 (each card appears once)
+    const remainder = targetCount % baseCount; // 0 (no duplicates needed)
 
     let expanded = [];
 
