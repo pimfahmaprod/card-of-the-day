@@ -34,7 +34,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Prompt:wght@200;300;400;500&family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=1.2.3">
+    <link rel="stylesheet" href="css/styles.css?v=1.2.4">
 </head>
 <body>
     <!-- Language Switcher -->
@@ -250,12 +250,11 @@
                 </svg>
                 <span id="commentToggleBtnText" data-i18n="result.acceptProphecy">น้อมรับคำทำนาย</span>
             </button>
-            <button class="view-comments-btn" id="viewCommentsBtn" onclick="viewCardComments()" style="display: none;">
+            <button class="view-comments-btn" id="viewCommentsBtn" onclick="viewCardComments()" style="display: none;" title="ส่อง" data-i18n-title="result.view">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                     <circle cx="12" cy="12" r="3"/>
                 </svg>
-                <span data-i18n="result.view">ส่อง</span>
             </button>
         </div>
         <div class="retry-row retry-row-bottom">
@@ -533,9 +532,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <!-- Scripts -->
-    <script src="js/translations.js?v=1.2.3"></script>
-    <script src="js/card-interpretations.js?v=1.2.3"></script>
-    <script src="js/app.js?v=1.2.3"></script>
-    <script src="js/counter.js?v=1.2.3"></script>
+    <script src="js/translations.js?v=1.2.4"></script>
+    <script src="js/card-interpretations.js?v=1.2.4"></script>
+    <script src="js/app.js?v=1.2.4"></script>
+    <script src="js/counter.js?v=1.2.4"></script>
 </body>
 </html>
