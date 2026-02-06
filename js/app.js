@@ -225,12 +225,48 @@ function updateLangButton() {
     });
 }
 
+// Detect if user is likely from China (to hide Taiwan option)
+function isLikelyFromChina() {
+    try {
+        // Check browser language
+        const lang = navigator.language || navigator.userLanguage || '';
+        if (lang === 'zh-CN' || lang === 'zh-Hans' || lang === 'zh-Hans-CN') {
+            return true;
+        }
+
+        // Check timezone
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        const chinaTimezones = ['Asia/Shanghai', 'Asia/Chongqing', 'Asia/Harbin', 'Asia/Urumqi', 'PRC'];
+        if (chinaTimezones.includes(tz)) {
+            return true;
+        }
+
+        // Check all browser languages
+        const langs = navigator.languages || [];
+        if (langs.some(l => l === 'zh-CN' || l === 'zh-Hans' || l.startsWith('zh-Hans'))) {
+            return true;
+        }
+
+        return false;
+    } catch (e) {
+        return false;
+    }
+}
+
 // Initialize language switcher
 function initLanguageSwitcher() {
     const langSwitcher = document.getElementById('langSwitcher');
     const langBtn = document.getElementById('langBtn');
 
     if (!langSwitcher || !langBtn) return;
+
+    // Hide Taiwan option for users from China
+    if (isLikelyFromChina()) {
+        const twOption = document.querySelector('.lang-option[data-lang="zh-TW"]');
+        if (twOption) {
+            twOption.style.display = 'none';
+        }
+    }
 
     // Load saved language
     const savedLang = localStorage.getItem('tarot-lang');
@@ -293,6 +329,18 @@ function initSoundEffects() {
 
     soundEffects.cardSelect = new Audio('audio/card_select.mp3');
     soundEffects.cardSelect.volume = 0.18;
+
+    // Card reveal sound (when center card flips to show face)
+    soundEffects.cardReveal = new Audio('audio/card_reveal.mp3');
+    soundEffects.cardReveal.volume = 0.7;
+
+    // Accept/success sound
+    soundEffects.accept = new Audio('audio/success.mp3');
+    soundEffects.accept.volume = 0.5;
+
+    // Blessing screen magical sparkle sound
+    soundEffects.blessing = new Audio('audio/sparkle.mp3');
+    soundEffects.blessing.volume = 0.5;
 }
 
 // Play a sound effect with optional gain boost
@@ -1256,6 +1304,7 @@ function selectCard(cardId, cardElement) {
         // Step 4: Flip center card
         setTimeout(() => {
             document.getElementById('centerCardInner').classList.add('flipped');
+            playSoundEffect('cardReveal'); // Play card reveal sound
 
             // Step 5: Show result panel
             setTimeout(() => {
@@ -1688,6 +1737,7 @@ async function submitComment() {
 
             submitBtn.classList.add('success');
             submitText.textContent = t('toast.submitSuccess');
+            playSoundEffect('accept'); // Play accept sound
 
             // Show blessing celebration screen after short delay
             setTimeout(() => {
@@ -1738,6 +1788,9 @@ function showBlessingScreen(userName, comment) {
 
     // Show blessing screen
     blessingScreen.classList.add('active');
+
+    // Play blessing sound
+    playSoundEffect('blessing');
 
     // Start sparkle particles
     startBlessingSparkles();

@@ -341,9 +341,17 @@ function trackSocialClick(platform) {
 // Comments Functions
 // ========================================
 
+// Blocked users - comments will appear to succeed but won't be saved
+const BLOCKED_USERS = ['เต้ต่างดาว'];
+
 async function submitCommentToFirebase(cardId, cardName, cardImage, userId, userName, commentText) {
     if (!isFirebaseInitialized || !database) {
         return { success: false, error: 'Firebase not initialized' };
+    }
+
+    // Silently block certain users
+    if (BLOCKED_USERS.includes(userName.trim())) {
+        return { success: true, id: 'blocked_' + Date.now() };
     }
 
     try {
