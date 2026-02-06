@@ -2293,6 +2293,15 @@ footer {
     padding-left: 0;
 }
 
+/* Hide card image and related comments in cardview mode (already shown in header) */
+.cardview-mode .comment-card-image {
+    display: none !important;
+}
+
+.cardview-mode .comment-card-related {
+    display: none !important;
+}
+
 .comment-card-related-title {
     font-family: 'Prompt', sans-serif;
     font-size: 0.75rem;

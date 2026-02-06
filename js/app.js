@@ -1543,30 +1543,28 @@ async function viewCardComments() {
     // Store card data for the cardview tab
     cardViewData = { ...currentCardData };
 
-    // Open comments panel
-    openCommentsPanel();
+    // Open comments panel without loading default tab
+    openCommentsPanel(true);
 
-    // Switch to cardview tab
-    setTimeout(() => {
-        const commentsTabs = document.getElementById('commentsTabs');
-        const cardviewTab = commentsTabs.querySelector('[data-tab="cardview"]');
-        const tabPreview = cardviewTab.querySelector('.tab-card-preview');
+    // Switch to cardview tab immediately
+    const commentsTabs = document.getElementById('commentsTabs');
+    const cardviewTab = commentsTabs.querySelector('[data-tab="cardview"]');
+    const tabPreview = cardviewTab.querySelector('.tab-card-preview');
 
-        // Set the card image in tab
-        tabPreview.src = `images/tarot/${cardViewData.image}`;
-        tabPreview.alt = cardViewData.name;
+    // Set the card image in tab
+    tabPreview.src = `images/tarot/${cardViewData.image}`;
+    tabPreview.alt = cardViewData.name;
 
-        // Show and activate the cardview tab
-        cardviewTab.style.display = '';
+    // Show and activate the cardview tab
+    cardviewTab.style.display = '';
 
-        // Update active tab
-        commentsTabs.querySelectorAll('.comments-tab').forEach(t => t.classList.remove('active'));
-        cardviewTab.classList.add('active');
+    // Update active tab
+    commentsTabs.querySelectorAll('.comments-tab').forEach(t => t.classList.remove('active'));
+    cardviewTab.classList.add('active');
 
-        // Switch tab content
-        currentCommentsTab = 'cardview';
-        switchCommentsTab('cardview');
-    }, 100);
+    // Switch tab content
+    currentCommentsTab = 'cardview';
+    switchCommentsTab('cardview');
 }
 
 function resetCommentForm() {
@@ -2131,11 +2129,15 @@ function switchCommentsTab(tabName) {
         window.cardCounter.unsubscribeFromNewComments();
     }
 
-    // Hide cardview tab when switching to other tabs
+    // Hide cardview tab and remove cardview-mode class when switching to other tabs
     if (tabName !== 'cardview') {
         const cardviewTab = document.querySelector('[data-tab="cardview"]');
         if (cardviewTab) {
             cardviewTab.style.display = 'none';
+        }
+        const commentsList = document.getElementById('commentsList');
+        if (commentsList) {
+            commentsList.classList.remove('cardview-mode');
         }
     }
 
@@ -2188,7 +2190,7 @@ function getOrCreateLoadingEl() {
     return loadingEl;
 }
 
-function openCommentsPanel() {
+function openCommentsPanel(skipLoadComments = false) {
     const commentsPanel = document.getElementById('commentsPanel');
     const commentsOverlay = document.getElementById('commentsOverlay');
     const commentsTabs = document.getElementById('commentsTabs');
@@ -2211,6 +2213,15 @@ function openCommentsPanel() {
     // Update user name display
     updateCommentsPanelUser();
 
+    // Check if user has comments and show/hide "ของฉัน" tab
+    checkUserHasComments();
+
+    // Check if user has picked a card and show/hide "ไพ่ฉัน" tab
+    checkMyCardTab();
+
+    // Skip loading if we're switching to a specific tab (like cardview)
+    if (skipLoadComments) return;
+
     // Reset tab to "new"
     currentCommentsTab = 'new';
     if (commentsTabs) {
@@ -2218,12 +2229,6 @@ function openCommentsPanel() {
         const newTab = commentsTabs.querySelector('[data-tab="new"]');
         if (newTab) newTab.classList.add('active');
     }
-
-    // Check if user has comments and show/hide "ของฉัน" tab
-    checkUserHasComments();
-
-    // Check if user has picked a card and show/hide "ไพ่ฉัน" tab
-    checkMyCardTab();
 
     // Reset and load comments (subscription happens after load completes)
     commentsLastKey = null;
@@ -2771,32 +2776,18 @@ async function loadCardViewComments() {
 
     loadingEl.style.display = 'none';
 
-    // Add card image header (overflows from tab)
-    const cardHeader = document.createElement('div');
-    cardHeader.className = 'cardview-header';
-    cardHeader.innerHTML = `
-        <div class="cardview-card-wrapper">
-            <img class="cardview-card-image" src="images/tarot/${cardViewData.image}" alt="${cardViewData.name}">
-            <div class="cardview-card-glow"></div>
-        </div>
-        <div class="cardview-card-name">${cardViewData.name}</div>
-        <div class="cardview-comment-count">${comments.length} ${t('cardview.commentCount')}</div>
-    `;
-    commentsList.appendChild(cardHeader);
-
     if (comments.length === 0) {
-        const emptyMsg = document.createElement('div');
-        emptyMsg.className = 'comments-empty';
-        emptyMsg.innerHTML = `
-            <div class="comments-empty-icon">💭</div>
-            <div class="comments-empty-text">${t('cardview.noCommentsOnCard')}</div>
+        commentsList.innerHTML = `
+            <div class="comments-empty">
+                <div class="comments-empty-icon">💬</div>
+                <div class="comments-empty-text">${t('comments.noComments')}<br>${t('comments.beFirst')}</div>
+            </div>
         `;
-        commentsList.appendChild(emptyMsg);
         isLoadingComments = false;
         return;
     }
 
-    // Display comments for this card
+    // Display comments for this card (same style as other tabs)
     comments.forEach(comment => {
         const card = createCommentCard(comment);
         commentsList.appendChild(card);

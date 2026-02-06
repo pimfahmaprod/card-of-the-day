@@ -771,8 +771,8 @@ const translations = {
             yourName: "Votre nom",
             namePlaceholder: "Entrez votre nom (max 15 caractères)",
             label: "Commentaire",
-            placeholder: "Acceptez la prophétie de la voyante",
-            submit: "Envoyer",
+            placeholder: "Acceptez la prophétie de la voyante Pimfah",
+            submit: "Envoyer le commentaire",
             sending: "Envoi en cours...",
             reply: "Répondre",
             replyPlaceholder: "Écrivez votre réponse...",
@@ -786,10 +786,10 @@ const translations = {
             tabMine: "Mes posts",
             empty: "Pas encore de commentaires",
             myComments: "Mes commentaires",
-            repliedTo: "Mes réponses",
+            repliedTo: "Commentaires auxquels j'ai répondu",
             noComments: "Vous n'avez pas encore commenté",
             goComment: "Allez commenter les cartes des autres !",
-            viewLatest: "Voir les derniers"
+            viewLatest: "Voir les derniers commentaires"
         },
         blessing: {
             wantMore: "En savoir plus",
@@ -815,9 +815,9 @@ const translations = {
         },
         time: {
             justNow: "À l'instant",
-            minutesAgo: "min",
-            hoursAgo: "h",
-            daysAgo: "j"
+            minutesAgo: "minutes",
+            hoursAgo: "heures",
+            daysAgo: "jours"
         },
         share: {
             gotCard: "J'ai tiré la carte",
@@ -837,9 +837,9 @@ const translations = {
         },
         cta: {
             notAccepted: "Prophétie pas encore acceptée",
-            drawToReceive: "Tirez une carte pour recevoir votre prédiction",
+            drawToReceive: "Tirez une carte pour recevoir la prédiction de la voyante Pimfah",
             goDrawCard: "Allons tirer une carte !",
-            acceptFirst: "Accepter en premier",
+            acceptFirst: "Soyez le premier à accepter",
             beFirstComment: "Pas encore de commentaires<br>Soyez le premier à commenter !"
         },
         error: {
