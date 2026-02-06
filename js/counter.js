@@ -579,6 +579,59 @@ async function fetchCommentsByUserId(userId, limit = 50) {
     }
 }
 
+// Fetch comments that user has replied to (cards they interacted with)
+async function fetchCommentsUserRepliedTo(userId, limit = 20) {
+    if (!isFirebaseInitialized || !database || !userId) return [];
+
+    try {
+        // Get all replies
+        const repliesRef = database.ref('replies');
+        const snapshot = await repliesRef.once('value');
+        const allReplies = snapshot.val();
+
+        if (!allReplies) return [];
+
+        // Find comment IDs where this user has replied
+        const commentIdsWithUserReply = new Set();
+        for (const [commentId, replies] of Object.entries(allReplies)) {
+            for (const reply of Object.values(replies)) {
+                if (reply.userId === userId) {
+                    commentIdsWithUserReply.add(commentId);
+                    break;
+                }
+            }
+        }
+
+        if (commentIdsWithUserReply.size === 0) return [];
+
+        // Fetch the parent comments
+        const commentsRef = database.ref('comments');
+        const commentsSnapshot = await commentsRef.once('value');
+        const allComments = commentsSnapshot.val();
+
+        if (!allComments) return [];
+
+        // Get comments that user replied to (exclude user's own comments)
+        const repliedComments = [];
+        for (const commentId of commentIdsWithUserReply) {
+            if (allComments[commentId] && allComments[commentId].userId !== userId) {
+                repliedComments.push({
+                    id: commentId,
+                    ...allComments[commentId]
+                });
+            }
+        }
+
+        // Sort by timestamp and limit
+        return repliedComments
+            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+            .slice(0, limit);
+    } catch (error) {
+        console.warn('Failed to fetch comments user replied to:', error.message);
+        return [];
+    }
+}
+
 // Fetch card rankings (with cache)
 async function fetchCardRankings(limit = 5) {
     if (!isFirebaseInitialized || !database) return [];
@@ -689,6 +742,7 @@ window.cardCounter = {
     fetchTopCommentsByReplies: fetchTopCommentsByReplies,
     fetchHotComments: fetchHotComments,
     fetchCommentsByUserId: fetchCommentsByUserId,
+    fetchCommentsUserRepliedTo: fetchCommentsUserRepliedTo,
     fetchCardRankings: fetchCardRankings,
     // Analytics (mostly disabled)
     trackEvent: trackEvent,

@@ -653,6 +653,8 @@ function startExperience() {
         // Hide landing page
         setTimeout(() => {
             landingPage.classList.add('hidden');
+            // Hide comments button on card spread
+            updateCommentsBtnVisibility();
         }, 300);
     }, 1100);
 }
@@ -1017,6 +1019,9 @@ function selectCard(cardId, cardElement) {
 
                 // Check if this card has comments and update button visibility
                 checkCardComments(card.id);
+
+                // Show comments button now that result is visible
+                updateCommentsBtnVisibility();
             }, 800);
         }, 500);
     }, 600);
@@ -1058,6 +1063,9 @@ function closeResult() {
 
     // Hide result panel
     document.getElementById('resultPanel').classList.remove('active');
+
+    // Hide comments button when going back to card spread
+    updateCommentsBtnVisibility();
 
     setTimeout(() => {
         // Hide center card
@@ -1261,37 +1269,45 @@ async function checkCardComments(cardId) {
     }
 }
 
-// View comments for the current card (creates gold-bordered navigated card)
+// Store card data for cardview tab
+let cardViewData = null;
+
+// View comments for the current card (opens cardview tab)
 async function viewCardComments() {
     if (!currentCardData) return;
 
-    const cardId = currentCardData.id;
+    // Track view card comments (ส่อง button)
+    if (window.cardCounter) {
+        window.cardCounter.trackFeatureUsage('viewCardComments', 'click');
+    }
 
-    // Open comments panel first
+    // Store card data for the cardview tab
+    cardViewData = { ...currentCardData };
+
+    // Open comments panel
     openCommentsPanel();
 
-    // Wait for comments to load, then create navigated card
-    setTimeout(async () => {
-        if (!window.cardCounter || !window.cardCounter.fetchCommentsByCardId) return;
+    // Switch to cardview tab
+    setTimeout(() => {
+        const commentsTabs = document.getElementById('commentsTabs');
+        const cardviewTab = commentsTabs.querySelector('[data-tab="cardview"]');
+        const tabPreview = cardviewTab.querySelector('.tab-card-preview');
 
-        try {
-            // Find the most recent comment for this card
-            const comments = await window.cardCounter.fetchCommentsByCardId(cardId, null, 1);
+        // Set the card image in tab
+        tabPreview.src = `images/tarot/${cardViewData.image}`;
+        tabPreview.alt = cardViewData.name;
 
-            if (comments && comments.length > 0) {
-                const latestComment = comments[0];
+        // Show and activate the cardview tab
+        cardviewTab.style.display = '';
 
-                // Use navigateToRelatedComment to create gold-bordered card
-                await navigateToRelatedComment(latestComment);
-            } else {
-                // No comments found for this card
-                showToast('ยังไม่มีความคิดเห็นบนไพ่ใบนี้');
-            }
-        } catch (error) {
-            console.warn('Failed to view card comments:', error);
-            showToast('ไม่สามารถโหลดความคิดเห็นได้');
-        }
-    }, 500);
+        // Update active tab
+        commentsTabs.querySelectorAll('.comments-tab').forEach(t => t.classList.remove('active'));
+        cardviewTab.classList.add('active');
+
+        // Switch tab content
+        currentCommentsTab = 'cardview';
+        switchCommentsTab('cardview');
+    }, 100);
 }
 
 function resetCommentForm() {
@@ -1410,6 +1426,9 @@ async function submitComment() {
                 saveUserName(userName);
             }
 
+            // Show "ไพ่ฉัน" tab now that user has commented on their card
+            checkMyCardTab();
+
             submitBtn.classList.add('success');
             submitText.textContent = 'ส่งสำเร็จ!';
 
@@ -1442,6 +1461,11 @@ function showBlessingScreen(userName, comment) {
     const blessingComment = document.getElementById('blessingComment');
 
     if (!blessingScreen || !currentCardData) return;
+
+    // Track blessing screen shown
+    if (window.cardCounter) {
+        window.cardCounter.trackFeatureUsage('blessingScreen', 'shown');
+    }
 
     // Set card image
     blessingCard.src = `images/tarot/${currentCardData.image}`;
@@ -1539,6 +1563,11 @@ function closeBlessingAndRestart() {
 }
 
 function goToLandingPage() {
+    // Track restart to landing page
+    if (window.cardCounter) {
+        window.cardCounter.trackFeatureUsage('restart', 'toLanding');
+    }
+
     const landingPage = document.getElementById('landingPage');
     const mainPage = document.getElementById('mainPage');
     const spinningCardContainer = document.getElementById('spinningCardContainer');
@@ -1654,6 +1683,9 @@ function goToLandingPage() {
         // Show landing page
         landingPage.classList.remove('hidden');
         landingPage.style.pointerEvents = 'auto';
+
+        // Show comments button on landing page
+        updateCommentsBtnVisibility();
 
         // Scroll to top instantly
         window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1807,6 +1839,26 @@ function initCommentsPanel() {
     }, 1000);
 }
 
+// Update comments button visibility based on current page state
+function updateCommentsBtnVisibility() {
+    const commentsBtn = document.getElementById('commentsBtn');
+    if (!commentsBtn) return;
+
+    const mainPage = document.getElementById('mainPage');
+    const resultPanel = document.getElementById('resultPanel');
+
+    // Hide only on card spread (mainPage visible but result not active)
+    if (mainPage && mainPage.classList.contains('visible')) {
+        if (!resultPanel || !resultPanel.classList.contains('active')) {
+            commentsBtn.style.display = 'none';
+            return;
+        }
+    }
+
+    // Show on result page
+    commentsBtn.style.display = 'flex';
+}
+
 function switchCommentsTab(tabName) {
     // Reset state
     commentsLastKey = null;
@@ -1820,14 +1872,26 @@ function switchCommentsTab(tabName) {
         window.cardCounter.unsubscribeFromNewComments();
     }
 
+    // Hide cardview tab when switching to other tabs
+    if (tabName !== 'cardview') {
+        const cardviewTab = document.querySelector('[data-tab="cardview"]');
+        if (cardviewTab) {
+            cardviewTab.style.display = 'none';
+        }
+    }
+
     // Load content for the selected tab
     if (tabName === 'new') {
         newestCommentTimestamp = 0;
         loadComments(true);
     } else if (tabName === 'hot') {
         loadHotComments();
+    } else if (tabName === 'mycard') {
+        loadMyCardComments();
     } else if (tabName === 'me') {
         loadMyComments();
+    } else if (tabName === 'cardview') {
+        loadCardViewComments();
     }
 }
 
@@ -1852,6 +1916,18 @@ let newestCommentTimestamp = 0;
 // Track currently expanded comment card
 let expandedCommentCard = null;
 let navigatedCommentCard = null; // Track the card that was navigated from related comments
+
+// Get or create loading element for comments list
+function getOrCreateLoadingEl() {
+    let loadingEl = document.getElementById('commentsLoading');
+    if (!loadingEl) {
+        loadingEl = document.createElement('div');
+        loadingEl.className = 'comments-loading';
+        loadingEl.id = 'commentsLoading';
+        loadingEl.innerHTML = '<span>กำลังโหลด...</span>';
+    }
+    return loadingEl;
+}
 
 function openCommentsPanel() {
     const commentsPanel = document.getElementById('commentsPanel');
@@ -1886,6 +1962,9 @@ function openCommentsPanel() {
 
     // Check if user has comments and show/hide "ของฉัน" tab
     checkUserHasComments();
+
+    // Check if user has picked a card and show/hide "ไพ่ฉัน" tab
+    checkMyCardTab();
 
     // Reset and load comments (subscription happens after load completes)
     commentsLastKey = null;
@@ -1926,6 +2005,32 @@ async function checkUserHasComments() {
     }
 }
 
+// Check if user has any comments and show/hide the "ไพ่ฉัน" tab
+async function checkMyCardTab() {
+    const commentsTabs = document.getElementById('commentsTabs');
+    if (!commentsTabs) return;
+
+    const myCardTab = commentsTabs.querySelector('[data-tab="mycard"]');
+    if (!myCardTab) return;
+
+    // Hide by default
+    myCardTab.style.display = 'none';
+
+    // Check if Firebase is ready
+    if (!window.cardCounter || !window.cardCounter.fetchCommentsByUserId) {
+        return;
+    }
+
+    // Check if user has any comments
+    const userId = getUserId();
+    const comments = await window.cardCounter.fetchCommentsByUserId(userId, 1);
+
+    if (comments.length > 0) {
+        myCardTab.style.display = '';
+        myCardTab.textContent = `ไพ่ฉัน`;
+    }
+}
+
 function updateCommentsPanelUser() {
     const userElement = document.getElementById('commentsPanelUser');
     if (!userElement) return;
@@ -1937,6 +2042,28 @@ function updateCommentsPanelUser() {
     } else {
         userElement.textContent = 'Anonymous';
         userElement.classList.add('anonymous');
+    }
+}
+
+// Navigate to draw card page from comments panel CTA
+function goToDrawFromComments() {
+    // Close comments panel first
+    closeCommentsPanel();
+
+    // If on result page, close result first
+    const resultPanel = document.getElementById('resultPanel');
+    if (resultPanel && resultPanel.classList.contains('active')) {
+        closeResult();
+        return;
+    }
+
+    // If on landing page, trigger the card to start
+    const landingPage = document.getElementById('landingPage');
+    if (landingPage && !landingPage.classList.contains('hidden')) {
+        const spinningCard = document.getElementById('spinningCard');
+        if (spinningCard) {
+            spinningCard.click();
+        }
     }
 }
 
@@ -2035,7 +2162,7 @@ async function loadComments(reset = false) {
     isLoadingComments = true;
 
     const commentsList = document.getElementById('commentsList');
-    const loadingEl = document.getElementById('commentsLoading');
+    const loadingEl = getOrCreateLoadingEl();
 
     if (reset) {
         commentsList.innerHTML = '';
@@ -2138,7 +2265,7 @@ async function loadHotComments() {
     isLoadingComments = true;
 
     const commentsList = document.getElementById('commentsList');
-    const loadingEl = document.getElementById('commentsLoading');
+    const loadingEl = getOrCreateLoadingEl();
 
     commentsList.innerHTML = '';
     commentsList.appendChild(loadingEl);
@@ -2181,7 +2308,7 @@ async function loadMyComments() {
     isLoadingComments = true;
 
     const commentsList = document.getElementById('commentsList');
-    const loadingEl = document.getElementById('commentsLoading');
+    const loadingEl = getOrCreateLoadingEl();
 
     commentsList.innerHTML = '';
     commentsList.appendChild(loadingEl);
@@ -2201,9 +2328,29 @@ async function loadMyComments() {
 
     if (comments.length === 0) {
         commentsList.innerHTML = `
-            <div class="comments-empty">
-                <div class="comments-empty-icon">✨</div>
-                <div class="comments-empty-text">คุณยังไม่เคยแสดงความคิดเห็น<br>ลองจับไพ่และบอกแม่หมอสิ!</div>
+            <div class="comments-empty comments-empty-cta">
+                <div class="cta-sparkles">
+                    <span class="sparkle s1">✦</span>
+                    <span class="sparkle s2">✧</span>
+                    <span class="sparkle s3">✦</span>
+                </div>
+                <div class="cta-card-icon">
+                    <svg viewBox="0 0 60 80" fill="none">
+                        <rect x="5" y="5" width="50" height="70" rx="4" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M30 25 L35 35 L45 37 L38 44 L40 55 L30 50 L20 55 L22 44 L15 37 L25 35 Z" fill="currentColor" opacity="0.3"/>
+                        <circle cx="30" cy="40" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                        <text x="30" y="44" text-anchor="middle" font-size="10" fill="currentColor">?</text>
+                    </svg>
+                </div>
+                <div class="comments-empty-text">ยังไม่ได้น้อมรับคำทำนาย</div>
+                <p class="cta-subtitle">จับไพ่เพื่อรับคำทำนายจากแม่หมอพิมพ์ฟ้า</p>
+                <button class="cta-draw-btn" onclick="goToDrawFromComments()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="7" height="10" rx="1" transform="rotate(-10 6.5 9)"/>
+                        <rect x="14" y="4" width="7" height="10" rx="1" transform="rotate(10 17.5 9)"/>
+                    </svg>
+                    <span>ไปจับไพ่กันเลย!</span>
+                </button>
             </div>
         `;
         isLoadingComments = false;
@@ -2211,6 +2358,203 @@ async function loadMyComments() {
     }
 
     // Display user's comments
+    comments.forEach(comment => {
+        const card = createCommentCard(comment);
+        commentsList.appendChild(card);
+        displayedCommentIds.add(comment.id);
+    });
+
+    isLoadingComments = false;
+}
+
+// Load comments for My Card tab (comments on the card user picked)
+async function loadMyCardComments() {
+    if (isLoadingComments) return;
+    isLoadingComments = true;
+
+    const commentsList = document.getElementById('commentsList');
+    const loadingEl = getOrCreateLoadingEl();
+
+    commentsList.innerHTML = '';
+    commentsList.appendChild(loadingEl);
+    loadingEl.style.display = 'block';
+
+    const userId = getUserId();
+
+    if (!window.cardCounter || !window.cardCounter.fetchCommentsByCardId) {
+        loadingEl.innerHTML = '<span>ไม่สามารถโหลดความคิดเห็นได้</span>';
+        isLoadingComments = false;
+        return;
+    }
+
+    // Track feature usage
+    if (window.cardCounter) {
+        window.cardCounter.trackFeatureUsage('myCardTab', 'view');
+    }
+
+    // Fetch data in parallel
+    const [myCardComments, repliedComments] = await Promise.all([
+        currentCardData ? window.cardCounter.fetchCommentsByCardId(currentCardData.id, null, 50) : [],
+        window.cardCounter.fetchCommentsUserRepliedTo ? window.cardCounter.fetchCommentsUserRepliedTo(userId, 20) : []
+    ]);
+
+    loadingEl.style.display = 'none';
+
+    // Check if both sections are empty
+    const hasMyCard = currentCardData && myCardComments.length > 0;
+    const hasRepliedCards = repliedComments.length > 0;
+
+    if (!currentCardData && !hasRepliedCards) {
+        // No picked card and no replied cards - show CTA
+        commentsList.innerHTML = `
+            <div class="comments-empty comments-empty-cta">
+                <div class="cta-sparkles">
+                    <span class="sparkle s1">✦</span>
+                    <span class="sparkle s2">✧</span>
+                    <span class="sparkle s3">✦</span>
+                </div>
+                <div class="cta-card-icon">
+                    <svg viewBox="0 0 60 80" fill="none">
+                        <rect x="5" y="5" width="50" height="70" rx="4" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M30 25 L35 35 L45 37 L38 44 L40 55 L30 50 L20 55 L22 44 L15 37 L25 35 Z" fill="currentColor" opacity="0.3"/>
+                        <circle cx="30" cy="40" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                        <text x="30" y="44" text-anchor="middle" font-size="10" fill="currentColor">?</text>
+                    </svg>
+                </div>
+                <div class="comments-empty-text">ยังไม่ได้น้อมรับคำทำนาย</div>
+                <p class="cta-subtitle">จับไพ่เพื่อรับคำทำนายจากแม่หมอพิมพ์ฟ้า</p>
+                <button class="cta-draw-btn" onclick="goToDrawFromComments()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="7" height="10" rx="1" transform="rotate(-10 6.5 9)"/>
+                        <rect x="14" y="4" width="7" height="10" rx="1" transform="rotate(10 17.5 9)"/>
+                    </svg>
+                    <span>ไปจับไพ่กันเลย!</span>
+                </button>
+            </div>
+        `;
+        isLoadingComments = false;
+        return;
+    }
+
+    // ===== Section 1: My Picked Card =====
+    if (currentCardData) {
+        // Section header with card preview
+        const myCardSection = document.createElement('div');
+        myCardSection.className = 'mycard-section';
+        myCardSection.innerHTML = `
+            <div class="mycard-section-header">
+                <img class="mycard-section-preview" src="images/tarot/${currentCardData.image}" alt="${currentCardData.name}">
+                <div class="mycard-section-info">
+                    <div class="mycard-section-label">ไพ่ที่ฉันจับได้</div>
+                    <div class="mycard-section-name">${currentCardData.name}</div>
+                </div>
+            </div>
+        `;
+        commentsList.appendChild(myCardSection);
+
+        if (myCardComments.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'mycard-section-empty';
+            emptyMsg.innerHTML = `<span>ยังไม่มีความคิดเห็นบนไพ่ใบนี้</span>`;
+            commentsList.appendChild(emptyMsg);
+        } else {
+            myCardComments.forEach(comment => {
+                const card = createCommentCard(comment);
+                commentsList.appendChild(card);
+                displayedCommentIds.add(comment.id);
+            });
+        }
+    }
+
+    // ===== Section 2: Cards I've Replied To =====
+    if (hasRepliedCards) {
+        const repliedSection = document.createElement('div');
+        repliedSection.className = 'mycard-section mycard-section-replied';
+        repliedSection.innerHTML = `
+            <div class="mycard-section-header replied-header">
+                <div class="replied-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                    </svg>
+                </div>
+                <div class="mycard-section-info">
+                    <div class="mycard-section-label">ความคิดเห็นที่ฉันเคยตอบ</div>
+                    <div class="mycard-section-count">${repliedComments.length} ความคิดเห็น</div>
+                </div>
+            </div>
+        `;
+        commentsList.appendChild(repliedSection);
+
+        // Display replied comments using createCommentCard (same format as other tabs)
+        repliedComments.forEach(comment => {
+            const card = createCommentCard(comment);
+            commentsList.appendChild(card);
+            displayedCommentIds.add(comment.id);
+        });
+    }
+
+    isLoadingComments = false;
+}
+
+// Load comments for cardview tab (viewing a specific card's comments from ส่อง button)
+async function loadCardViewComments() {
+    if (isLoadingComments) return;
+    isLoadingComments = true;
+
+    const commentsList = document.getElementById('commentsList');
+    const loadingEl = getOrCreateLoadingEl();
+
+    commentsList.innerHTML = '';
+    commentsList.appendChild(loadingEl);
+    loadingEl.style.display = 'block';
+
+    if (!cardViewData) {
+        commentsList.innerHTML = `
+            <div class="comments-empty">
+                <div class="comments-empty-icon">🃏</div>
+                <div class="comments-empty-text">ไม่พบข้อมูลไพ่</div>
+            </div>
+        `;
+        isLoadingComments = false;
+        return;
+    }
+
+    if (!window.cardCounter || !window.cardCounter.fetchCommentsByCardId) {
+        loadingEl.innerHTML = '<span>ไม่สามารถโหลดความคิดเห็นได้</span>';
+        isLoadingComments = false;
+        return;
+    }
+
+    const comments = await window.cardCounter.fetchCommentsByCardId(cardViewData.id, null, 50);
+
+    loadingEl.style.display = 'none';
+
+    // Add card image header (overflows from tab)
+    const cardHeader = document.createElement('div');
+    cardHeader.className = 'cardview-header';
+    cardHeader.innerHTML = `
+        <div class="cardview-card-wrapper">
+            <img class="cardview-card-image" src="images/tarot/${cardViewData.image}" alt="${cardViewData.name}">
+            <div class="cardview-card-glow"></div>
+        </div>
+        <div class="cardview-card-name">${cardViewData.name}</div>
+        <div class="cardview-comment-count">${comments.length} ความคิดเห็น</div>
+    `;
+    commentsList.appendChild(cardHeader);
+
+    if (comments.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.className = 'comments-empty';
+        emptyMsg.innerHTML = `
+            <div class="comments-empty-icon">💭</div>
+            <div class="comments-empty-text">ยังไม่มีใครแสดงความคิดเห็นบนไพ่ใบนี้</div>
+        `;
+        commentsList.appendChild(emptyMsg);
+        isLoadingComments = false;
+        return;
+    }
+
+    // Display comments for this card
     comments.forEach(comment => {
         const card = createCommentCard(comment);
         commentsList.appendChild(card);
@@ -2394,6 +2738,11 @@ function setupReplyFeature(card, comment) {
             const result = await window.cardCounter.submitReply(comment.id, userId, userName, text);
 
             if (result.success) {
+                // Track reply submitted
+                if (window.cardCounter) {
+                    window.cardCounter.trackFeatureUsage('reply', 'submitted');
+                }
+
                 // Clear input and hide form
                 replyInput.value = '';
                 replyForm.classList.remove('show');
@@ -2498,6 +2847,11 @@ async function toggleCommentCardExpand(card, comment) {
 
 async function expandCommentCard(card, comment) {
     card.classList.add('expanded');
+
+    // Track comment card expanded
+    if (window.cardCounter) {
+        window.cardCounter.trackFeatureUsage('commentCard', 'expanded');
+    }
 
     // Load full interpretation from tarotData
     const interpretationEl = card.querySelector('.comment-card-full-interpretation');
@@ -2605,6 +2959,11 @@ function collapseCommentCard(card) {
 }
 
 async function navigateToRelatedComment(commentData) {
+    // Track navigate to related comment
+    if (window.cardCounter) {
+        window.cardCounter.trackFeatureUsage('relatedComment', 'navigate');
+    }
+
     try {
         const commentsList = document.getElementById('commentsList');
         if (!commentsList) return;
@@ -2680,7 +3039,10 @@ function escapeHtml(text) {
 }
 
 // Initialize comments panel on DOM ready
-document.addEventListener('DOMContentLoaded', initCommentsPanel);
+document.addEventListener('DOMContentLoaded', () => {
+    initCommentsPanel();
+    updateCommentsBtnVisibility();
+});
 
 // Save Image Functions
 let currentCardData = null;
@@ -3667,55 +4029,52 @@ waitForResources();
         }
     }
 
-    // Load top 10 cards
+    // Load all 78 cards grid
     async function loadTopCards() {
-        const container = document.getElementById('topCardsList');
+        const container = document.getElementById('allCardsGrid');
+        if (!container) return;
 
         try {
             const database = firebase.database();
             const snapshot = await database.ref('cardPicks').once('value');
-            const data = snapshot.val();
+            const data = snapshot.val() || {};
 
-            if (!data) {
-                container.innerHTML = '<div class="analytics-empty">ยังไม่มีข้อมูล</div>';
+            // Build pick count map
+            const pickCounts = {};
+            Object.entries(data).forEach(([key, count]) => {
+                const cardId = key.replace('card_', '');
+                pickCounts[cardId] = count || 0;
+            });
+
+            // Get all 78 cards from tarotData
+            if (!tarotData || !tarotData.cards) {
+                container.innerHTML = '<div class="analytics-empty">ยังไม่โหลดข้อมูลไพ่</div>';
                 return;
             }
 
-            // Convert to array and sort
-            const cardPicks = Object.entries(data)
-                .map(([key, count]) => ({
-                    cardId: key.replace('card_', ''),
-                    count: count || 0
-                }))
-                .sort((a, b) => b.count - a.count)
-                .slice(0, 10);
-
-            const maxCount = cardPicks[0]?.count || 1;
+            // Sort cards by pick count (descending)
+            const sortedCards = [...tarotData.cards].sort((a, b) => {
+                const countA = pickCounts[a.id] || 0;
+                const countB = pickCounts[b.id] || 0;
+                return countB - countA;
+            });
 
             let html = '';
-            cardPicks.forEach((card, index) => {
-                const cardData = (tarotData && tarotData.cards) ?
-                    tarotData.cards.find(c => c.id == card.cardId) : null;
-                const cardName = cardData ? cardData.name : `Card ${card.cardId}`;
-                const cardImage = cardData ? `images/tarot/${cardData.image}` : '';
-                const percentage = ((card.count / maxCount) * 100).toFixed(0);
+            sortedCards.forEach((card, index) => {
+                const count = pickCounts[card.id] || 0;
+                const cardImage = `images/tarot/${card.image}`;
 
-                let rankClass = 'normal';
-                if (index === 0) rankClass = 'gold';
-                else if (index === 1) rankClass = 'silver';
-                else if (index === 2) rankClass = 'bronze';
+                // Rank styling for top 3
+                let rankBadge = '';
+                if (index === 0) rankBadge = '<span class="card-grid-rank gold">1</span>';
+                else if (index === 1) rankBadge = '<span class="card-grid-rank silver">2</span>';
+                else if (index === 2) rankBadge = '<span class="card-grid-rank bronze">3</span>';
 
                 html += `
-                    <div class="top-card-item">
-                        <div class="top-card-rank ${rankClass}">${index + 1}</div>
-                        ${cardImage ? `<img src="${cardImage}" alt="${cardName}" class="top-card-image">` : ''}
-                        <div class="top-card-info">
-                            <div class="top-card-name">${escapeHtml(cardName)}</div>
-                            <div class="top-card-count">${card.count.toLocaleString('th-TH')} picks</div>
-                        </div>
-                        <div class="top-card-bar">
-                            <div class="top-card-bar-fill" style="width: ${percentage}%"></div>
-                        </div>
+                    <div class="card-grid-item" title="${card.name}">
+                        ${rankBadge}
+                        <img src="${cardImage}" alt="${card.name}" class="card-grid-image">
+                        <div class="card-grid-count">${count}</div>
                     </div>
                 `;
             });
@@ -3723,7 +4082,7 @@ waitForResources();
             container.innerHTML = html;
 
         } catch (error) {
-            console.error('Error loading top cards:', error);
+            console.error('Error loading all cards:', error);
             container.innerHTML = '<div class="analytics-empty">เกิดข้อผิดพลาด</div>';
         }
     }
@@ -3834,41 +4193,34 @@ waitForResources();
             const snapshot = await database.ref('buttonClicks/social').once('value');
             const data = snapshot.val() || {};
 
+            const igIcon = '<svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>';
+            const ttIcon = '<svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>';
+            const fbIcon = '<svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>';
+            const ytIcon = '<svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>';
+            const lineIcon = '<svg viewBox="0 0 24 24"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>';
+
             const socials = [
-                {
-                    key: 'instagram',
-                    label: 'Instagram',
-                    class: 'instagram',
-                    icon: '<svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>'
-                },
-                {
-                    key: 'tiktok',
-                    label: 'TikTok',
-                    class: 'tiktok',
-                    icon: '<svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>'
-                },
-                {
-                    key: 'facebook',
-                    label: 'Facebook',
-                    class: 'facebook',
-                    icon: '<svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'
-                },
-                {
-                    key: 'youtube',
-                    label: 'YouTube',
-                    class: 'youtube',
-                    icon: '<svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>'
-                }
+                { key: 'instagram', bkey: 'blessing_instagram', label: 'Instagram', class: 'instagram', icon: igIcon },
+                { key: 'tiktok', bkey: 'blessing_tiktok', label: 'TikTok', class: 'tiktok', icon: ttIcon },
+                { key: 'facebook', bkey: 'blessing_facebook', label: 'Facebook', class: 'facebook', icon: fbIcon },
+                { key: 'youtube', bkey: null, label: 'YouTube', class: 'youtube', icon: ytIcon },
+                { key: null, bkey: 'blessing_line', label: 'LINE (Blessing)', class: 'line', icon: lineIcon }
             ];
 
             let html = '';
             socials.forEach(social => {
-                const value = data[social.key] || 0;
+                const footerValue = social.key ? (data[social.key] || 0) : 0;
+                const blessingValue = social.bkey ? (data[social.bkey] || 0) : 0;
+                const totalValue = footerValue + blessingValue;
+                const breakdown = social.bkey && social.key ?
+                    `<div class="social-breakdown">Footer: ${footerValue} / Blessing: ${blessingValue}</div>` :
+                    '';
                 html += `
                     <div class="social-stat-card ${social.class}">
                         <div class="social-stat-icon">${social.icon}</div>
-                        <div class="social-stat-value">${value.toLocaleString('th-TH')}</div>
+                        <div class="social-stat-value">${totalValue.toLocaleString('th-TH')}</div>
                         <div class="social-stat-label">${social.label}</div>
+                        ${breakdown}
                     </div>
                 `;
             });
@@ -4103,7 +4455,7 @@ waitForResources();
                 {
                     key: 'commentsPanel',
                     label: 'Comments Panel',
-                    actions: ['opened', 'closed']
+                    actions: ['opened', 'closed', 'tabSwitch_new', 'tabSwitch_hot', 'tabSwitch_mycard', 'tabSwitch_me']
                 },
                 {
                     key: 'rankingPanel',
@@ -4114,6 +4466,41 @@ waitForResources();
                     key: 'commentForm',
                     label: 'Comment Form',
                     actions: ['started', 'submitted', 'abandoned']
+                },
+                {
+                    key: 'viewCardComments',
+                    label: 'View Card Comments (ส่อง)',
+                    actions: ['click']
+                },
+                {
+                    key: 'restart',
+                    label: 'Restart',
+                    actions: ['toLanding']
+                },
+                {
+                    key: 'blessingScreen',
+                    label: 'Blessing Screen',
+                    actions: ['shown']
+                },
+                {
+                    key: 'reply',
+                    label: 'Reply to Comment',
+                    actions: ['submitted']
+                },
+                {
+                    key: 'commentCard',
+                    label: 'Comment Card',
+                    actions: ['expanded']
+                },
+                {
+                    key: 'relatedComment',
+                    label: 'Related Comment',
+                    actions: ['navigate']
+                },
+                {
+                    key: 'myCardTab',
+                    label: 'My Card Tab (ไพ่ฉัน)',
+                    actions: ['view']
                 }
             ];
 
