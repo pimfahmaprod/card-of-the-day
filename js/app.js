@@ -1412,25 +1412,11 @@ async function submitComment() {
 
             submitBtn.classList.add('success');
             submitText.textContent = 'ส่งสำเร็จ!';
-            showToast('ขอบคุณสำหรับความคิดเห็น!');
 
-            // Close form and disable button for this round
+            // Show blessing celebration screen after short delay
             setTimeout(() => {
-                const acceptActions = document.getElementById('acceptActions');
-                const toggleBtn = document.getElementById('commentToggleBtn');
-
-                if (acceptActions) acceptActions.style.display = 'none';
-                toggleBtn.classList.remove('active');
-                toggleBtn.classList.add('commented');
-                toggleBtn.disabled = true;
-                toggleBtn.querySelector('span').textContent = 'น้อมรับแล้ว';
-                // Icon is already checkmark, keep it
-
-                // Auto-open comments panel to show user's comment
-                setTimeout(() => {
-                    openCommentsPanel();
-                }, 300);
-            }, 1500);
+                showBlessingScreen(userName, commentText);
+            }, 800);
         } else {
             submitBtn.disabled = false;
             submitText.textContent = 'ส่งความคิดเห็น';
@@ -1441,6 +1427,313 @@ async function submitComment() {
         submitText.textContent = 'ส่งความคิดเห็น';
         showToast('ระบบยังไม่พร้อม กรุณาลองใหม่');
     }
+}
+
+// ========================================
+// Blessing Celebration Screen
+// ========================================
+
+let blessingSparkleInterval = null;
+
+function showBlessingScreen(userName, comment) {
+    const blessingScreen = document.getElementById('blessingScreen');
+    const blessingCard = document.getElementById('blessingCard');
+    const blessingName = document.getElementById('blessingName');
+    const blessingComment = document.getElementById('blessingComment');
+
+    if (!blessingScreen || !currentCardData) return;
+
+    // Set card image
+    blessingCard.src = `images/tarot/${currentCardData.image}`;
+
+    // Set user name and comment
+    blessingName.textContent = userName === 'Anonymous' ? '' : `— ${userName} —`;
+    blessingComment.textContent = `"${comment}"`;
+
+    // Hide other panels
+    document.getElementById('resultPanel').classList.remove('active');
+    document.getElementById('centerCard').classList.remove('active');
+    document.getElementById('overlay').classList.remove('active');
+
+    // Show blessing screen
+    blessingScreen.classList.add('active');
+
+    // Start sparkle particles
+    startBlessingSparkles();
+
+    // Setup restart button
+    const restartBtn = document.getElementById('blessingRestartBtn');
+    if (restartBtn) {
+        restartBtn.onclick = closeBlessingAndRestart;
+    }
+}
+
+// Create floating sparkles for blessing card
+function startBlessingSparkles() {
+    const container = document.querySelector('.blessing-card-container');
+    if (!container) return;
+
+    // Clear any existing interval
+    if (blessingSparkleInterval) {
+        clearInterval(blessingSparkleInterval);
+    }
+
+    blessingSparkleInterval = setInterval(() => {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'blessing-sparkle';
+
+        // Random position around the card
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 80 + Math.random() * 60;
+        const startX = 100 + Math.cos(angle) * distance;
+        const startY = 178 + Math.sin(angle) * distance;
+
+        // Random movement direction
+        const moveX = (Math.random() - 0.5) * 100;
+        const moveY = -30 - Math.random() * 60;
+        const duration = 1.5 + Math.random() * 1;
+
+        sparkle.style.cssText = `
+            left: ${startX}px;
+            top: ${startY}px;
+            --move-x: ${moveX}px;
+            --move-y: ${moveY}px;
+            animation: blessingSparkleRise ${duration}s ease-out forwards;
+        `;
+
+        container.appendChild(sparkle);
+
+        // Remove after animation
+        setTimeout(() => sparkle.remove(), duration * 1000);
+    }, 150);
+}
+
+function stopBlessingSparkles() {
+    if (blessingSparkleInterval) {
+        clearInterval(blessingSparkleInterval);
+        blessingSparkleInterval = null;
+    }
+    // Remove any remaining sparkles
+    const container = document.querySelector('.blessing-card-container');
+    if (container) {
+        container.querySelectorAll('.blessing-sparkle').forEach(s => s.remove());
+    }
+}
+
+function closeBlessingAndRestart() {
+    const blessingScreen = document.getElementById('blessingScreen');
+
+    // Stop sparkles
+    stopBlessingSparkles();
+
+    // Fade out blessing screen
+    blessingScreen.style.animation = 'blessingFadeIn 0.5s ease reverse forwards';
+
+    setTimeout(() => {
+        blessingScreen.classList.remove('active');
+        blessingScreen.style.animation = '';
+
+        // Go back to landing page (not card selection)
+        goToLandingPage();
+    }, 500);
+}
+
+function goToLandingPage() {
+    const landingPage = document.getElementById('landingPage');
+    const mainPage = document.getElementById('mainPage');
+    const spinningCardContainer = document.getElementById('spinningCardContainer');
+    const spinningCardWrapper = spinningCardContainer.querySelector('.spinning-card-wrapper');
+    const spinningCard = document.getElementById('spinningCard');
+    const landingHeading = document.querySelector('.landing-heading');
+    const landingBrand = document.querySelector('.landing-brand');
+    const landingInstruction = document.querySelector('.landing-instruction');
+    const cardClickHint = spinningCardContainer.querySelector('.card-click-hint');
+    const cardGrid = document.getElementById('cardGrid');
+    const miniHeader = document.querySelector('.mini-header');
+
+    // Reset accept actions and buttons
+    const acceptActions = document.getElementById('acceptActions');
+    const commentToggleBtn = document.getElementById('commentToggleBtn');
+    const viewCommentsBtn = document.getElementById('viewCommentsBtn');
+    if (acceptActions) acceptActions.style.display = 'none';
+    if (commentToggleBtn) {
+        commentToggleBtn.style.display = 'inline-flex';
+        commentToggleBtn.classList.remove('active');
+        commentToggleBtn.classList.remove('commented');
+        commentToggleBtn.disabled = false;
+        const btnText = commentToggleBtn.querySelector('span');
+        if (btnText) btnText.textContent = 'น้อมรับคำทำนาย';
+        const svgIcon = commentToggleBtn.querySelector('svg');
+        if (svgIcon) {
+            svgIcon.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
+        }
+    }
+    if (viewCommentsBtn) {
+        viewCommentsBtn.style.display = 'none';
+    }
+    if (typeof resetCommentForm === 'function') resetCommentForm();
+
+    // Step 1: Fade out main page smoothly
+    mainPage.style.transition = 'opacity 0.4s ease';
+    mainPage.style.opacity = '0';
+
+    // Remove mini header with fade
+    if (miniHeader) {
+        miniHeader.style.transition = 'opacity 0.3s ease';
+        miniHeader.style.opacity = '0';
+        setTimeout(() => miniHeader.remove(), 300);
+    }
+
+    // Step 2: After fade out, prepare landing page
+    setTimeout(() => {
+        // Hide main page completely
+        mainPage.classList.remove('visible');
+        mainPage.style.opacity = '';
+        mainPage.style.transition = '';
+
+        // Reset all card containers - remove spread/floating classes
+        const cardContainers = document.querySelectorAll('.card-container');
+        cardContainers.forEach(container => {
+            container.classList.remove('spread');
+            container.classList.remove('floating');
+            container.style.transition = 'none';
+            container.style.transform = '';
+            container.style.left = '';
+            container.style.top = '';
+        });
+
+        // Reshuffle and re-render cards fresh
+        shuffleCards();
+        renderCards();
+
+        // Reset card grid to stacked state
+        cardGrid.classList.add('stacked');
+        cardGrid.classList.remove('initial-hidden');
+
+        // Reset spinning card container - start invisible for fade in
+        spinningCardContainer.style.transition = 'none';
+        spinningCardContainer.style.transform = '';
+        spinningCardContainer.style.opacity = '0';
+        spinningCardContainer.style.visibility = 'visible';
+        spinningCardContainer.style.animation = '';
+        spinningCardContainer.style.filter = '';
+
+        // Reset card faces shadow
+        const cardFaces = spinningCardContainer.querySelectorAll('.spinning-card-face');
+        cardFaces.forEach(face => {
+            face.style.transition = '';
+            face.style.boxShadow = '';
+        });
+
+        // Reset spinning card wrapper - back to spinning animation
+        spinningCardWrapper.style.transition = '';
+        spinningCardWrapper.style.transform = '';
+        spinningCardWrapper.style.animation = 'spinOnY 4s linear infinite';
+
+        // Reset spinning card tilt
+        spinningCard.style.transition = '';
+        spinningCard.style.transform = 'rotate(-29.3deg)';
+
+        // Show hint text
+        if (cardClickHint) {
+            cardClickHint.style.opacity = '1';
+        }
+
+        // Reset landing elements - start invisible
+        landingHeading.style.animation = '';
+        landingHeading.style.opacity = '0';
+        landingHeading.style.transform = '';
+        landingHeading.style.transition = '';
+
+        if (landingBrand) {
+            landingBrand.style.opacity = '0';
+        }
+        if (landingInstruction) {
+            landingInstruction.style.opacity = '0';
+        }
+
+        // Show landing page
+        landingPage.classList.remove('hidden');
+        landingPage.style.pointerEvents = 'auto';
+
+        // Scroll to top instantly
+        window.scrollTo({ top: 0, behavior: 'instant' });
+
+        // Step 3: Fade in landing elements smoothly
+        requestAnimationFrame(() => {
+            // Fade in spinning card
+            spinningCardContainer.style.transition = 'opacity 0.5s ease';
+            spinningCardContainer.style.opacity = '1';
+
+            // Fade in heading
+            landingHeading.style.transition = 'opacity 0.5s ease';
+            landingHeading.style.opacity = '1';
+
+            // Fade in other elements with slight delays
+            setTimeout(() => {
+                if (landingBrand) {
+                    landingBrand.style.transition = 'opacity 0.4s ease';
+                    landingBrand.style.opacity = '1';
+                }
+            }, 150);
+
+            setTimeout(() => {
+                if (landingInstruction) {
+                    landingInstruction.style.transition = 'opacity 0.4s ease';
+                    landingInstruction.style.opacity = '1';
+                }
+            }, 300);
+        });
+
+        // Restart spinning card interval and sparkles
+        startCardRotation();
+        createFloatingSparkles();
+
+        // Reset state
+        isPaused = false;
+        currentCardData = null;
+
+        // Track retry
+        if (window.cardCounter) window.cardCounter.trackRetry();
+    }, 400);
+}
+
+function resetForNewPick() {
+    // Reset accept actions container and buttons
+    const acceptActions = document.getElementById('acceptActions');
+    const commentToggleBtn = document.getElementById('commentToggleBtn');
+    const viewCommentsBtn = document.getElementById('viewCommentsBtn');
+    if (acceptActions) acceptActions.style.display = 'none';
+    if (commentToggleBtn) {
+        commentToggleBtn.style.display = 'inline-flex';
+        commentToggleBtn.classList.remove('active');
+        commentToggleBtn.classList.remove('commented');
+        commentToggleBtn.disabled = false;
+        const btnText = commentToggleBtn.querySelector('span');
+        if (btnText) btnText.textContent = 'น้อมรับคำทำนาย';
+        const svgIcon = commentToggleBtn.querySelector('svg');
+        if (svgIcon) {
+            svgIcon.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
+        }
+    }
+    if (viewCommentsBtn) {
+        viewCommentsBtn.style.display = 'none';
+    }
+    if (typeof resetCommentForm === 'function') resetCommentForm();
+
+    // Track retry
+    if (window.cardCounter) window.cardCounter.trackRetry();
+
+    // Reshuffle and re-render
+    shuffleCards();
+    renderCards();
+
+    // Reset state
+    isPaused = false;
+    currentCardData = null;
+
+    // Scroll to top smoothly
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ========================================

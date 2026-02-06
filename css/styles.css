@@ -3559,3 +3559,496 @@ footer {
         gap: 10px;
     }
 }
+
+/* ========================================
+   Blessing Celebration Screen
+   ======================================== */
+
+.blessing-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(20, 15, 18, 0.7);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.blessing-screen.active {
+    display: flex;
+    animation: blessingFadeIn 0.8s ease forwards;
+}
+
+@keyframes blessingFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Glowing background effect */
+.blessing-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.1) 40%, transparent 70%);
+    transform: translate(-50%, -60%);
+    animation: blessingGlow 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes blessingGlow {
+    0%, 100% {
+        transform: translate(-50%, -60%) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-50%, -60%) scale(1.2);
+        opacity: 1;
+    }
+}
+
+
+/* Card container - 3D spinning effect like homepage */
+.blessing-card-container {
+    position: relative;
+    width: 200px;
+    height: 357px; /* 200 * 1.783 (tarot ratio) */
+    perspective: 1500px;
+    transform-style: preserve-3d;
+    animation: blessingCardZoomIn 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transform: scale(0);
+}
+
+/* Pulsating aura behind the card */
+.blessing-card-container::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 280px;
+    height: 380px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse at center,
+        rgba(212, 175, 55, 0.4) 0%,
+        rgba(212, 175, 55, 0.2) 30%,
+        rgba(180, 130, 70, 0.1) 50%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    animation: auraGlow 3s ease-in-out infinite;
+    z-index: -1;
+    filter: blur(20px);
+}
+
+/* Reflection below the card */
+.blessing-card-container::after {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    left: 50%;
+    width: 160px;
+    height: 30px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center,
+        rgba(212, 175, 55, 0.3) 0%,
+        rgba(212, 175, 55, 0.1) 40%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    filter: blur(8px);
+    animation: reflectionPulse 3s ease-in-out infinite;
+}
+
+/* Wrapper - spins around Y-axis */
+.blessing-card-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+    animation: blessingSpinOnY 3s linear infinite;
+}
+
+/* Inner card - tilted like homepage */
+.blessing-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+    /* Tilt so diagonal becomes vertical - same as homepage */
+    transform: rotate(-29.3deg);
+}
+
+/* Card faces */
+.blessing-card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow:
+        0 30px 60px rgba(114, 47, 55, 0.5),
+        0 15px 40px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(212, 175, 55, 0.4);
+}
+
+.blessing-card-face img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.blessing-card-back {
+    transform: rotateY(180deg);
+}
+
+/* Blessing sparkle particles */
+.blessing-card-container .blessing-sparkle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle,
+        rgba(255, 255, 255, 1) 0%,
+        rgba(255, 215, 0, 0.8) 30%,
+        transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+    z-index: 10;
+}
+
+@keyframes blessingSparkleRise {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(calc(var(--move-x) * 0.2), calc(var(--move-y) * 0.2)) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--move-x), var(--move-y)) scale(0.5);
+    }
+}
+
+@keyframes blessingSpinOnY {
+    0% {
+        transform: rotateY(0deg);
+    }
+    100% {
+        transform: rotateY(360deg);
+    }
+}
+
+@keyframes auraGlow {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.15);
+        opacity: 1;
+    }
+}
+
+@keyframes reflectionPulse {
+    0%, 100% {
+        transform: translateX(-50%) scaleX(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateX(-50%) scaleX(1.2);
+        opacity: 0.9;
+    }
+}
+
+@keyframes blessingCardZoomIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+
+/* Card area wrapper */
+.blessing-card-area {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Comment overlay - main text element */
+.blessing-comment-overlay {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 20;
+    animation: commentOverlayFadeIn 1.2s ease 1s forwards;
+    opacity: 0;
+    width: 90vw;
+    max-width: 90vw;
+    padding: 0 20px;
+}
+
+@keyframes commentOverlayFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.blessing-name {
+    font-family: 'Prompt', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #d4af37;
+    margin-bottom: 12px;
+    text-shadow:
+        0 2px 20px rgba(0, 0, 0, 0.95),
+        0 0 40px rgba(212, 175, 55, 0.4);
+    letter-spacing: 1px;
+}
+
+.blessing-comment {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 300;
+    font-style: italic;
+    color: rgba(245, 230, 211, 0.95);
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+    line-height: 1.7;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.95);
+}
+
+/* Social channels section */
+.blessing-social-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 60px;
+}
+
+.blessing-social-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(245, 230, 211, 0.8);
+    text-decoration: none;
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 300;
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: socialItemFadeIn 0.6s ease forwards;
+    animation-delay: var(--delay);
+}
+
+.blessing-social-item:hover {
+    color: #d4af37;
+}
+
+.blessing-social-item svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+@keyframes socialItemFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* LINE section */
+.blessing-line-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+    opacity: 0;
+    animation: socialItemFadeIn 0.6s ease forwards;
+    animation-delay: var(--delay);
+}
+
+.blessing-line-label {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: rgba(245, 230, 211, 0.6);
+}
+
+.blessing-line-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #00B900;
+    text-decoration: none;
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: all 0.3s ease;
+}
+
+.blessing-line-link:hover {
+    transform: scale(1.05);
+}
+
+.blessing-line-link svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+}
+
+/* Restart button - bottom right */
+.blessing-restart-btn {
+    position: absolute;
+    bottom: 25px;
+    right: 25px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 20px;
+    border: none;
+    background: rgba(212, 175, 55, 0.15);
+    color: rgba(212, 175, 55, 0.8);
+    cursor: pointer;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 300;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    animation: buttonFadeIn 1s ease 2.8s forwards;
+    opacity: 0;
+}
+
+.blessing-restart-btn:hover {
+    background: rgba(212, 175, 55, 0.25);
+    color: #d4af37;
+}
+
+.restart-arrow {
+    font-weight: 400;
+    letter-spacing: -2px;
+}
+
+@keyframes buttonFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .blessing-card-container {
+        width: 140px;
+        height: 250px;
+    }
+
+    .blessing-comment-overlay {
+        bottom: -25px;
+        width: 95vw;
+        max-width: 95vw;
+    }
+
+    .blessing-name {
+        font-size: 1.2rem;
+    }
+
+    .blessing-comment {
+        font-size: 1rem;
+        max-width: none;
+    }
+
+    .blessing-restart-btn {
+        bottom: 15px;
+        right: 15px;
+        padding: 8px 14px;
+        font-size: 0.75rem;
+    }
+
+    .blessing-glow {
+        width: 300px;
+        height: 300px;
+    }
+
+    .blessing-social-item {
+        font-size: 0.8rem;
+    }
+
+    .blessing-social-item svg {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+@media (min-width: 768px) {
+    .blessing-card-container {
+        width: 200px;
+        height: 357px;
+    }
+
+    .blessing-glow {
+        width: 500px;
+        height: 500px;
+    }
+
+    .blessing-comment-overlay {
+        width: 85vw;
+        max-width: 85vw;
+    }
+
+    .blessing-name {
+        font-size: 1.6rem;
+    }
+
+    .blessing-comment {
+        font-size: 1.35rem;
+        max-width: none;
+    }
+
+    .blessing-restart-btn {
+        bottom: 30px;
+        right: 30px;
+    }
+}
