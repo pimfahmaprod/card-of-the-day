@@ -1,5 +1,33 @@
-// Valentine Tarot - Translations Data
-// This file contains all i18n translations for the application
+/**
+ * Valentine Tarot - Translations Data
+ *
+ * @description UI text translations for 6 languages
+ * @version 1.1.0
+ *
+ * EXPORTS:
+ * - translations: Object with UI strings for each language
+ * - cardNameTranslations: Object (empty - card names kept in English)
+ *
+ * SUPPORTED LANGUAGES:
+ * - th: Thai (default)
+ * - en: English
+ * - zh-CN: Simplified Chinese
+ * - zh-TW: Traditional Chinese
+ * - ko: Korean
+ * - ja: Japanese
+ *
+ * TRANSLATION STRUCTURE:
+ * translations[lang].section.key
+ *
+ * SECTIONS: landing, main, ranking, result, comment, comments,
+ *           blessing, toast, common
+ *
+ * USAGE IN HTML:
+ * <span data-i18n="result.drawAgain">จับใหม่</span>
+ *
+ * USAGE IN JS:
+ * translations[currentLang].result.drawAgain
+ */
 
 // ========================================
 // UI Translations

@@ -1,6 +1,36 @@
-// Firebase Configuration for Card Counter
+/**
+ * Valentine Tarot - Firebase Integration & Analytics
+ *
+ * @description Firebase Realtime Database integration for:
+ * - Card pick tracking
+ * - Comment system with replies
+ * - Card rankings
+ * - Basic analytics
+ *
+ * @version 1.1.0
+ *
+ * EXPORTS (via window.cardCounter):
+ * - incrementCardPick(cardName) - Track card selection
+ * - getTotalPicks() - Get total pick count
+ * - submitComment(data) - Submit user comment
+ * - fetchComments(limit) - Get recent comments
+ * - fetchCommentsByCard(cardName) - Get comments for specific card
+ * - submitReply(commentId, data) - Reply to comment
+ * - fetchReplies(commentId) - Get replies for comment
+ * - fetchCardRankings(limit) - Get popular cards
+ * - fetchHotComments(limit) - Get most replied comments
+ *
+ * FIREBASE DATA PATHS:
+ * - /cardPicks/{cardName} - Pick counts per card
+ * - /comments/{id} - User comments
+ * - /replies/{commentId}/{replyId} - Reply threads
+ *
+ * SETUP: See FIREBASE_SETUP.md for configuration guide
+ */
+
 // ========================================
-// OPTIMIZED VERSION - Reduced connections & bandwidth
+// Firebase Configuration
+// ========================================
 // ดูวิธีตั้งค่าได้ที่ FIREBASE_SETUP.md
 
 const firebaseConfig = {

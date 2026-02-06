@@ -1,6 +1,31 @@
-// Valentine Tarot - Card Interpretations Data
-// This file contains all 78 tarot card interpretations
-// Translations for: English, Japanese, Korean, Simplified Chinese, Traditional Chinese
+/**
+ * Valentine Tarot - Card Interpretations Data
+ *
+ * @description Love predictions for all 78 tarot cards
+ * @version 1.1.0
+ *
+ * EXPORTS:
+ * - cardInterpretations: Object with predictions keyed by card name
+ *
+ * CARD STRUCTURE:
+ * cardInterpretations["CARD NAME"] = {
+ *   en: { quote: "...", interpretation: "..." },
+ *   ja: { quote: "...", interpretation: "..." },
+ *   ko: { quote: "...", interpretation: "..." },
+ *   "zh-CN": { quote: "...", interpretation: "..." },
+ *   "zh-TW": { quote: "...", interpretation: "..." }
+ * }
+ *
+ * NOTE: Thai (th) interpretations are in valentine_tarot.json
+ *
+ * CARD CATEGORIES:
+ * - Major Arcana (22 cards): THE FOOL, THE MAGICIAN, ... THE WORLD
+ * - Minor Arcana (56 cards):
+ *   - Wands: ACE OF WANDS ... KING OF WANDS
+ *   - Cups: ACE OF CUPS ... KING OF CUPS
+ *   - Swords: ACE OF SWORDS ... KING OF SWORDS
+ *   - Pentacles: ACE OF PENTACLES ... KING OF PENTACLES
+ */
 
 // Card interpretations for all 78 cards
 const cardInterpretations = {

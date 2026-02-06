@@ -1,4 +1,30 @@
-// Valentine Tarot - Main Application Script
+/**
+ * Valentine Tarot - Main Application Script
+ *
+ * @description Core application logic for the tarot card reading app
+ * @version 1.1.0
+ *
+ * DEPENDENCIES (must load before this file):
+ * - js/translations.js (provides: translations, cardNameTranslations)
+ * - js/card-interpretations.js (provides: cardInterpretations)
+ *
+ * MAIN SECTIONS:
+ * - Lines 1-200: i18n & Language switching
+ * - Lines 200-500: Card grid & selection
+ * - Lines 500-1000: Result display & animations
+ * - Lines 1000-1500: Image generation (saveImage)
+ * - Lines 1500-2000: Comment system
+ * - Lines 2000-3000: Blessing screen & effects
+ * - Lines 3000+: Utilities & initialization
+ *
+ * KEY FUNCTIONS:
+ * - initApp() - Entry point
+ * - createCardGrid() - Renders 78 cards
+ * - selectCard(card) - Handles card selection
+ * - showResult() - Displays prediction
+ * - saveImage(format) - Generates shareable images
+ * - setLanguage(lang) - Changes UI language
+ */
 
 let tarotData = null;
 let selectedCardElement = null;
