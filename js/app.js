@@ -2393,19 +2393,19 @@ async function loadMyCardComments() {
     }
 
     // Fetch data in parallel
-    const [myCardComments, repliedComments] = await Promise.all([
-        currentCardData ? window.cardCounter.fetchCommentsByCardId(currentCardData.id, null, 50) : [],
+    const [myComments, repliedComments] = await Promise.all([
+        window.cardCounter.fetchCommentsByUserId ? window.cardCounter.fetchCommentsByUserId(userId, 50) : [],
         window.cardCounter.fetchCommentsUserRepliedTo ? window.cardCounter.fetchCommentsUserRepliedTo(userId, 20) : []
     ]);
 
     loadingEl.style.display = 'none';
 
     // Check if both sections are empty
-    const hasMyCard = currentCardData && myCardComments.length > 0;
-    const hasRepliedCards = repliedComments.length > 0;
+    const hasMyComments = myComments.length > 0;
+    const hasRepliedComments = repliedComments.length > 0;
 
-    if (!currentCardData && !hasRepliedCards) {
-        // No picked card and no replied cards - show CTA
+    if (!hasMyComments && !hasRepliedComments) {
+        // No comments and no replies - show CTA
         commentsList.innerHTML = `
             <div class="comments-empty comments-empty-cta">
                 <div class="cta-sparkles">
@@ -2421,14 +2421,13 @@ async function loadMyCardComments() {
                         <text x="30" y="44" text-anchor="middle" font-size="10" fill="currentColor">?</text>
                     </svg>
                 </div>
-                <div class="comments-empty-text">ยังไม่ได้น้อมรับคำทำนาย</div>
-                <p class="cta-subtitle">จับไพ่เพื่อรับคำทำนายจากแม่หมอพิมพ์ฟ้า</p>
-                <button class="cta-draw-btn" onclick="goToDrawFromComments()">
+                <div class="comments-empty-text">ยังไม่ได้แสดงความคิดเห็น</div>
+                <p class="cta-subtitle">ไปแสดงความคิดเห็นบนไพ่ของคนอื่นกันเลย!</p>
+                <button class="cta-draw-btn" onclick="switchCommentsTab('new')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="7" height="10" rx="1" transform="rotate(-10 6.5 9)"/>
-                        <rect x="14" y="4" width="7" height="10" rx="1" transform="rotate(10 17.5 9)"/>
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
                     </svg>
-                    <span>ไปจับไพ่กันเลย!</span>
+                    <span>ดูความคิดเห็นล่าสุด</span>
                 </button>
             </div>
         `;
@@ -2436,51 +2435,35 @@ async function loadMyCardComments() {
         return;
     }
 
-    // ===== Section 1: My Picked Card =====
-    if (currentCardData) {
-        // Section header with card preview
-        const myCardSection = document.createElement('div');
-        myCardSection.className = 'mycard-section';
-        myCardSection.innerHTML = `
-            <div class="mycard-section-header">
-                <img class="mycard-section-preview" src="images/tarot/${currentCardData.image}" alt="${currentCardData.name}">
-                <div class="mycard-section-info">
-                    <div class="mycard-section-label">ไพ่ที่ฉันจับได้</div>
-                    <div class="mycard-section-name">${currentCardData.name}</div>
-                </div>
+    // ===== Section 1: My Comments =====
+    if (hasMyComments) {
+        const myCommentsSection = document.createElement('div');
+        myCommentsSection.className = 'mycard-section';
+        myCommentsSection.innerHTML = `
+            <div class="section-divider">
+                <span class="section-label">ความคิดเห็นของฉัน</span>
+                <span class="section-line"></span>
+                <span class="section-count">${myComments.length}</span>
             </div>
         `;
-        commentsList.appendChild(myCardSection);
+        commentsList.appendChild(myCommentsSection);
 
-        if (myCardComments.length === 0) {
-            const emptyMsg = document.createElement('div');
-            emptyMsg.className = 'mycard-section-empty';
-            emptyMsg.innerHTML = `<span>ยังไม่มีความคิดเห็นบนไพ่ใบนี้</span>`;
-            commentsList.appendChild(emptyMsg);
-        } else {
-            myCardComments.forEach(comment => {
-                const card = createCommentCard(comment);
-                commentsList.appendChild(card);
-                displayedCommentIds.add(comment.id);
-            });
-        }
+        myComments.forEach(comment => {
+            const card = createCommentCard(comment);
+            commentsList.appendChild(card);
+            displayedCommentIds.add(comment.id);
+        });
     }
 
-    // ===== Section 2: Cards I've Replied To =====
-    if (hasRepliedCards) {
+    // ===== Section 2: Comments I've Replied To =====
+    if (hasRepliedComments) {
         const repliedSection = document.createElement('div');
         repliedSection.className = 'mycard-section mycard-section-replied';
         repliedSection.innerHTML = `
-            <div class="mycard-section-header replied-header">
-                <div class="replied-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                    </svg>
-                </div>
-                <div class="mycard-section-info">
-                    <div class="mycard-section-label">ความคิดเห็นที่ฉันเคยตอบ</div>
-                    <div class="mycard-section-count">${repliedComments.length} ความคิดเห็น</div>
-                </div>
+            <div class="section-divider">
+                <span class="section-label">ที่ฉันเคยตอบ</span>
+                <span class="section-line"></span>
+                <span class="section-count">${repliedComments.length}</span>
             </div>
         `;
         commentsList.appendChild(repliedSection);

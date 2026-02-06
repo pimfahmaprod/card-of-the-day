@@ -2802,145 +2802,44 @@ footer {
 }
 
 /* My Card Tab Sections */
+/* My Card Tab Sections */
 .mycard-section {
-    margin-bottom: 25px;
+    margin-bottom: 10px;
 }
 
-.mycard-section-header {
+.mycard-section-replied {
+    margin-top: 25px;
+}
+
+.section-divider {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 15px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
-    border-radius: 12px;
-    margin-bottom: 15px;
-    border: 1px solid rgba(212, 175, 55, 0.2);
+    gap: 10px;
+    padding: 8px 5px;
+    margin-bottom: 12px;
 }
 
-.mycard-section-preview {
-    width: 45px;
-    height: 68px;
-    object-fit: cover;
-    border-radius: 4px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-    border: 1px solid var(--gold);
-}
-
-.mycard-section-info {
-    flex: 1;
-}
-
-.mycard-section-label {
+.section-label {
     font-family: 'Prompt', sans-serif;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 400;
-    color: rgba(114, 47, 55, 0.6);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    color: rgba(114, 47, 55, 0.7);
+    white-space: nowrap;
 }
 
-.mycard-section-name {
+.section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(114, 47, 55, 0.3), rgba(114, 47, 55, 0.1));
+}
+
+.section-count {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--burgundy);
-    margin-top: 2px;
-}
-
-.mycard-section-count {
-    font-family: 'Prompt', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 400;
-    color: var(--burgundy);
-    margin-top: 2px;
-}
-
-.mycard-section-empty {
-    text-align: center;
-    padding: 20px;
-    color: rgba(114, 47, 55, 0.5);
-    font-family: 'Prompt', sans-serif;
-    font-size: 0.85rem;
-    font-style: italic;
-}
-
-/* Replied Section */
-.mycard-section-replied {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px dashed rgba(114, 47, 55, 0.2);
-}
-
-.replied-header {
-    background: linear-gradient(135deg, rgba(114, 47, 55, 0.08), rgba(114, 47, 55, 0.03));
-    border-color: rgba(114, 47, 55, 0.15);
-}
-
-.replied-icon {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(114, 47, 55, 0.1);
-    border-radius: 50%;
-}
-
-.replied-icon svg {
-    width: 20px;
-    height: 20px;
-    color: var(--burgundy);
-    opacity: 0.7;
-}
-
-.replied-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
-    gap: 12px;
-    padding: 10px 5px;
-}
-
-.replied-card-item {
-    position: relative;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.replied-card-item:hover {
-    transform: translateY(-3px);
-}
-
-.replied-card-item img {
-    width: 100%;
-    aspect-ratio: 2/3;
-    object-fit: cover;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    border: 1px solid rgba(114, 47, 55, 0.2);
-}
-
-.replied-card-item:hover img {
-    border-color: var(--burgundy);
-    box-shadow: 0 4px 12px rgba(114, 47, 55, 0.25);
-}
-
-.replied-card-count {
-    position: absolute;
-    top: -6px;
-    right: -6px;
     min-width: 20px;
-    height: 20px;
-    padding: 0 5px;
-    background: var(--burgundy);
-    color: var(--cream);
-    border-radius: 10px;
-    font-family: 'Prompt', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    text-align: center;
 }
 
 /* ==================== RESPONSIVE ==================== */
