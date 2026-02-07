@@ -411,7 +411,7 @@ function initAudioElement() {
     if (audioElement) {
         // Set source directly on element for better compatibility
         audioElement.src = 'audio/background.mp3';
-        audioElement.volume = 0.15;
+        audioElement.volume = 0.12;
         audioElement.loop = true;
         audioElement.load();
         console.log('Audio element initialized');
@@ -445,7 +445,7 @@ function tryPlayMusic(muteOnFail = false) {
         return;
     }
 
-    audio.volume = 0.15;
+    audio.volume = 0.12;
 
     const playPromise = audio.play();
     if (playPromise !== undefined) {

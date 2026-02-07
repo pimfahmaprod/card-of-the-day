@@ -28,13 +28,27 @@ html, body {
 body {
     font-family: 'Prompt', sans-serif;
     font-weight: 300;
+    /* Fallback solid color for older browsers */
+    background-color: #FFFEF5;
+    /* Webkit prefix for older iOS Safari */
+    background: -webkit-repeating-linear-gradient(
+        0deg,
+        #FFFEF5 0px,
+        #FFFEF5 8px,
+        #F5F0E1 8px,
+        #F5F0E1 10px
+    );
+    /* Standard syntax with explicit colors for iOS compatibility */
     background: repeating-linear-gradient(
         90deg,
-        var(--cream) 0px,
-        var(--cream) 8px,
-        var(--cream-dark) 8px,
-        var(--cream-dark) 10px
+        #FFFEF5 0px,
+        #FFFEF5 8px,
+        #F5F0E1 8px,
+        #F5F0E1 10px
     );
+    background-attachment: scroll;
+    -webkit-background-size: 10px 100%;
+    background-size: 10px 100%;
     min-height: 100vh;
     color: var(--burgundy);
 }
