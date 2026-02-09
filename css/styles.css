@@ -7,11 +7,11 @@
 }
 
 :root {
-    --burgundy: #722F37;
-    --cream: #FFFEF5;
-    --cream-dark: #F5F0E1;
-    --envelope-cream: #F8F4E8;
-    --gold: #C9A227;
+    --burgundy: #C0C8E0;
+    --cream: #0d1333;
+    --cream-dark: #141b45;
+    --envelope-cream: #111638;
+    --gold: #9AAAD4;
 }
 
 html, body {
@@ -28,29 +28,80 @@ html, body {
 body {
     font-family: 'Prompt', sans-serif;
     font-weight: 300;
-    /* Fallback solid color for older browsers */
-    background-color: #FFFEF5;
-    /* Webkit prefix for older iOS Safari */
-    background: -webkit-repeating-linear-gradient(
-        0deg,
-        #FFFEF5 0px,
-        #FFFEF5 8px,
-        #F5F0E1 8px,
-        #F5F0E1 10px
-    );
-    /* Standard syntax with explicit colors for iOS compatibility */
-    background: repeating-linear-gradient(
-        90deg,
-        #FFFEF5 0px,
-        #FFFEF5 8px,
-        #F5F0E1 8px,
-        #F5F0E1 10px
-    );
-    background-attachment: scroll;
-    -webkit-background-size: 10px 100%;
-    background-size: 10px 100%;
+    background-color: #060A1F;
+    background: linear-gradient(135deg, #060A1F 0%, #0a0e27 50%, #0d1333 100%);
+    background-attachment: fixed;
     min-height: 100vh;
     color: var(--burgundy);
+}
+
+/* ==================== STARFIELD BACKGROUND ==================== */
+.starfield {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.star {
+    position: absolute;
+    border-radius: 50%;
+    background: #fff;
+    animation: twinkle ease-in-out infinite alternate;
+}
+
+.star--sm {
+    width: 1px;
+    height: 1px;
+}
+
+.star--md {
+    width: 1.5px;
+    height: 1.5px;
+    box-shadow: 0 0 2px rgba(200, 216, 240, 0.3);
+}
+
+.star--lg {
+    width: 2px;
+    height: 2px;
+    box-shadow: 0 0 4px rgba(200, 216, 240, 0.4), 0 0 8px rgba(200, 216, 240, 0.15);
+}
+
+@keyframes twinkle {
+    0% { opacity: var(--star-min, 0.15); }
+    100% { opacity: var(--star-max, 0.8); }
+}
+
+/* Shooting stars */
+.shooting-star {
+    position: absolute;
+    width: var(--shoot-len, 80px);
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(200, 216, 240, 0.5) 50%, rgba(255, 255, 255, 0.8) 100%);
+    border-radius: 0.5px;
+    transform: rotate(var(--shoot-angle, 140deg));
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: shootingStar var(--shoot-dur, 0.8s) ease-in forwards;
+    animation-delay: var(--shoot-delay, 0s);
+}
+
+@keyframes shootingStar {
+    0% {
+        opacity: 0;
+        transform: rotate(var(--shoot-angle, 215deg)) translateX(0);
+    }
+    8% {
+        opacity: 1;
+    }
+    70% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(var(--shoot-angle, 215deg)) translateX(var(--shoot-dist, 200px));
+    }
 }
 
 /* ==================== LANDING PAGE ==================== */
@@ -101,7 +152,7 @@ body {
 
 .strikethrough-word .mistake {
     text-decoration: line-through;
-    text-decoration-color: #1a1a1a;
+    text-decoration-color: #E8E8F0;
     text-decoration-thickness: 2px;
 }
 
@@ -114,7 +165,7 @@ body {
     font-family: 'Caveat', cursive;
     font-size: 1em;
     font-weight: 400;
-    color: #1a1a1a;
+    color: #E8E8F0;
 }
 
 .landing-page {
@@ -187,10 +238,10 @@ body {
 
 @keyframes headerGlow {
     0%, 100% {
-        text-shadow: 0 0 10px rgba(114, 47, 55, 0.3);
+        text-shadow: 0 0 10px rgba(160, 180, 220, 0.3);
     }
     50% {
-        text-shadow: 0 0 20px rgba(114, 47, 55, 0.6), 0 0 30px rgba(114, 47, 55, 0.3);
+        text-shadow: 0 0 20px rgba(160, 180, 220, 0.6), 0 0 30px rgba(160, 180, 220, 0.3);
     }
 }
 
@@ -217,7 +268,7 @@ body {
 
 .mini-header .mistake {
     text-decoration: line-through;
-    text-decoration-color: #1a1a1a;
+    text-decoration-color: #E8E8F0;
     text-decoration-thickness: 1px;
 }
 
@@ -230,7 +281,7 @@ body {
     font-family: 'Caveat', cursive;
     font-size: 1em;
     font-weight: 400;
-    color: #1a1a1a;
+    color: #E8E8F0;
 }
 
 /* Animation for spinning card hint fade */
@@ -293,7 +344,7 @@ body {
     border-radius: 12px;
     overflow: hidden;
     box-shadow:
-        0 30px 60px rgba(114, 47, 55, 0.5),
+        0 30px 60px rgba(160, 180, 220, 0.5),
         0 15px 40px rgba(0, 0, 0, 0.4);
 }
 
@@ -327,11 +378,11 @@ body {
     height: 6px;
     background: radial-gradient(circle,
         rgba(255, 255, 255, 1) 0%,
-        rgba(255, 215, 0, 0.8) 30%,
+        rgba(200, 216, 240, 0.8) 30%,
         transparent 70%);
     border-radius: 50%;
     pointer-events: none;
-    box-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 6px rgba(200, 216, 240, 0.8);
 }
 
 @keyframes sparkleRise {
@@ -387,19 +438,19 @@ body {
 @keyframes cardReadyReveal {
     0% {
         transform: scale(1);
-        filter: drop-shadow(0 0 0 rgba(201, 162, 39, 0));
+        filter: drop-shadow(0 0 0 rgba(154, 170, 212, 0));
     }
     30% {
         transform: scale(1.08);
-        filter: drop-shadow(0 0 30px rgba(201, 162, 39, 0.8));
+        filter: drop-shadow(0 0 30px rgba(154, 170, 212, 0.8));
     }
     60% {
         transform: scale(1.02);
-        filter: drop-shadow(0 0 20px rgba(201, 162, 39, 0.5));
+        filter: drop-shadow(0 0 20px rgba(154, 170, 212, 0.5));
     }
     100% {
         transform: scale(1);
-        filter: drop-shadow(0 0 8px rgba(201, 162, 39, 0.3));
+        filter: drop-shadow(0 0 8px rgba(154, 170, 212, 0.3));
     }
 }
 
@@ -415,7 +466,7 @@ body {
     left: -10%;
     width: 120%;
     height: 120%;
-    background: radial-gradient(ellipse at center, rgba(201, 162, 39, 0.15) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center, rgba(154, 170, 212, 0.15) 0%, transparent 70%);
     pointer-events: none;
     z-index: -1;
     animation: subtleGlow 3s ease-in-out infinite;
@@ -446,8 +497,8 @@ body {
     align-items: center;
     gap: 6px;
     padding: 8px 14px;
-    background: rgba(114, 47, 55, 0.08);
-    border: 1px solid rgba(114, 47, 55, 0.15);
+    background: rgba(160, 180, 220, 0.08);
+    border: 1px solid rgba(160, 180, 220, 0.15);
     border-radius: 20px;
     opacity: 0;
     pointer-events: none;
@@ -480,7 +531,7 @@ body {
 }
 
 .total-counter.show:hover {
-    background: rgba(114, 47, 55, 0.15);
+    background: rgba(160, 180, 220, 0.15);
 }
 
 /* Ranking Panel - Minimal Foggy Glass */
@@ -489,7 +540,7 @@ body {
     top: 55px;
     right: -220px;
     width: 200px;
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(13, 19, 51, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 12px 0 0 12px;
@@ -505,7 +556,7 @@ body {
 
 .ranking-header {
     padding: 10px 12px;
-    border-bottom: 1px solid rgba(139, 69, 79, 0.1);
+    border-bottom: 1px solid rgba(140, 160, 200, 0.1);
 }
 
 .ranking-title {
@@ -543,7 +594,7 @@ body {
 }
 
 .ranking-item:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(20, 27, 69, 0.7);
 }
 
 .ranking-trophy {
@@ -608,8 +659,8 @@ body {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgba(114, 47, 55, 0.1);
-    border: 1px solid rgba(114, 47, 55, 0.2);
+    background: rgba(160, 180, 220, 0.1);
+    border: 1px solid rgba(160, 180, 220, 0.2);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -622,7 +673,7 @@ body {
 }
 
 .mute-btn:hover {
-    background: rgba(114, 47, 55, 0.2);
+    background: rgba(160, 180, 220, 0.2);
     transform: scale(1.05);
 }
 
@@ -786,7 +837,7 @@ body {
     right: 8px;
     font-family: 'Courier New', monospace;
     font-size: 0.55rem;
-    color: rgba(114, 47, 55, 0.25);
+    color: rgba(160, 180, 220, 0.25);
     letter-spacing: 0.5px;
     pointer-events: none;
     user-select: none;
@@ -904,7 +955,7 @@ header {
     left: -20px;
     right: -20px;
     bottom: -20px;
-    background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.8) 0%, rgba(255, 180, 0, 0.4) 40%, transparent 70%);
+    background: radial-gradient(ellipse at center, rgba(200, 216, 240, 0.8) 0%, rgba(180, 200, 232, 0.4) 40%, transparent 70%);
     border-radius: 16px;
     z-index: -1;
     animation: goldenGlow 0.6s ease-out forwards;
@@ -930,7 +981,7 @@ header {
     position: absolute;
     width: 8px;
     height: 8px;
-    background: radial-gradient(circle, #fff 0%, #ffd700 50%, transparent 70%);
+    background: radial-gradient(circle, #fff 0%, #C8D8F0 50%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
     z-index: 1000;
@@ -972,12 +1023,12 @@ header {
     backface-visibility: hidden;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(114, 47, 55, 0.15);
+    box-shadow: 0 2px 8px rgba(160, 180, 220, 0.15);
 }
 
 /* Only show shadow on spread cards, not stacked */
 .card-container.spread .card-face {
-    box-shadow: 0 4px 15px rgba(114, 47, 55, 0.25);
+    box-shadow: 0 4px 15px rgba(160, 180, 220, 0.25);
 }
 
 /* Stacked cards - minimal individual shadows */
@@ -995,7 +1046,7 @@ header {
     width: 90px;
     height: 160px;
     border-radius: 10px;
-    box-shadow: 0 15px 40px rgba(114, 47, 55, 0.4), 0 5px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 15px 40px rgba(160, 180, 220, 0.4), 0 5px 15px rgba(0, 0, 0, 0.2);
     z-index: -1;
     pointer-events: none;
 }
@@ -1017,7 +1068,7 @@ header {
 }
 
 .card-back {
-    background: #FFB6C1;
+    background: #141B45;
 }
 
 .card-front {
@@ -1119,7 +1170,7 @@ header {
     color: var(--burgundy);
     margin-bottom: 15px;
     padding: 12px;
-    background: rgba(114, 47, 55, 0.05);
+    background: rgba(160, 180, 220, 0.05);
     border-radius: 10px;
     border-left: 4px solid var(--burgundy);
 }
@@ -1142,17 +1193,17 @@ header {
 }
 
 .result-interpretation::-webkit-scrollbar-track {
-    background: rgba(114, 47, 55, 0.1);
+    background: rgba(160, 180, 220, 0.1);
     border-radius: 3px;
 }
 
 .result-interpretation::-webkit-scrollbar-thumb {
-    background: rgba(114, 47, 55, 0.3);
+    background: rgba(160, 180, 220, 0.3);
     border-radius: 3px;
 }
 
 .result-interpretation::-webkit-scrollbar-thumb:hover {
-    background: rgba(114, 47, 55, 0.5);
+    background: rgba(160, 180, 220, 0.5);
 }
 
 /* Pick Counter */
@@ -1163,8 +1214,8 @@ header {
     gap: 8px;
     margin: 15px auto;
     padding: 8px 16px;
-    background: linear-gradient(135deg, rgba(201, 162, 39, 0.1), rgba(114, 47, 55, 0.08));
-    border: 1px solid rgba(201, 162, 39, 0.3);
+    background: linear-gradient(135deg, rgba(154, 170, 212, 0.1), rgba(160, 180, 220, 0.08));
+    border: 1px solid rgba(154, 170, 212, 0.3);
     border-radius: 20px;
     font-size: 0.85rem;
     color: var(--burgundy);
@@ -1233,7 +1284,7 @@ header {
 }
 
 .result-close:hover {
-    background: #5a252c;
+    background: #8090B8;
     transform: scale(1.05);
 }
 
@@ -1443,14 +1494,14 @@ footer {
     padding: 12px 24px;
     border-radius: 30px;
     border: 2px solid var(--burgundy);
-    background: linear-gradient(135deg, rgba(139, 69, 79, 0.1) 0%, rgba(139, 69, 79, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(140, 160, 200, 0.1) 0%, rgba(140, 160, 200, 0.05) 100%);
     color: var(--burgundy);
     cursor: pointer;
     font-family: 'Prompt', sans-serif;
     font-weight: 400;
     font-size: 0.9rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(139, 69, 79, 0.15);
+    box-shadow: 0 2px 8px rgba(140, 160, 200, 0.15);
     position: relative;
     overflow: hidden;
 }
@@ -1474,15 +1525,15 @@ footer {
 }
 
 .comment-toggle-btn:hover {
-    background: linear-gradient(135deg, var(--burgundy) 0%, #a04858 100%);
+    background: linear-gradient(135deg, var(--burgundy) 0%, #7B8DB5 100%);
     color: var(--cream);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(139, 69, 79, 0.35);
+    box-shadow: 0 6px 20px rgba(140, 160, 200, 0.35);
 }
 
 .comment-toggle-btn:active {
     transform: translateY(0) scale(0.98);
-    box-shadow: 0 2px 8px rgba(139, 69, 79, 0.25);
+    box-shadow: 0 2px 8px rgba(140, 160, 200, 0.25);
 }
 
 .comment-toggle-btn svg {
@@ -1496,7 +1547,7 @@ footer {
 }
 
 .comment-toggle-btn.active {
-    background: linear-gradient(135deg, var(--burgundy) 0%, #a04858 100%);
+    background: linear-gradient(135deg, var(--burgundy) 0%, #7B8DB5 100%);
     color: var(--cream);
 }
 
@@ -1553,7 +1604,7 @@ footer {
 .comment-form {
     margin-top: 15px;
     padding: 15px;
-    background: rgba(139, 69, 79, 0.05);
+    background: rgba(140, 160, 200, 0.05);
     border-radius: 15px;
     text-align: left;
 }
@@ -1581,7 +1632,7 @@ footer {
 .comment-input-group textarea {
     width: 100%;
     padding: 10px 12px;
-    border: 1.5px solid rgba(139, 69, 79, 0.3);
+    border: 1.5px solid rgba(140, 160, 200, 0.3);
     border-radius: 10px;
     background: var(--cream);
     color: var(--burgundy);
@@ -1609,7 +1660,7 @@ footer {
     bottom: 8px;
     font-family: 'Prompt', sans-serif;
     font-size: 0.7rem;
-    color: rgba(139, 69, 79, 0.5);
+    color: rgba(140, 160, 200, 0.5);
 }
 
 .comment-input-group textarea + .char-count {
@@ -1621,14 +1672,14 @@ footer {
     padding: 14px 24px;
     border-radius: 30px;
     border: none;
-    background: linear-gradient(135deg, var(--burgundy) 0%, #a04858 100%);
+    background: linear-gradient(135deg, var(--burgundy) 0%, #7B8DB5 100%);
     color: var(--cream);
     cursor: pointer;
     font-family: 'Prompt', sans-serif;
     font-weight: 500;
     font-size: 0.95rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(139, 69, 79, 0.3);
+    box-shadow: 0 4px 15px rgba(140, 160, 200, 0.3);
     position: relative;
     overflow: hidden;
     letter-spacing: 0.5px;
@@ -1650,14 +1701,14 @@ footer {
 }
 
 .comment-submit-btn:hover {
-    background: linear-gradient(135deg, #a04858 0%, var(--burgundy) 100%);
+    background: linear-gradient(135deg, #7B8DB5 0%, var(--burgundy) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(139, 69, 79, 0.4);
+    box-shadow: 0 6px 25px rgba(140, 160, 200, 0.4);
 }
 
 .comment-submit-btn:active {
     transform: translateY(0) scale(0.98);
-    box-shadow: 0 2px 10px rgba(139, 69, 79, 0.3);
+    box-shadow: 0 2px 10px rgba(140, 160, 200, 0.3);
 }
 
 .comment-submit-btn:disabled {
@@ -1691,8 +1742,8 @@ footer {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgba(114, 47, 55, 0.1);
-    border: 1px solid rgba(114, 47, 55, 0.2);
+    background: rgba(160, 180, 220, 0.1);
+    border: 1px solid rgba(160, 180, 220, 0.2);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1705,7 +1756,7 @@ footer {
 }
 
 .comments-btn:hover {
-    background: rgba(114, 47, 55, 0.2);
+    background: rgba(160, 180, 220, 0.2);
     transform: scale(1.05);
 }
 
@@ -1770,7 +1821,7 @@ footer {
     max-width: 500px;
     height: 100vh;
     height: 100dvh;
-    background: linear-gradient(135deg, #F5E6D3 0%, #EDE0D4 100%);
+    background: linear-gradient(135deg, #0d1333 0%, #111638 100%);
     border-radius: 0;
     z-index: 10001;
     transform: translateY(100%);
@@ -1802,7 +1853,7 @@ footer {
 .comments-panel-header h3 {
     font-family: 'Prompt', sans-serif;
     font-size: 0.7rem;
-    color: rgba(139, 69, 79, 0.5);
+    color: rgba(140, 160, 200, 0.5);
     margin: 0;
     font-weight: 400;
     letter-spacing: 0.5px;
@@ -1818,7 +1869,7 @@ footer {
 
 .comments-panel-user.anonymous {
     font-style: italic;
-    color: rgba(139, 69, 79, 0.6);
+    color: rgba(140, 160, 200, 0.6);
 }
 
 .comments-panel-close {
@@ -1826,7 +1877,7 @@ footer {
     height: 36px;
     border-radius: 50%;
     border: 2px solid var(--burgundy);
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(17, 22, 56, 0.9);
     color: var(--burgundy);
     cursor: pointer;
     display: flex;
@@ -1835,7 +1886,7 @@ footer {
     transition: all 0.3s ease;
     padding: 0;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(139, 69, 79, 0.2);
+    box-shadow: 0 2px 8px rgba(140, 160, 200, 0.2);
 }
 
 .comments-panel-close svg {
@@ -1855,8 +1906,8 @@ footer {
     display: flex;
     gap: 0;
     padding: 0 15px;
-    border-bottom: 1px solid rgba(139, 69, 79, 0.15);
-    background: rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(140, 160, 200, 0.15);
+    background: rgba(20, 27, 69, 0.4);
 }
 
 .comments-tab {
@@ -1867,7 +1918,7 @@ footer {
     font-family: 'Prompt', sans-serif;
     font-size: 0.8rem;
     font-weight: 400;
-    color: rgba(139, 69, 79, 0.5);
+    color: rgba(140, 160, 200, 0.5);
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
@@ -1931,7 +1982,7 @@ footer {
 .comments-section-title.recent {
     margin-top: 10px;
     padding-top: 15px;
-    border-top: 1px dashed rgba(139, 69, 79, 0.2);
+    border-top: 1px dashed rgba(140, 160, 200, 0.2);
 }
 
 /* Reply badge for top comments */
@@ -1943,24 +1994,24 @@ footer {
     font-size: 0.7rem;
     font-weight: 400;
     color: var(--gold);
-    background: rgba(201, 162, 39, 0.1);
+    background: rgba(154, 170, 212, 0.1);
     padding: 2px 8px;
     border-radius: 10px;
     margin-left: auto;
 }
 
 .comment-card.top-comment {
-    border-color: rgba(201, 162, 39, 0.3);
-    box-shadow: 0 2px 12px rgba(201, 162, 39, 0.15);
+    border-color: rgba(154, 170, 212, 0.3);
+    box-shadow: 0 2px 12px rgba(154, 170, 212, 0.15);
 }
 
 .comment-card {
-    background: linear-gradient(135deg, #FFFDF9 0%, #F9F3EB 100%);
-    border: 1px solid rgba(139, 69, 79, 0.15);
+    background: linear-gradient(135deg, #0F1439 0%, #10163A 100%);
+    border: 1px solid rgba(140, 160, 200, 0.15);
     border-radius: 12px;
     padding: 15px;
     position: relative;
-    box-shadow: 0 2px 8px rgba(139, 69, 79, 0.08);
+    box-shadow: 0 2px 8px rgba(140, 160, 200, 0.08);
     animation: fadeInUp 0.4s ease;
     overflow: visible;
 }
@@ -2011,23 +2062,23 @@ footer {
 /* New comment highlight animation */
 .comment-card.new-comment {
     animation: newCommentPulse 0.5s ease;
-    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.4), 0 4px 15px rgba(139, 69, 79, 0.15);
+    box-shadow: 0 0 0 3px rgba(154, 170, 212, 0.4), 0 4px 15px rgba(140, 160, 200, 0.15);
 }
 
 @keyframes newCommentPulse {
     0% {
         opacity: 0;
         transform: translateY(-20px) scale(0.95);
-        box-shadow: 0 0 0 0 rgba(201, 162, 39, 0.6);
+        box-shadow: 0 0 0 0 rgba(154, 170, 212, 0.6);
     }
     50% {
         transform: translateY(5px) scale(1.02);
-        box-shadow: 0 0 0 6px rgba(201, 162, 39, 0.3);
+        box-shadow: 0 0 0 6px rgba(154, 170, 212, 0.3);
     }
     100% {
         opacity: 1;
         transform: translateY(0) scale(1);
-        box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.4), 0 4px 15px rgba(139, 69, 79, 0.15);
+        box-shadow: 0 0 0 3px rgba(154, 170, 212, 0.4), 0 4px 15px rgba(140, 160, 200, 0.15);
     }
 }
 
@@ -2071,7 +2122,7 @@ footer {
     left: 10px;
     right: 10px;
     bottom: 10px;
-    border: 1px dashed rgba(139, 69, 79, 0.1);
+    border: 1px dashed rgba(140, 160, 200, 0.1);
     border-radius: 8px;
     pointer-events: none;
 }
@@ -2104,7 +2155,7 @@ footer {
 
 .comment-card-tarot {
     display: inline-block;
-    background: rgba(139, 69, 79, 0.1);
+    background: rgba(140, 160, 200, 0.1);
     padding: 2px 8px;
     border-radius: 10px;
     font-family: 'Prompt', sans-serif;
@@ -2115,7 +2166,7 @@ footer {
 .comment-card-date {
     font-family: 'Prompt', sans-serif;
     font-size: 0.65rem;
-    color: rgba(139, 69, 79, 0.45);
+    color: rgba(140, 160, 200, 0.45);
     position: absolute;
     bottom: 12px;
     right: 15px;
@@ -2125,7 +2176,7 @@ footer {
     font-family: 'Prompt', sans-serif;
     font-weight: 300;
     font-size: 0.9rem;
-    color: #5a3d41;
+    color: #B8C0D8;
     line-height: 1.4;
     position: relative;
     padding-left: 15px;
@@ -2145,7 +2196,7 @@ footer {
     top: -5px;
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.5rem;
-    color: rgba(139, 69, 79, 0.3);
+    color: rgba(140, 160, 200, 0.3);
 }
 
 /* Expanded Comment Card State */
@@ -2154,8 +2205,8 @@ footer {
 }
 
 .comment-card.expanded {
-    background: linear-gradient(135deg, #FFF9F0 0%, #F5E6D3 100%);
-    box-shadow: 0 8px 30px rgba(139, 69, 79, 0.2);
+    background: linear-gradient(135deg, #0E1338 0%, #0d1333 100%);
+    box-shadow: 0 8px 30px rgba(140, 160, 200, 0.2);
     z-index: 10;
     padding-bottom: 15px;
     overflow: visible;
@@ -2196,7 +2247,7 @@ footer {
     display: block;
     margin-top: 15px;
     padding-top: 15px;
-    border-top: 1px dashed rgba(139, 69, 79, 0.2);
+    border-top: 1px dashed rgba(140, 160, 200, 0.2);
 }
 
 .comment-card.expanded.with-image .comment-card-full {
@@ -2214,7 +2265,7 @@ footer {
 .comment-card-full-title .comment-card-tarot {
     font-size: 0.75rem;
     padding: 3px 10px;
-    background: rgba(139, 69, 79, 0.12);
+    background: rgba(140, 160, 200, 0.12);
 }
 
 .comment-card-full-label {
@@ -2236,7 +2287,7 @@ footer {
     font-family: 'Prompt', sans-serif;
     font-size: 0.85rem;
     font-weight: 300;
-    color: #5a3d41;
+    color: #B8C0D8;
     line-height: 1.6;
     white-space: pre-line;
 }
@@ -2250,7 +2301,7 @@ footer {
     display: block;
     margin-top: 15px;
     padding-top: 15px;
-    border-top: 1px dashed rgba(139, 69, 79, 0.2);
+    border-top: 1px dashed rgba(140, 160, 200, 0.2);
 }
 
 .comment-card.expanded.with-image .comment-card-replies-section {
@@ -2262,7 +2313,7 @@ footer {
     font-family: 'Prompt', sans-serif;
     font-size: 0.75rem;
     font-weight: 500;
-    color: rgba(139, 69, 79, 0.7);
+    color: rgba(140, 160, 200, 0.7);
     margin-bottom: 8px;
 }
 
@@ -2275,8 +2326,8 @@ footer {
     font-weight: 400;
     color: var(--burgundy);
     padding: 12px;
-    background: rgba(139, 69, 79, 0.08);
-    border: 1px dashed rgba(139, 69, 79, 0.3);
+    background: rgba(140, 160, 200, 0.08);
+    border: 1px dashed rgba(140, 160, 200, 0.3);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -2284,8 +2335,8 @@ footer {
 }
 
 .replies-empty-btn:hover {
-    background: rgba(139, 69, 79, 0.15);
-    border-color: rgba(139, 69, 79, 0.5);
+    background: rgba(140, 160, 200, 0.15);
+    border-color: rgba(140, 160, 200, 0.5);
 }
 
 /* Related comments section */
@@ -2298,7 +2349,7 @@ footer {
     max-height: 300px;
     margin-top: 15px;
     padding-top: 15px;
-    border-top: 1px dashed rgba(139, 69, 79, 0.2);
+    border-top: 1px dashed rgba(140, 160, 200, 0.2);
     overflow-y: auto;
 }
 
@@ -2320,16 +2371,16 @@ footer {
     font-family: 'Prompt', sans-serif;
     font-size: 0.75rem;
     font-weight: 500;
-    color: rgba(139, 69, 79, 0.7);
+    color: rgba(140, 160, 200, 0.7);
     margin-bottom: 10px;
 }
 
 .related-comment {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(20, 27, 69, 0.6);
     border-radius: 8px;
     padding: 10px 12px;
     margin-bottom: 8px;
-    border-left: 3px solid rgba(139, 69, 79, 0.3);
+    border-left: 3px solid rgba(140, 160, 200, 0.3);
 }
 
 .related-comment:last-child {
@@ -2355,14 +2406,14 @@ footer {
 .related-comment-date {
     font-family: 'Prompt', sans-serif;
     font-size: 0.6rem;
-    color: rgba(139, 69, 79, 0.45);
+    color: rgba(140, 160, 200, 0.45);
 }
 
 .related-comment-text {
     font-family: 'Prompt', sans-serif;
     font-size: 0.8rem;
     font-weight: 300;
-    color: #5a3d41;
+    color: #B8C0D8;
     line-height: 1.4;
 }
 
@@ -2371,12 +2422,12 @@ footer {
     text-align: center;
     font-family: 'Prompt', sans-serif;
     font-size: 0.75rem;
-    color: rgba(139, 69, 79, 0.5);
+    color: rgba(140, 160, 200, 0.5);
     padding: 10px;
 }
 
 .related-comment:hover {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(20, 27, 69, 0.8);
     border-left-color: var(--burgundy);
     transform: translateX(2px);
     transition: all 0.2s ease;
@@ -2387,7 +2438,7 @@ footer {
     font-family: 'Prompt', sans-serif;
     font-size: 0.65rem;
     color: var(--gold);
-    background: rgba(212, 175, 55, 0.15);
+    background: rgba(168, 184, 216, 0.15);
     padding: 2px 6px;
     border-radius: 10px;
     margin-left: auto;
@@ -2412,13 +2463,13 @@ footer {
     cursor: pointer;
     font-family: 'Prompt', sans-serif;
     font-size: 0.7rem;
-    color: rgba(139, 69, 79, 0.6);
+    color: rgba(140, 160, 200, 0.6);
     transition: all 0.2s ease;
     border-radius: 12px;
 }
 
 .reply-btn:hover {
-    background: rgba(139, 69, 79, 0.1);
+    background: rgba(140, 160, 200, 0.1);
     color: var(--burgundy);
 }
 
@@ -2429,7 +2480,7 @@ footer {
 
 .reply-count {
     font-size: 0.65rem;
-    background: rgba(139, 69, 79, 0.15);
+    background: rgba(140, 160, 200, 0.15);
     padding: 2px 6px;
     border-radius: 10px;
     margin-left: 2px;
@@ -2459,12 +2510,13 @@ footer {
 .reply-input {
     flex: 1;
     padding: 8px 12px;
-    border: 1px solid rgba(139, 69, 79, 0.2);
+    border: 1px solid rgba(140, 160, 200, 0.2);
     border-radius: 16px;
     font-family: 'Prompt', sans-serif;
     font-size: 0.8rem;
     font-weight: 300;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(20, 27, 69, 0.8);
+    color: #E8E8F0;
     resize: none;
     min-height: 36px;
     max-height: 80px;
@@ -2491,7 +2543,7 @@ footer {
 }
 
 .reply-submit-btn:hover {
-    background: #6d3a42;
+    background: #6B7399;
     transform: scale(1.05);
 }
 
@@ -2508,14 +2560,14 @@ footer {
 /* Replies List */
 .replies-list {
     padding-left: 15px;
-    border-left: 2px solid rgba(139, 69, 79, 0.15);
+    border-left: 2px solid rgba(140, 160, 200, 0.15);
     margin-bottom: 12px;
 }
 
 .reply-item {
     padding: 8px 10px;
     margin-bottom: 6px;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(20, 27, 69, 0.7);
     border-radius: 8px;
 }
 
@@ -2541,14 +2593,14 @@ footer {
 .reply-date {
     font-family: 'Prompt', sans-serif;
     font-size: 0.55rem;
-    color: rgba(139, 69, 79, 0.45);
+    color: rgba(140, 160, 200, 0.45);
 }
 
 .reply-text {
     font-family: 'Prompt', sans-serif;
     font-size: 0.75rem;
     font-weight: 300;
-    color: #5a3d41;
+    color: #B8C0D8;
     line-height: 1.4;
 }
 
@@ -2663,7 +2715,7 @@ footer {
     font-family: 'Prompt', sans-serif;
     font-size: 0.85rem;
     font-weight: 300;
-    color: rgba(114, 47, 55, 0.6);
+    color: rgba(160, 180, 220, 0.6);
     margin: 0 0 25px 0;
 }
 
@@ -2672,7 +2724,7 @@ footer {
     align-items: center;
     gap: 10px;
     padding: 14px 28px;
-    background: linear-gradient(135deg, var(--burgundy) 0%, #8b4f5a 100%);
+    background: linear-gradient(135deg, var(--burgundy) 0%, #7B8DB5 100%);
     color: var(--cream);
     border: none;
     border-radius: 30px;
@@ -2681,7 +2733,7 @@ footer {
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(114, 47, 55, 0.3);
+    box-shadow: 0 4px 15px rgba(160, 180, 220, 0.3);
     position: relative;
     overflow: hidden;
 }
@@ -2703,7 +2755,7 @@ footer {
 
 .cta-draw-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(114, 47, 55, 0.4);
+    box-shadow: 0 6px 20px rgba(160, 180, 220, 0.4);
 }
 
 .cta-draw-btn:active {
@@ -2761,7 +2813,7 @@ footer {
 
 .comments-tab-cardview.active .tab-card-preview {
     transform: translateX(-50%) rotate(-5deg) scale(1.05);
-    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 4px 15px rgba(168, 184, 216, 0.4);
 }
 
 /* Cardview Header - Card image overflow */
@@ -2772,8 +2824,8 @@ footer {
     padding: 0 20px 20px;
     margin: -80px -15px 20px -25px;
     background: linear-gradient(180deg,
-        rgba(245, 230, 211, 0.98) 0%,
-        rgba(245, 230, 211, 0.95) 60%,
+        rgba(13, 19, 51, 0.98) 0%,
+        rgba(13, 19, 51, 0.95) 60%,
         transparent 100%
     );
     position: relative;
@@ -2790,7 +2842,7 @@ footer {
     object-fit: cover;
     border-radius: 8px;
     box-shadow:
-        0 8px 25px rgba(114, 47, 55, 0.3),
+        0 8px 25px rgba(160, 180, 220, 0.3),
         0 4px 10px rgba(0, 0, 0, 0.1);
     border: 2px solid var(--gold);
 }
@@ -2798,7 +2850,7 @@ footer {
 .cardview-card-glow {
     position: absolute;
     inset: -10px;
-    background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.3) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center, rgba(168, 184, 216, 0.3) 0%, transparent 70%);
     z-index: -1;
     animation: card-glow-pulse 3s ease-in-out infinite;
 }
@@ -2821,7 +2873,7 @@ footer {
     font-family: 'Prompt', sans-serif;
     font-size: 0.8rem;
     font-weight: 300;
-    color: rgba(114, 47, 55, 0.6);
+    color: rgba(160, 180, 220, 0.6);
     margin-top: 4px;
 }
 
@@ -2847,14 +2899,14 @@ footer {
     font-family: 'Prompt', sans-serif;
     font-size: 0.8rem;
     font-weight: 400;
-    color: rgba(114, 47, 55, 0.7);
+    color: rgba(160, 180, 220, 0.7);
     white-space: nowrap;
 }
 
 .section-line {
     flex: 1;
     height: 1px;
-    background: linear-gradient(to right, rgba(114, 47, 55, 0.3), rgba(114, 47, 55, 0.1));
+    background: linear-gradient(to right, rgba(160, 180, 220, 0.3), rgba(160, 180, 220, 0.1));
 }
 
 .section-count {
@@ -3007,7 +3059,7 @@ footer {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background: linear-gradient(135deg, #060A1F 0%, #0a0e27 50%, #141b45 100%);
     z-index: 20000;
     opacity: 0;
     visibility: hidden;
@@ -3025,7 +3077,7 @@ footer {
     position: relative;
     text-align: center;
     padding: 40px 20px 30px;
-    background: linear-gradient(180deg, rgba(201, 162, 39, 0.1) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(154, 170, 212, 0.1) 0%, transparent 100%);
 }
 
 .analytics-close {
@@ -3061,7 +3113,7 @@ footer {
     font-weight: 600;
     color: var(--gold);
     margin-bottom: 8px;
-    text-shadow: 0 2px 20px rgba(201, 162, 39, 0.3);
+    text-shadow: 0 2px 20px rgba(154, 170, 212, 0.3);
 }
 
 .analytics-subtitle {
@@ -3090,7 +3142,7 @@ footer {
     color: white;
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(201, 162, 39, 0.3);
+    border-bottom: 1px solid rgba(154, 170, 212, 0.3);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -3131,7 +3183,7 @@ footer {
 }
 
 .stat-card.gradient-pink {
-    background: linear-gradient(135deg, #722F37 0%, #a04050 100%);
+    background: linear-gradient(135deg, #C0C8E0 0%, #7B8DB5 100%);
 }
 
 .stat-card.gradient-purple {
@@ -3143,7 +3195,7 @@ footer {
 }
 
 .stat-card.gradient-gold {
-    background: linear-gradient(135deg, #7d6608 0%, #c9a227 100%);
+    background: linear-gradient(135deg, #2A3570 0%, #9AAAD4 100%);
 }
 
 .stat-icon {
@@ -3273,7 +3325,7 @@ footer {
 
 .top-card-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--gold) 0%, #f4d03f 100%);
+    background: linear-gradient(90deg, var(--gold) 0%, #C8D8F0 100%);
     border-radius: 4px;
     transition: width 0.5s ease;
 }
@@ -3414,7 +3466,7 @@ footer {
 }
 
 .chart-bar-fill.wide {
-    background: linear-gradient(90deg, #722F37 0%, #a04050 100%);
+    background: linear-gradient(90deg, #C0C8E0 0%, #7B8DB5 100%);
 }
 
 .chart-bar-fill.messenger {
@@ -3586,7 +3638,7 @@ footer {
     align-items: center;
     gap: 5px;
     padding: 4px 10px;
-    background: rgba(201, 162, 39, 0.2);
+    background: rgba(154, 170, 212, 0.2);
     border-radius: 12px;
     font-family: 'Prompt', sans-serif;
     font-size: 0.7rem;
@@ -3983,7 +4035,7 @@ footer {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(20, 15, 18, 0.7);
+    background: rgba(6, 10, 31, 0.8);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     z-index: 10000;
@@ -4016,7 +4068,7 @@ footer {
     left: 50%;
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.1) 40%, transparent 70%);
+    background: radial-gradient(circle, rgba(168, 184, 216, 0.3) 0%, rgba(168, 184, 216, 0.1) 40%, transparent 70%);
     transform: translate(-50%, -60%);
     animation: blessingGlow 3s ease-in-out infinite;
     pointer-events: none;
@@ -4055,9 +4107,9 @@ footer {
     height: 380px;
     transform: translate(-50%, -50%);
     background: radial-gradient(ellipse at center,
-        rgba(212, 175, 55, 0.4) 0%,
-        rgba(212, 175, 55, 0.2) 30%,
-        rgba(180, 130, 70, 0.1) 50%,
+        rgba(168, 184, 216, 0.4) 0%,
+        rgba(168, 184, 216, 0.2) 30%,
+        rgba(130, 150, 190, 0.1) 50%,
         transparent 70%
     );
     border-radius: 50%;
@@ -4076,8 +4128,8 @@ footer {
     height: 30px;
     transform: translateX(-50%);
     background: radial-gradient(ellipse at center,
-        rgba(212, 175, 55, 0.3) 0%,
-        rgba(212, 175, 55, 0.1) 40%,
+        rgba(168, 184, 216, 0.3) 0%,
+        rgba(168, 184, 216, 0.1) 40%,
         transparent 70%
     );
     border-radius: 50%;
@@ -4115,9 +4167,9 @@ footer {
     border-radius: 12px;
     overflow: hidden;
     box-shadow:
-        0 30px 60px rgba(114, 47, 55, 0.5),
+        0 30px 60px rgba(160, 180, 220, 0.5),
         0 15px 40px rgba(0, 0, 0, 0.4),
-        0 0 30px rgba(212, 175, 55, 0.4);
+        0 0 30px rgba(168, 184, 216, 0.4);
 }
 
 .blessing-card-face img {
@@ -4137,11 +4189,11 @@ footer {
     height: 6px;
     background: radial-gradient(circle,
         rgba(255, 255, 255, 1) 0%,
-        rgba(255, 215, 0, 0.8) 30%,
+        rgba(200, 216, 240, 0.8) 30%,
         transparent 70%);
     border-radius: 50%;
     pointer-events: none;
-    box-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 6px rgba(200, 216, 240, 0.8);
     z-index: 10;
 }
 
@@ -4241,11 +4293,11 @@ footer {
     font-family: 'Prompt', sans-serif;
     font-size: 1.5rem;
     font-weight: 500;
-    color: #d4af37;
+    color: #A8B8D8;
     margin-bottom: 12px;
     text-shadow:
         0 2px 20px rgba(0, 0, 0, 0.95),
-        0 0 40px rgba(212, 175, 55, 0.4);
+        0 0 40px rgba(168, 184, 216, 0.4);
     letter-spacing: 1px;
 }
 
@@ -4254,7 +4306,7 @@ footer {
     font-size: 1.25rem;
     font-weight: 300;
     font-style: italic;
-    color: rgba(245, 230, 211, 0.95);
+    color: rgba(232, 232, 240, 0.95);
     width: 100%;
     max-width: none;
     margin: 0 auto;
@@ -4275,7 +4327,7 @@ footer {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: rgba(245, 230, 211, 0.8);
+    color: rgba(232, 232, 240, 0.8);
     text-decoration: none;
     font-family: 'Prompt', sans-serif;
     font-size: 0.85rem;
@@ -4287,7 +4339,7 @@ footer {
 }
 
 .blessing-social-item:hover {
-    color: #d4af37;
+    color: #A8B8D8;
 }
 
 .blessing-social-item svg {
@@ -4315,7 +4367,7 @@ footer {
     gap: 6px;
     margin-top: 10px;
     padding-top: 15px;
-    border-top: 1px solid rgba(212, 175, 55, 0.2);
+    border-top: 1px solid rgba(168, 184, 216, 0.2);
     opacity: 0;
     animation: socialItemFadeIn 0.6s ease forwards;
     animation-delay: var(--delay);
@@ -4325,7 +4377,7 @@ footer {
     font-family: 'Prompt', sans-serif;
     font-size: 0.75rem;
     font-weight: 300;
-    color: rgba(245, 230, 211, 0.6);
+    color: rgba(232, 232, 240, 0.6);
 }
 
 .blessing-line-link {
@@ -4361,8 +4413,8 @@ footer {
     padding: 10px 18px;
     border-radius: 20px;
     border: none;
-    background: rgba(212, 175, 55, 0.15);
-    color: rgba(212, 175, 55, 0.8);
+    background: rgba(168, 184, 216, 0.15);
+    color: rgba(168, 184, 216, 0.8);
     cursor: pointer;
     font-family: 'Prompt', sans-serif;
     font-weight: 300;
@@ -4373,8 +4425,8 @@ footer {
 }
 
 .blessing-restart-btn:hover {
-    background: rgba(212, 175, 55, 0.25);
-    color: #d4af37;
+    background: rgba(168, 184, 216, 0.25);
+    color: #A8B8D8;
 }
 
 .restart-arrow {
@@ -4479,21 +4531,21 @@ footer {
     align-items: center;
     gap: 6px;
     padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(139, 69, 79, 0.2);
+    background: rgba(13, 19, 51, 0.95);
+    border: 1px solid rgba(140, 160, 200, 0.2);
     border-radius: 20px;
     cursor: pointer;
     font-family: 'Prompt', sans-serif;
     font-size: 0.8rem;
     font-weight: 400;
     color: var(--burgundy);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     transition: all 0.2s ease;
 }
 
 .lang-btn:hover {
-    background: #fff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    background: #111638;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .lang-flag {
@@ -4520,10 +4572,10 @@ footer {
     top: calc(100% + 8px);
     left: 0;
     min-width: 140px;
-    background: rgba(255, 255, 255, 0.98);
-    border: 1px solid rgba(139, 69, 79, 0.15);
+    background: rgba(13, 19, 51, 0.98);
+    border: 1px solid rgba(140, 160, 200, 0.2);
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
@@ -4548,17 +4600,17 @@ footer {
     cursor: pointer;
     font-family: 'Prompt', sans-serif;
     font-size: 0.85rem;
-    color: #5a3d41;
+    color: #B8C0D8;
     transition: all 0.15s ease;
     text-align: left;
 }
 
 .lang-option:hover {
-    background: rgba(139, 69, 79, 0.08);
+    background: rgba(140, 160, 200, 0.08);
 }
 
 .lang-option.active {
-    background: rgba(212, 175, 55, 0.15);
+    background: rgba(168, 184, 216, 0.15);
     color: var(--burgundy);
     font-weight: 500;
 }

@@ -580,7 +580,7 @@ async function waitForResources() {
 
     // Load tarot data and essential images in parallel
     const essentialImages = [
-        'images/card_back_red.png',
+        'images/card_back_blue.png',
         ...spinningCardImages.slice(0, 3) // Only first 3 spinning images
     ];
 
@@ -781,7 +781,7 @@ function createCardBurst() {
         card.className = 'flying-card';
 
         // Alternate between card back and front
-        const imgSrc = i % 2 === 0 ? 'images/card_back_red.png' : spinningCardImages[i % spinningCardImages.length];
+        const imgSrc = i % 2 === 0 ? 'images/card_back_blue.png' : spinningCardImages[i % spinningCardImages.length];
         card.innerHTML = `<img src="${imgSrc}" alt="Flying Card">`;
 
         // Random direction for burst effect
@@ -925,7 +925,7 @@ function startExperience() {
         const cardFaces = spinningCardContainer.querySelectorAll('.spinning-card-face');
         cardFaces.forEach(face => {
             face.style.transition = 'box-shadow 0.6s ease';
-            face.style.boxShadow = '0 2px 8px rgba(114, 47, 55, 0.15)';
+            face.style.boxShadow = '0 2px 8px rgba(160, 180, 220, 0.15)';
         });
     }, 500);
 
@@ -1022,7 +1022,7 @@ function renderCards() {
         <div class="card-container" data-card-id="${card.id}">
             <div class="card">
                 <div class="card-face card-back">
-                    <img src="images/card_back_red.png" alt="Card Back">
+                    <img src="images/card_back_blue.png" alt="Card Back">
                 </div>
                 <div class="card-face card-front">
                     <img src="images/tarot/${card.image}" alt="${card.name}">
@@ -1637,6 +1637,62 @@ function resetCommentForm() {
 }
 
 // Character count listeners
+// Starfield background
+(function createStarfield() {
+    const container = document.getElementById('starfield');
+    if (!container) return;
+    const sizes = ['sm', 'md', 'lg'];
+    const weights = [0.6, 0.3, 0.1]; // 60% small, 30% medium, 10% large
+    const count = 100;
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+        const r = Math.random();
+        const size = r < weights[0] ? sizes[0] : r < weights[0] + weights[1] ? sizes[1] : sizes[2];
+        const star = document.createElement('div');
+        star.className = 'star star--' + size;
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.setProperty('--star-min', (Math.random() * 0.15 + 0.05).toFixed(2));
+        star.style.setProperty('--star-max', (Math.random() * 0.5 + 0.5).toFixed(2));
+        star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        star.style.animationDelay = (Math.random() * 5) + 's';
+        frag.appendChild(star);
+    }
+    container.appendChild(frag);
+
+    // Shooting stars — thin streaks matching comet direction
+    function spawnShootingStar() {
+        const el = document.createElement('div');
+        el.className = 'shooting-star';
+        el.style.left = (20 + Math.random() * 80) + '%';
+        el.style.top = (Math.random() * 60) + '%';
+        // Same direction as comet: ~140deg ±8deg
+        const angle = 136 + Math.random() * 16;
+        const len = 60 + Math.random() * 80;
+        const dist = 100 + Math.random() * 160;
+        const dur = (0.4 + Math.random() * 0.4).toFixed(2);
+        el.style.setProperty('--shoot-angle', angle.toFixed(0) + 'deg');
+        el.style.setProperty('--shoot-len', len.toFixed(0) + 'px');
+        el.style.setProperty('--shoot-dist', dist.toFixed(0) + 'px');
+        el.style.setProperty('--shoot-dur', dur + 's');
+        container.appendChild(el);
+        el.addEventListener('animationend', () => el.remove(), { once: true });
+    }
+
+    // Meteor shower: bursts of 1-3 stars every 1.5-3.5s
+    (function scheduleNext() {
+        const delay = 1500 + Math.random() * 2000;
+        setTimeout(() => {
+            const burst = Math.random() < 0.35 ? (Math.random() < 0.5 ? 3 : 2) : 1;
+            for (let i = 0; i < burst; i++) {
+                setTimeout(spawnShootingStar, i * (100 + Math.random() * 250));
+            }
+            scheduleNext();
+        }, delay);
+    })();
+    setTimeout(spawnShootingStar, 800);
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     const nameInput = document.getElementById('commentName');
     const commentInput = document.getElementById('commentText');
@@ -3412,20 +3468,20 @@ function drawShareImage(ctx, cardImg, size, platform) {
 
     // Background gradient
     const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#FDF8F3');
-    gradient.addColorStop(0.5, '#FAF0E6');
-    gradient.addColorStop(1, '#F5E6D3');
+    gradient.addColorStop(0, '#080C24');
+    gradient.addColorStop(0.5, '#0B1030');
+    gradient.addColorStop(1, '#0d1333');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
 
     // Decorative border
-    ctx.strokeStyle = '#722F37';
+    ctx.strokeStyle = '#2A3570';
     ctx.lineWidth = isWide ? 6 : 8;
     const borderPadding = isWide ? 20 : 30;
     ctx.strokeRect(borderPadding, borderPadding, width - borderPadding * 2, height - borderPadding * 2);
 
     // Inner decorative line
-    ctx.strokeStyle = 'rgba(114, 47, 55, 0.3)';
+    ctx.strokeStyle = 'rgba(160, 180, 220, 0.3)';
     ctx.lineWidth = 2;
     const innerPadding = borderPadding + 15;
     ctx.strokeRect(innerPadding, innerPadding, width - innerPadding * 2, height - innerPadding * 2);
@@ -3545,13 +3601,13 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
 
     // Card name - right after card
     const nameY = cardBottomY + 80;
-    ctx.fillStyle = '#722F37';
+    ctx.fillStyle = '#C0C8E0';
     ctx.font = 'bold 64px "Cormorant Garamond", serif';
     ctx.textAlign = 'center';
     ctx.fillText(getCardName(currentCardData.name), width / 2, nameY);
 
     // Decorative line under name
-    ctx.strokeStyle = 'rgba(114, 47, 55, 0.4)';
+    ctx.strokeStyle = 'rgba(160, 180, 220, 0.4)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(width / 2 - 180, nameY + 25);
@@ -3560,7 +3616,7 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
 
     // Quote
     ctx.font = 'italic 36px "Cormorant Garamond", serif';
-    ctx.fillStyle = 'rgba(114, 47, 55, 0.85)';
+    ctx.fillStyle = 'rgba(160, 180, 220, 0.85)';
     const quote = `"${getCardQuote(currentCardData)}"`;
     wrapText(ctx, quote, width / 2, nameY + 90, width - 160, 48);
 
@@ -3568,7 +3624,7 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
     const interpretY = nameY + 200;
 
     // Divider
-    ctx.strokeStyle = 'rgba(114, 47, 55, 0.3)';
+    ctx.strokeStyle = 'rgba(160, 180, 220, 0.3)';
     ctx.beginPath();
     ctx.moveTo(120, interpretY);
     ctx.lineTo(width - 120, interpretY);
@@ -3576,18 +3632,18 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
 
     // Interpretation label
     ctx.font = 'bold 28px "Prompt", sans-serif';
-    ctx.fillStyle = '#722F37';
+    ctx.fillStyle = '#C0C8E0';
     ctx.fillText(t('common.prophecy'), width / 2, interpretY + 50);
 
     // Interpretation text - full text with bounds (preserve paragraph breaks)
     ctx.font = '26px "Prompt", sans-serif';
-    ctx.fillStyle = '#722F37';
+    ctx.fillStyle = '#C0C8E0';
     const maxInterpretY = height - 180; // Leave space for footer
     wrapTextWithParagraphsCenter(ctx, getCardInterpretation(currentCardData), width / 2, interpretY + 110, width - 160, 38, maxInterpretY);
 
     // Footer - 2 columns layout with divider
     const iconSize = 26;
-    const footerColor = 'rgba(114, 47, 55, 0.6)';
+    const footerColor = 'rgba(160, 180, 220, 0.6)';
     const footerY = height - 120;
 
     // Calculate widths for centering
@@ -3641,13 +3697,13 @@ function drawSquareLayout(ctx, cardImg, width, height) {
     const textWidth = width - textX - safePadding - 10; // More right padding
 
     // Title small
-    ctx.fillStyle = 'rgba(114, 47, 55, 0.6)';
+    ctx.fillStyle = 'rgba(160, 180, 220, 0.6)';
     ctx.font = '22px "Cormorant Garamond", serif';
     ctx.textAlign = 'left';
     ctx.fillText('Valentine Tarot', textX, 140);
 
     // Card name - large (with dynamic sizing to fit)
-    ctx.fillStyle = '#722F37';
+    ctx.fillStyle = '#C0C8E0';
     let nameFontSize = 48;
     const cardName = getCardName(currentCardData.name);
     ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", serif`;
@@ -3660,7 +3716,7 @@ function drawSquareLayout(ctx, cardImg, width, height) {
     ctx.fillText(cardName, textX, 195);
 
     // Decorative line
-    ctx.strokeStyle = 'rgba(114, 47, 55, 0.4)';
+    ctx.strokeStyle = 'rgba(160, 180, 220, 0.4)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(textX, 220);
@@ -3669,19 +3725,19 @@ function drawSquareLayout(ctx, cardImg, width, height) {
 
     // Quote
     ctx.font = 'italic 22px "Cormorant Garamond", serif';
-    ctx.fillStyle = 'rgba(114, 47, 55, 0.85)';
+    ctx.fillStyle = 'rgba(160, 180, 220, 0.85)';
     const quoteText = `"${getCardQuote(currentCardData)}"`;
     wrapTextLeft(ctx, quoteText, textX, 265, textWidth, 30);
 
     // Interpretation - full text with bounds (preserve paragraph breaks)
     ctx.font = '17px "Prompt", sans-serif';
-    ctx.fillStyle = '#722F37';
+    ctx.fillStyle = '#C0C8E0';
     const maxInterpretY = height - safePadding - 100; // Leave space for footer within safe area
     wrapTextWithParagraphs(ctx, getCardInterpretation(currentCardData), textX, 360, textWidth, 25, maxInterpretY);
 
     // Footer - 2 columns layout with divider
     const iconSize = 18;
-    const footerColor = 'rgba(114, 47, 55, 0.55)';
+    const footerColor = 'rgba(160, 180, 220, 0.55)';
     const footerY = height - safePadding - 40;
     const gap = 50;
 
@@ -3727,13 +3783,13 @@ function drawWideLayout(ctx, cardImg, width, height) {
     const textWidth = width - textX - 60;
 
     // Title small
-    ctx.fillStyle = 'rgba(114, 47, 55, 0.6)';
+    ctx.fillStyle = 'rgba(160, 180, 220, 0.6)';
     ctx.font = '20px "Cormorant Garamond", serif';
     ctx.textAlign = 'left';
     ctx.fillText('Valentine Tarot', textX, 80);
 
     // Card name - prominent (with dynamic sizing to fit)
-    ctx.fillStyle = '#722F37';
+    ctx.fillStyle = '#C0C8E0';
     let nameFontSize = 42;
     const cardName = getCardName(currentCardData.name);
     ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", serif`;
@@ -3746,7 +3802,7 @@ function drawWideLayout(ctx, cardImg, width, height) {
     ctx.fillText(cardName, textX, 125);
 
     // Decorative line
-    ctx.strokeStyle = 'rgba(114, 47, 55, 0.4)';
+    ctx.strokeStyle = 'rgba(160, 180, 220, 0.4)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(textX, 145);
@@ -3755,19 +3811,19 @@ function drawWideLayout(ctx, cardImg, width, height) {
 
     // Quote
     ctx.font = 'italic 20px "Cormorant Garamond", serif';
-    ctx.fillStyle = 'rgba(114, 47, 55, 0.9)';
+    ctx.fillStyle = 'rgba(160, 180, 220, 0.9)';
     const quoteText = `"${getCardQuote(currentCardData)}"`;
     wrapTextLeft(ctx, quoteText, textX, 180, textWidth, 26);
 
     // Interpretation - full text with bounds (preserve paragraph breaks)
     ctx.font = '16px "Prompt", sans-serif';
-    ctx.fillStyle = '#722F37';
+    ctx.fillStyle = '#C0C8E0';
     const maxInterpretY = height - 90; // Leave space for footer
     wrapTextWithParagraphs(ctx, getCardInterpretation(currentCardData), textX, 260, textWidth, 22, maxInterpretY);
 
     // Footer - 2 columns layout with divider
     const iconSize = 14;
-    const footerColor = 'rgba(114, 47, 55, 0.55)';
+    const footerColor = 'rgba(160, 180, 220, 0.55)';
     const footerY = height - 62;
     const gap = 40;
 
