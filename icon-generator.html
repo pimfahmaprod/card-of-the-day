@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>App Icon Generator - Card of the Day</title>
+<style>
+    body {
+        margin: 0;
+        background: #1a1a2e;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        font-family: sans-serif;
+        color: #C0C8E0;
+    }
+    .icon-wrapper {
+        position: relative;
+        width: 1024px;
+        height: 1024px;
+    }
+    canvas {
+        border: 2px solid #333;
+        border-radius: 12px;
+    }
+    .controls {
+        margin-top: 24px;
+        display: flex;
+        gap: 12px;
+    }
+    button {
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #1a2555, #0d1333);
+        color: #C0C8E0;
+        border: 1px solid rgba(154,170,212,0.3);
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    button:hover {
+        background: linear-gradient(135deg, #243070, #141b45);
+        border-color: rgba(154,170,212,0.6);
+    }
+    p { margin-top: 16px; opacity: 0.6; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<h2>Card of the Day - Facebook App Icon (1024x1024)</h2>
+<div class="icon-wrapper">
+    <canvas id="iconCanvas" width="1024" height="1024"></canvas>
+</div>
+<div class="controls">
+    <button onclick="downloadIcon()">Download PNG</button>
+</div>
+<p>Right-click the canvas to "Save image as..." or click the button above.</p>
+
+<script>
+const canvas = document.getElementById('iconCanvas');
+const ctx = canvas.getContext('2d');
+const W = 1024, H = 1024;
+
+function drawIcon() {
+    // === Background: deep navy gradient ===
+    const bgGrad = ctx.createRadialGradient(W/2, H/2, 100, W/2, H/2, W*0.7);
+    bgGrad.addColorStop(0, '#141d4a');
+    bgGrad.addColorStop(0.5, '#0d1333');
+    bgGrad.addColorStop(1, '#060A1F');
+    ctx.fillStyle = bgGrad;
+    roundRect(ctx, 0, 0, W, H, 180);
+    ctx.fill();
+
+    // === Subtle star particles ===
+    drawStars(ctx, 60);
+
+    // === Outer glow ring ===
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.strokeStyle = '#9AAAD4';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(W/2, H/2, 420, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // === Mystical circle decoration ===
+    drawMysticalCircle(ctx, W/2, H/2, 380);
+
+    // === Card shape (centered, slightly rotated) ===
+    drawTarotCard(ctx, W/2, H/2 - 20);
+
+    // === Text: "Card of the Day" ===
+    drawTitle(ctx, W/2, H - 155);
+
+    // === Small sparkles around card ===
+    drawSparkles(ctx);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+}
+
+function drawStars(ctx, count) {
+    ctx.save();
+    for (let i = 0; i < count; i++) {
+        const x = Math.random() * W;
+        const y = Math.random() * H;
+        const size = Math.random() * 2.5 + 0.5;
+        const alpha = Math.random() * 0.4 + 0.1;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = '#C0C8E0';
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+function drawMysticalCircle(ctx, cx, cy, r) {
+    ctx.save();
+
+    // Outer decorative ring with dots
+    ctx.globalAlpha = 0.08;
+    ctx.strokeStyle = '#9AAAD4';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 36; i++) {
+        const angle = (i / 36) * Math.PI * 2;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Inner circle
+    ctx.globalAlpha = 0.06;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r - 30, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Moon phases at top
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = '#9AAAD4';
+    const moonY = cy - r + 60;
+    // Crescent left
+    drawCrescent(ctx, cx - 60, moonY, 14, 'left');
+    // Full moon center
+    ctx.beginPath();
+    ctx.arc(cx, moonY, 12, 0, Math.PI * 2);
+    ctx.fill();
+    // Crescent right
+    drawCrescent(ctx, cx + 60, moonY, 14, 'right');
+
+    ctx.restore();
+}
+
+function drawCrescent(ctx, cx, cy, r, side) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    const offset = side === 'left' ? 7 : -7;
+    ctx.beginPath();
+    ctx.arc(cx + offset, cy, r - 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // Re-fill with semi-transparent to avoid full cutout
+    ctx.save();
+    ctx.globalAlpha = 0.04;
+    ctx.beginPath();
+    ctx.arc(cx + offset, cy, r - 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawTarotCard(ctx, cx, cy) {
+    const cardW = 280;
+    const cardH = 440;
+    const cardR = 20;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // === Shadow ===
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 40;
+    ctx.shadowOffsetY = 10;
+    ctx.fillStyle = '#0a0e27';
+    roundRect(ctx, -cardW/2, -cardH/2, cardW, cardH, cardR);
+    ctx.fill();
+    ctx.restore();
+
+    // === Card background ===
+    const cardGrad = ctx.createLinearGradient(-cardW/2, -cardH/2, cardW/2, cardH/2);
+    cardGrad.addColorStop(0, '#1a2355');
+    cardGrad.addColorStop(0.5, '#141b45');
+    cardGrad.addColorStop(1, '#0f1538');
+    ctx.fillStyle = cardGrad;
+    roundRect(ctx, -cardW/2, -cardH/2, cardW, cardH, cardR);
+    ctx.fill();
+
+    // === Card border ===
+    ctx.strokeStyle = 'rgba(154, 170, 212, 0.35)';
+    ctx.lineWidth = 2.5;
+    roundRect(ctx, -cardW/2, -cardH/2, cardW, cardH, cardR);
+    ctx.stroke();
+
+    // === Inner border ===
+    ctx.strokeStyle = 'rgba(154, 170, 212, 0.12)';
+    ctx.lineWidth = 1;
+    roundRect(ctx, -cardW/2 + 12, -cardH/2 + 12, cardW - 24, cardH - 24, 12);
+    ctx.stroke();
+
+    // === Star symbol at center of card ===
+    drawStar(ctx, 0, -40, 65, 5);
+
+    // === Eye of providence / mystical eye ===
+    drawMysticalEye(ctx, 0, -40);
+
+    // === Decorative lines ===
+    ctx.strokeStyle = 'rgba(154, 170, 212, 0.2)';
+    ctx.lineWidth = 1;
+    // Top line
+    ctx.beginPath();
+    ctx.moveTo(-80, -cardH/2 + 50);
+    ctx.lineTo(80, -cardH/2 + 50);
+    ctx.stroke();
+    // Bottom line
+    ctx.beginPath();
+    ctx.moveTo(-80, cardH/2 - 50);
+    ctx.lineTo(80, cardH/2 - 50);
+    ctx.stroke();
+
+    // === Small diamonds at corners ===
+    const dm = 8;
+    const corners = [
+        [-cardW/2 + 30, -cardH/2 + 30],
+        [cardW/2 - 30, -cardH/2 + 30],
+        [-cardW/2 + 30, cardH/2 - 30],
+        [cardW/2 - 30, cardH/2 - 30]
+    ];
+    ctx.fillStyle = 'rgba(154, 170, 212, 0.25)';
+    corners.forEach(([dx, dy]) => {
+        ctx.beginPath();
+        ctx.moveTo(dx, dy - dm);
+        ctx.lineTo(dx + dm, dy);
+        ctx.lineTo(dx, dy + dm);
+        ctx.lineTo(dx - dm, dy);
+        ctx.closePath();
+        ctx.fill();
+    });
+
+    // === Card text ===
+    // Top: Roman numeral
+    ctx.fillStyle = 'rgba(154, 170, 212, 0.5)';
+    ctx.font = '600 22px "Cormorant Garamond", Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('XVII', 0, -cardH/2 + 32);
+
+    // Bottom text on card
+    ctx.fillStyle = 'rgba(192, 200, 224, 0.6)';
+    ctx.font = '500 20px "Cormorant Garamond", Georgia, serif';
+    ctx.fillText('THE STAR', 0, cardH/2 - 32);
+
+    // === Bottom section: prediction text ===
+    ctx.fillStyle = 'rgba(154, 170, 212, 0.3)';
+    ctx.font = '16px "Prompt", sans-serif';
+    ctx.fillText('~ daily tarot ~', 0, 160);
+
+    ctx.restore();
+}
+
+function drawStar(ctx, cx, cy, r, points) {
+    ctx.save();
+    ctx.globalAlpha = 0.08;
+    ctx.fillStyle = '#9AAAD4';
+    ctx.beginPath();
+    for (let i = 0; i < points * 2; i++) {
+        const angle = (i * Math.PI) / points - Math.PI / 2;
+        const radius = i % 2 === 0 ? r : r * 0.4;
+        const x = cx + Math.cos(angle) * radius;
+        const y = cy + Math.sin(angle) * radius;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawMysticalEye(ctx, cx, cy) {
+    ctx.save();
+
+    // Eye shape (almond)
+    ctx.strokeStyle = 'rgba(154, 170, 212, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx - 50, cy);
+    ctx.bezierCurveTo(cx - 25, cy - 30, cx + 25, cy - 30, cx + 50, cy);
+    ctx.bezierCurveTo(cx + 25, cy + 30, cx - 25, cy + 30, cx - 50, cy);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Iris
+    const irisGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 18);
+    irisGrad.addColorStop(0, 'rgba(120, 160, 230, 0.6)');
+    irisGrad.addColorStop(0.6, 'rgba(100, 140, 220, 0.3)');
+    irisGrad.addColorStop(1, 'rgba(80, 120, 200, 0.1)');
+    ctx.fillStyle = irisGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pupil
+    ctx.fillStyle = 'rgba(154, 170, 212, 0.7)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Highlight
+    ctx.fillStyle = 'rgba(200, 210, 240, 0.8)';
+    ctx.beginPath();
+    ctx.arc(cx + 4, cy - 4, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Rays from eye
+    ctx.globalAlpha = 0.15;
+    ctx.strokeStyle = '#9AAAD4';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        const innerR = 25;
+        const outerR = 45;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(angle) * innerR, cy + Math.sin(angle) * innerR);
+        ctx.lineTo(cx + Math.cos(angle) * outerR, cy + Math.sin(angle) * outerR);
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+function drawTitle(ctx, cx, cy) {
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // "Card of the Day" main title
+    ctx.fillStyle = 'rgba(192, 200, 224, 0.95)';
+    ctx.font = '700 62px "Cormorant Garamond", Georgia, serif';
+    ctx.letterSpacing = '4px';
+    ctx.fillText('Card of the Day', cx, cy);
+
+    // Decorative line under title
+    const lineW = 200;
+    ctx.strokeStyle = 'rgba(154, 170, 212, 0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - lineW, cy + 38);
+    ctx.lineTo(cx + lineW, cy + 38);
+    ctx.stroke();
+
+    // Small diamond at center of line
+    ctx.fillStyle = 'rgba(154, 170, 212, 0.4)';
+    const d = 5;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + 38 - d);
+    ctx.lineTo(cx + d, cy + 38);
+    ctx.lineTo(cx, cy + 38 + d);
+    ctx.lineTo(cx - d, cy + 38);
+    ctx.closePath();
+    ctx.fill();
+
+    // Subtitle
+    ctx.fillStyle = 'rgba(154, 170, 212, 0.45)';
+    ctx.font = '300 26px "Prompt", sans-serif';
+    ctx.fillText('Daily Tarot Reading', cx, cy + 65);
+
+    ctx.restore();
+}
+
+function drawSparkles(ctx) {
+    ctx.save();
+    const sparkles = [
+        { x: 200, y: 180, size: 12, alpha: 0.3 },
+        { x: 820, y: 220, size: 10, alpha: 0.25 },
+        { x: 160, y: 700, size: 8, alpha: 0.2 },
+        { x: 860, y: 650, size: 11, alpha: 0.28 },
+        { x: 300, y: 350, size: 7, alpha: 0.15 },
+        { x: 730, y: 400, size: 9, alpha: 0.2 },
+        { x: 180, y: 480, size: 6, alpha: 0.12 },
+        { x: 850, y: 480, size: 8, alpha: 0.18 },
+    ];
+
+    sparkles.forEach(s => {
+        ctx.globalAlpha = s.alpha;
+        ctx.strokeStyle = '#C0C8E0';
+        ctx.lineWidth = 1.5;
+        // 4-point sparkle
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y - s.size);
+        ctx.lineTo(s.x, s.y + s.size);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(s.x - s.size, s.y);
+        ctx.lineTo(s.x + s.size, s.y);
+        ctx.stroke();
+        // Diagonal (smaller)
+        const ds = s.size * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(s.x - ds, s.y - ds);
+        ctx.lineTo(s.x + ds, s.y + ds);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(s.x + ds, s.y - ds);
+        ctx.lineTo(s.x - ds, s.y + ds);
+        ctx.stroke();
+    });
+
+    ctx.restore();
+}
+
+// Draw the icon
+drawIcon();
+
+function downloadIcon() {
+    const link = document.createElement('a');
+    link.download = 'card-of-the-day-icon-1024.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+</script>
+</body>
+</html>

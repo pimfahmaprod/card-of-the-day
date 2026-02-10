@@ -90,7 +90,13 @@ const translations = {
         },
         blessing: {
             wantMore: "อยากรู้เพิ่มเติม",
-            restart: "เริ่มใหม่"
+            restart: "เริ่มใหม่",
+            seeWhatFriendsDraw: "ดูว่าเพื่อนจับไพ่อะไร",
+            loginToSee: "ล็อกอินเพื่อดูไพ่ของเพื่อนและบันทึกประวัติ"
+        },
+        login: {
+            required: "ล็อกอิน Facebook เพื่อใช้ฟีเจอร์นี้",
+            loginBtn: "เข้าสู่ระบบด้วย Facebook"
         },
         toast: {
             copied: "คัดลอกลิงก์แล้ว!",
@@ -174,7 +180,10 @@ const translations = {
             empty: "ยังไม่มีเพื่อนที่ใช้แอพนี้",
             emptyHint: "ชวนเพื่อนมาจับไพ่ด้วยกัน!",
             inviteBtn: "ชวนเพื่อนมาดูดวง",
-            inviteMsg: "มาจับไพ่ทาโรต์รายวันกัน! ดูดวงความรักและรับข้อความจากจักรวาล ✨🔮"
+            inviteMsg: "มาจับไพ่ทาโรต์รายวันกัน! ดูดวงความรักและรับข้อความจากจักรวาล ✨🔮",
+            reconnect: "เซสชัน Facebook หมดอายุ",
+            reconnectHint: "กรุณาเชื่อมต่อใหม่เพื่อดูการ์ดของเพื่อน",
+            reconnectBtn: "เชื่อมต่อ Facebook อีกครั้ง"
         }
     },
     en: {
@@ -233,7 +242,13 @@ const translations = {
         },
         blessing: {
             wantMore: "Want to know more?",
-            restart: "Start Over"
+            restart: "Start Over",
+            seeWhatFriendsDraw: "See what your friends draw",
+            loginToSee: "Login to see your friends' cards and save your history"
+        },
+        login: {
+            required: "Login with Facebook to use this feature",
+            loginBtn: "Login with Facebook"
         },
         toast: {
             copied: "Link copied!",
@@ -317,7 +332,10 @@ const translations = {
             empty: "None of your friends are using this app yet",
             emptyHint: "Invite friends to draw cards together!",
             inviteBtn: "Invite Friends",
-            inviteMsg: "Draw your daily tarot card! Discover love predictions and receive messages from the universe ✨🔮"
+            inviteMsg: "Draw your daily tarot card! Discover love predictions and receive messages from the universe ✨🔮",
+            reconnect: "Facebook session expired",
+            reconnectHint: "Please reconnect to see your friends' cards",
+            reconnectBtn: "Reconnect Facebook"
         }
     },
     "zh-CN": {
@@ -376,7 +394,13 @@ const translations = {
         },
         blessing: {
             wantMore: "想了解更多？",
-            restart: "重新开始"
+            restart: "重新开始",
+            seeWhatFriendsDraw: "看看朋友抽到了什么牌",
+            loginToSee: "登录查看朋友的牌并保存历史记录"
+        },
+        login: {
+            required: "请登录Facebook使用此功能",
+            loginBtn: "用Facebook登录"
         },
         toast: {
             copied: "链接已复制！",
@@ -460,7 +484,10 @@ const translations = {
             empty: "还没有好友在使用这个应用",
             emptyHint: "邀请好友一起来抽牌吧！",
             inviteBtn: "邀请好友",
-            inviteMsg: "一起来抽每日塔罗牌吧！探索爱情运势，接收来自宇宙的讯息 ✨🔮"
+            inviteMsg: "一起来抽每日塔罗牌吧！探索爱情运势，接收来自宇宙的讯息 ✨🔮",
+            reconnect: "Facebook会话已过期",
+            reconnectHint: "请重新连接以查看好友的卡牌",
+            reconnectBtn: "重新连接Facebook"
         }
     },
     "zh-TW": {
@@ -519,7 +546,13 @@ const translations = {
         },
         blessing: {
             wantMore: "想了解更多？",
-            restart: "重新開始"
+            restart: "重新開始",
+            seeWhatFriendsDraw: "看看朋友抽到了什麼牌",
+            loginToSee: "登入查看朋友的牌並儲存歷史記錄"
+        },
+        login: {
+            required: "請登入Facebook使用此功能",
+            loginBtn: "用Facebook登入"
         },
         toast: {
             copied: "連結已複製！",
@@ -603,7 +636,10 @@ const translations = {
             empty: "還沒有好友在使用這個應用",
             emptyHint: "邀請好友一起來抽牌吧！",
             inviteBtn: "邀請好友",
-            inviteMsg: "一起來抽每日塔羅牌吧！探索愛情運勢，接收來自宇宙的訊息 ✨🔮"
+            inviteMsg: "一起來抽每日塔羅牌吧！探索愛情運勢，接收來自宇宙的訊息 ✨🔮",
+            reconnect: "Facebook會話已過期",
+            reconnectHint: "請重新連接以查看好友的卡牌",
+            reconnectBtn: "重新連接Facebook"
         }
     },
     ko: {
@@ -662,7 +698,13 @@ const translations = {
         },
         blessing: {
             wantMore: "더 알고 싶으세요?",
-            restart: "다시 시작"
+            restart: "다시 시작",
+            seeWhatFriendsDraw: "친구들이 어떤 카드를 뽑았는지 확인하세요",
+            loginToSee: "로그인하여 친구의 카드를 보고 기록을 저장하세요"
+        },
+        login: {
+            required: "이 기능을 사용하려면 Facebook으로 로그인하세요",
+            loginBtn: "Facebook으로 로그인"
         },
         toast: {
             copied: "링크 복사됨!",
@@ -746,7 +788,10 @@ const translations = {
             empty: "아직 이 앱을 사용하는 친구가 없습니다",
             emptyHint: "친구를 초대해서 함께 카드를 뽑아보세요!",
             inviteBtn: "친구 초대하기",
-            inviteMsg: "매일 타로 카드를 뽑아보세요! 사랑 운세를 알아보고 우주의 메시지를 받아보세요 ✨🔮"
+            inviteMsg: "매일 타로 카드를 뽑아보세요! 사랑 운세를 알아보고 우주의 메시지를 받아보세요 ✨🔮",
+            reconnect: "Facebook 세션이 만료되었습니다",
+            reconnectHint: "친구의 카드를 보려면 다시 연결해주세요",
+            reconnectBtn: "Facebook 다시 연결"
         }
     },
     ja: {
@@ -805,7 +850,13 @@ const translations = {
         },
         blessing: {
             wantMore: "もっと知りたい？",
-            restart: "やり直す"
+            restart: "やり直す",
+            seeWhatFriendsDraw: "友達が何のカードを引いたか見てみよう",
+            loginToSee: "ログインして友達のカードを見たり履歴を保存しよう"
+        },
+        login: {
+            required: "この機能を使うにはFacebookでログインしてください",
+            loginBtn: "Facebookでログイン"
         },
         toast: {
             copied: "リンクをコピーしました！",
@@ -889,7 +940,10 @@ const translations = {
             empty: "まだこのアプリを使っている友達がいません",
             emptyHint: "友達を招待して一緒にカードを引きましょう！",
             inviteBtn: "友達を招待",
-            inviteMsg: "毎日タロットカードを引いてみよう！恋愛運を占って、宇宙からのメッセージを受け取ろう ✨🔮"
+            inviteMsg: "毎日タロットカードを引いてみよう！恋愛運を占って、宇宙からのメッセージを受け取ろう ✨🔮",
+            reconnect: "Facebookセッションが期限切れです",
+            reconnectHint: "友達のカードを見るには再接続してください",
+            reconnectBtn: "Facebookに再接続"
         }
     },
     fr: {
@@ -948,7 +1002,13 @@ const translations = {
         },
         blessing: {
             wantMore: "En savoir plus",
-            restart: "Recommencer"
+            restart: "Recommencer",
+            seeWhatFriendsDraw: "Voyez ce que vos amis ont tiré",
+            loginToSee: "Connectez-vous pour voir les cartes de vos amis et sauvegarder votre historique"
+        },
+        login: {
+            required: "Connectez-vous avec Facebook pour utiliser cette fonctionnalité",
+            loginBtn: "Se connecter avec Facebook"
         },
         toast: {
             copied: "Lien copié !",
@@ -1032,7 +1092,10 @@ const translations = {
             empty: "Aucun ami n'utilise cette application pour le moment",
             emptyHint: "Invitez vos amis à tirer les cartes ensemble !",
             inviteBtn: "Inviter des amis",
-            inviteMsg: "Tirez votre carte de tarot quotidienne ! Découvrez les prédictions d'amour et recevez des messages de l'univers ✨🔮"
+            inviteMsg: "Tirez votre carte de tarot quotidienne ! Découvrez les prédictions d'amour et recevez des messages de l'univers ✨🔮",
+            reconnect: "Session Facebook expirée",
+            reconnectHint: "Veuillez vous reconnecter pour voir les cartes de vos amis",
+            reconnectBtn: "Reconnecter Facebook"
         }
     }
 };

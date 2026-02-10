@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Deletion - Card of the Day</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #060A1F;
+            color: #C0C8E0;
+            line-height: 1.8;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: #E8E8F0;
+        }
+        .updated {
+            font-size: 0.85rem;
+            color: #8090B0;
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 1.2rem;
+            color: #9AAAD4;
+            margin-top: 28px;
+            margin-bottom: 10px;
+        }
+        p, li {
+            font-size: 0.95rem;
+            color: #B0B8D0;
+            margin-bottom: 12px;
+        }
+        ol {
+            padding-left: 24px;
+            margin-bottom: 12px;
+        }
+        ul {
+            padding-left: 24px;
+            margin-bottom: 12px;
+        }
+        a {
+            color: #9AAAD4;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 32px;
+            color: #9AAAD4;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .note-box {
+            background: rgba(154, 170, 212, 0.08);
+            border-left: 3px solid #9AAAD4;
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .note-box p {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Data Deletion Instructions</h1>
+        <p class="updated">Last updated: February 11, 2026</p>
+
+        <p>Card of the Day respects your right to control your personal data. If you want to delete your data associated with our app, please follow the instructions below.</p>
+
+        <h2>What Data We Store</h2>
+        <p>When you log in with Facebook, we store the following in our database:</p>
+        <ul>
+            <li>Your Facebook user ID (used as an identifier)</li>
+            <li>Your display name and profile picture URL</li>
+            <li>Comments and replies you have posted</li>
+            <li>Your card draw history</li>
+        </ul>
+
+        <h2>How to Delete Your Data</h2>
+
+        <h2>Step 1: Remove Local Data</h2>
+        <ol>
+            <li>Open <a href="index.html">Card of the Day</a></li>
+            <li>Click the <strong>Logout</strong> button in your profile dropdown</li>
+            <li>This will clear all locally stored data (name, picture, draw history) from your browser</li>
+        </ol>
+
+        <h2>Step 2: Remove Facebook Connection</h2>
+        <ol>
+            <li>Go to your <a href="https://www.facebook.com/settings?tab=applications" target="_blank">Facebook App Settings</a></li>
+            <li>Find <strong>"Card of the Day"</strong> in the list of apps</li>
+            <li>Click <strong>Remove</strong> to revoke access</li>
+        </ol>
+
+        <h2>Step 3: Request Server Data Deletion</h2>
+        <p>To request deletion of your data from our database (comments, replies, draw history, and profile), please contact us through one of these channels:</p>
+        <ul>
+            <li>Open an issue on our <a href="https://github.com/pimfahmaprod/card-of-the-day/issues" target="_blank">GitHub repository</a></li>
+            <li>Include your Facebook display name so we can locate your data</li>
+        </ul>
+
+        <div class="note-box">
+            <p><strong>Note:</strong> We will process your deletion request within 30 days. Once deleted, your comments, replies, draw history, and profile information will be permanently removed from our database.</p>
+        </div>
+
+        <h2>Automatic Data</h2>
+        <p>We do not store Facebook access tokens. Anonymous card pick counts are aggregated and cannot be traced back to individual users.</p>
+
+        <a href="index.html" class="back-link">&larr; Back to Card of the Day</a>
+    </div>
+</body>
+</html>

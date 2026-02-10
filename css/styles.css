@@ -5806,6 +5806,82 @@ footer {
     text-shadow: 0 2px 20px rgba(0, 0, 0, 0.95);
 }
 
+/* Blessing Login CTA for non-logged-in users */
+.blessing-login-cta {
+    text-align: center;
+    margin-top: 30px;
+    padding: 20px;
+    opacity: 0;
+    animation: socialItemFadeIn 0.8s ease 1s forwards;
+}
+
+.blessing-login-cta .friends-cta-icon {
+    margin-bottom: 10px;
+    color: rgba(154, 170, 212, 0.5);
+}
+
+.blessing-login-cta .cta-sparkles {
+    margin-bottom: 8px;
+}
+
+.blessing-login-cta .cta-sparkles .sparkle {
+    display: inline-block;
+    color: rgba(154, 170, 212, 0.5);
+    font-size: 1rem;
+    margin: 0 6px;
+    animation: sparkleFloat 2s ease-in-out infinite;
+}
+
+.blessing-login-cta .cta-sparkles .s2 {
+    animation-delay: 0.3s;
+}
+
+.blessing-login-cta .cta-sparkles .s3 {
+    animation-delay: 0.6s;
+}
+
+.blessing-login-cta-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #C0C8E0;
+    margin-bottom: 6px;
+}
+
+.blessing-login-cta .cta-subtitle {
+    font-size: 0.8rem;
+    color: rgba(154, 170, 212, 0.6);
+    margin-bottom: 8px;
+}
+
+.blessing-login-cta .friends-login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 20px;
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    cursor: pointer;
+    background: #1877F2;
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(24, 119, 242, 0.3);
+    transition: all 0.2s ease;
+}
+
+.blessing-login-cta .friends-login-btn:hover {
+    background: #166FE5;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 18px rgba(24, 119, 242, 0.4);
+}
+
+.blessing-login-cta .friends-login-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
 /* Social channels section */
 .blessing-save-share-section {
     display: flex;

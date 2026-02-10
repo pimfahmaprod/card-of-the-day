@@ -243,6 +243,29 @@
             </div>
         </div>
 
+        <!-- Login CTA for non-logged-in users -->
+        <div class="blessing-login-cta" id="blessingLoginCta" style="display:none;">
+            <div class="cta-sparkles">
+                <span class="sparkle s1">&#10022;</span>
+                <span class="sparkle s2">&#10023;</span>
+                <span class="sparkle s3">&#10022;</span>
+            </div>
+            <div class="friends-cta-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="42" height="42">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+            </div>
+            <div class="blessing-login-cta-text" data-i18n="blessing.seeWhatFriendsDraw">See what your friends draw</div>
+            <p class="cta-subtitle" data-i18n="blessing.loginToSee">Login to see your friends' cards and save your history</p>
+            <button class="friends-login-btn" onclick="loginWithFacebook()">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                <span data-i18n="login.loginBtn">Login with Facebook</span>
+            </button>
+        </div>
+
         <!-- Save & Share Section -->
         <div class="blessing-save-share-section">
             <!-- Save Image Buttons -->
@@ -545,9 +568,9 @@
     <script async defer crossorigin="anonymous" src="https://connect.facebook.net/th_TH/sdk.js"></script>
 
     <!-- Scripts -->
-    <script src="js/translations.js?v=1.2.6"></script>
+    <script src="js/translations.js?v=1.2.7"></script>
     <script src="js/card-interpretations.js?v=1.2.4"></script>
-    <script src="js/app.js?v=1.2.39"></script>
+    <script src="js/app.js?v=1.2.40"></script>
     <script src="js/facebook.js?v=1.2.2"></script>
     <script src="js/counter.js?v=1.2.10"></script>
 </body>

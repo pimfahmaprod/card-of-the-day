@@ -1636,8 +1636,11 @@ function getLocalDrawHistory() {
 // Show/hide name group based on saved name (called when result panel opens)
 function initCommentForm() {
     const nameGroup = document.getElementById('commentNameGroup');
+    const isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
     const savedName = getSavedUserName();
-    if (savedName && nameGroup) {
+
+    // Hide name input if logged in with FB or has a saved name
+    if ((isLoggedIn || savedName) && nameGroup) {
         nameGroup.style.display = 'none';
     } else if (nameGroup) {
         nameGroup.style.display = 'block';
@@ -1685,15 +1688,16 @@ async function viewCardComments() {
 
 function resetCommentForm() {
     const savedName = getSavedUserName();
+    const isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
     const nameInput = document.getElementById('commentName');
     const nameGroup = document.getElementById('commentNameGroup');
 
-    if (!savedName && nameInput) {
+    if (!savedName && !isLoggedIn && nameInput) {
         nameInput.value = '';
         document.getElementById('nameCharCount').textContent = '0';
     }
     if (nameGroup) {
-        nameGroup.style.display = savedName ? 'none' : 'block';
+        nameGroup.style.display = (isLoggedIn || savedName) ? 'none' : 'block';
     }
 
     document.getElementById('commentText').value = '';
@@ -1834,6 +1838,8 @@ async function submitComment() {
     const submitBtn = document.getElementById('commentSubmitBtn');
     const submitText = document.getElementById('commentSubmitText');
 
+    const isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
+
     // Use saved name or input value, default to "Anonymous"
     const savedName = getSavedUserName();
     const userName = savedName || nameInput.value.trim() || 'Anonymous';
@@ -1851,13 +1857,13 @@ async function submitComment() {
     submitBtn.disabled = true;
     submitText.textContent = t('comment.sending');
 
-    // Track card pick in Firebase (count on accept/submit)
-    if (window.cardCounter && window.cardCounter.increment && currentCardData) {
-        window.cardCounter.increment(currentCardData.id, currentCardData.name, getUserId());
-    }
+    // Only save to Firebase if logged in with Facebook
+    if (isLoggedIn && window.cardCounter && window.cardCounter.submitComment) {
+        // Track card pick in Firebase
+        if (window.cardCounter.increment) {
+            window.cardCounter.increment(currentCardData.id, currentCardData.name, getUserId());
+        }
 
-    // Submit to Firebase
-    if (window.cardCounter && window.cardCounter.submitComment) {
         const userId = getUserId();
         const result = await window.cardCounter.submitComment(
             currentCardData.id,
@@ -1870,35 +1876,27 @@ async function submitComment() {
         );
 
         if (result.success) {
-            // Save name for future comments (only if not Anonymous)
             if (userName !== 'Anonymous') {
                 saveUserName(userName);
             }
-
-            // Show "ไพ่ฉัน" tab now that user has commented on their card
             checkMyCardTab();
 
-            // Save draw history
-            saveDrawToLocal(currentCardData, commentText);
-            if (typeof isFacebookConnected === 'function' && isFacebookConnected()) {
-                const fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
-                if (fbUserId) {
-                    if (window.cardCounter && window.cardCounter.saveUserDraw) {
-                        window.cardCounter.saveUserDraw(fbUserId, {
-                            cardId: currentCardData.id,
-                            cardName: currentCardData.name,
-                            cardImage: currentCardData.image,
-                            comment: commentText
-                        });
-                    }
-                }
+            // Save draw history to Firebase
+            const fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
+            if (fbUserId && window.cardCounter.saveUserDraw) {
+                window.cardCounter.saveUserDraw(fbUserId, {
+                    cardId: currentCardData.id,
+                    cardName: currentCardData.name,
+                    cardImage: currentCardData.image,
+                    comment: commentText
+                });
             }
+            saveDrawToLocal(currentCardData, commentText);
 
             submitBtn.classList.add('success');
             submitText.textContent = t('toast.submitSuccess');
-            playSoundEffect('accept'); // Play accept sound
+            playSoundEffect('accept');
 
-            // Show blessing celebration screen after short delay
             setTimeout(() => {
                 showBlessingScreen(userName, commentText);
             }, 800);
@@ -1908,9 +1906,14 @@ async function submitComment() {
             showToast(t('toast.error'));
         }
     } else {
-        submitBtn.disabled = false;
-        submitText.textContent = t('comment.submit');
-        showToast(t('toast.systemNotReady'));
+        // Not logged in: skip Firebase, go straight to blessing with CTA
+        playSoundEffect('accept');
+        submitBtn.classList.add('success');
+        submitText.textContent = t('toast.submitSuccess');
+
+        setTimeout(() => {
+            showBlessingScreen(userName, commentText);
+        }, 800);
     }
 }
 
@@ -1925,15 +1928,27 @@ function showBlessingScreen(userName, comment) {
     const blessingCard = document.getElementById('blessingCard');
     const blessingName = document.getElementById('blessingName');
     const blessingComment = document.getElementById('blessingComment');
+    const blessingLoginCta = document.getElementById('blessingLoginCta');
+    const commentOverlay = document.querySelector('.blessing-comment-overlay');
 
     if (!blessingScreen || !currentCardData) return;
+
+    const isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
 
     // Set card image
     blessingCard.src = `images/tarot/${currentCardData.image}`;
 
-    // Set user name and comment
-    blessingName.textContent = userName === 'Anonymous' ? '' : `— ${userName} —`;
-    blessingComment.textContent = `"${comment}"`;
+    if (isLoggedIn) {
+        // Logged in: show comment overlay, hide CTA
+        if (commentOverlay) commentOverlay.style.display = '';
+        if (blessingLoginCta) blessingLoginCta.style.display = 'none';
+        blessingName.textContent = userName === 'Anonymous' ? '' : `— ${userName} —`;
+        blessingComment.textContent = `"${comment}"`;
+    } else {
+        // Not logged in: hide comment overlay, show login CTA
+        if (commentOverlay) commentOverlay.style.display = 'none';
+        if (blessingLoginCta) blessingLoginCta.style.display = '';
+    }
 
     // Hide other panels
     document.getElementById('resultPanel').classList.remove('active');
@@ -2013,6 +2028,12 @@ function closeBlessingAndRestart() {
 
     // Stop sparkles
     stopBlessingSparkles();
+
+    // Reset blessing screen state (comment overlay and login CTA)
+    const commentOverlay = document.querySelector('.blessing-comment-overlay');
+    const blessingLoginCta = document.getElementById('blessingLoginCta');
+    if (commentOverlay) commentOverlay.style.display = '';
+    if (blessingLoginCta) blessingLoginCta.style.display = 'none';
 
     // Fade out blessing screen
     blessingScreen.style.animation = 'blessingFadeIn 0.5s ease reverse forwards';
@@ -2579,6 +2600,11 @@ function createFeedCard(comment) {
 
     replySubmitBtn.addEventListener('click', async function(e) {
         e.stopPropagation();
+        // Require Facebook login to reply
+        if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
+            loginWithFacebook();
+            return;
+        }
         var text = replyInput.value.trim();
         if (!text) return;
         replySubmitBtn.disabled = true;
@@ -2592,7 +2618,6 @@ function createFeedCard(comment) {
             if (res.success) {
                 replyInput.value = '';
                 await loadReplies(card, comment.id, comment);
-                // Update reply count display
                 loadReplyCount(card, comment.id);
                 showToast(t('toast.replySuccess'));
             } else {
@@ -2621,6 +2646,14 @@ async function loadActivityTimeline() {
 
     var commentsList = document.getElementById('commentsList');
     var loadingEl = getOrCreateLoadingEl();
+
+    // Require Facebook login
+    if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
+        commentsList.innerHTML = buildLoginRequiredCta('login.required', 'blessing.loginToSee');
+        isLoadingComments = false;
+        return;
+    }
+
     commentsList.innerHTML = '';
     commentsList.appendChild(loadingEl);
     loadingEl.style.display = 'block';
@@ -2875,6 +2908,9 @@ async function checkMyCardTab() {
 
     // Hide by default
     myCardTab.style.display = 'none';
+
+    // Only show for FB-connected users
+    if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) return;
 
     // Check if Firebase is ready
     if (!window.cardCounter || !window.cardCounter.fetchCommentsByUserId) {
@@ -3171,6 +3207,13 @@ async function loadMyComments() {
     const commentsList = document.getElementById('commentsList');
     const loadingEl = getOrCreateLoadingEl();
 
+    // Require Facebook login
+    if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
+        commentsList.innerHTML = buildLoginRequiredCta('login.required', 'blessing.loginToSee');
+        isLoadingComments = false;
+        return;
+    }
+
     commentsList.innerHTML = '';
     commentsList.appendChild(loadingEl);
     loadingEl.style.display = 'block';
@@ -3236,6 +3279,13 @@ async function loadMyCardComments() {
 
     const commentsList = document.getElementById('commentsList');
     const loadingEl = getOrCreateLoadingEl();
+
+    // Require Facebook login
+    if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
+        commentsList.innerHTML = buildLoginRequiredCta('login.required', 'blessing.loginToSee');
+        isLoadingComments = false;
+        return;
+    }
 
     commentsList.innerHTML = '';
     commentsList.appendChild(loadingEl);
@@ -3311,9 +3361,17 @@ async function loadFriendsCards() {
 
     // Fetch Facebook friends who also use this app
     try {
-        var friendIds = await getFacebookFriendIds();
+        var friendResult = await getFacebookFriendIds();
 
-        if (friendIds.length === 0) {
+        // If FB session expired, show reconnect CTA
+        if (friendResult.status === 'not_connected' || friendResult.status === 'no_sdk') {
+            loadingEl.style.display = 'none';
+            commentsList.innerHTML = buildFriendsReconnectCta();
+            isLoadingComments = false;
+            return;
+        }
+
+        if (friendResult.ids.length === 0) {
             loadingEl.style.display = 'none';
             commentsList.innerHTML = buildFriendsInviteCta();
             isLoadingComments = false;
@@ -3321,7 +3379,7 @@ async function loadFriendsCards() {
         }
 
         // Convert FB IDs to app user IDs (fb_ prefix)
-        var friendUserIds = friendIds.map(function(id) { return 'fb_' + id; });
+        var friendUserIds = friendResult.ids.map(function(id) { return 'fb_' + id; });
 
         if (!window.cardCounter || !window.cardCounter.fetchCommentsByUserIds) {
             loadingEl.style.display = 'none';
@@ -3357,24 +3415,36 @@ async function loadFriendsCards() {
 }
 
 // Get Facebook friend IDs who also use this app
+// Returns { ids: string[], status: 'ok'|'not_connected'|'no_sdk' }
 function getFacebookFriendIds() {
     return new Promise(function(resolve) {
         if (typeof FB === 'undefined') {
-            resolve([]);
+            console.warn('Friends: FB SDK not loaded');
+            resolve({ ids: [], status: 'no_sdk' });
             return;
         }
-        FB.api('/me/friends', { fields: 'id', limit: 100 }, function(response) {
-            if (response && response.data) {
-                resolve(response.data.map(function(f) { return f.id; }));
-            } else {
-                resolve([]);
+        // First verify the FB session is actually active
+        FB.getLoginStatus(function(statusResponse) {
+            if (statusResponse.status !== 'connected') {
+                console.warn('Friends: FB session not active, status:', statusResponse.status);
+                resolve({ ids: [], status: 'not_connected' });
+                return;
             }
+            FB.api('/me/friends', { fields: 'id', limit: 100 }, function(response) {
+                if (response && !response.error && response.data) {
+                    console.log('Friends: found', response.data.length, 'app friends');
+                    resolve({ ids: response.data.map(function(f) { return f.id; }), status: 'ok' });
+                } else {
+                    console.warn('Friends: API error', response && response.error);
+                    resolve({ ids: [], status: 'ok' });
+                }
+            });
         });
     });
 }
 
-// Build CTA for when user is not logged in
-function buildFriendsLoginCta() {
+// Build generic login-required CTA (reusable across tabs)
+function buildLoginRequiredCta(messageKey, subtitleKey) {
     return '<div class="comments-empty comments-empty-cta friends-cta">' +
         '<div class="cta-sparkles">' +
             '<span class="sparkle s1">✦</span>' +
@@ -3389,13 +3459,18 @@ function buildFriendsLoginCta() {
                 '<path d="M16 3.13a4 4 0 0 1 0 7.75"/>' +
             '</svg>' +
         '</div>' +
-        '<div class="comments-empty-text">' + t('friends.empty') + '</div>' +
-        '<p class="cta-subtitle">' + t('friends.emptyHint') + '</p>' +
+        '<div class="comments-empty-text">' + t(messageKey || 'login.required') + '</div>' +
+        '<p class="cta-subtitle">' + t(subtitleKey || 'blessing.loginToSee') + '</p>' +
         '<button class="friends-login-btn" onclick="loginWithFacebook()">' +
             '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>' +
-            'Login with Facebook' +
+            t('login.loginBtn') +
         '</button>' +
     '</div>';
+}
+
+// Build CTA for when user is not logged in (friends tab)
+function buildFriendsLoginCta() {
+    return buildLoginRequiredCta('blessing.seeWhatFriendsDraw', 'blessing.loginToSee');
 }
 
 // Build CTA for inviting friends
@@ -3421,6 +3496,44 @@ function buildFriendsInviteCta() {
             t('friends.inviteBtn') +
         '</button>' +
     '</div>';
+}
+
+// Build CTA for when FB session expired (need to reconnect)
+function buildFriendsReconnectCta() {
+    return '<div class="comments-empty comments-empty-cta friends-cta">' +
+        '<div class="cta-sparkles">' +
+            '<span class="sparkle s1">✦</span>' +
+            '<span class="sparkle s2">✧</span>' +
+            '<span class="sparkle s3">✦</span>' +
+        '</div>' +
+        '<div class="friends-cta-icon">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">' +
+                '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>' +
+                '<circle cx="9" cy="7" r="4"/>' +
+                '<path d="M23 21v-2a4 4 0 0 0-3-3.87"/>' +
+                '<path d="M16 3.13a4 4 0 0 1 0 7.75"/>' +
+            '</svg>' +
+        '</div>' +
+        '<div class="comments-empty-text">' + t('friends.reconnect') + '</div>' +
+        '<p class="cta-subtitle">' + t('friends.reconnectHint') + '</p>' +
+        '<button class="friends-login-btn" onclick="reconnectFacebook()">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>' +
+            t('friends.reconnectBtn') +
+        '</button>' +
+    '</div>';
+}
+
+// Reconnect Facebook and reload friends tab
+function reconnectFacebook() {
+    if (typeof FB === 'undefined') return;
+    FB.login(function(response) {
+        if (response.status === 'connected') {
+            handleStatusChange(response);
+            isLoadingComments = false; // Reset flag so loadFriendsCards can proceed
+            displayedCommentIds.clear();
+            loadFriendsCards();
+        }
+    }, { scope: 'public_profile,user_friends', return_scopes: true });
 }
 
 // Invite friends via Facebook Messenger
@@ -3659,6 +3772,11 @@ function setupReplyFeature(card, comment) {
     // Submit reply
     replySubmitBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
+        // Require Facebook login to reply
+        if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
+            loginWithFacebook();
+            return;
+        }
         const text = replyInput.value.trim();
         if (!text) return;
 
@@ -3672,13 +3790,9 @@ function setupReplyFeature(card, comment) {
             const result = await window.cardCounter.submitReply(comment.id, userId, userName, text, getCurrentProfilePicture());
 
             if (result.success) {
-                // Clear input and hide form
                 replyInput.value = '';
                 replyForm.classList.remove('show');
-
-                // Reload replies
                 await loadReplies(card, comment.id, comment);
-
                 showToast(t('toast.replySuccess'));
             } else {
                 showToast(t('toast.error'));
