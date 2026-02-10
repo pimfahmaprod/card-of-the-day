@@ -77,6 +77,7 @@ const translations = {
             tabHot: "ยอดนิยม",
             tabMyCard: "ไพ่ฉัน",
             tabMine: "ของฉัน",
+            tabDraws: "ไพ่ที่จับ",
             empty: "ยังไม่มีความคิดเห็น",
             myComments: "ความคิดเห็นของฉัน",
             repliedTo: "ที่ฉันเคยตอบ",
@@ -144,6 +145,16 @@ const translations = {
             commentCount: "ความคิดเห็น",
             noCommentsOnCard: "ยังไม่มีใครแสดงความคิดเห็นบนไพ่ใบนี้",
             noOtherComments: "ยังไม่มีความคิดเห็นอื่นบนไพ่ใบนี้"
+        },
+        profile: {
+            editName: "เปลี่ยนชื่อ",
+            editNamePrompt: "ใส่ชื่อใหม่:",
+            drawHistory: "ประวัติการจับไพ่",
+            logout: "ออกจากระบบ"
+        },
+        draws: {
+            empty: "ยังไม่ได้จับไพ่",
+            emptyHint: "จับไพ่เพื่อบันทึกประวัติ"
         }
     },
     en: {
@@ -189,6 +200,7 @@ const translations = {
             tabHot: "Popular",
             tabMyCard: "My Card",
             tabMine: "Mine",
+            tabDraws: "My Draws",
             empty: "No comments yet",
             myComments: "My Comments",
             repliedTo: "Replied To",
@@ -256,6 +268,16 @@ const translations = {
             commentCount: "comments",
             noCommentsOnCard: "No one has commented on this card yet",
             noOtherComments: "No other comments on this card yet"
+        },
+        profile: {
+            editName: "Change Name",
+            editNamePrompt: "Enter new display name:",
+            drawHistory: "Draw History",
+            logout: "Logout"
+        },
+        draws: {
+            empty: "No cards drawn yet",
+            emptyHint: "Draw a card to start your history"
         }
     },
     "zh-CN": {
@@ -301,6 +323,7 @@ const translations = {
             tabHot: "热门",
             tabMyCard: "我的牌",
             tabMine: "我的",
+            tabDraws: "抽牌记录",
             empty: "暂无评论",
             myComments: "我的评论",
             repliedTo: "我回复的",
@@ -368,6 +391,16 @@ const translations = {
             commentCount: "条评论",
             noCommentsOnCard: "还没有人在这张牌上评论",
             noOtherComments: "这张牌上还没有其他评论"
+        },
+        profile: {
+            editName: "更改名字",
+            editNamePrompt: "输入新名字：",
+            drawHistory: "抽牌记录",
+            logout: "退出登录"
+        },
+        draws: {
+            empty: "还没有抽过牌",
+            emptyHint: "抽一张牌开始记录"
         }
     },
     "zh-TW": {
@@ -413,6 +446,7 @@ const translations = {
             tabHot: "熱門",
             tabMyCard: "我的牌",
             tabMine: "我的",
+            tabDraws: "抽牌紀錄",
             empty: "暫無評論",
             myComments: "我的評論",
             repliedTo: "我回覆的",
@@ -480,6 +514,16 @@ const translations = {
             commentCount: "則評論",
             noCommentsOnCard: "還沒有人在這張牌上評論",
             noOtherComments: "這張牌上還沒有其他評論"
+        },
+        profile: {
+            editName: "更改名字",
+            editNamePrompt: "輸入新名字：",
+            drawHistory: "抽牌紀錄",
+            logout: "登出"
+        },
+        draws: {
+            empty: "還沒有抽過牌",
+            emptyHint: "抽一張牌開始紀錄"
         }
     },
     ko: {
@@ -525,6 +569,7 @@ const translations = {
             tabHot: "인기",
             tabMyCard: "내 카드",
             tabMine: "내 것",
+            tabDraws: "뽑은 카드",
             empty: "댓글이 없습니다",
             myComments: "내 댓글",
             repliedTo: "내가 답글 단",
@@ -592,6 +637,16 @@ const translations = {
             commentCount: "개의 댓글",
             noCommentsOnCard: "아직 이 카드에 댓글이 없습니다",
             noOtherComments: "이 카드에 다른 댓글이 없습니다"
+        },
+        profile: {
+            editName: "이름 변경",
+            editNamePrompt: "새 이름을 입력하세요:",
+            drawHistory: "뽑은 카드 기록",
+            logout: "로그아웃"
+        },
+        draws: {
+            empty: "아직 카드를 뽑지 않았습니다",
+            emptyHint: "카드를 뽑아 기록을 시작하세요"
         }
     },
     ja: {
@@ -637,6 +692,7 @@ const translations = {
             tabHot: "人気",
             tabMyCard: "私のカード",
             tabMine: "私の",
+            tabDraws: "引いたカード",
             empty: "コメントはまだありません",
             myComments: "私のコメント",
             repliedTo: "返信した",
@@ -704,6 +760,16 @@ const translations = {
             commentCount: "件のコメント",
             noCommentsOnCard: "まだこのカードにコメントがありません",
             noOtherComments: "このカードに他のコメントはありません"
+        },
+        profile: {
+            editName: "名前を変更",
+            editNamePrompt: "新しい名前を入力：",
+            drawHistory: "引いたカードの記録",
+            logout: "ログアウト"
+        },
+        draws: {
+            empty: "まだカードを引いていません",
+            emptyHint: "カードを引いて記録を始めましょう"
         }
     },
     fr: {
@@ -749,6 +815,7 @@ const translations = {
             tabHot: "Populaire",
             tabMyCard: "Ma carte",
             tabMine: "Mes posts",
+            tabDraws: "Mes tirages",
             empty: "Pas encore de commentaires",
             myComments: "Mes commentaires",
             repliedTo: "Commentaires auxquels j'ai répondu",
@@ -816,6 +883,16 @@ const translations = {
             commentCount: "commentaires",
             noCommentsOnCard: "Pas encore de commentaires sur cette carte",
             noOtherComments: "Pas d'autres commentaires sur cette carte"
+        },
+        profile: {
+            editName: "Changer le nom",
+            editNamePrompt: "Entrez un nouveau nom :",
+            drawHistory: "Historique des tirages",
+            logout: "Déconnexion"
+        },
+        draws: {
+            empty: "Aucune carte tirée",
+            emptyHint: "Tirez une carte pour commencer"
         }
     }
 };

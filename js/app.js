@@ -1541,6 +1541,34 @@ function saveUserName(name) {
     localStorage.setItem(SAVED_NAME_KEY, name.trim());
 }
 
+// ========================================
+// Draw History (local storage)
+// ========================================
+function saveDrawToLocal(card, comment) {
+    try {
+        const draws = JSON.parse(localStorage.getItem('tarot_draw_history') || '[]');
+        draws.unshift({
+            cardId: card.id,
+            cardName: card.name,
+            cardImage: card.image,
+            comment: comment || '',
+            timestamp: Date.now()
+        });
+        if (draws.length > 50) draws.length = 50;
+        localStorage.setItem('tarot_draw_history', JSON.stringify(draws));
+    } catch (e) {
+        // localStorage full or unavailable
+    }
+}
+
+function getLocalDrawHistory() {
+    try {
+        return JSON.parse(localStorage.getItem('tarot_draw_history') || '[]');
+    } catch (e) {
+        return [];
+    }
+}
+
 // Show/hide name group based on saved name (called when result panel opens)
 function initCommentForm() {
     const nameGroup = document.getElementById('commentNameGroup');
@@ -1775,6 +1803,20 @@ async function submitComment() {
 
             // Show "ไพ่ฉัน" tab now that user has commented on their card
             checkMyCardTab();
+
+            // Save draw history
+            saveDrawToLocal(currentCardData, commentText);
+            if (typeof isFacebookConnected === 'function' && isFacebookConnected() && window.cardCounter && window.cardCounter.saveUserDraw) {
+                const fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
+                if (fbUserId) {
+                    window.cardCounter.saveUserDraw(fbUserId, {
+                        cardId: currentCardData.id,
+                        cardName: currentCardData.name,
+                        cardImage: currentCardData.image,
+                        comment: commentText
+                    });
+                }
+            }
 
             submitBtn.classList.add('success');
             submitText.textContent = t('toast.submitSuccess');
@@ -2206,6 +2248,8 @@ function switchCommentsTab(tabName) {
         loadMyCardComments();
     } else if (tabName === 'me') {
         loadMyComments();
+    } else if (tabName === 'draws') {
+        loadDrawHistory();
     } else if (tabName === 'cardview') {
         loadCardViewComments();
     }
@@ -2221,6 +2265,74 @@ function updateCommentsCountBadge(count) {
     } else {
         badge.classList.remove('show');
     }
+}
+
+// ========================================
+// Draw History Tab
+// ========================================
+async function loadDrawHistory() {
+    if (isLoadingComments) return;
+    isLoadingComments = true;
+
+    const commentsList = document.getElementById('commentsList');
+    const loadingEl = getOrCreateLoadingEl();
+    commentsList.innerHTML = '';
+    commentsList.appendChild(loadingEl);
+    loadingEl.style.display = 'block';
+
+    let draws = [];
+
+    // Try Firebase first for FB users
+    if (typeof isFacebookConnected === 'function' && isFacebookConnected() && window.cardCounter && window.cardCounter.fetchUserDraws) {
+        const fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
+        if (fbUserId) {
+            draws = await window.cardCounter.fetchUserDraws(fbUserId);
+        }
+    }
+
+    // Fallback to local history
+    if (draws.length === 0) {
+        draws = getLocalDrawHistory();
+    }
+
+    loadingEl.style.display = 'none';
+
+    if (draws.length === 0) {
+        commentsList.innerHTML = '<div class="comments-empty comments-empty-cta">' +
+            '<div class="comments-empty-text">' + t('draws.empty') + '</div>' +
+            '<p class="cta-subtitle">' + t('draws.emptyHint') + '</p>' +
+            '</div>';
+        isLoadingComments = false;
+        return;
+    }
+
+    draws.forEach(function(draw) {
+        const card = createDrawHistoryCard(draw);
+        commentsList.appendChild(card);
+    });
+
+    isLoadingComments = false;
+}
+
+function createDrawHistoryCard(draw) {
+    const div = document.createElement('div');
+    div.className = 'draw-history-card';
+
+    const date = new Date(draw.timestamp);
+    const locale = currentLang === 'th' ? 'th-TH' : (currentLang === 'ja' ? 'ja-JP' : (currentLang === 'ko' ? 'ko-KR' : (currentLang === 'fr' ? 'fr-FR' : 'en-US')));
+    const dateStr = date.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
+    const timeStr = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+
+    div.innerHTML = '<div class="draw-card-image">' +
+        '<img src="images/tarot/' + (draw.cardImage || draw.cardName + '.png') + '" alt="' + draw.cardName + '">' +
+        '</div>' +
+        '<div class="draw-card-info">' +
+        '<div class="draw-card-name">' + draw.cardName + '</div>' +
+        '<div class="draw-card-date">' + dateStr + ' ' + timeStr + '</div>' +
+        (draw.comment ? '<div class="draw-card-comment">"' + draw.comment + '"</div>' : '') +
+        '</div>';
+
+    return div;
 }
 
 // Track displayed comment IDs to avoid duplicates

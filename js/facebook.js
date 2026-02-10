@@ -25,7 +25,7 @@ window.fbAsyncInit = function() {
 function handleStatusChange(response) {
     if (response.status === 'connected') {
         fbUser = response.authResponse;
-        fetchUserProfile();
+        fetchUserProfileFB();
     } else {
         fbUser = null;
         // If was previously FB-connected but session expired, keep local data
@@ -45,8 +45,8 @@ function handleStatusChange(response) {
     }
 }
 
-// Fetch user profile info
-function fetchUserProfile() {
+// Fetch user profile info from Facebook
+function fetchUserProfileFB() {
     FB.api('/me', { fields: 'id,name,picture.type(normal)' }, function(response) {
         if (response && !response.error) {
             fbUser = {
@@ -70,17 +70,126 @@ function fetchUserProfile() {
             if (window.cardCounter) {
                 window.cardCounter.trackFeatureUsage('facebookLogin', 'connected');
             }
+
+            // Save/update profile in Firebase
+            if (window.cardCounter && window.cardCounter.saveUserProfile) {
+                window.cardCounter.saveUserProfile(response.id, {
+                    fbName: response.name,
+                    displayName: localStorage.getItem('tarot_user_name') || response.name
+                });
+            }
+
+            // Sync draw history from Firebase
+            syncDrawHistoryOnLogin(response.id);
+
+            // Check if custom display name exists in Firebase
+            if (window.cardCounter && window.cardCounter.fetchUserProfile) {
+                window.cardCounter.fetchUserProfile(response.id).then(function(savedProfile) {
+                    if (savedProfile && savedProfile.displayName && savedProfile.displayName !== response.name) {
+                        localStorage.setItem('tarot_user_name', savedProfile.displayName);
+                        updateFacebookButton(true, savedProfile.displayName, response.picture?.data?.url);
+                    }
+                });
+            }
         }
     });
 }
 
-// Main connect function
-function connectWithFacebook() {
+// Profile click handler (replaces connectWithFacebook)
+function handleProfileClick() {
     if (fbUser && fbUser.id) {
-        showFacebookOptions();
+        toggleProfileDropdown();
+    } else if (localStorage.getItem(FB_CONNECTED_KEY) === 'true') {
+        // Session expired but was connected - try to show dropdown with cached data
+        toggleProfileDropdown();
     } else {
         loginWithFacebook();
     }
+}
+
+// Toggle profile dropdown
+function toggleProfileDropdown() {
+    const profileSwitcher = document.getElementById('profileSwitcher');
+    if (!profileSwitcher) return;
+    profileSwitcher.classList.toggle('open');
+
+    if (profileSwitcher.classList.contains('open')) {
+        updateProfileDropdown();
+    }
+}
+
+// Update dropdown content with current user info
+function updateProfileDropdown() {
+    const pic = document.getElementById('profileDropdownPic');
+    const name = document.getElementById('profileDropdownName');
+
+    if (pic) {
+        pic.src = localStorage.getItem(FB_PICTURE_KEY) || '';
+    }
+    if (name) {
+        name.textContent = localStorage.getItem('tarot_user_name') || (fbUser && fbUser.name) || '';
+    }
+}
+
+// Edit display name
+function editDisplayName() {
+    const profileSwitcher = document.getElementById('profileSwitcher');
+    if (profileSwitcher) profileSwitcher.classList.remove('open');
+
+    const currentLang = window.currentLang || 'th';
+    const promptText = (window.translations && window.translations[currentLang] && window.translations[currentLang].profile && window.translations[currentLang].profile.editNamePrompt) || 'Enter new display name:';
+    const currentName = localStorage.getItem('tarot_user_name') || '';
+    const newName = prompt(promptText, currentName);
+
+    if (newName !== null && newName.trim() !== '') {
+        const trimmed = newName.trim().substring(0, 15);
+        localStorage.setItem('tarot_user_name', trimmed);
+
+        // Update FB button text
+        updateFacebookButton(true, trimmed, localStorage.getItem(FB_PICTURE_KEY));
+
+        // Sync to Firebase
+        const fbUserId = getFbUserId();
+        if (fbUserId && window.cardCounter && window.cardCounter.saveUserProfile) {
+            window.cardCounter.saveUserProfile(fbUserId, {
+                displayName: trimmed,
+                fbName: (fbUser && fbUser.name) || ''
+            });
+        }
+    }
+}
+
+// Open draw history from profile dropdown
+function openDrawHistoryFromProfile() {
+    const profileSwitcher = document.getElementById('profileSwitcher');
+    if (profileSwitcher) profileSwitcher.classList.remove('open');
+
+    // Open comments panel and switch to draws tab
+    if (typeof openCommentsPanel === 'function') {
+        openCommentsPanel(true);
+    }
+
+    const commentsTabs = document.getElementById('commentsTabs');
+    if (commentsTabs) {
+        commentsTabs.querySelectorAll('.comments-tab').forEach(function(t) {
+            t.classList.remove('active');
+        });
+        const drawsTab = commentsTabs.querySelector('[data-tab="draws"]');
+        if (drawsTab) {
+            drawsTab.classList.add('active');
+        }
+    }
+
+    if (typeof switchCommentsTab === 'function') {
+        switchCommentsTab('draws');
+    }
+}
+
+// Logout from profile dropdown
+function logoutFromProfile() {
+    const profileSwitcher = document.getElementById('profileSwitcher');
+    if (profileSwitcher) profileSwitcher.classList.remove('open');
+    logoutFromFacebook();
 }
 
 // Login with Facebook
@@ -112,21 +221,6 @@ function clearFacebookData() {
     localStorage.setItem('tarot_user_id', newId);
 }
 
-// Show options when already connected
-function showFacebookOptions() {
-    const choice = confirm(`เชื่อมต่อเป็น ${fbUser.name} อยู่\n\nกด OK เพื่อดูไพ่ของเพื่อน\nกด Cancel เพื่อออกจากระบบ`);
-    if (choice) {
-        viewFriendsCards();
-    } else {
-        logoutFromFacebook();
-    }
-}
-
-// View friends' cards (placeholder)
-function viewFriendsCards() {
-    alert('ฟีเจอร์ดูไพ่ของเพื่อนกำลังพัฒนา\n\nFriends\' cards feature coming soon!');
-}
-
 // Update button appearance
 function updateFacebookButton(isLoggedIn, userName = '', pictureUrl = '') {
     const btn = document.getElementById('facebookConnectBtn');
@@ -155,6 +249,14 @@ function updateFacebookButton(isLoggedIn, userName = '', pictureUrl = '') {
     }
 }
 
+// Get FB user ID (without fb_ prefix)
+function getFbUserId() {
+    if (fbUser && fbUser.id) return fbUser.id;
+    const storedId = localStorage.getItem('tarot_user_id');
+    if (storedId && storedId.startsWith('fb_')) return storedId.replace('fb_', '');
+    return null;
+}
+
 // Get current user
 function getFacebookUser() {
     return fbUser;
@@ -164,3 +266,36 @@ function getFacebookUser() {
 function isFacebookConnected() {
     return (fbUser && fbUser.id) || localStorage.getItem(FB_CONNECTED_KEY) === 'true';
 }
+
+// Sync draw history from Firebase on login
+async function syncDrawHistoryOnLogin(fbUserId) {
+    if (!window.cardCounter || !window.cardCounter.fetchUserDraws) return;
+
+    try {
+        const firebaseDraws = await window.cardCounter.fetchUserDraws(fbUserId);
+        if (firebaseDraws.length === 0) return;
+
+        // Get existing local draws
+        const localDraws = JSON.parse(localStorage.getItem('tarot_draw_history') || '[]');
+
+        // Merge: Firebase as source of truth, append unique local draws
+        const firebaseTimestamps = new Set(firebaseDraws.map(function(d) { return d.timestamp; }));
+        const uniqueLocalDraws = localDraws.filter(function(d) { return !firebaseTimestamps.has(d.timestamp); });
+
+        const merged = firebaseDraws.concat(uniqueLocalDraws)
+            .sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); })
+            .slice(0, 50);
+
+        localStorage.setItem('tarot_draw_history', JSON.stringify(merged));
+    } catch (e) {
+        console.warn('Failed to sync draw history:', e.message);
+    }
+}
+
+// Close profile dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    const profileSwitcher = document.getElementById('profileSwitcher');
+    if (profileSwitcher && !profileSwitcher.contains(e.target)) {
+        profileSwitcher.classList.remove('open');
+    }
+});

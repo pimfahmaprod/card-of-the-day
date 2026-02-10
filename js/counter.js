@@ -81,7 +81,9 @@ const CACHE_DURATIONS = {
     hotComments: CACHE_DURATION_LONG,
     commentsFirstPage: CACHE_DURATION,
     commentsCount: CACHE_DURATION,
-    userRepliedTo: CACHE_DURATION_MEDIUM
+    userRepliedTo: CACHE_DURATION_MEDIUM,
+    userDraws: CACHE_DURATION_MEDIUM,
+    userProfile: CACHE_DURATION_MEDIUM
 };
 
 function getCacheDuration(key) {
@@ -859,6 +861,92 @@ async function fetchAnalyticsSummary() {
 }
 
 // ========================================
+// User Draw History & Profile (per-user Firebase data)
+// ========================================
+
+async function saveUserDraw(fbUserId, drawData) {
+    if (!isFirebaseInitialized || !database || !fbUserId) return null;
+    try {
+        const drawsRef = database.ref('users/' + fbUserId + '/draws');
+        const newDrawRef = drawsRef.push();
+        await newDrawRef.set({
+            cardId: drawData.cardId,
+            cardName: drawData.cardName,
+            cardImage: drawData.cardImage,
+            timestamp: firebase.database.ServerValue.TIMESTAMP,
+            comment: drawData.comment || ''
+        });
+        clearCache('userDraws_' + fbUserId);
+        return { success: true, id: newDrawRef.key };
+    } catch (error) {
+        console.warn('Failed to save user draw:', error.message);
+        return null;
+    }
+}
+
+async function fetchUserDraws(fbUserId, limit) {
+    limit = limit || 50;
+    if (!isFirebaseInitialized || !database || !fbUserId) return [];
+
+    const cacheKey = 'userDraws_' + fbUserId;
+    const cached = getCached(cacheKey);
+    if (cached !== null) return cached;
+
+    try {
+        const drawsRef = database.ref('users/' + fbUserId + '/draws');
+        const query = drawsRef.orderByKey().limitToLast(limit);
+        const snapshot = await query.once('value');
+        const data = snapshot.val();
+        if (!data) return [];
+
+        const draws = Object.entries(data)
+            .map(function(entry) { return { id: entry[0], ...entry[1] }; })
+            .sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+
+        setCache(cacheKey, draws);
+        return draws;
+    } catch (error) {
+        console.warn('Failed to fetch user draws:', error.message);
+        return [];
+    }
+}
+
+async function saveUserProfile(fbUserId, profileData) {
+    if (!isFirebaseInitialized || !database || !fbUserId) return null;
+    try {
+        const profileRef = database.ref('users/' + fbUserId + '/profile');
+        await profileRef.update({
+            ...profileData,
+            lastSeen: firebase.database.ServerValue.TIMESTAMP
+        });
+        clearCache('userProfile_' + fbUserId);
+        return { success: true };
+    } catch (error) {
+        console.warn('Failed to save user profile:', error.message);
+        return null;
+    }
+}
+
+async function fetchUserProfile(fbUserId) {
+    if (!isFirebaseInitialized || !database || !fbUserId) return null;
+
+    const cacheKey = 'userProfile_' + fbUserId;
+    const cached = getCached(cacheKey);
+    if (cached !== null) return cached;
+
+    try {
+        const profileRef = database.ref('users/' + fbUserId + '/profile');
+        const snapshot = await profileRef.once('value');
+        const data = snapshot.val();
+        if (data) setCache(cacheKey, data);
+        return data;
+    } catch (error) {
+        console.warn('Failed to fetch user profile:', error.message);
+        return null;
+    }
+}
+
+// ========================================
 // Export for use in app.js
 // ========================================
 window.cardCounter = {
@@ -900,5 +988,10 @@ window.cardCounter = {
     trackCommentFormStart: trackCommentFormStart,
     trackCommentFormAbandon: trackCommentFormAbandon,
     trackCommentFormSubmit: trackCommentFormSubmit,
-    fetchAnalyticsSummary: fetchAnalyticsSummary
+    fetchAnalyticsSummary: fetchAnalyticsSummary,
+    // User draw history & profile
+    saveUserDraw: saveUserDraw,
+    fetchUserDraws: fetchUserDraws,
+    saveUserProfile: saveUserProfile,
+    fetchUserProfile: fetchUserProfile
 };
