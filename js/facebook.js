@@ -56,50 +56,58 @@ function fetchUserProfileFB() {
                 picture: response.picture?.data?.url
             };
 
-            // Save to localStorage for integration with existing user system
+            // Save basic FB data to localStorage
             localStorage.setItem('tarot_user_id', 'fb_' + response.id);
-            localStorage.setItem('tarot_user_name', response.name);
             localStorage.setItem(FB_CONNECTED_KEY, 'true');
             if (response.picture?.data?.url) {
                 localStorage.setItem(FB_PICTURE_KEY, response.picture.data.url);
             }
 
-            updateFacebookButton(true, response.name, response.picture?.data?.url);
+            // Show FB name temporarily while we check Firebase for custom name
+            var picUrl = response.picture?.data?.url;
+            updateFacebookButton(true, response.name, picUrl);
 
             // Track FB login
             if (window.cardCounter) {
                 window.cardCounter.trackFeatureUsage('facebookLogin', 'connected');
             }
 
-            // Save/update profile in Firebase (comprehensive for social features)
-            if (window.cardCounter && window.cardCounter.saveUserProfile) {
-                var profileData = {
-                    fbName: response.name,
-                    displayName: localStorage.getItem('tarot_user_name') || response.name
-                };
-                if (response.picture && response.picture.data && response.picture.data.url) {
-                    profileData.fbPicture = response.picture.data.url;
-                }
-                window.cardCounter.saveUserProfile(response.id, profileData);
-            }
-
             // Sync draw history from Firebase
             syncDrawHistoryOnLogin(response.id);
 
-            // Check if custom display name exists in Firebase
+            // Fetch existing profile from Firebase FIRST, then save
             if (window.cardCounter && window.cardCounter.fetchUserProfile) {
                 window.cardCounter.fetchUserProfile(response.id).then(function(savedProfile) {
-                    if (savedProfile && savedProfile.displayName) {
-                        // Update in-memory display name cache
-                        if (typeof userDisplayNames !== 'undefined') {
-                            userDisplayNames.set(response.id, savedProfile.displayName);
+                    // Determine the correct display name (Firebase custom name takes priority)
+                    var displayName = response.name;
+                    if (savedProfile && savedProfile.displayName && savedProfile.displayName !== savedProfile.fbName) {
+                        // User has a custom name different from their FB name — preserve it
+                        displayName = savedProfile.displayName;
+                    }
+
+                    localStorage.setItem('tarot_user_name', displayName);
+                    updateFacebookButton(true, displayName, picUrl);
+
+                    // Update in-memory display name cache
+                    if (typeof userDisplayNames !== 'undefined') {
+                        userDisplayNames.set(response.id, displayName);
+                    }
+
+                    // Save/update profile in Firebase (preserve custom displayName)
+                    if (window.cardCounter.saveUserProfile) {
+                        var profileData = {
+                            fbName: response.name,
+                            displayName: displayName
+                        };
+                        if (response.picture && response.picture.data && response.picture.data.url) {
+                            profileData.fbPicture = response.picture.data.url;
                         }
-                        if (savedProfile.displayName !== response.name) {
-                            localStorage.setItem('tarot_user_name', savedProfile.displayName);
-                            updateFacebookButton(true, savedProfile.displayName, response.picture?.data?.url);
-                        }
+                        window.cardCounter.saveUserProfile(response.id, profileData);
                     }
                 });
+            } else {
+                // No Firebase available — fall back to FB name
+                localStorage.setItem('tarot_user_name', response.name);
             }
         }
     });
@@ -170,32 +178,6 @@ function editDisplayName() {
                 userDisplayNames.set(fbUserId, trimmed);
             }
         }
-    }
-}
-
-// Open draw history from profile dropdown
-function openDrawHistoryFromProfile() {
-    const profileSwitcher = document.getElementById('profileSwitcher');
-    if (profileSwitcher) profileSwitcher.classList.remove('open');
-
-    // Open comments panel and switch to draws tab
-    if (typeof openCommentsPanel === 'function') {
-        openCommentsPanel(true);
-    }
-
-    const commentsTabs = document.getElementById('commentsTabs');
-    if (commentsTabs) {
-        commentsTabs.querySelectorAll('.comments-tab').forEach(function(t) {
-            t.classList.remove('active');
-        });
-        const drawsTab = commentsTabs.querySelector('[data-tab="draws"]');
-        if (drawsTab) {
-            drawsTab.classList.add('active');
-        }
-    }
-
-    if (typeof switchCommentsTab === 'function') {
-        switchCommentsTab('draws');
     }
 }
 

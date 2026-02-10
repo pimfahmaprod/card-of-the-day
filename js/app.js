@@ -1614,9 +1614,8 @@ async function resolveDisplayNames(items) {
             if (userDisplayNames.has(fbId)) {
                 item.userName = userDisplayNames.get(fbId);
             }
-            if (userProfilePictures.has(fbId)) {
-                item.profilePicture = userProfilePictures.get(fbId);
-            }
+            // Use Facebook Graph API redirect URL — always current, never expires
+            item.profilePicture = 'https://graph.facebook.com/' + fbId + '/picture?type=normal';
         }
     });
 }
@@ -1791,6 +1790,38 @@ function resetCommentForm() {
         }, delay);
     })();
     setTimeout(spawnShootingStar, 800);
+})();
+
+// Header shooting stars — spawns mini shooting stars inside .comments-panel-header
+(function() {
+    function spawnHeaderStar() {
+        var header = document.querySelector('.comments-panel-header');
+        if (!header || header.offsetHeight === 0) return;
+        var el = document.createElement('div');
+        el.className = 'header-shooting-star';
+        var angle = 136 + Math.random() * 16;
+        var len = 30 + Math.random() * 40;
+        var dist = 60 + Math.random() * 80;
+        var dur = (0.4 + Math.random() * 0.3).toFixed(2);
+        el.style.left = (10 + Math.random() * 80) + '%';
+        el.style.top = (Math.random() * 80) + '%';
+        el.style.width = len + 'px';
+        el.style.setProperty('--hss-angle', angle.toFixed(0) + 'deg');
+        el.style.setProperty('--hss-dist', dist.toFixed(0) + 'px');
+        el.style.setProperty('--hss-dur', dur + 's');
+        header.appendChild(el);
+        el.addEventListener('animationend', function() { el.remove(); }, { once: true });
+    }
+    (function scheduleHeaderStar() {
+        var delay = 800 + Math.random() * 1500;
+        setTimeout(function() {
+            var burst = Math.random() < 0.4 ? 2 : 1;
+            for (var i = 0; i < burst; i++) {
+                setTimeout(spawnHeaderStar, i * (80 + Math.random() * 150));
+            }
+            scheduleHeaderStar();
+        }, delay);
+    })();
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -2251,6 +2282,12 @@ function initCommentsPanel() {
         commentsOverlay.addEventListener('click', closeCommentsPanel);
     }
 
+    // Theme toggle
+    var themeToggle = document.getElementById('commentsThemeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleCommentsTheme);
+    }
+
     // Tab click handlers
     if (commentsTabs) {
         commentsTabs.addEventListener('click', (e) => {
@@ -2289,6 +2326,35 @@ function initCommentsPanel() {
                     loadMoreComments();
                 }
             }
+        });
+
+        // Collapse header on scroll down, expand on scroll up
+        var lastScrollTop = 0;
+        var scrollThreshold = 30;
+        var headerCollapsed = false;
+        var collapseTime = 0;
+        commentsList.addEventListener('scroll', function() {
+            var st = commentsList.scrollTop;
+            var panelHeader = document.querySelector('.comments-panel-header');
+            var tabsBar = document.getElementById('commentsTabs');
+            if (!panelHeader) return;
+
+            var delta = st - lastScrollTop;
+            var now = Date.now();
+
+            if (!headerCollapsed && st > scrollThreshold && delta > 5) {
+                // Scrolling down past threshold with enough momentum — collapse
+                headerCollapsed = true;
+                collapseTime = now;
+                panelHeader.classList.add('collapsed');
+                if (tabsBar) tabsBar.classList.add('collapsed');
+            } else if (headerCollapsed && (st <= scrollThreshold || (delta < -8 && now - collapseTime > 300))) {
+                // Scrolling up significantly (with cooldown) or back near top — expand
+                headerCollapsed = false;
+                panelHeader.classList.remove('collapsed');
+                if (tabsBar) tabsBar.classList.remove('collapsed');
+            }
+            lastScrollTop = st;
         });
     }
 
@@ -2366,8 +2432,6 @@ function switchCommentsTab(tabName) {
         loadMyCardComments();
     } else if (tabName === 'me') {
         loadMyComments();
-    } else if (tabName === 'draws') {
-        loadDrawHistory();
     } else if (tabName === 'feed') {
         newestCommentTimestamp = 0;
         loadFeed(true);
@@ -2388,74 +2452,6 @@ function updateCommentsCountBadge(count) {
     } else {
         badge.classList.remove('show');
     }
-}
-
-// ========================================
-// Draw History Tab
-// ========================================
-async function loadDrawHistory() {
-    if (isLoadingComments) return;
-    isLoadingComments = true;
-
-    const commentsList = document.getElementById('commentsList');
-    const loadingEl = getOrCreateLoadingEl();
-    commentsList.innerHTML = '';
-    commentsList.appendChild(loadingEl);
-    loadingEl.style.display = 'block';
-
-    let draws = [];
-
-    // Try Firebase first for FB users
-    if (typeof isFacebookConnected === 'function' && isFacebookConnected() && window.cardCounter && window.cardCounter.fetchUserDraws) {
-        const fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
-        if (fbUserId) {
-            draws = await window.cardCounter.fetchUserDraws(fbUserId);
-        }
-    }
-
-    // Fallback to local history
-    if (draws.length === 0) {
-        draws = getLocalDrawHistory();
-    }
-
-    loadingEl.style.display = 'none';
-
-    if (draws.length === 0) {
-        commentsList.innerHTML = '<div class="comments-empty comments-empty-cta">' +
-            '<div class="comments-empty-text">' + t('draws.empty') + '</div>' +
-            '<p class="cta-subtitle">' + t('draws.emptyHint') + '</p>' +
-            '</div>';
-        isLoadingComments = false;
-        return;
-    }
-
-    draws.forEach(function(draw) {
-        const card = createDrawHistoryCard(draw);
-        commentsList.appendChild(card);
-    });
-
-    isLoadingComments = false;
-}
-
-function createDrawHistoryCard(draw) {
-    const div = document.createElement('div');
-    div.className = 'draw-history-card';
-
-    const date = new Date(draw.timestamp);
-    const locale = currentLang === 'th' ? 'th-TH' : (currentLang === 'ja' ? 'ja-JP' : (currentLang === 'ko' ? 'ko-KR' : (currentLang === 'fr' ? 'fr-FR' : 'en-US')));
-    const dateStr = date.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
-    const timeStr = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
-
-    div.innerHTML = '<div class="draw-card-image">' +
-        '<img src="images/tarot/' + (draw.cardImage || draw.cardName + '.png') + '" alt="' + draw.cardName + '">' +
-        '</div>' +
-        '<div class="draw-card-info">' +
-        '<div class="draw-card-name">' + draw.cardName + '</div>' +
-        '<div class="draw-card-date">' + dateStr + ' ' + timeStr + '</div>' +
-        (draw.comment ? '<div class="draw-card-comment">"' + draw.comment + '"</div>' : '') +
-        '</div>';
-
-    return div;
 }
 
 // ========================================
@@ -2544,6 +2540,14 @@ async function handleNewFeedItem(comment) {
     setTimeout(function() { card.classList.remove('new-comment'); }, 500);
 }
 
+function collapseFeedCard(card) {
+    card.classList.remove('expanded');
+    var sec = card.querySelector('.feed-card-replies-section');
+    var form = card.querySelector('.reply-form');
+    if (sec) sec.classList.remove('open');
+    if (form) form.classList.remove('show');
+}
+
 function createFeedCard(comment) {
     var card = document.createElement('div');
     card.className = 'feed-card';
@@ -2565,24 +2569,40 @@ function createFeedCard(comment) {
         ? '<div class="feed-card-image"><img src="images/tarot/' + escapeHtml(cardImagePath) + '" alt="' + escapeHtml(comment.cardName || 'Tarot') + '" onerror="this.parentElement.style.display=\'none\'"></div>'
         : '';
 
+    // Look up card interpretation
+    var interpretationText = '';
+    var quoteText = '';
+    if (tarotData && tarotData.cards) {
+        var tarotCard = tarotData.cards.find(function(c) { return c.id === comment.cardId || c.name === comment.cardName; });
+        if (tarotCard) {
+            interpretationText = getCardInterpretation(tarotCard);
+            quoteText = getCardQuote(tarotCard);
+        }
+    }
+
     card.innerHTML =
         '<div class="feed-card-header">' +
-            avatarHtml +
+            '<div class="feed-card-avatar-wrap">' +
+                avatarHtml +
+                '<span class="feed-card-reply-count" style="display: none;">' +
+                    '<span class="reply-count-num">0</span>' +
+                '</span>' +
+            '</div>' +
             '<div class="feed-card-author">' +
                 '<span class="feed-card-name">' + escapeHtml(comment.userName || 'Anonymous') + '</span>' +
                 '<span class="feed-card-meta">' + t('feed.drewCard') + ' <strong>' + escapeHtml(comment.cardName || '') + '</strong><span class="feed-card-date">' + dateStr + '</span></span>' +
             '</div>' +
+            '<svg class="feed-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
         '</div>' +
         '<div class="feed-card-body">' +
             '<div class="feed-card-comment">' + escapeHtml(comment.comment || '') + '</div>' +
-            imageHtml +
         '</div>' +
-        '<div class="feed-card-actions">' +
-            '<button class="feed-reply-btn" data-comment-id="' + comment.id + '">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
-                '<span>' + t('comment.reply') + '</span>' +
-                '<span class="reply-count" style="display: none;">0</span>' +
-            '</button>' +
+        '<div class="feed-card-expanded">' +
+            imageHtml +
+            '<div class="feed-card-info">' +
+                (quoteText ? '<div class="feed-card-quote">"' + escapeHtml(quoteText) + '"</div>' : '') +
+                (interpretationText ? '<div class="feed-card-interpretation">' + escapeHtml(interpretationText) + '</div>' : '') +
+            '</div>' +
         '</div>' +
         '<div class="feed-card-replies-section">' +
             '<div class="replies-list"></div>' +
@@ -2596,23 +2616,39 @@ function createFeedCard(comment) {
             '</div>' +
         '</div>';
 
-    // Wire up reply button
-    var replyBtn = card.querySelector('.feed-reply-btn');
+    // Toggle expanded section on card click
+    var feedHeader = card.querySelector('.feed-card-header');
+    var feedBody = card.querySelector('.feed-card-body');
     var repliesSection = card.querySelector('.feed-card-replies-section');
     var replyForm = card.querySelector('.reply-form');
     var replyInput = card.querySelector('.reply-input');
     var replySubmitBtn = card.querySelector('.reply-submit-btn');
+    var repliesLoaded = false;
 
-    replyBtn.addEventListener('click', async function(e) {
-        e.stopPropagation();
-        if (!repliesSection.classList.contains('open')) {
-            repliesSection.classList.add('open');
-            await loadReplies(card, comment.id);
+    function expandCard(e) {
+        if (e.target.closest('.feed-card-replies-section') || e.target.closest('.reply-form')) return;
+        // Already expanded — do nothing
+        if (card.classList.contains('expanded')) return;
+        // Collapse any other expanded card in the list
+        var list = card.closest('.comments-list');
+        if (list) {
+            var prev = list.querySelector('.feed-card.expanded');
+            if (prev && prev !== card) {
+                collapseFeedCard(prev);
+            }
         }
-        replyForm.classList.toggle('show');
-        if (replyForm.classList.contains('show')) replyInput.focus();
-    });
+        card.classList.add('expanded');
+        repliesSection.classList.add('open');
+        replyForm.classList.add('show');
+        if (!repliesLoaded) {
+            repliesLoaded = true;
+            loadReplies(card, comment.id);
+        }
+    }
+    feedHeader.addEventListener('click', expandCard);
+    feedBody.addEventListener('click', expandCard);
 
+    // Wire up reply form
     replyInput.addEventListener('input', function() {
         replySubmitBtn.disabled = replyInput.value.trim().length === 0;
     });
@@ -2639,8 +2675,9 @@ function createFeedCard(comment) {
                     }
                 }
                 replyInput.value = '';
-                replyForm.classList.remove('show');
                 await loadReplies(card, comment.id);
+                // Update reply count display
+                loadReplyCount(card, comment.id);
                 showToast(t('toast.replySuccess'));
             } else {
                 showToast(t('toast.error'));
@@ -2797,10 +2834,32 @@ function getOrCreateLoadingEl() {
     return loadingEl;
 }
 
+// Comments panel theme toggle
+function toggleCommentsTheme() {
+    var panel = document.getElementById('commentsPanel');
+    if (!panel) return;
+    var isLight = panel.classList.toggle('light-theme');
+    localStorage.setItem('tarot_comments_theme', isLight ? 'light' : 'dark');
+}
+
+function applyCommentsTheme() {
+    var panel = document.getElementById('commentsPanel');
+    if (!panel) return;
+    var saved = localStorage.getItem('tarot_comments_theme');
+    if (saved === 'light') {
+        panel.classList.add('light-theme');
+    } else {
+        panel.classList.remove('light-theme');
+    }
+}
+
 function openCommentsPanel(skipLoadComments = false) {
     const commentsPanel = document.getElementById('commentsPanel');
     const commentsOverlay = document.getElementById('commentsOverlay');
     const commentsTabs = document.getElementById('commentsTabs');
+
+    // Restore saved theme preference
+    applyCommentsTheme();
 
     commentsPanel.classList.add('show');
     commentsOverlay.classList.add('show');
@@ -3644,11 +3703,15 @@ async function loadReplyCount(card, commentId) {
     if (!window.cardCounter || !window.cardCounter.getReplyCount) return;
 
     const count = await window.cardCounter.getReplyCount(commentId);
-    const replyCountEl = card.querySelector('.reply-count');
+    const replyCountEl = card.querySelector('.feed-card-reply-count');
 
-    if (count > 0) {
-        replyCountEl.textContent = count;
-        replyCountEl.style.display = 'inline';
+    if (replyCountEl) {
+        if (count > 0) {
+            replyCountEl.querySelector('.reply-count-num').textContent = count;
+            replyCountEl.style.display = 'inline-flex';
+        } else {
+            replyCountEl.style.display = 'none';
+        }
     }
 }
 
@@ -3659,6 +3722,7 @@ async function loadReplies(card, commentId) {
     const repliesList = card.querySelector('.replies-list');
     const repliesEmptyBtn = card.querySelector('.replies-empty-btn');
 
+    repliesList.style.display = '';
     repliesList.innerHTML = '<div class="related-comment-loading">' + t('common.loading') + '</div>';
     if (repliesEmptyBtn) repliesEmptyBtn.style.display = 'none';
 
@@ -3683,6 +3747,7 @@ async function loadReplies(card, commentId) {
                 </div>
             `;
         }).join('');
+        repliesList.style.display = '';
 
         // Update count on reply button
         const replyCountEl = card.querySelector('.reply-count');
@@ -3694,6 +3759,7 @@ async function loadReplies(card, commentId) {
         if (repliesEmptyBtn) repliesEmptyBtn.style.display = 'none';
     } else {
         repliesList.innerHTML = '';
+        repliesList.style.display = 'none';
         if (repliesEmptyBtn) repliesEmptyBtn.style.display = 'block';
     }
 }

@@ -35,7 +35,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Prompt:wght@200;300;400;500&family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=1.2.8">
+    <link rel="stylesheet" href="css/styles.css?v=1.2.24">
 </head>
 <body>
     <!-- Starfield Background -->
@@ -102,14 +102,6 @@
                 </svg>
                 <span data-i18n="profile.editName">เปลี่ยนชื่อ</span>
             </button>
-            <button class="profile-dropdown-option" onclick="openDrawHistoryFromProfile()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                <span data-i18n="profile.drawHistory">ประวัติการจับไพ่</span>
-            </button>
-            <div class="profile-dropdown-divider"></div>
             <button class="profile-dropdown-option profile-logout" onclick="logoutFromProfile()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -348,6 +340,10 @@
     <!-- Comments Panel -->
     <div class="comments-panel" id="commentsPanel">
         <div class="comments-panel-header">
+            <button class="comments-theme-toggle" id="commentsThemeToggle" aria-label="Toggle theme">
+                <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
             <div class="comments-panel-title">
                 <h3 data-i18n="comments.title">เรื่องเล่าจากวงไพ่ ✦</h3>
                 <span class="comments-panel-user" id="commentsPanelUser">Anonymous</span>
@@ -363,7 +359,7 @@
             <button class="comments-tab" data-tab="mycard" style="display:none;" data-i18n="comments.tabMyCard">ไพ่ฉัน</button>
             <button class="comments-tab" data-tab="me" data-i18n="comments.tabMine">ของฉัน</button>
             <button class="comments-tab" data-tab="activity" data-i18n="comments.tabActivity">กิจกรรม</button>
-            <button class="comments-tab" data-tab="draws" data-i18n="comments.tabDraws">ไพ่ที่จับ</button>
+
             <button class="comments-tab comments-tab-cardview" data-tab="cardview" style="display:none;">
                 <img class="tab-card-preview" alt="">
             </button>
@@ -545,8 +541,8 @@
     <!-- Scripts -->
     <script src="js/translations.js?v=1.2.5"></script>
     <script src="js/card-interpretations.js?v=1.2.4"></script>
-    <script src="js/app.js?v=1.2.17"></script>
-    <script src="js/facebook.js?v=1.2.0"></script>
+    <script src="js/app.js?v=1.2.30"></script>
+    <script src="js/facebook.js?v=1.2.2"></script>
     <script src="js/counter.js?v=1.2.9"></script>
 </body>
 </html>
