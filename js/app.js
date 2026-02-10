@@ -1453,7 +1453,7 @@ window.addEventListener('resize', () => {
 });
 
 // Share Functions
-const siteUrl = 'https://pimfahmaprod.github.io/love-tarot/';
+const siteUrl = 'https://pimfahmaprod.github.io/card-of-the-day/';
 
 function getShareText() {
     const cardName = document.getElementById('resultCardName').textContent;
