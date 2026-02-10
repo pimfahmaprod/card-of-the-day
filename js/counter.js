@@ -999,5 +999,6 @@ window.cardCounter = {
     saveUserDraw: saveUserDraw,
     fetchUserDraws: fetchUserDraws,
     saveUserProfile: saveUserProfile,
-    fetchUserProfile: fetchUserProfile
+    fetchUserProfile: fetchUserProfile,
+    clearProfileCache: function(fbUserId) { clearCache('userProfile_' + fbUserId); }
 };

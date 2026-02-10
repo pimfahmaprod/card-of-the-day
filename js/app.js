@@ -1554,6 +1554,8 @@ function saveUserName(name) {
 // In-memory caches: fbUserId (without prefix) → value
 const userDisplayNames = new Map();
 const userProfilePictures = new Map();
+const userProfileCacheTime = new Map();
+const PROFILE_CACHE_TTL = 3 * 60 * 1000; // 3 minutes in-memory TTL
 
 async function resolveDisplayNames(items) {
     if (!items || items.length === 0) return;
@@ -1569,20 +1571,29 @@ async function resolveDisplayNames(items) {
         }
     }
 
-    // Collect unique FB user IDs that aren't cached yet
-    const uncachedFbIds = new Set();
+    // Collect unique FB user IDs that need fetching (uncached or stale)
+    var now = Date.now();
+    const fbIdsToFetch = new Set();
     items.forEach(function(item) {
         if (item.userId && item.userId.startsWith('fb_')) {
             const fbId = item.userId.replace('fb_', '');
-            if (!userDisplayNames.has(fbId)) {
-                uncachedFbIds.add(fbId);
+            var cachedAt = userProfileCacheTime.get(fbId) || 0;
+            if (!userDisplayNames.has(fbId) || (now - cachedAt) > PROFILE_CACHE_TTL) {
+                fbIdsToFetch.add(fbId);
             }
         }
     });
 
     // Fetch profiles in parallel
-    if (uncachedFbIds.size > 0) {
-        await Promise.all(Array.from(uncachedFbIds).map(async function(fbId) {
+    if (fbIdsToFetch.size > 0) {
+        // Clear localStorage cache for stale profiles so Firebase is re-read
+        if (window.cardCounter && window.cardCounter.clearProfileCache) {
+            fbIdsToFetch.forEach(function(fbId) {
+                window.cardCounter.clearProfileCache(fbId);
+            });
+        }
+
+        await Promise.all(Array.from(fbIdsToFetch).map(async function(fbId) {
             try {
                 const profile = await window.cardCounter.fetchUserProfile(fbId);
                 if (profile && profile.displayName) {
@@ -1591,6 +1602,7 @@ async function resolveDisplayNames(items) {
                 if (profile && profile.fbPicture) {
                     userProfilePictures.set(fbId, profile.fbPicture);
                 }
+                userProfileCacheTime.set(fbId, Date.now());
             } catch (e) { /* ignore */ }
         }));
     }
@@ -2334,6 +2346,16 @@ function switchCommentsTab(tabName) {
         }
     }
 
+    // Toggle feed-mode class for full-width minimal layout
+    var feedCommentsList = document.getElementById('commentsList');
+    if (feedCommentsList) {
+        if (tabName === 'feed') {
+            feedCommentsList.classList.add('feed-mode');
+        } else {
+            feedCommentsList.classList.remove('feed-mode');
+        }
+    }
+
     // Load content for the selected tab
     if (tabName === 'new') {
         newestCommentTimestamp = 0;
@@ -2548,8 +2570,7 @@ function createFeedCard(comment) {
             avatarHtml +
             '<div class="feed-card-author">' +
                 '<span class="feed-card-name">' + escapeHtml(comment.userName || 'Anonymous') + '</span>' +
-                '<span class="feed-card-meta">' + t('feed.drewCard') + ' <strong>' + escapeHtml(comment.cardName || '') + '</strong></span>' +
-                '<span class="feed-card-date">' + dateStr + '</span>' +
+                '<span class="feed-card-meta">' + t('feed.drewCard') + ' <strong>' + escapeHtml(comment.cardName || '') + '</strong><span class="feed-card-date">' + dateStr + '</span></span>' +
             '</div>' +
         '</div>' +
         '<div class="feed-card-body">' +
@@ -2713,40 +2734,39 @@ async function loadActivityTimeline() {
 function createActivityCard(activity) {
     var div = document.createElement('div');
     div.className = 'activity-card';
+    div.dataset.type = activity.type;
 
     var date = new Date(activity.timestamp);
     var dateStr = formatCommentDate(date);
     var d = activity.data;
-    var iconSvg, actionText, detailHtml;
+    var dotIconSvg, actionText, detailHtml;
 
     switch (activity.type) {
         case 'draw':
-            iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="7" height="10" rx="1" transform="rotate(-10 6.5 9)"/><rect x="14" y="4" width="7" height="10" rx="1" transform="rotate(10 17.5 9)"/></svg>';
+            dotIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="4" width="14" height="17" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg>';
             actionText = t('activity.drewCard');
-            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt=""></div>' +
+            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>' +
                 '<div class="activity-card-info"><span class="activity-card-name">' + escapeHtml(d.cardName) + '</span>' +
                 (d.comment ? '<span class="activity-card-comment">"' + escapeHtml(d.comment) + '"</span>' : '') + '</div></div>';
             break;
         case 'comment':
-            iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
-            actionText = t('activity.commented');
-            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt=""></div>' +
-                '<div class="activity-card-info"><span class="activity-card-name">' + escapeHtml(d.cardName) + '</span>' +
-                '<span class="activity-card-comment">"' + escapeHtml(d.comment || '') + '"</span></div></div>';
+            dotIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+            actionText = t('activity.commented') + ' <strong>' + escapeHtml(d.cardName) + '</strong>';
+            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>' +
+                '<div class="activity-card-info"><span class="activity-card-comment">"' + escapeHtml(d.comment || '') + '"</span></div></div>';
             break;
         case 'replied':
-            iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>';
-            actionText = t('activity.repliedTo') + ' ' + escapeHtml(d.userName || 'Anonymous');
-            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt=""></div>' +
+            dotIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>';
+            actionText = t('activity.repliedTo') + ' <strong>' + escapeHtml(d.userName || 'Anonymous') + '</strong>';
+            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>' +
                 '<div class="activity-card-info"><span class="activity-card-name">' + escapeHtml(d.cardName || '') + '</span>' +
                 '<span class="activity-card-comment">"' + escapeHtml(d.comment || '') + '"</span></div></div>';
             break;
     }
 
-    div.innerHTML = '<div class="activity-timeline-dot"></div>' +
+    div.innerHTML = '<div class="activity-timeline-dot">' + dotIconSvg + '</div>' +
         '<div class="activity-card-content">' +
             '<div class="activity-card-header">' +
-                '<span class="activity-icon">' + iconSvg + '</span>' +
                 '<span class="activity-action">' + actionText + '</span>' +
                 '<span class="activity-date">' + dateStr + '</span>' +
             '</div>' + detailHtml +
@@ -2830,6 +2850,10 @@ function openCommentsPanel(skipLoadComments = false) {
     if (window.cardCounter && window.cardCounter.unsubscribeFromNewComments) {
         window.cardCounter.unsubscribeFromNewComments();
     }
+
+    // Set feed-mode for full-width layout
+    var commentsList = document.getElementById('commentsList');
+    if (commentsList) commentsList.classList.add('feed-mode');
 
     // Load social feed
     loadFeed(true);

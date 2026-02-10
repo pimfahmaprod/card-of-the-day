@@ -35,7 +35,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Prompt:wght@200;300;400;500&family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=1.2.5">
+    <link rel="stylesheet" href="css/styles.css?v=1.2.8">
 </head>
 <body>
     <!-- Starfield Background -->
@@ -85,13 +85,13 @@
     <!-- Profile/FB Login Button (persistent across all pages) -->
     <div class="profile-switcher" id="profileSwitcher">
         <button class="fb-login-btn" id="facebookConnectBtn" onclick="handleProfileClick()">
-            <img id="fbProfilePic" class="fb-profile-pic" src="" alt="" style="display:none">
+            <img id="fbProfilePic" class="fb-profile-pic" alt="" style="display:none">
             <svg id="fbIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
             <span id="fbBtnText">Login</span>
         </button>
         <div class="profile-dropdown" id="profileDropdown">
             <div class="profile-dropdown-header">
-                <img id="profileDropdownPic" class="profile-dropdown-pic" src="" alt="">
+                <img id="profileDropdownPic" class="profile-dropdown-pic" alt="">
                 <span id="profileDropdownName" class="profile-dropdown-name"></span>
             </div>
             <div class="profile-dropdown-divider"></div>
@@ -194,7 +194,7 @@
                 <img src="images/card_back_blue.png" alt="Card Back">
             </div>
             <div class="card-face card-front">
-                <img id="centerCardImage" src="" alt="Card">
+                <img id="centerCardImage" alt="Card">
             </div>
         </div>
     </div>
@@ -236,7 +236,7 @@
                 <div class="blessing-card-wrapper">
                     <div class="blessing-card-inner">
                         <div class="blessing-card-face blessing-card-front">
-                            <img id="blessingCard" src="" alt="Your Card">
+                            <img id="blessingCard" alt="Your Card">
                         </div>
                         <div class="blessing-card-face blessing-card-back">
                             <img src="images/card_back_blue.png" alt="Card Back">
@@ -326,7 +326,7 @@
     <div class="copy-toast" id="copyToast" data-i18n="toast.copied">คัดลอกลิงก์แล้ว!</div>
 
     <!-- Background Music -->
-    <audio id="bgMusic" src="audio/background.mp3" loop preload="auto" autoplay></audio>
+    <audio id="bgMusic" src="audio/background.mp3" loop preload="auto"></audio>
 
     <!-- Sound Wave Indicator -->
     <div class="sound-indicator" id="soundIndicator">
@@ -365,7 +365,7 @@
             <button class="comments-tab" data-tab="activity" data-i18n="comments.tabActivity">กิจกรรม</button>
             <button class="comments-tab" data-tab="draws" data-i18n="comments.tabDraws">ไพ่ที่จับ</button>
             <button class="comments-tab comments-tab-cardview" data-tab="cardview" style="display:none;">
-                <img class="tab-card-preview" src="" alt="">
+                <img class="tab-card-preview" alt="">
             </button>
         </div>
         <div class="comments-list" id="commentsList">
@@ -545,8 +545,8 @@
     <!-- Scripts -->
     <script src="js/translations.js?v=1.2.5"></script>
     <script src="js/card-interpretations.js?v=1.2.4"></script>
-    <script src="js/app.js?v=1.2.15"></script>
+    <script src="js/app.js?v=1.2.17"></script>
     <script src="js/facebook.js?v=1.2.0"></script>
-    <script src="js/counter.js?v=1.2.8"></script>
+    <script src="js/counter.js?v=1.2.9"></script>
 </body>
 </html>

@@ -2863,37 +2863,56 @@ footer {
 }
 
 /* ========================================
-   Feed Card (Facebook-style social feed)
+   Feed Card (Minimal full-width style)
    ======================================== */
+
+/* Remove side padding when feed tab is active */
+.comments-list.feed-mode {
+    padding: 0;
+    gap: 0;
+}
+
 .feed-card {
-    background: rgba(160, 180, 220, 0.06);
-    border: 1px solid rgba(154, 170, 212, 0.1);
-    border-radius: 12px;
-    margin-bottom: 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(154, 170, 212, 0.08);
+    border-radius: 0;
     overflow: hidden;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.feed-card:last-child {
+    border-bottom: none;
+}
+
+.feed-card:hover {
+    background: rgba(154, 170, 212, 0.03);
 }
 
 .feed-card-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 10px;
-    padding: 14px 14px 0;
+    padding: 16px 18px 0;
 }
 
 .feed-card-header .comment-avatar {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     flex-shrink: 0;
+    border: 1.5px solid rgba(154, 170, 212, 0.15);
 }
 
 .feed-card-header .comment-avatar-default {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid rgba(154, 170, 212, 0.1);
 }
 
 .feed-card-header .comment-avatar-default svg {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
 }
 
 .feed-card-author {
@@ -2901,101 +2920,135 @@ footer {
     flex-direction: column;
     gap: 1px;
     min-width: 0;
+    flex: 1;
 }
 
 .feed-card-name {
-    font-weight: 600;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 500;
     font-size: 0.85rem;
-    color: rgba(192, 200, 224, 0.95);
+    color: rgba(192, 200, 224, 0.9);
+    line-height: 1.3;
+    letter-spacing: 0.01em;
 }
 
 .feed-card-meta {
-    font-size: 0.75rem;
-    color: rgba(154, 170, 212, 0.7);
+    font-size: 0.7rem;
+    color: rgba(154, 170, 212, 0.45);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 300;
 }
 
 .feed-card-meta strong {
-    color: rgba(154, 170, 212, 0.9);
-    font-weight: 500;
+    color: rgba(154, 170, 212, 0.65);
+    font-weight: 400;
 }
 
 .feed-card-date {
-    font-size: 0.7rem;
-    color: rgba(154, 170, 212, 0.45);
+    font-size: 0.65rem;
+    color: rgba(154, 170, 212, 0.3);
+}
+
+.feed-card-date::before {
+    content: '\00B7';
+    color: rgba(154, 170, 212, 0.25);
+    font-weight: bold;
+    margin: 0 3px;
 }
 
 .feed-card-body {
-    padding: 10px 14px;
+    padding: 8px 18px 14px;
 }
 
 .feed-card-comment {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 300;
     font-size: 0.85rem;
-    color: rgba(192, 200, 224, 0.85);
-    line-height: 1.5;
+    color: rgba(192, 200, 224, 0.75);
+    line-height: 1.6;
     margin-bottom: 10px;
     word-break: break-word;
+    border-left: none;
+    padding-left: 0;
+}
+
+.feed-card-comment:empty {
+    display: none;
 }
 
 .feed-card-image {
     display: flex;
     justify-content: center;
-    margin-top: 4px;
+    background: none;
+    border-radius: 0;
+    padding: 0;
+    margin-top: 2px;
 }
 
 .feed-card-image img {
-    max-height: 200px;
+    max-height: 220px;
     border-radius: 8px;
     object-fit: contain;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: transform 0.2s ease, opacity 0.2s;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
 }
 
 .feed-card-image img:hover {
-    opacity: 0.85;
+    transform: scale(1.02);
+    opacity: 0.92;
 }
 
 .feed-card-actions {
     display: flex;
     align-items: center;
-    border-top: 1px solid rgba(154, 170, 212, 0.08);
-    padding: 0 6px;
+    padding: 0 12px;
 }
 
 .feed-reply-btn {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     background: none;
     border: none;
-    color: rgba(154, 170, 212, 0.6);
-    font-size: 0.78rem;
-    padding: 10px 8px;
+    color: rgba(154, 170, 212, 0.4);
+    font-size: 0.72rem;
+    padding: 8px 8px;
     cursor: pointer;
-    transition: color 0.2s;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 300;
 }
 
 .feed-reply-btn:hover {
-    color: rgba(154, 170, 212, 0.9);
+    color: rgba(154, 170, 212, 0.8);
+    background: rgba(154, 170, 212, 0.05);
 }
 
 .feed-reply-btn svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
 }
 
 .feed-reply-btn .reply-count {
-    background: rgba(154, 170, 212, 0.12);
+    background: rgba(154, 170, 212, 0.08);
     border-radius: 8px;
     padding: 1px 6px;
-    font-size: 0.7rem;
-    min-width: 18px;
+    font-size: 0.65rem;
+    min-width: 16px;
     text-align: center;
+    font-weight: 400;
 }
 
 .feed-card-replies-section {
     display: none;
-    border-top: 1px solid rgba(154, 170, 212, 0.06);
-    padding: 0 14px 10px;
+    border-top: 1px solid rgba(154, 170, 212, 0.05);
+    padding: 0 18px 14px;
+    background: rgba(0, 0, 0, 0.03);
 }
 
 .feed-card-replies-section.open {
@@ -3003,12 +3056,12 @@ footer {
 }
 
 .feed-card-replies-section .replies-list {
-    padding: 8px 0 0;
+    padding: 10px 0 0;
 }
 
 .feed-card-replies-section .reply-form {
     display: none;
-    padding-top: 8px;
+    padding-top: 10px;
 }
 
 .feed-card-replies-section .reply-form.show {
@@ -3017,28 +3070,32 @@ footer {
 
 .feed-card-replies-section .reply-input-wrapper {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     align-items: center;
 }
 
 .feed-card-replies-section .reply-input {
     flex: 1;
-    background: rgba(154, 170, 212, 0.08);
-    border: 1px solid rgba(154, 170, 212, 0.12);
+    background: rgba(154, 170, 212, 0.06);
+    border: 1px solid rgba(154, 170, 212, 0.1);
     border-radius: 20px;
     color: #C0C8E0;
-    padding: 7px 14px;
-    font-size: 0.78rem;
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 300;
     outline: none;
+    transition: border-color 0.2s, background 0.2s;
 }
 
 .feed-card-replies-section .reply-input:focus {
-    border-color: rgba(154, 170, 212, 0.3);
+    border-color: rgba(154, 170, 212, 0.25);
+    background: rgba(154, 170, 212, 0.08);
 }
 
 .feed-card-replies-section .reply-submit-btn {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: rgba(154, 170, 212, 0.15);
     border: none;
@@ -3048,16 +3105,17 @@ footer {
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
-    transition: background 0.2s, color 0.2s;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
 }
 
 .feed-card-replies-section .reply-submit-btn:hover:not(:disabled) {
-    background: rgba(154, 170, 212, 0.25);
+    background: rgba(154, 170, 212, 0.3);
     color: #C0C8E0;
+    transform: scale(1.05);
 }
 
 .feed-card-replies-section .reply-submit-btn:disabled {
-    opacity: 0.3;
+    opacity: 0.25;
     cursor: default;
 }
 
@@ -3066,83 +3124,149 @@ footer {
     height: 14px;
 }
 
+/* New comment animation */
+.feed-card.new-comment {
+    animation: feedSlideIn 0.4s ease-out;
+}
+
+@keyframes feedSlideIn {
+    0% { opacity: 0; transform: translateY(-15px) scale(0.97); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* ========================================
    Activity Timeline
    ======================================== */
+.activity-timeline-wrapper {
+    padding: 8px 4px 8px 0;
+}
+
 .activity-card {
     display: flex;
-    align-items: stretch;
-    gap: 12px;
-    padding: 0 0 0 14px;
+    gap: 14px;
+    padding: 0 0 0 8px;
     position: relative;
-    min-height: 60px;
+    margin-bottom: 4px;
+    flex-shrink: 0;
 }
 
 /* Timeline vertical line */
 .activity-card::before {
     content: '';
     position: absolute;
-    left: 18px;
+    left: 22px;
     top: 0;
     bottom: 0;
     width: 2px;
-    background: rgba(154, 170, 212, 0.12);
+    background: linear-gradient(180deg, rgba(154, 170, 212, 0.18) 0%, rgba(154, 170, 212, 0.06) 100%);
+}
+
+.activity-card:first-child::before {
+    top: 20px;
 }
 
 .activity-card:last-child::before {
     bottom: 50%;
 }
 
+/* Color-coded timeline dots */
 .activity-timeline-dot {
-    width: 10px;
-    height: 10px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    background: rgba(154, 170, 212, 0.5);
-    box-shadow: 0 0 6px rgba(154, 170, 212, 0.25);
     flex-shrink: 0;
-    margin-top: 16px;
+    margin-top: 12px;
     z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(154, 170, 212, 0.12);
+    border: 2px solid rgba(154, 170, 212, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.activity-card:hover .activity-timeline-dot {
+    transform: scale(1.1);
+}
+
+.activity-timeline-dot svg {
+    width: 13px;
+    height: 13px;
+    stroke-width: 2.5;
+}
+
+/* Draw activity - purple accent */
+.activity-card[data-type="draw"] .activity-timeline-dot {
+    background: rgba(147, 130, 220, 0.18);
+    border-color: rgba(147, 130, 220, 0.35);
+    color: rgba(170, 155, 235, 0.85);
+    box-shadow: 0 0 10px rgba(147, 130, 220, 0.15);
+}
+
+/* Comment activity - blue accent */
+.activity-card[data-type="comment"] .activity-timeline-dot {
+    background: rgba(100, 160, 230, 0.18);
+    border-color: rgba(100, 160, 230, 0.35);
+    color: rgba(120, 175, 240, 0.85);
+    box-shadow: 0 0 10px rgba(100, 160, 230, 0.15);
+}
+
+/* Reply activity - teal accent */
+.activity-card[data-type="replied"] .activity-timeline-dot {
+    background: rgba(100, 200, 190, 0.18);
+    border-color: rgba(100, 200, 190, 0.35);
+    color: rgba(120, 215, 205, 0.85);
+    box-shadow: 0 0 10px rgba(100, 200, 190, 0.15);
 }
 
 .activity-card-content {
     flex: 1;
-    background: rgba(160, 180, 220, 0.06);
+    background: linear-gradient(135deg, rgba(160, 180, 220, 0.07) 0%, rgba(130, 150, 200, 0.03) 100%);
     border: 1px solid rgba(154, 170, 212, 0.1);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
     min-width: 0;
+    transition: border-color 0.2s;
+}
+
+.activity-card:hover .activity-card-content {
+    border-color: rgba(154, 170, 212, 0.18);
 }
 
 .activity-card-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
 }
 
 .activity-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(154, 170, 212, 0.6);
-}
-
-.activity-icon svg {
-    width: 16px;
-    height: 16px;
+    display: none;
 }
 
 .activity-action {
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: rgba(192, 200, 224, 0.9);
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: rgba(192, 200, 224, 0.85);
+}
+
+/* Color-coded action text */
+.activity-card[data-type="draw"] .activity-action {
+    color: rgba(170, 155, 235, 0.9);
+}
+.activity-card[data-type="comment"] .activity-action {
+    color: rgba(120, 175, 240, 0.9);
+}
+.activity-card[data-type="replied"] .activity-action {
+    color: rgba(120, 215, 205, 0.9);
 }
 
 .activity-date {
-    font-size: 0.7rem;
-    color: rgba(154, 170, 212, 0.4);
+    font-size: 0.68rem;
+    color: rgba(154, 170, 212, 0.35);
     margin-left: auto;
+    white-space: nowrap;
 }
 
 .activity-card-detail {
@@ -3155,11 +3279,13 @@ footer {
 }
 
 .activity-card-image {
-    width: 40px;
-    height: 60px;
+    width: 42px;
+    height: 62px;
     flex-shrink: 0;
-    border-radius: 4px;
+    border-radius: 5px;
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(154, 170, 212, 0.1);
 }
 
 .activity-card-image img {
@@ -3171,19 +3297,23 @@ footer {
 .activity-card-info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
     min-width: 0;
 }
 
 .activity-card-name {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: rgba(154, 170, 212, 0.85);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-style: italic;
+    color: rgba(192, 200, 224, 0.85);
 }
 
 .activity-card-comment {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 300;
     font-size: 0.75rem;
-    color: rgba(192, 200, 224, 0.6);
+    color: rgba(192, 200, 224, 0.55);
     font-style: italic;
     overflow: hidden;
     text-overflow: ellipsis;
