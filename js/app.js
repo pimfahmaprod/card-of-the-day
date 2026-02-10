@@ -492,11 +492,6 @@ function toggleMute(e) {
     isMuted = !isMuted;
     audio.muted = isMuted;
 
-    // Track music toggle
-    if (window.cardCounter) {
-        window.cardCounter.trackMusicToggle(isMuted);
-    }
-
     console.log('Mute toggled:', isMuted);
 
     if (muteIconEl && unmuteIconEl) {
@@ -826,12 +821,6 @@ function startExperience() {
     // Don't allow starting if page is not ready yet
     if (!isPageReady) {
         return;
-    }
-
-    // Track journey step: landing to main
-    if (window.cardCounter) {
-        window.cardCounter.trackJourneyStep('landing');
-        window.cardCounter.trackDeviceType();
     }
 
     // Play music on first user interaction (guaranteed to work)
@@ -1319,14 +1308,6 @@ function selectCard(cardId, cardElement) {
     // Reset center card flip state
     document.getElementById('centerCardInner').classList.remove('flipped');
 
-    // Track card pick journey and timing
-    if (window.cardCounter) {
-        window.cardCounter.trackJourneyStep('pick');
-        window.cardCounter.trackTimeToFirstPick();
-        const index = parseInt(cardElement.dataset.index);
-        window.cardCounter.trackCardPosition(index * (360 / 78));
-    }
-
     // Step 1: Add selecting class for golden glow
     cardElement.classList.add('selecting');
 
@@ -1369,11 +1350,6 @@ function selectCard(cardId, cardElement) {
                 document.getElementById('resultPanel').classList.add('active');
                 isAnimating = false;
 
-                // Track journey step: result
-                if (window.cardCounter) {
-                    window.cardCounter.trackJourneyStep('result');
-                }
-
                 // Initialize comment form (show/hide name group)
                 initCommentForm();
 
@@ -1388,9 +1364,6 @@ function selectCard(cardId, cardElement) {
 function closeResult() {
     if (isAnimating) return;
     isAnimating = true;
-
-    // Track retry
-    if (window.cardCounter) window.cardCounter.trackRetry();
 
     const cardGrid = document.getElementById('cardGrid');
 
@@ -1489,9 +1462,6 @@ function tryWebShare() {
 }
 
 function shareToFacebook() {
-    // Track share
-    if (window.cardCounter) window.cardCounter.trackShare('messenger');
-
     // Share to Facebook Messenger
     const text = getShareText() + '\n\n' + siteUrl;
     navigator.clipboard.writeText(text).then(() => {
@@ -1505,18 +1475,12 @@ function shareToFacebook() {
 }
 
 function shareToLine() {
-    // Track share
-    if (window.cardCounter) window.cardCounter.trackShare('line');
-
     // LINE already opens chat/messaging
     const text = encodeURIComponent(getShareText() + '\n' + siteUrl);
     window.open(`https://line.me/R/share?text=${text}`, '_blank', 'width=600,height=400');
 }
 
 function copyLink() {
-    // Track share
-    if (window.cardCounter) window.cardCounter.trackShare('copylink');
-
     const text = getShareText() + '\n\n' + siteUrl;
     navigator.clipboard.writeText(text).then(() => {
         showToast(t('share.copiedText'));
@@ -1546,6 +1510,10 @@ function getSavedUserName() {
 
 function saveUserName(name) {
     localStorage.setItem(SAVED_NAME_KEY, name.trim());
+}
+
+function getCurrentProfilePicture() {
+    return localStorage.getItem('tarot_fb_picture') || '';
 }
 
 // ========================================
@@ -1614,8 +1582,13 @@ async function resolveDisplayNames(items) {
             if (userDisplayNames.has(fbId)) {
                 item.userName = userDisplayNames.get(fbId);
             }
-            // Use Facebook Graph API redirect URL — always current, never expires
-            item.profilePicture = 'https://graph.facebook.com/' + fbId + '/picture?type=normal';
+            // Use stored profilePicture (from comment/reply data or Firebase profile)
+            // Falls back to cached profile picture from Firebase user profile
+            if (!item.profilePicture) {
+                if (userProfilePictures.has(fbId)) {
+                    item.profilePicture = userProfilePictures.get(fbId);
+                }
+            }
         }
     });
 }
@@ -1682,11 +1655,6 @@ let cardViewData = null;
 // View comments for the current card (opens cardview tab)
 async function viewCardComments() {
     if (!currentCardData) return;
-
-    // Track view card comments (ส่อง button)
-    if (window.cardCounter) {
-        window.cardCounter.trackFeatureUsage('viewCardComments', 'click');
-    }
 
     // Store card data for the cardview tab
     cardViewData = { ...currentCardData };
@@ -1847,19 +1815,6 @@ document.addEventListener('DOMContentLoaded', () => {
         resultPanel.addEventListener('scroll', () => {
             const scrollTop = resultPanel.scrollTop;
             const scrollHeight = resultPanel.scrollHeight - resultPanel.clientHeight;
-            if (scrollHeight > 0) {
-                const scrollPercent = Math.round((scrollTop / scrollHeight) * 100);
-                // Only track when reaching new milestones (25%, 50%, 75%, 100%)
-                const milestones = [25, 50, 75, 100];
-                for (const milestone of milestones) {
-                    if (scrollPercent >= milestone && maxScrollTracked < milestone) {
-                        maxScrollTracked = milestone;
-                        if (window.cardCounter) {
-                            window.cardCounter.trackInterpretationScroll(milestone);
-                        }
-                    }
-                }
-            }
         });
         // Reset max scroll when panel closes (detected by class change)
         const observer = new MutationObserver((mutations) => {
@@ -1910,15 +1865,11 @@ async function submitComment() {
             currentCardData.image,
             userId,
             userName,
-            commentText
+            commentText,
+            getCurrentProfilePicture()
         );
 
         if (result.success) {
-            // Track comment form submitted
-            if (window.cardCounter) {
-                window.cardCounter.trackCommentFormSubmit();
-            }
-
             // Save name for future comments (only if not Anonymous)
             if (userName !== 'Anonymous') {
                 saveUserName(userName);
@@ -1939,14 +1890,6 @@ async function submitComment() {
                             cardImage: currentCardData.image,
                             comment: commentText
                         });
-                    }
-                    // Keep user profile up-to-date on every activity
-                    if (window.cardCounter && window.cardCounter.saveUserProfile) {
-                        window.cardCounter.saveUserProfile(fbUserId, {
-                            displayName: userName
-                        });
-                        // Update in-memory cache
-                        userDisplayNames.set(fbUserId, userName);
                     }
                 }
             }
@@ -1984,11 +1927,6 @@ function showBlessingScreen(userName, comment) {
     const blessingComment = document.getElementById('blessingComment');
 
     if (!blessingScreen || !currentCardData) return;
-
-    // Track blessing screen shown
-    if (window.cardCounter) {
-        window.cardCounter.trackFeatureUsage('blessingScreen', 'shown');
-    }
 
     // Set card image
     blessingCard.src = `images/tarot/${currentCardData.image}`;
@@ -2089,11 +2027,6 @@ function closeBlessingAndRestart() {
 }
 
 function goToLandingPage() {
-    // Track restart to landing page
-    if (window.cardCounter) {
-        window.cardCounter.trackFeatureUsage('restart', 'toLanding');
-    }
-
     const landingPage = document.getElementById('landingPage');
     const mainPage = document.getElementById('mainPage');
     const spinningCardContainer = document.getElementById('spinningCardContainer');
@@ -2230,18 +2163,12 @@ function goToLandingPage() {
         // Reset state
         isPaused = false;
         currentCardData = null;
-
-        // Track retry
-        if (window.cardCounter) window.cardCounter.trackRetry();
     }, 400);
 }
 
 function resetForNewPick() {
     // Reset comment form
     if (typeof resetCommentForm === 'function') resetCommentForm();
-
-    // Track retry
-    if (window.cardCounter) window.cardCounter.trackRetry();
 
     // Re-render cards (renderCards already shuffles)
     renderCards();
@@ -2300,11 +2227,6 @@ function initCommentsPanel() {
             // Update active tab
             commentsTabs.querySelectorAll('.comments-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-
-            // Track tab switch
-            if (window.cardCounter) {
-                window.cardCounter.trackCommentsPanel('tabSwitch_' + tabName);
-            }
 
             // Switch tab content
             currentCommentsTab = tabName;
@@ -2415,7 +2337,7 @@ function switchCommentsTab(tabName) {
     // Toggle feed-mode class for full-width minimal layout
     var feedCommentsList = document.getElementById('commentsList');
     if (feedCommentsList) {
-        if (tabName === 'feed') {
+        if (tabName === 'feed' || tabName === 'mycard' || tabName === 'friends') {
             feedCommentsList.classList.add('feed-mode');
         } else {
             feedCommentsList.classList.remove('feed-mode');
@@ -2435,6 +2357,8 @@ function switchCommentsTab(tabName) {
     } else if (tabName === 'feed') {
         newestCommentTimestamp = 0;
         loadFeed(true);
+    } else if (tabName === 'friends') {
+        loadFriendsCards();
     } else if (tabName === 'activity') {
         loadActivityTimeline();
     } else if (tabName === 'cardview') {
@@ -2592,8 +2516,8 @@ function createFeedCard(comment) {
                 '<span class="feed-card-name">' + escapeHtml(comment.userName || 'Anonymous') + '</span>' +
                 '<span class="feed-card-meta">' + t('feed.drewCard') + ' <strong>' + escapeHtml(comment.cardName || '') + '</strong><span class="feed-card-date">' + dateStr + '</span></span>' +
             '</div>' +
-            '<svg class="feed-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
         '</div>' +
+        '<svg class="feed-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
         '<div class="feed-card-body">' +
             '<div class="feed-card-comment">' + escapeHtml(comment.comment || '') + '</div>' +
         '</div>' +
@@ -2642,7 +2566,7 @@ function createFeedCard(comment) {
         replyForm.classList.add('show');
         if (!repliesLoaded) {
             repliesLoaded = true;
-            loadReplies(card, comment.id);
+            loadReplies(card, comment.id, comment);
         }
     }
     feedHeader.addEventListener('click', expandCard);
@@ -2664,18 +2588,10 @@ function createFeedCard(comment) {
         var userName = getSavedUserName() || 'Anonymous';
 
         if (window.cardCounter && window.cardCounter.submitReply) {
-            var res = await window.cardCounter.submitReply(comment.id, userId, userName, text);
+            var res = await window.cardCounter.submitReply(comment.id, userId, userName, text, getCurrentProfilePicture());
             if (res.success) {
-                if (window.cardCounter) window.cardCounter.trackFeatureUsage('reply', 'submitted');
-                if (typeof isFacebookConnected === 'function' && isFacebookConnected() && window.cardCounter.saveUserProfile) {
-                    var fbUid = typeof getFbUserId === 'function' ? getFbUserId() : null;
-                    if (fbUid) {
-                        window.cardCounter.saveUserProfile(fbUid, { displayName: userName });
-                        userDisplayNames.set(fbUid, userName);
-                    }
-                }
                 replyInput.value = '';
-                await loadReplies(card, comment.id);
+                await loadReplies(card, comment.id, comment);
                 // Update reply count display
                 loadReplyCount(card, comment.id);
                 showToast(t('toast.replySuccess'));
@@ -2806,8 +2722,13 @@ function createActivityCard(activity) {
             '<div class="activity-card-header">' +
                 '<span class="activity-action">' + actionText + '</span>' +
                 '<span class="activity-date">' + dateStr + '</span>' +
+                '<svg class="activity-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>' +
             '</div>' + detailHtml +
         '</div>';
+
+    div.addEventListener('click', function() {
+        div.classList.toggle('expanded');
+    });
 
     return div;
 }
@@ -2869,11 +2790,6 @@ function openCommentsPanel(skipLoadComments = false) {
     if (!window.commentsPanelHistoryPushed) {
         history.pushState({ commentsPanel: true }, '', '');
         window.commentsPanelHistoryPushed = true;
-    }
-
-    // Track comments panel opened
-    if (window.cardCounter) {
-        window.cardCounter.trackCommentsPanel('opened');
     }
 
     // Update user name display
@@ -3028,11 +2944,6 @@ function closeCommentsPanel(fromBackButton = false) {
         history.back();
     } else {
         window.commentsPanelHistoryPushed = false;
-    }
-
-    // Track comments panel closed
-    if (window.cardCounter) {
-        window.cardCounter.trackCommentsPanel('closed');
     }
 
     // Reset expanded card state
@@ -3332,32 +3243,18 @@ async function loadMyCardComments() {
 
     const userId = getUserId();
 
-    if (!window.cardCounter || !window.cardCounter.fetchCommentsByCardId) {
+    if (!window.cardCounter || !window.cardCounter.fetchCommentsByUserId) {
         loadingEl.innerHTML = '<span>' + t('common.loadError') + '</span>';
         isLoadingComments = false;
         return;
     }
 
-    // Track feature usage
-    if (window.cardCounter) {
-        window.cardCounter.trackFeatureUsage('myCardTab', 'view');
-    }
-
-    // Fetch data in parallel
-    const [myComments, repliedComments] = await Promise.all([
-        window.cardCounter.fetchCommentsByUserId ? window.cardCounter.fetchCommentsByUserId(userId, 50) : [],
-        window.cardCounter.fetchCommentsUserRepliedTo ? window.cardCounter.fetchCommentsUserRepliedTo(userId, 20) : []
-    ]);
-    await resolveDisplayNames(myComments.concat(repliedComments));
+    const myComments = await window.cardCounter.fetchCommentsByUserId(userId, 50);
+    await resolveDisplayNames(myComments);
 
     loadingEl.style.display = 'none';
 
-    // Check if both sections are empty
-    const hasMyComments = myComments.length > 0;
-    const hasRepliedComments = repliedComments.length > 0;
-
-    if (!hasMyComments && !hasRepliedComments) {
-        // No comments and no replies - show CTA
+    if (myComments.length === 0) {
         commentsList.innerHTML = `
             <div class="comments-empty comments-empty-cta">
                 <div class="cta-sparkles">
@@ -3381,48 +3278,164 @@ async function loadMyCardComments() {
         return;
     }
 
-    // ===== Section 1: My Comments =====
-    if (hasMyComments) {
-        const myCommentsSection = document.createElement('div');
-        myCommentsSection.className = 'mycard-section';
-        myCommentsSection.innerHTML = `
-            <div class="section-divider">
-                <span class="section-label">${t('comments.myComments')}</span>
-                <span class="section-line"></span>
-                <span class="section-count">${myComments.length}</span>
-            </div>
-        `;
-        commentsList.appendChild(myCommentsSection);
+    // Use feed card style — same as วงไพ่ tab
+    myComments.forEach(comment => {
+        if (displayedCommentIds.has(comment.id)) return;
+        var card = createFeedCard(comment);
+        commentsList.appendChild(card);
+        displayedCommentIds.add(comment.id);
+    });
 
-        myComments.forEach(comment => {
-            const card = createCommentCard(comment);
-            commentsList.appendChild(card);
-            displayedCommentIds.add(comment.id);
-        });
+    isLoadingComments = false;
+}
+
+// Load friends' cards using Facebook friends API
+async function loadFriendsCards() {
+    if (isLoadingComments) return;
+    isLoadingComments = true;
+
+    var commentsList = document.getElementById('commentsList');
+    var loadingEl = getOrCreateLoadingEl();
+
+    commentsList.innerHTML = '';
+    commentsList.appendChild(loadingEl);
+    loadingEl.style.display = 'block';
+
+    // Check if user is logged in via Facebook
+    if (!isFacebookConnected()) {
+        loadingEl.style.display = 'none';
+        commentsList.innerHTML = buildFriendsLoginCta();
+        isLoadingComments = false;
+        return;
     }
 
-    // ===== Section 2: Comments I've Replied To =====
-    if (hasRepliedComments) {
-        const repliedSection = document.createElement('div');
-        repliedSection.className = 'mycard-section mycard-section-replied';
-        repliedSection.innerHTML = `
-            <div class="section-divider">
-                <span class="section-label">${t('comments.repliedTo')}</span>
-                <span class="section-line"></span>
-                <span class="section-count">${repliedComments.length}</span>
-            </div>
-        `;
-        commentsList.appendChild(repliedSection);
+    // Fetch Facebook friends who also use this app
+    try {
+        var friendIds = await getFacebookFriendIds();
 
-        // Display replied comments using createCommentCard (same format as other tabs)
-        repliedComments.forEach(comment => {
-            const card = createCommentCard(comment);
+        if (friendIds.length === 0) {
+            loadingEl.style.display = 'none';
+            commentsList.innerHTML = buildFriendsInviteCta();
+            isLoadingComments = false;
+            return;
+        }
+
+        // Convert FB IDs to app user IDs (fb_ prefix)
+        var friendUserIds = friendIds.map(function(id) { return 'fb_' + id; });
+
+        if (!window.cardCounter || !window.cardCounter.fetchCommentsByUserIds) {
+            loadingEl.style.display = 'none';
+            commentsList.innerHTML = '<div class="comments-empty"><div class="comments-empty-text">' + t('common.loadError') + '</div></div>';
+            isLoadingComments = false;
+            return;
+        }
+
+        var friendComments = await window.cardCounter.fetchCommentsByUserIds(friendUserIds, 50);
+        await resolveDisplayNames(friendComments);
+
+        loadingEl.style.display = 'none';
+
+        if (friendComments.length === 0) {
+            commentsList.innerHTML = buildFriendsInviteCta();
+            isLoadingComments = false;
+            return;
+        }
+
+        friendComments.forEach(function(comment) {
+            if (displayedCommentIds.has(comment.id)) return;
+            var card = createFeedCard(comment);
             commentsList.appendChild(card);
             displayedCommentIds.add(comment.id);
         });
+    } catch (e) {
+        console.warn('Failed to load friends cards:', e.message);
+        loadingEl.style.display = 'none';
+        commentsList.innerHTML = buildFriendsInviteCta();
     }
 
     isLoadingComments = false;
+}
+
+// Get Facebook friend IDs who also use this app
+function getFacebookFriendIds() {
+    return new Promise(function(resolve) {
+        if (typeof FB === 'undefined') {
+            resolve([]);
+            return;
+        }
+        FB.api('/me/friends', { fields: 'id', limit: 100 }, function(response) {
+            if (response && response.data) {
+                resolve(response.data.map(function(f) { return f.id; }));
+            } else {
+                resolve([]);
+            }
+        });
+    });
+}
+
+// Build CTA for when user is not logged in
+function buildFriendsLoginCta() {
+    return '<div class="comments-empty comments-empty-cta friends-cta">' +
+        '<div class="cta-sparkles">' +
+            '<span class="sparkle s1">✦</span>' +
+            '<span class="sparkle s2">✧</span>' +
+            '<span class="sparkle s3">✦</span>' +
+        '</div>' +
+        '<div class="friends-cta-icon">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">' +
+                '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>' +
+                '<circle cx="9" cy="7" r="4"/>' +
+                '<path d="M23 21v-2a4 4 0 0 0-3-3.87"/>' +
+                '<path d="M16 3.13a4 4 0 0 1 0 7.75"/>' +
+            '</svg>' +
+        '</div>' +
+        '<div class="comments-empty-text">' + t('friends.empty') + '</div>' +
+        '<p class="cta-subtitle">' + t('friends.emptyHint') + '</p>' +
+        '<button class="friends-login-btn" onclick="loginWithFacebook()">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>' +
+            'Login with Facebook' +
+        '</button>' +
+    '</div>';
+}
+
+// Build CTA for inviting friends
+function buildFriendsInviteCta() {
+    return '<div class="comments-empty comments-empty-cta friends-cta">' +
+        '<div class="cta-sparkles">' +
+            '<span class="sparkle s1">✦</span>' +
+            '<span class="sparkle s2">✧</span>' +
+            '<span class="sparkle s3">✦</span>' +
+        '</div>' +
+        '<div class="friends-cta-icon">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">' +
+                '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>' +
+                '<circle cx="9" cy="7" r="4"/>' +
+                '<line x1="19" y1="8" x2="19" y2="14"/>' +
+                '<line x1="16" y1="11" x2="22" y2="11"/>' +
+            '</svg>' +
+        '</div>' +
+        '<div class="comments-empty-text">' + t('friends.empty') + '</div>' +
+        '<p class="cta-subtitle">' + t('friends.emptyHint') + '</p>' +
+        '<button class="friends-invite-btn" onclick="inviteFriendsViaMessenger()">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.91 1.2 5.42 3.17 7.22V22l3.04-1.67c.84.23 1.75.37 2.79.37 5.64 0 10-4.13 10-9.7S17.64 2 12 2zm1.03 13.05l-2.55-2.73L5.5 15.05l5.5-5.83 2.55 2.73 4.98-2.73-5.5 5.83z"/></svg>' +
+            t('friends.inviteBtn') +
+        '</button>' +
+    '</div>';
+}
+
+// Invite friends via Facebook Messenger
+function inviteFriendsViaMessenger() {
+    if (typeof FB === 'undefined') return;
+
+    var appUrl = 'https://pimfahmaprod.github.io/card-of-the-day/';
+    var inviteMsg = t('friends.inviteMsg');
+
+    FB.ui({
+        method: 'send',
+        link: appUrl
+    }, function(response) {
+        // Optional callback
+    });
 }
 
 // Load comments for cardview tab (viewing a specific card's comments from ส่อง button)
@@ -3656,29 +3669,15 @@ function setupReplyFeature(card, comment) {
         const userName = getSavedUserName() || 'Anonymous';
 
         if (window.cardCounter && window.cardCounter.submitReply) {
-            const result = await window.cardCounter.submitReply(comment.id, userId, userName, text);
+            const result = await window.cardCounter.submitReply(comment.id, userId, userName, text, getCurrentProfilePicture());
 
             if (result.success) {
-                // Track reply submitted
-                if (window.cardCounter) {
-                    window.cardCounter.trackFeatureUsage('reply', 'submitted');
-                }
-
-                // Keep user profile up-to-date on reply activity
-                if (typeof isFacebookConnected === 'function' && isFacebookConnected() && window.cardCounter.saveUserProfile) {
-                    const fbUid = typeof getFbUserId === 'function' ? getFbUserId() : null;
-                    if (fbUid) {
-                        window.cardCounter.saveUserProfile(fbUid, { displayName: userName });
-                        userDisplayNames.set(fbUid, userName);
-                    }
-                }
-
                 // Clear input and hide form
                 replyInput.value = '';
                 replyForm.classList.remove('show');
 
                 // Reload replies
-                await loadReplies(card, comment.id);
+                await loadReplies(card, comment.id, comment);
 
                 showToast(t('toast.replySuccess'));
             } else {
@@ -3716,9 +3715,10 @@ async function loadReplyCount(card, commentId) {
 }
 
 // Load replies for a comment
-async function loadReplies(card, commentId) {
+async function loadReplies(card, commentId, commentData) {
     if (!window.cardCounter || !window.cardCounter.fetchReplies) return;
 
+    const commentOwnerId = commentData.userId;
     const repliesList = card.querySelector('.replies-list');
     const repliesEmptyBtn = card.querySelector('.replies-empty-btn');
 
@@ -3729,24 +3729,60 @@ async function loadReplies(card, commentId) {
     const replies = await window.cardCounter.fetchReplies(commentId);
     await resolveDisplayNames(replies);
 
+    const currentUserId = getUserId();
+
+    // Build the original comment as the first left-aligned bubble
+    var commentText = commentData.comment || commentData.text || '';
+    var commentDate = commentData.timestamp ? new Date(commentData.timestamp) : new Date();
+    var commentDateStr = formatCommentDate(commentDate);
+    var commentAvatar = getProfilePictureHtml(commentData);
+    var isSelfComment = commentOwnerId === currentUserId;
+    var firstBubble = '<div class="reply-item reply-bubble-left reply-original' + (isSelfComment ? ' reply-self' : '') + '">' +
+        '<div class="reply-avatar-col">' + commentAvatar + '</div>' +
+        '<div class="reply-bubble">' +
+            '<div class="reply-bubble-header">' +
+                '<span class="reply-name">' + escapeHtml(commentData.userName || 'Anonymous') + '</span>' +
+                '<span class="reply-date">' + commentDateStr + '</span>' +
+            '</div>' +
+            '<div class="reply-text">' + escapeHtml(commentText) + '</div>' +
+        '</div>' +
+    '</div>';
+
     if (replies.length > 0) {
-        repliesList.innerHTML = replies.map(reply => {
+        var replyBubbles = replies.map(function(reply) {
             const replyDate = reply.timestamp ? new Date(reply.timestamp) : new Date();
             const replyDateStr = formatCommentDate(replyDate);
             const replyAvatar = getProfilePictureHtml(reply);
-            return `
-                <div class="reply-item">
-                    <div class="reply-header">
-                        ${replyAvatar}
-                        <div class="reply-author">
-                            <span class="reply-name">${escapeHtml(reply.userName || 'Anonymous')}</span>
-                            <span class="reply-date">${replyDateStr}</span>
-                        </div>
-                    </div>
-                    <div class="reply-text">${escapeHtml(reply.text || '')}</div>
-                </div>
-            `;
+            const isOwner = reply.userId === commentOwnerId;
+            const isSelf = reply.userId === currentUserId;
+            const bubbleClass = isOwner ? 'reply-bubble-left' : 'reply-bubble-right';
+            const selfClass = isSelf ? ' reply-self' : '';
+
+            if (isOwner) {
+                return '<div class="reply-item ' + bubbleClass + selfClass + '">' +
+                    '<div class="reply-avatar-col">' + replyAvatar + '</div>' +
+                    '<div class="reply-bubble">' +
+                        '<div class="reply-bubble-header">' +
+                            '<span class="reply-name">' + escapeHtml(reply.userName || 'Anonymous') + '</span>' +
+                            '<span class="reply-date">' + replyDateStr + '</span>' +
+                        '</div>' +
+                        '<div class="reply-text">' + escapeHtml(reply.text || '') + '</div>' +
+                    '</div>' +
+                '</div>';
+            } else {
+                return '<div class="reply-item ' + bubbleClass + selfClass + '">' +
+                    '<div class="reply-bubble">' +
+                        '<div class="reply-bubble-header">' +
+                            '<span class="reply-name">' + escapeHtml(reply.userName || 'Anonymous') + '</span>' +
+                            '<span class="reply-date">' + replyDateStr + '</span>' +
+                        '</div>' +
+                        '<div class="reply-text">' + escapeHtml(reply.text || '') + '</div>' +
+                    '</div>' +
+                    '<div class="reply-avatar-col">' + replyAvatar + '</div>' +
+                '</div>';
+            }
         }).join('');
+        repliesList.innerHTML = firstBubble + replyBubbles;
         repliesList.style.display = '';
 
         // Update count on reply button
@@ -3758,9 +3794,9 @@ async function loadReplies(card, commentId) {
 
         if (repliesEmptyBtn) repliesEmptyBtn.style.display = 'none';
     } else {
-        repliesList.innerHTML = '';
-        repliesList.style.display = 'none';
-        if (repliesEmptyBtn) repliesEmptyBtn.style.display = 'block';
+        repliesList.innerHTML = firstBubble;
+        repliesList.style.display = '';
+        if (repliesEmptyBtn) repliesEmptyBtn.style.display = 'none';
     }
 }
 
@@ -3790,10 +3826,9 @@ async function toggleCommentCardExpand(card, comment) {
 async function expandCommentCard(card, comment) {
     card.classList.add('expanded');
 
-    // Track comment card expanded
-    if (window.cardCounter) {
-        window.cardCounter.trackFeatureUsage('commentCard', 'expanded');
-    }
+    // Show reply form (belt-and-suspenders with CSS override)
+    const replyForm = card.querySelector('.reply-form');
+    if (replyForm) replyForm.classList.add('show');
 
     // Load full interpretation from tarotData
     const interpretationEl = card.querySelector('.comment-card-full-interpretation');
@@ -3811,7 +3846,7 @@ async function expandCommentCard(card, comment) {
     }
 
     // Auto-load replies
-    await loadReplies(card, comment.id);
+    await loadReplies(card, comment.id, comment);
 
     // Load related comments
     const relatedListEl = card.querySelector('.related-comments-list');
@@ -3825,7 +3860,7 @@ async function expandCommentCard(card, comment) {
         const relatedComments = await window.cardCounter.fetchCommentsByCardId(
             comment.cardId,
             comment.id,
-            5
+            3
         );
         await resolveDisplayNames(relatedComments);
 
@@ -3891,6 +3926,10 @@ async function expandCommentCard(card, comment) {
 function collapseCommentCard(card) {
     card.classList.remove('expanded');
 
+    // Hide reply form
+    const replyForm = card.querySelector('.reply-form');
+    if (replyForm) replyForm.classList.remove('show');
+
     // If this is a navigated card, fade it out and remove it
     if (card.classList.contains('navigated-card')) {
         card.classList.add('fading-out');
@@ -3904,11 +3943,6 @@ function collapseCommentCard(card) {
 }
 
 async function navigateToRelatedComment(commentData) {
-    // Track navigate to related comment
-    if (window.cardCounter) {
-        window.cardCounter.trackFeatureUsage('relatedComment', 'navigate');
-    }
-
     try {
         const commentsList = document.getElementById('commentsList');
         if (!commentsList) return;
@@ -4004,9 +4038,6 @@ function saveImage(platform) {
         showToast(t('image.selectFirst'));
         return;
     }
-
-    // Track save image
-    if (window.cardCounter) window.cardCounter.trackSaveImage(platform);
 
     const sizes = {
         'ig-story': { width: 1080, height: 1920 },

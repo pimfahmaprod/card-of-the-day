@@ -2228,6 +2228,16 @@ footer {
     background: #6B5BA8;
 }
 
+/* Activity icon tab light theme */
+.comments-panel.light-theme .comments-tab-activity svg {
+    color: #5a4d8a;
+}
+
+/* Friends CTA light theme */
+.comments-panel.light-theme .friends-cta-icon {
+    color: rgba(100, 80, 160, 0.35);
+}
+
 /* Comment cards */
 .comments-panel.light-theme .comment-card {
     background: rgba(255, 255, 255, 0.7);
@@ -2314,13 +2324,10 @@ footer {
     color: rgba(60, 50, 100, 0.45);
 }
 
-.comments-panel.light-theme .feed-card.expanded .feed-card-chevron {
-    color: rgba(60, 50, 100, 0.65);
-}
-
 .comments-panel.light-theme .feed-card-quote {
-    color: rgba(50, 40, 90, 0.75);
-    border-left-color: rgba(100, 80, 160, 0.3);
+    color: rgba(50, 40, 90, 0.85);
+    border-left-color: rgba(100, 80, 160, 0.35);
+    background: rgba(100, 80, 160, 0.06);
 }
 
 .comments-panel.light-theme .feed-card-interpretation {
@@ -2341,13 +2348,32 @@ footer {
     border-color: rgba(100, 80, 160, 0.08);
 }
 
-/* Reply items and forms */
-.comments-panel.light-theme .replies-list {
-    border-left-color: rgba(100, 80, 160, 0.12);
+/* Reply chat bubbles */
+.comments-panel.light-theme .reply-bubble-left .reply-bubble {
+    background: rgba(240, 238, 248, 0.8);
 }
 
-.comments-panel.light-theme .reply-item {
-    background: rgba(245, 243, 252, 0.7);
+.comments-panel.light-theme .reply-bubble-right .reply-bubble {
+    background: rgba(100, 80, 160, 0.08);
+}
+
+.comments-panel.light-theme .reply-self .reply-bubble {
+    background: rgba(100, 120, 200, 0.12);
+    border-color: rgba(100, 120, 200, 0.15);
+}
+
+.comments-panel.light-theme .reply-original {
+    border-bottom-color: rgba(100, 80, 160, 0.08);
+}
+
+.comments-panel.light-theme .reply-original .reply-bubble {
+    background: rgba(245, 243, 252, 0.95);
+    border-color: rgba(100, 80, 160, 0.12);
+}
+
+.comments-panel.light-theme .reply-original.reply-self .reply-bubble {
+    background: rgba(245, 243, 252, 0.95);
+    border-color: rgba(100, 120, 200, 0.2);
 }
 
 .comments-panel.light-theme .reply-name {
@@ -2416,12 +2442,25 @@ footer {
 }
 
 .comments-panel.light-theme .activity-card-content {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(248, 246, 255, 0.4) 100%);
-    border-color: rgba(100, 80, 160, 0.1);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(248, 246, 255, 0.2) 100%);
+    border-color: rgba(100, 80, 160, 0.08);
 }
 
 .comments-panel.light-theme .activity-card:hover .activity-card-content {
-    border-color: rgba(100, 80, 160, 0.18);
+    border-color: rgba(100, 80, 160, 0.15);
+}
+
+.comments-panel.light-theme .activity-card.expanded .activity-card-content {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(248, 246, 255, 0.4) 100%);
+    border-color: rgba(100, 80, 160, 0.12);
+}
+
+.comments-panel.light-theme .activity-chevron {
+    color: rgba(100, 80, 160, 0.25);
+}
+
+.comments-panel.light-theme .activity-card.expanded .activity-chevron {
+    color: rgba(100, 80, 160, 0.5);
 }
 
 .comments-panel.light-theme .activity-action {
@@ -2444,7 +2483,7 @@ footer {
     color: rgba(60, 50, 100, 0.6);
 }
 
-.comments-panel.light-theme .activity-card-detail {
+.comments-panel.light-theme .activity-card.expanded .activity-card-detail {
     border-top-color: rgba(100, 80, 160, 0.06);
 }
 
@@ -2569,6 +2608,96 @@ footer {
 /* Hide "Me" tab by default - shown by JS if user has comments */
 .comments-tab[data-tab="me"] {
     display: none;
+}
+
+/* Activity tab — icon only, pushed to right */
+.comments-tab-activity {
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.comments-tab-activity svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.comments-tab-activity:hover svg,
+.comments-tab-activity.active svg {
+    opacity: 1;
+}
+
+.comments-tab-activity.active::after {
+    width: 20px;
+}
+
+/* Friends tab */
+.friends-cta {
+    padding: 40px 20px;
+}
+
+.friends-cta-icon {
+    margin-bottom: 12px;
+    color: rgba(154, 170, 212, 0.4);
+}
+
+.friends-cta-icon svg {
+    width: 48px;
+    height: 48px;
+}
+
+.friends-invite-btn,
+.friends-login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 20px;
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.friends-invite-btn {
+    background: linear-gradient(135deg, #0084FF 0%, #00C6FF 100%);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(0, 132, 255, 0.3);
+}
+
+.friends-invite-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 18px rgba(0, 132, 255, 0.4);
+}
+
+.friends-invite-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.friends-login-btn {
+    background: #1877F2;
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(24, 119, 242, 0.3);
+}
+
+.friends-login-btn:hover {
+    background: #166FE5;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 18px rgba(24, 119, 242, 0.4);
+}
+
+.friends-login-btn svg {
+    width: 16px;
+    height: 16px;
 }
 
 .comments-list {
@@ -2955,6 +3084,23 @@ footer {
     border-top: 1px dashed rgba(140, 160, 200, 0.2);
 }
 
+/* Hide title and reply button in expanded comment cards — chat bubbles replace them */
+.comment-card.expanded .comment-card-replies-title {
+    display: none;
+}
+
+.comment-card.expanded .comment-card-actions {
+    display: none;
+}
+
+/* Auto-show reply form when comment card is expanded */
+.comment-card.expanded .reply-form {
+    max-height: 150px;
+    opacity: 1;
+    margin-top: 10px;
+    overflow: visible;
+}
+
 .comment-card.expanded.with-image .comment-card-replies-section {
     margin-left: -60px;
     padding-left: 0;
@@ -3223,58 +3369,128 @@ footer {
     height: 16px;
 }
 
-/* Replies List */
+/* Replies List — Chat Bubble Style */
 .replies-list {
-    display: none;
-    padding-left: 15px;
-    border-left: 2px solid rgba(140, 160, 200, 0.15);
-    margin-bottom: 12px;
+    padding: 6px 0;
+    margin-bottom: 8px;
 }
 
+/* Hide replies-list in comment cards until loaded */
+.comment-card-replies-section .replies-list {
+    display: none;
+}
+
+/* Base reply item — chat row */
 .reply-item {
-    padding: 8px 10px;
-    margin-bottom: 6px;
-    background: rgba(20, 27, 69, 0.7);
-    border-radius: 8px;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: flex-end;
 }
 
 .reply-item:last-child {
     margin-bottom: 0;
 }
 
-.reply-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 3px;
+/* Avatar column */
+.reply-avatar-col {
+    flex-shrink: 0;
 }
 
-.reply-header .comment-avatar {
-    width: 24px;
-    height: 24px;
+.reply-avatar-col .comment-avatar,
+.reply-avatar-col .comment-avatar-default {
+    width: 28px;
+    height: 28px;
 }
 
-.reply-header .comment-avatar-default {
-    width: 24px;
-    height: 24px;
-}
-
-.reply-header .comment-avatar-default svg {
+.reply-avatar-col .comment-avatar-default svg {
     width: 14px;
     height: 14px;
 }
 
-.reply-author {
-    flex: 1;
+/* Chat bubble */
+.reply-bubble {
+    max-width: 78%;
+    padding: 7px 11px;
+    border-radius: 14px;
+}
+
+/* Left-aligned bubble (comment owner) */
+.reply-bubble-left {
+    flex-direction: row;
+}
+
+.reply-bubble-left .reply-bubble {
+    background: rgba(20, 27, 69, 0.7);
+    border-bottom-left-radius: 4px;
+}
+
+/* Right-aligned bubble (others) — avatar on right */
+.reply-bubble-right {
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.reply-bubble-right .reply-bubble {
+    background: rgba(140, 160, 200, 0.12);
+    border-bottom-right-radius: 4px;
+}
+
+/* Original comment bubble — visually distinct from replies */
+.reply-original {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(154, 170, 212, 0.08);
+}
+
+.reply-original .reply-avatar-col .comment-avatar,
+.reply-original .reply-avatar-col .comment-avatar-default {
+    width: 34px;
+    height: 34px;
+}
+
+.reply-original .reply-avatar-col .comment-avatar-default svg {
+    width: 17px;
+    height: 17px;
+}
+
+.reply-original .reply-bubble {
+    background: rgba(20, 27, 69, 0.9);
+    border: 1px solid rgba(154, 170, 212, 0.12);
+    max-width: 85%;
+}
+
+.reply-original .reply-text {
+    font-size: 0.8rem;
+}
+
+.reply-original .reply-name {
+    font-size: 0.85rem;
+}
+
+/* Current user's bubble — accent color */
+.reply-self .reply-bubble {
+    background: rgba(90, 130, 210, 0.2);
+    border: 1px solid rgba(90, 130, 210, 0.12);
+}
+
+/* Original + self: keep original style but with self border */
+.reply-original.reply-self .reply-bubble {
+    background: rgba(20, 27, 69, 0.9);
+    border-color: rgba(90, 130, 210, 0.2);
+}
+
+/* Bubble header */
+.reply-bubble-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 6px;
+    margin-bottom: 2px;
 }
 
 .reply-name {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--burgundy);
     font-style: italic;
@@ -3282,8 +3498,8 @@ footer {
 
 .reply-date {
     font-family: 'Prompt', sans-serif;
-    font-size: 0.55rem;
-    color: rgba(140, 160, 200, 0.45);
+    font-size: 0.5rem;
+    color: rgba(140, 160, 200, 0.4);
 }
 
 .reply-text {
@@ -3292,6 +3508,7 @@ footer {
     font-weight: 300;
     color: #B8C0D8;
     line-height: 1.4;
+    word-break: break-word;
 }
 
 .comments-load-more {
@@ -3471,6 +3688,7 @@ footer {
 }
 
 .feed-card {
+    position: relative;
     background: transparent;
     border: none;
     border-bottom: 1px solid rgba(154, 170, 212, 0.08);
@@ -3500,7 +3718,7 @@ footer {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 16px 18px 0;
+    padding: 16px 36px 0 18px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
@@ -3569,10 +3787,20 @@ footer {
 }
 
 .feed-card-body {
-    padding: 8px 18px 6px;
+    padding: 8px 36px 6px 18px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    max-height: 200px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.3s ease;
+}
+
+.feed-card.expanded .feed-card-body {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .feed-card-comment {
@@ -3639,18 +3867,21 @@ footer {
     opacity: 0.92;
 }
 
-/* Chevron indicator */
+/* Chevron indicator — centered vertically on collapsed card */
 .feed-card-chevron {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 16px;
     height: 16px;
-    flex-shrink: 0;
     color: rgba(154, 170, 212, 0.3);
-    transition: transform 0.25s ease, color 0.2s;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
 }
 
 .feed-card.expanded .feed-card-chevron {
-    transform: rotate(180deg);
-    color: rgba(154, 170, 212, 0.5);
+    opacity: 0;
 }
 
 /* Expandable section — hidden by default */
@@ -3677,7 +3908,7 @@ footer {
 }
 
 .feed-card-expanded .feed-card-image img {
-    max-height: 180px;
+    max-height: 135px;
     width: auto;
 }
 
@@ -3689,12 +3920,14 @@ footer {
 .feed-card-quote {
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
-    font-size: 0.85rem;
-    color: rgba(154, 170, 212, 0.6);
+    font-size: 0.95rem;
+    color: rgba(192, 200, 224, 0.85);
     line-height: 1.5;
     margin: 0 0 8px;
-    padding-left: 10px;
-    border-left: 2px solid rgba(154, 170, 212, 0.15);
+    padding: 8px 12px;
+    border-left: 2px solid rgba(154, 170, 212, 0.3);
+    background: rgba(154, 170, 212, 0.06);
+    border-radius: 0 6px 6px 0;
 }
 
 .feed-card-interpretation {
@@ -3805,26 +4038,27 @@ footer {
 
 .activity-card {
     display: flex;
-    gap: 14px;
+    gap: 10px;
     padding: 0 0 0 8px;
     position: relative;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     flex-shrink: 0;
+    cursor: pointer;
 }
 
-/* Timeline vertical line */
+/* Timeline vertical line — extend into margin to connect between rows */
 .activity-card::before {
     content: '';
     position: absolute;
-    left: 22px;
+    left: 19px;
     top: 0;
-    bottom: 0;
+    bottom: -6px;
     width: 2px;
-    background: linear-gradient(180deg, rgba(154, 170, 212, 0.18) 0%, rgba(154, 170, 212, 0.06) 100%);
+    background: rgba(154, 170, 212, 0.12);
 }
 
 .activity-card:first-child::before {
-    top: 20px;
+    top: 16px;
 }
 
 .activity-card:last-child::before {
@@ -3833,11 +4067,11 @@ footer {
 
 /* Color-coded timeline dots */
 .activity-timeline-dot {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     flex-shrink: 0;
-    margin-top: 12px;
+    margin-top: 8px;
     z-index: 1;
     display: flex;
     align-items: center;
@@ -3852,8 +4086,8 @@ footer {
 }
 
 .activity-timeline-dot svg {
-    width: 13px;
-    height: 13px;
+    width: 11px;
+    height: 11px;
     stroke-width: 2.5;
 }
 
@@ -3883,17 +4117,22 @@ footer {
 
 .activity-card-content {
     flex: 1;
-    background: linear-gradient(135deg, rgba(160, 180, 220, 0.07) 0%, rgba(130, 150, 200, 0.03) 100%);
-    border: 1px solid rgba(154, 170, 212, 0.1);
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 8px;
+    background: linear-gradient(135deg, rgba(160, 180, 220, 0.05) 0%, rgba(130, 150, 200, 0.02) 100%);
+    border: 1px solid rgba(154, 170, 212, 0.07);
+    border-radius: 10px;
+    padding: 7px 12px;
+    margin-bottom: 4px;
     min-width: 0;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, background 0.2s;
 }
 
 .activity-card:hover .activity-card-content {
-    border-color: rgba(154, 170, 212, 0.18);
+    border-color: rgba(154, 170, 212, 0.15);
+}
+
+.activity-card.expanded .activity-card-content {
+    background: linear-gradient(135deg, rgba(160, 180, 220, 0.07) 0%, rgba(130, 150, 200, 0.03) 100%);
+    border-color: rgba(154, 170, 212, 0.12);
 }
 
 .activity-card-header {
@@ -3908,7 +4147,7 @@ footer {
 
 .activity-action {
     font-family: 'Prompt', sans-serif;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 400;
     color: rgba(192, 200, 224, 0.85);
 }
@@ -3925,19 +4164,47 @@ footer {
 }
 
 .activity-date {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     color: rgba(154, 170, 212, 0.35);
     margin-left: auto;
     white-space: nowrap;
 }
 
+.activity-chevron {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: rgba(154, 170, 212, 0.25);
+    transition: transform 0.25s ease;
+    margin-left: 2px;
+}
+
+.activity-card.expanded .activity-chevron {
+    transform: rotate(180deg);
+    color: rgba(154, 170, 212, 0.5);
+}
+
+/* Detail section — hidden by default, expand on click */
 .activity-card-detail {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(154, 170, 212, 0.06);
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 1px solid transparent;
+    transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.25s ease, padding-top 0.25s ease, border-color 0.25s ease;
+}
+
+.activity-card.expanded .activity-card-detail {
+    max-height: 120px;
+    opacity: 1;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top-color: rgba(154, 170, 212, 0.06);
+    overflow: visible;
 }
 
 .activity-card-image {

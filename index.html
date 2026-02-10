@@ -35,7 +35,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Prompt:wght@200;300;400;500&family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=1.2.24">
+    <link rel="stylesheet" href="css/styles.css?v=1.2.37">
 </head>
 <body>
     <!-- Starfield Background -->
@@ -356,12 +356,18 @@
         </div>
         <div class="comments-tabs" id="commentsTabs">
             <button class="comments-tab active" data-tab="feed" data-i18n="comments.tabFeed">วงไพ่</button>
+            <button class="comments-tab" data-tab="friends" data-i18n="comments.tabFriends">เพื่อน</button>
             <button class="comments-tab" data-tab="mycard" style="display:none;" data-i18n="comments.tabMyCard">ไพ่ฉัน</button>
             <button class="comments-tab" data-tab="me" data-i18n="comments.tabMine">ของฉัน</button>
-            <button class="comments-tab" data-tab="activity" data-i18n="comments.tabActivity">กิจกรรม</button>
 
             <button class="comments-tab comments-tab-cardview" data-tab="cardview" style="display:none;">
                 <img class="tab-card-preview" alt="">
+            </button>
+            <button class="comments-tab comments-tab-activity" data-tab="activity" aria-label="Activity">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
             </button>
         </div>
         <div class="comments-list" id="commentsList">
@@ -539,10 +545,10 @@
     <script async defer crossorigin="anonymous" src="https://connect.facebook.net/th_TH/sdk.js"></script>
 
     <!-- Scripts -->
-    <script src="js/translations.js?v=1.2.5"></script>
+    <script src="js/translations.js?v=1.2.6"></script>
     <script src="js/card-interpretations.js?v=1.2.4"></script>
-    <script src="js/app.js?v=1.2.30"></script>
+    <script src="js/app.js?v=1.2.39"></script>
     <script src="js/facebook.js?v=1.2.2"></script>
-    <script src="js/counter.js?v=1.2.9"></script>
+    <script src="js/counter.js?v=1.2.10"></script>
 </body>
 </html>

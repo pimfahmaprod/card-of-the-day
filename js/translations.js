@@ -80,6 +80,7 @@ const translations = {
             tabDraws: "ไพ่ที่จับ",
             tabFeed: "วงไพ่",
             tabActivity: "กิจกรรม",
+            tabFriends: "เพื่อน",
             empty: "ยังไม่มีความคิดเห็น",
             myComments: "ความคิดเห็นของฉัน",
             repliedTo: "ที่ฉันเคยตอบ",
@@ -168,6 +169,12 @@ const translations = {
             repliedTo: "ตอบกลับ",
             empty: "ยังไม่มีกิจกรรม",
             emptyHint: "จับไพ่เพื่อเริ่มบันทึกกิจกรรม"
+        },
+        friends: {
+            empty: "ยังไม่มีเพื่อนที่ใช้แอพนี้",
+            emptyHint: "ชวนเพื่อนมาจับไพ่ด้วยกัน!",
+            inviteBtn: "ชวนเพื่อนมาดูดวง",
+            inviteMsg: "มาจับไพ่ทาโรต์รายวันกัน! ดูดวงความรักและรับข้อความจากจักรวาล ✨🔮"
         }
     },
     en: {
@@ -216,6 +223,7 @@ const translations = {
             tabDraws: "My Draws",
             tabFeed: "Feed",
             tabActivity: "Activity",
+            tabFriends: "Friends",
             empty: "No comments yet",
             myComments: "My Comments",
             repliedTo: "Replied To",
@@ -304,6 +312,12 @@ const translations = {
             repliedTo: "Replied to",
             empty: "No activity yet",
             emptyHint: "Draw a card to start recording activity"
+        },
+        friends: {
+            empty: "None of your friends are using this app yet",
+            emptyHint: "Invite friends to draw cards together!",
+            inviteBtn: "Invite Friends",
+            inviteMsg: "Draw your daily tarot card! Discover love predictions and receive messages from the universe ✨🔮"
         }
     },
     "zh-CN": {
@@ -352,6 +366,7 @@ const translations = {
             tabDraws: "抽牌记录",
             tabFeed: "牌圈",
             tabActivity: "动态",
+            tabFriends: "好友",
             empty: "暂无评论",
             myComments: "我的评论",
             repliedTo: "我回复的",
@@ -440,6 +455,12 @@ const translations = {
             repliedTo: "回复了",
             empty: "还没有动态",
             emptyHint: "抽一张牌开始记录动态"
+        },
+        friends: {
+            empty: "还没有好友在使用这个应用",
+            emptyHint: "邀请好友一起来抽牌吧！",
+            inviteBtn: "邀请好友",
+            inviteMsg: "一起来抽每日塔罗牌吧！探索爱情运势，接收来自宇宙的讯息 ✨🔮"
         }
     },
     "zh-TW": {
@@ -488,6 +509,7 @@ const translations = {
             tabDraws: "抽牌紀錄",
             tabFeed: "牌圈",
             tabActivity: "動態",
+            tabFriends: "好友",
             empty: "暫無評論",
             myComments: "我的評論",
             repliedTo: "我回覆的",
@@ -576,6 +598,12 @@ const translations = {
             repliedTo: "回覆了",
             empty: "還沒有動態",
             emptyHint: "抽一張牌開始紀錄動態"
+        },
+        friends: {
+            empty: "還沒有好友在使用這個應用",
+            emptyHint: "邀請好友一起來抽牌吧！",
+            inviteBtn: "邀請好友",
+            inviteMsg: "一起來抽每日塔羅牌吧！探索愛情運勢，接收來自宇宙的訊息 ✨🔮"
         }
     },
     ko: {
@@ -624,6 +652,7 @@ const translations = {
             tabDraws: "뽑은 카드",
             tabFeed: "피드",
             tabActivity: "활동",
+            tabFriends: "친구",
             empty: "댓글이 없습니다",
             myComments: "내 댓글",
             repliedTo: "내가 답글 단",
@@ -712,6 +741,12 @@ const translations = {
             repliedTo: "답글을 남겼습니다",
             empty: "아직 활동이 없습니다",
             emptyHint: "카드를 뽑아 활동을 시작하세요"
+        },
+        friends: {
+            empty: "아직 이 앱을 사용하는 친구가 없습니다",
+            emptyHint: "친구를 초대해서 함께 카드를 뽑아보세요!",
+            inviteBtn: "친구 초대하기",
+            inviteMsg: "매일 타로 카드를 뽑아보세요! 사랑 운세를 알아보고 우주의 메시지를 받아보세요 ✨🔮"
         }
     },
     ja: {
@@ -760,6 +795,7 @@ const translations = {
             tabDraws: "引いたカード",
             tabFeed: "フィード",
             tabActivity: "アクティビティ",
+            tabFriends: "友達",
             empty: "コメントはまだありません",
             myComments: "私のコメント",
             repliedTo: "返信した",
@@ -848,6 +884,12 @@ const translations = {
             repliedTo: "返信しました",
             empty: "まだアクティビティがありません",
             emptyHint: "カードを引いてアクティビティを始めましょう"
+        },
+        friends: {
+            empty: "まだこのアプリを使っている友達がいません",
+            emptyHint: "友達を招待して一緒にカードを引きましょう！",
+            inviteBtn: "友達を招待",
+            inviteMsg: "毎日タロットカードを引いてみよう！恋愛運を占って、宇宙からのメッセージを受け取ろう ✨🔮"
         }
     },
     fr: {
@@ -896,6 +938,7 @@ const translations = {
             tabDraws: "Mes tirages",
             tabFeed: "Fil",
             tabActivity: "Activité",
+            tabFriends: "Amis",
             empty: "Pas encore de commentaires",
             myComments: "Mes commentaires",
             repliedTo: "Commentaires auxquels j'ai répondu",
@@ -984,6 +1027,12 @@ const translations = {
             repliedTo: "A répondu à",
             empty: "Pas encore d'activité",
             emptyHint: "Tirez une carte pour commencer"
+        },
+        friends: {
+            empty: "Aucun ami n'utilise cette application pour le moment",
+            emptyHint: "Invitez vos amis à tirer les cartes ensemble !",
+            inviteBtn: "Inviter des amis",
+            inviteMsg: "Tirez votre carte de tarot quotidienne ! Découvrez les prédictions d'amour et recevez des messages de l'univers ✨🔮"
         }
     }
 };

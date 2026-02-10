@@ -301,43 +301,14 @@ if (document.readyState === 'loading') {
 }
 
 // ========================================
-// Button Click Tracking (simplified)
+// Analytics tracking removed to optimize Firebase costs
+// All tracking functions are no-ops
 // ========================================
-
-async function trackButtonClick(category, action) {
-    if (!isFirebaseInitialized || !database) return null;
-
-    try {
-        const buttonRef = database.ref(`buttonClicks/${category}/${action}`);
-        const result = await buttonRef.transaction((currentCount) => {
-            return (currentCount || 0) + 1;
-        });
-
-        if (result.committed) {
-            return result.snapshot.val();
-        }
-        return null;
-    } catch (error) {
-        console.warn('Failed to track button click:', error.message);
-        return null;
-    }
-}
-
-function trackSaveImage(format) {
-    return trackButtonClick('save', format);
-}
-
-function trackShare(platform) {
-    return trackButtonClick('share', platform);
-}
-
-function trackRetry() {
-    return trackButtonClick('actions', 'retry');
-}
-
-function trackSocialClick(platform) {
-    return trackButtonClick('social', platform);
-}
+function trackButtonClick() { return null; }
+function trackSaveImage() { return null; }
+function trackShare() { return null; }
+function trackRetry() { return null; }
+function trackSocialClick() { return null; }
 
 // ========================================
 // Comments Functions
@@ -346,7 +317,7 @@ function trackSocialClick(platform) {
 // Blocked users - comments will appear to succeed but won't be saved
 const BLOCKED_USERS = ['เต้ต่างดาว'];
 
-async function submitCommentToFirebase(cardId, cardName, cardImage, userId, userName, commentText) {
+async function submitCommentToFirebase(cardId, cardName, cardImage, userId, userName, commentText, profilePicture) {
     if (!isFirebaseInitialized || !database) {
         return { success: false, error: 'Firebase not initialized' };
     }
@@ -360,7 +331,7 @@ async function submitCommentToFirebase(cardId, cardName, cardImage, userId, user
         const commentsRef = database.ref('comments');
         const newCommentRef = commentsRef.push();
 
-        await newCommentRef.set({
+        const commentData = {
             cardId: cardId,
             cardName: cardName,
             cardImage: cardImage || '',
@@ -368,7 +339,10 @@ async function submitCommentToFirebase(cardId, cardName, cardImage, userId, user
             userName: userName.trim(),
             comment: commentText.trim(),
             timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
+        };
+        if (profilePicture) commentData.profilePicture = profilePicture;
+
+        await newCommentRef.set(commentData);
 
         // Clear comments cache
         clearCache('commentsCount');
@@ -540,7 +514,7 @@ async function fetchCommentsByCardId(cardId, excludeCommentId = null, limit = 5)
 // Replies Functions
 // ========================================
 
-async function submitReply(commentId, userId, userName, replyText) {
+async function submitReply(commentId, userId, userName, replyText, profilePicture) {
     if (!isFirebaseInitialized || !database) {
         return { success: false, error: 'Firebase not initialized' };
     }
@@ -549,12 +523,15 @@ async function submitReply(commentId, userId, userName, replyText) {
         const repliesRef = database.ref(`replies/${commentId}`);
         const newReplyRef = repliesRef.push();
 
-        await newReplyRef.set({
+        const replyData = {
             userId: userId,
             userName: userName.trim(),
             text: replyText.trim(),
             timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
+        };
+        if (profilePicture) replyData.profilePicture = profilePicture;
+
+        await newReplyRef.set(replyData);
 
         // Clear hot comments cache (reply counts changed)
         clearCache('hotComments_20');
@@ -709,6 +686,21 @@ async function fetchCommentsByUserId(userId, limit = 50) {
     }
 }
 
+// Fetch comments by multiple user IDs (for friends feed)
+async function fetchCommentsByUserIds(userIds, limit = 50) {
+    if (!isFirebaseInitialized || !database || !userIds || userIds.length === 0) return [];
+    try {
+        const promises = userIds.map(uid => fetchCommentsByUserId(uid, limit));
+        const results = await Promise.all(promises);
+        return results.flat()
+            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+            .slice(0, limit);
+    } catch (error) {
+        console.warn('Failed to fetch friends comments:', error.message);
+        return [];
+    }
+}
+
 // Fetch comments that user has replied to (cards they interacted with)
 async function fetchCommentsUserRepliedTo(userId, limit = 20) {
     if (!isFirebaseInitialized || !database || !userId) return [];
@@ -807,37 +799,12 @@ async function fetchCardRankings(limit = 5) {
 }
 
 // ========================================
-// Simplified Analytics (counter-based only)
+// All analytics tracking disabled to optimize Firebase costs
 // ========================================
-// DISABLED detailed event tracking to save bandwidth
-// Only keeping simple counter increments
-
-async function trackFeatureUsage(feature, action = 'use') {
-    if (!isFirebaseInitialized || !database) return null;
-
-    try {
-        const featureRef = database.ref(`analytics/features/${feature}/${action}`);
-        await featureRef.transaction((current) => (current || 0) + 1);
-        return true;
-    } catch (error) {
-        return null;
-    }
-}
-
-// Simple tracking functions (no detailed events)
-function trackMusicToggle(isMuted) {
-    trackFeatureUsage('music', isMuted ? 'muted' : 'unmuted');
-}
-
-function trackCommentsPanel(action) {
-    trackFeatureUsage('commentsPanel', action);
-}
-
-function trackRankingPanel(action) {
-    trackFeatureUsage('rankingPanel', action);
-}
-
-// Disabled functions (return immediately to save bandwidth)
+function trackFeatureUsage() { return null; }
+function trackMusicToggle() { return null; }
+function trackCommentsPanel() { return null; }
+function trackRankingPanel() { return null; }
 function trackEvent() { return null; }
 function trackJourneyStep() { return null; }
 function trackTimeToFirstPick() { return null; }
@@ -847,18 +814,7 @@ function trackDeviceType() { return null; }
 function trackCommentFormStart() { return null; }
 function trackCommentFormAbandon() { return null; }
 function trackCommentFormSubmit() { return null; }
-
-async function fetchAnalyticsSummary() {
-    if (!isFirebaseInitialized || !database) return null;
-
-    try {
-        const analyticsRef = database.ref('analytics');
-        const snapshot = await analyticsRef.once('value');
-        return snapshot.val() || {};
-    } catch (error) {
-        return null;
-    }
-}
+function fetchAnalyticsSummary() { return null; }
 
 // ========================================
 // User Draw History & Profile (per-user Firebase data)
@@ -915,16 +871,7 @@ async function saveUserProfile(fbUserId, profileData) {
     if (!isFirebaseInitialized || !database || !fbUserId) return null;
     try {
         const profileRef = database.ref('users/' + fbUserId + '/profile');
-        // Set joinedAt only on first save (won't overwrite if exists)
-        const snapshot = await profileRef.child('joinedAt').once('value');
-        var dataToSave = {
-            ...profileData,
-            lastSeen: firebase.database.ServerValue.TIMESTAMP
-        };
-        if (!snapshot.exists()) {
-            dataToSave.joinedAt = firebase.database.ServerValue.TIMESTAMP;
-        }
-        await profileRef.update(dataToSave);
+        await profileRef.update(profileData);
         clearCache('userProfile_' + fbUserId);
         return { success: true };
     } catch (error) {
@@ -956,15 +903,13 @@ async function fetchUserProfile(fbUserId) {
 // Export for use in app.js
 // ========================================
 window.cardCounter = {
+    // Core: card picks
     increment: handleCardPickCounter,
     getCount: getCardCount,
     getTotal: getTotalPicks,
     updateDisplay: updateCounterDisplay,
     isEnabled: () => isFirebaseInitialized,
-    trackSaveImage: trackSaveImage,
-    trackShare: trackShare,
-    trackRetry: trackRetry,
-    trackSocialClick: trackSocialClick,
+    // Comments & replies
     submitComment: submitCommentToFirebase,
     fetchComments: fetchComments,
     fetchCommentsByCardId: fetchCommentsByCardId,
@@ -978,23 +923,9 @@ window.cardCounter = {
     fetchTopCommentsByReplies: fetchTopCommentsByReplies,
     fetchHotComments: fetchHotComments,
     fetchCommentsByUserId: fetchCommentsByUserId,
+    fetchCommentsByUserIds: fetchCommentsByUserIds,
     fetchCommentsUserRepliedTo: fetchCommentsUserRepliedTo,
     fetchCardRankings: fetchCardRankings,
-    // Analytics (mostly disabled)
-    trackEvent: trackEvent,
-    trackJourneyStep: trackJourneyStep,
-    trackTimeToFirstPick: trackTimeToFirstPick,
-    trackFeatureUsage: trackFeatureUsage,
-    trackMusicToggle: trackMusicToggle,
-    trackCommentsPanel: trackCommentsPanel,
-    trackRankingPanel: trackRankingPanel,
-    trackInterpretationScroll: trackInterpretationScroll,
-    trackCardPosition: trackCardPosition,
-    trackDeviceType: trackDeviceType,
-    trackCommentFormStart: trackCommentFormStart,
-    trackCommentFormAbandon: trackCommentFormAbandon,
-    trackCommentFormSubmit: trackCommentFormSubmit,
-    fetchAnalyticsSummary: fetchAnalyticsSummary,
     // User draw history & profile
     saveUserDraw: saveUserDraw,
     fetchUserDraws: fetchUserDraws,

@@ -67,11 +67,6 @@ function fetchUserProfileFB() {
             var picUrl = response.picture?.data?.url;
             updateFacebookButton(true, response.name, picUrl);
 
-            // Track FB login
-            if (window.cardCounter) {
-                window.cardCounter.trackFeatureUsage('facebookLogin', 'connected');
-            }
-
             // Sync draw history from Firebase
             syncDrawHistoryOnLogin(response.id);
 
