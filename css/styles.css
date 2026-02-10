@@ -1,4 +1,4 @@
-/* Valentine Tarot - Main Styles */
+/* Card of the Day - Main Styles */
 
 * {
     margin: 0;
@@ -189,6 +189,66 @@ body {
     pointer-events: none;
 }
 
+/* Facebook Login Button */
+.fb-login-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(13, 19, 51, 0.6);
+    border: 1px solid rgba(154, 170, 212, 0.25);
+    border-radius: 20px;
+    padding: 6px 12px;
+    color: rgba(192, 200, 224, 0.9);
+    cursor: pointer;
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 300;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.fb-login-btn svg {
+    width: 18px;
+    height: 18px;
+    color: #1877F2;
+    flex-shrink: 0;
+}
+
+.fb-login-btn:hover {
+    background: rgba(24, 119, 242, 0.15);
+    border-color: rgba(24, 119, 242, 0.4);
+    color: #E8E8F0;
+}
+
+.fb-login-btn.connected {
+    padding: 3px 10px 3px 3px;
+}
+
+.fb-login-btn.connected svg {
+    display: none;
+}
+
+.fb-profile-pic {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid rgba(154, 170, 212, 0.3);
+}
+
+.fb-login-btn.connected #fbBtnText {
+    font-size: 0.7rem;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* Animation for header moving to top-left corner */
 .landing-heading.revealed {
     transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
@@ -204,84 +264,19 @@ body {
     transition: opacity 0.6s ease !important;
 }
 
-/* Mini header that fades in at center of ellipse */
-.mini-header {
-    position: fixed;
-    top: calc(50% - 25px);
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.8);
-    font-family: 'Caveat', cursive;
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: var(--burgundy);
-    line-height: 1.3;
-    text-align: center;
-    z-index: 1;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.mini-header.visible {
-    animation: headerFadeIn 0.8s ease-out forwards, headerGlow 3s ease-in-out 0.8s infinite;
-}
-
-@keyframes headerFadeIn {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.8);
-    }
-    100% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-}
-
-@keyframes headerGlow {
-    0%, 100% {
-        text-shadow: 0 0 10px rgba(160, 180, 220, 0.3);
-    }
-    50% {
-        text-shadow: 0 0 20px rgba(160, 180, 220, 0.6), 0 0 30px rgba(160, 180, 220, 0.3);
-    }
-}
-
 /* Floating animation for spread cards */
 @keyframes cardFloat {
     0%, 100% {
-        transform: var(--card-rotation) translateY(0px);
+        transform: translateY(0px);
     }
     50% {
-        transform: var(--card-rotation) translateY(-4px);
+        transform: translateY(-4px);
     }
 }
 
 .card-container.spread.floating {
-    transform: var(--card-rotation) translateY(0px);
     animation: cardFloat 3s ease-in-out infinite;
     animation-delay: var(--float-delay, 0s);
-}
-
-.mini-header .strikethrough-word {
-    position: relative;
-    display: inline-block;
-}
-
-.mini-header .mistake {
-    text-decoration: line-through;
-    text-decoration-color: #E8E8F0;
-    text-decoration-thickness: 1px;
-}
-
-.mini-header .valentine {
-    position: absolute;
-    left: 50%;
-    top: 85%;
-    transform: translateX(-50%) rotate(-8deg);
-    white-space: nowrap;
-    font-family: 'Caveat', cursive;
-    font-size: 1em;
-    font-weight: 400;
-    color: #E8E8F0;
 }
 
 /* Animation for spinning card hint fade */
@@ -294,9 +289,13 @@ body {
     z-index: 100;
 }
 
-/* Card grid - ready state */
+/* Card grid - stacked state (before spread animation) */
 .card-grid.stacked {
-    /* Cards are stacked and ready */
+    gap: 0;
+}
+
+.card-grid.stacked .card-container {
+    position: absolute;
 }
 
 /* Spinning Card Container - Diamond shape spinning on corner */
@@ -913,30 +912,38 @@ header {
     display: none;
 }
 
-/* Card Grid - Circular Layout */
+/* Card Grid - Overlapping Row Layout */
 .card-grid {
     position: relative;
     width: 100%;
     flex: 1;
+    min-height: 0;
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    align-content: center;
+    gap: 0;
+    padding: 10px 10px 10px 10px;
     overflow: hidden;
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition: opacity 0.5s ease;
 }
 
 /* Card */
 .card-container {
-    position: absolute;
-    width: 80px;
-    height: 143px;
+    width: 65px;
+    height: 116px;
     perspective: 1000px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
     transform-origin: center center;
+    flex-shrink: 0;
 }
 
-/* Card stays at original z-index on hover */
+.card-container.spread:hover {
+    transform: translateY(-6px) scale(1.08);
+    z-index: 100;
+}
 
 .card-container.disabled {
     pointer-events: none;
@@ -2953,6 +2960,10 @@ footer {
         bottom: -50px;
     }
 
+    .card-grid {
+        padding: 8px 10px;
+    }
+
     .card-grid.stacked::after {
         width: 70px;
         height: 125px;
@@ -3006,6 +3017,10 @@ footer {
     .card-click-hint {
         font-size: 0.8rem;
         bottom: -50px;
+    }
+
+    .card-grid {
+        padding: 6px 8px;
     }
 
     .card-grid.stacked::after {
@@ -4315,12 +4330,31 @@ footer {
 }
 
 /* Social channels section */
+.blessing-save-share-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 40px;
+    opacity: 0;
+    animation: socialItemFadeIn 0.6s ease 0.8s forwards;
+}
+
+.blessing-save-share-section .save-section,
+.blessing-save-share-section .share-section {
+    width: 100%;
+}
+
+.blessing-save-share-section .save-row {
+    justify-content: center;
+}
+
 .blessing-social-section {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    margin-top: 60px;
+    margin-top: 30px;
 }
 
 .blessing-social-item {

@@ -1,5 +1,5 @@
 /**
- * Valentine Tarot - Translations Data
+ * Card of the Day - Translations Data
  *
  * @description UI text translations for 6 languages
  * @version 1.1.0
@@ -36,15 +36,13 @@
 const translations = {
     th: {
         landing: {
-            heading: "Who's Gonna Be My Next",
-            mistake: "Mistake?",
-            valentine: "Valentine!",
+            heading: "Card of the Day",
             loading: "กำลังโหลด...",
-            instruction: "ใครจะเข้ามาในชีวิตคุณช่วงวาเลนไทน์?",
+            instruction: "จับไพ่ทาโรต์ 1 ใบเพื่อดูดวงประจำวัน",
             clickToDraw: "แตะไพ่เพื่อเริ่มดูดวง"
         },
         main: {
-            title: "ใครจะเข้ามาในชีวิตคุณช่วงวาเลนไทน์",
+            title: "เลือกไพ่ 1 ใบเพื่อรับข้อความประจำวัน",
             instruction: "เลือกไพ่ 1 ใบ เพื่อดูคำทำนาย",
             loadingCards: "กำลังโหลดไพ่..."
         },
@@ -70,7 +68,7 @@ const translations = {
             namePlaceholder: "ใส่ชื่อ (ไม่เกิน 15 ตัวอักษร)",
             label: "ความคิดเห็น",
             placeholder: "น้อมรับคำทำนายจากแม่หมอพิมพ์ฟ้า",
-            submit: "ส่งความคิดเห็น",
+            submit: "น้อมรับคำทำนาย",
             sending: "กำลังส่ง...",
             reply: "ตอบกลับ",
             replyPlaceholder: "เขียนข้อความตอบกลับ...",
@@ -119,8 +117,8 @@ const translations = {
         },
         share: {
             gotCard: "ฉันจับได้ไพ่",
-            letsRead: "มาดูดวงความรักวาเลนไทน์กัน!",
-            title: "ดูดวงความรักวาเลนไทน์",
+            letsRead: "มาจับไพ่ทาโรต์รายวันกัน!",
+            title: "ไพ่ทาโรต์รายวัน",
             copiedForMessenger: "คัดลอกข้อความแล้ว! วางใน Messenger ได้เลย",
             copiedText: "คัดลอกข้อความแล้ว!"
         },
@@ -153,15 +151,13 @@ const translations = {
     },
     en: {
         landing: {
-            heading: "Who's Gonna Be My Next",
-            mistake: "Mistake?",
-            valentine: "Valentine!",
+            heading: "Card of the Day",
             loading: "Loading...",
-            instruction: "Who will come into your life?",
+            instruction: "Draw a tarot card to reveal today's message",
             clickToDraw: "Tap card to draw"
         },
         main: {
-            title: "Who will come into your life?",
+            title: "Pick a card to reveal today's message",
             instruction: "Pick 1 card to see your fortune",
             loadingCards: "Loading cards..."
         },
@@ -187,7 +183,7 @@ const translations = {
             namePlaceholder: "Enter name (max 15 chars)",
             label: "Comment",
             placeholder: "Accept the prophecy from fortune teller",
-            submit: "Submit Comment",
+            submit: "Accept the Prophecy",
             sending: "Sending...",
             reply: "Reply",
             replyPlaceholder: "Write a reply...",
@@ -236,8 +232,8 @@ const translations = {
         },
         share: {
             gotCard: "I got the card",
-            letsRead: "Let's read Valentine love fortune!",
-            title: "Valentine Love Fortune",
+            letsRead: "Draw your daily tarot card!",
+            title: "Card of the Day - Daily Tarot",
             copiedForMessenger: "Text copied! Paste in Messenger",
             copiedText: "Text copied!"
         },
@@ -270,15 +266,13 @@ const translations = {
     },
     "zh-CN": {
         landing: {
-            heading: "Who's Gonna Be My Next",
-            mistake: "Mistake?",
-            valentine: "Valentine!",
+            heading: "Card of the Day",
             loading: "加载中...",
-            instruction: "情人节谁会走进你的生活？",
+            instruction: "抽一张塔罗牌，揭示今日讯息",
             clickToDraw: "点击抽牌"
         },
         main: {
-            title: "情人节谁会走进你的生活？",
+            title: "选一张牌揭示今日讯息",
             instruction: "选择1张牌看你的运势",
             loadingCards: "加载牌中..."
         },
@@ -304,7 +298,7 @@ const translations = {
             namePlaceholder: "输入名字（最多15字）",
             label: "评论",
             placeholder: "接受占卜师的预言",
-            submit: "提交评论",
+            submit: "接受预言",
             sending: "发送中...",
             reply: "回复",
             replyPlaceholder: "写回复...",
@@ -353,8 +347,8 @@ const translations = {
         },
         share: {
             gotCard: "我抽到了",
-            letsRead: "一起来看情人节爱情运势吧！",
-            title: "情人节爱情运势",
+            letsRead: "一起来抽每日塔罗牌吧！",
+            title: "每日塔罗牌",
             copiedForMessenger: "已复制文字！请粘贴到Messenger",
             copiedText: "已复制文字！"
         },
@@ -387,15 +381,13 @@ const translations = {
     },
     "zh-TW": {
         landing: {
-            heading: "Who's Gonna Be My Next",
-            mistake: "Mistake?",
-            valentine: "Valentine!",
+            heading: "Card of the Day",
             loading: "載入中...",
-            instruction: "情人節誰會走進你的生活？",
+            instruction: "抽一張塔羅牌，揭示今日訊息",
             clickToDraw: "點擊抽牌"
         },
         main: {
-            title: "情人節誰會走進你的生活？",
+            title: "選一張牌揭示今日訊息",
             instruction: "選擇1張牌看你的運勢",
             loadingCards: "載入牌中..."
         },
@@ -421,7 +413,7 @@ const translations = {
             namePlaceholder: "輸入名字（最多15字）",
             label: "評論",
             placeholder: "接受占卜師的預言",
-            submit: "提交評論",
+            submit: "接受預言",
             sending: "發送中...",
             reply: "回覆",
             replyPlaceholder: "寫回覆...",
@@ -470,8 +462,8 @@ const translations = {
         },
         share: {
             gotCard: "我抽到了",
-            letsRead: "一起來看情人節愛情運勢吧！",
-            title: "情人節愛情運勢",
+            letsRead: "一起來抽每日塔羅牌吧！",
+            title: "每日塔羅牌",
             copiedForMessenger: "已複製文字！請貼到Messenger",
             copiedText: "已複製文字！"
         },
@@ -504,15 +496,13 @@ const translations = {
     },
     ko: {
         landing: {
-            heading: "Who's Gonna Be My Next",
-            mistake: "Mistake?",
-            valentine: "Valentine!",
+            heading: "Card of the Day",
             loading: "로딩 중...",
-            instruction: "발렌타인에 누가 당신의 삶에 들어올까요?",
+            instruction: "타로 카드를 뽑아 오늘의 메시지를 확인하세요",
             clickToDraw: "카드를 탭하여 뽑기"
         },
         main: {
-            title: "발렌타인에 누가 당신의 삶에 들어올까요?",
+            title: "카드를 선택하여 오늘의 메시지를 확인하세요",
             instruction: "운세를 보려면 카드 1장을 선택하세요",
             loadingCards: "카드 로딩 중..."
         },
@@ -538,7 +528,7 @@ const translations = {
             namePlaceholder: "이름 입력 (최대 15자)",
             label: "댓글",
             placeholder: "점술사의 예언을 받아들이세요",
-            submit: "댓글 달기",
+            submit: "예언 받아들이기",
             sending: "전송 중...",
             reply: "답글",
             replyPlaceholder: "답글 작성...",
@@ -587,8 +577,8 @@ const translations = {
         },
         share: {
             gotCard: "나는",
-            letsRead: "발렌타인 사랑 운세를 함께 봐요!",
-            title: "발렌타인 사랑 운세",
+            letsRead: "오늘의 타로 카드를 뽑아보세요!",
+            title: "오늘의 타로 카드",
             copiedForMessenger: "텍스트 복사됨! 메신저에 붙여넣기",
             copiedText: "텍스트 복사됨!"
         },
@@ -621,15 +611,13 @@ const translations = {
     },
     ja: {
         landing: {
-            heading: "Who's Gonna Be My Next",
-            mistake: "Mistake?",
-            valentine: "Valentine!",
+            heading: "Card of the Day",
             loading: "読み込み中...",
-            instruction: "バレンタインに誰があなたの人生に入ってくる？",
+            instruction: "タロットカードを引いて今日のメッセージを受け取りましょう",
             clickToDraw: "カードをタップして引く"
         },
         main: {
-            title: "バレンタインに誰があなたの人生に入ってくる？",
+            title: "カードを選んで今日のメッセージを受け取る",
             instruction: "運勢を見るためにカードを1枚選んでください",
             loadingCards: "カードを読み込み中..."
         },
@@ -655,7 +643,7 @@ const translations = {
             namePlaceholder: "名前を入力（最大15文字）",
             label: "コメント",
             placeholder: "占い師の予言を受け入れる",
-            submit: "コメント送信",
+            submit: "予言を受け入れる",
             sending: "送信中...",
             reply: "返信",
             replyPlaceholder: "返信を書く...",
@@ -704,8 +692,8 @@ const translations = {
         },
         share: {
             gotCard: "私のカードは",
-            letsRead: "バレンタインの恋愛運を見てみよう！",
-            title: "バレンタイン恋愛運",
+            letsRead: "今日のタロットカードを引いてみよう！",
+            title: "今日のタロットカード",
             copiedForMessenger: "テキストをコピーしました！メッセンジャーに貼り付けてください",
             copiedText: "テキストをコピーしました！"
         },
@@ -738,15 +726,13 @@ const translations = {
     },
     fr: {
         landing: {
-            heading: "Who's Gonna Be My Next",
-            mistake: "Mistake?",
-            valentine: "Valentine!",
+            heading: "Card of the Day",
             loading: "Chargement...",
-            instruction: "Qui entrera dans votre vie pour la Saint-Valentin ?",
+            instruction: "Tirez une carte de tarot pour découvrir le message du jour",
             clickToDraw: "Touchez la carte pour tirer"
         },
         main: {
-            title: "Qui entrera dans votre vie pour la Saint-Valentin ?",
+            title: "Choisissez une carte pour le message du jour",
             instruction: "Choisissez 1 carte pour voir votre prédiction",
             loadingCards: "Chargement des cartes..."
         },
@@ -772,7 +758,7 @@ const translations = {
             namePlaceholder: "Entrez votre nom (max 15 caractères)",
             label: "Commentaire",
             placeholder: "Acceptez la prophétie de la voyante Pimfah",
-            submit: "Envoyer le commentaire",
+            submit: "Accepter la prophétie",
             sending: "Envoi en cours...",
             reply: "Répondre",
             replyPlaceholder: "Écrivez votre réponse...",
@@ -821,8 +807,8 @@ const translations = {
         },
         share: {
             gotCard: "J'ai tiré la carte",
-            letsRead: "Découvrez votre horoscope amoureux de Saint-Valentin !",
-            title: "Horoscope amoureux Saint-Valentin",
+            letsRead: "Tirez votre carte du jour !",
+            title: "Carte du Jour - Tarot quotidien",
             copiedForMessenger: "Texte copié ! Collez dans Messenger",
             copiedText: "Texte copié !"
         },

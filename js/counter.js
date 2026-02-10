@@ -1,5 +1,5 @@
 /**
- * Valentine Tarot - Firebase Integration & Analytics
+ * Card of the Day - Firebase Integration & Analytics
  *
  * @description Firebase Realtime Database integration for:
  * - Card pick tracking
@@ -36,7 +36,7 @@
 const firebaseConfig = {
     apiKey: "AIzaSyCVo5U0lntL-rB4x8GkijXew8ajtMDqmhI",
     authDomain: "love-tarot-bf13e.firebaseapp.com",
-    databaseURL: "https://love-tarot-bf13e-default-rtdb.asia-southeast1.firebasedatabase.app",
+    databaseURL: "https://card-of-the-day-ea607-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "love-tarot-bf13e",
     storageBucket: "love-tarot-bf13e.firebasestorage.app",
     messagingSenderId: "629888519835",

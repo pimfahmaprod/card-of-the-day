@@ -1,7 +1,7 @@
-# Valentine Tarot - AI Context File
+# Card of the Day - AI Context File
 
 ## Project Overview
-A Valentine's Day themed tarot card reading web application. Users can draw tarot cards to receive love predictions, save result images, and share on social media.
+A "Card of the Day" tarot card reading web application. Users can draw a daily tarot card to receive predictions and messages, save result images, and share on social media.
 
 ## Tech Stack
 - **Frontend**: Vanilla HTML/CSS/JavaScript (no frameworks)

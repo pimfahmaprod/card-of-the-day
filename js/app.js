@@ -1,5 +1,5 @@
 /**
- * Valentine Tarot - Main Application Script
+ * Card of the Day - Main Application Script
  *
  * @description Core application logic for the tarot card reading app
  * @version 1.1.0
@@ -848,8 +848,7 @@ function startExperience() {
     const landingHeading = document.querySelector('.landing-heading');
     const cardGrid = document.getElementById('cardGrid');
 
-    // Get stack card size for target shrink
-    const { cardWidth, cardHeight } = getEllipseParams();
+    // cardWidth determined later when grid is visible
 
     // Stop the rotation interval and sparkles
     if (spinningCardInterval) {
@@ -890,15 +889,24 @@ function startExperience() {
     setTimeout(() => {
         landingPage.style.pointerEvents = 'none';
         cardGrid.classList.add('stacked');
-        // Don't add initial-hidden - cards will be behind the spinning card
         mainPage.classList.add('visible');
+
+        // Hide UI buttons for clean draw page
+        const langSwitcher = document.querySelector('.lang-switcher');
+        const totalCounter = document.querySelector('.total-counter');
+        const muteBtn = document.querySelector('.mute-btn');
+        if (langSwitcher) langSwitcher.style.display = 'none';
+        if (totalCounter) totalCounter.style.display = 'none';
+        if (muteBtn) muteBtn.style.display = 'none';
     }, 400);
 
     // Step 3: Shrink the card and move to stack center
     setTimeout(() => {
-        // Calculate scale to match stack card size
+        // Calculate scale to match grid card size (grid is now visible)
+        const layout = calculateCardLayout();
+        const targetWidth = layout ? layout.cardW : getStackParams().cardWidth;
         const currentWidth = spinningCardContainer.offsetWidth;
-        const scale = cardWidth / currentWidth;
+        const scale = targetWidth / currentWidth;
 
         // Clear the ready-glow animation first so transform can work
         spinningCardContainer.style.animation = 'none';
@@ -939,22 +947,7 @@ function startExperience() {
 
         // Small delay before spreading to make it feel like the top card is part of the stack
         setTimeout(() => {
-            cardGrid.classList.remove('stacked');
-            animateToEllipse();
-
-            // Create mini header that fades in at center of ellipse after cards spread
-            // 78 cards * 15ms stagger + 600ms animation = ~1800ms total
-            setTimeout(() => {
-                const miniHeader = document.createElement('div');
-                miniHeader.className = 'mini-header';
-                miniHeader.innerHTML = 'Who\'s Gonna Be<br>My Next <span class="strikethrough-word"><span class="mistake">Mistake?</span><span class="valentine">Valentine!</span></span>';
-                document.body.appendChild(miniHeader);
-
-                // Fade in after a brief moment
-                requestAnimationFrame(() => {
-                    miniHeader.classList.add('visible');
-                });
-            }, 1800);
+            animateToGrid();
         }, 50);
 
         // Hide landing page
@@ -1048,10 +1041,15 @@ function renderCards() {
     applyStackedLayout();
 }
 
-// Apply stacked layout (initial state)
+// Apply stacked layout (initial state) - uses grid card size for consistent sizing
 function applyStackedLayout() {
+    const grid = document.querySelector('.card-grid');
     const containers = document.querySelectorAll('.card-container');
-    const { cardWidth, cardHeight } = getEllipseParams();
+
+    // Use grid card size so stack matches the distributed card size
+    const layout = calculateCardLayout();
+    const cardWidth = layout ? layout.cardW : getStackParams().cardWidth;
+    const cardHeight = layout ? layout.cardH : getStackParams().cardHeight;
 
     containers.forEach((container, index) => {
         // Small random offset for natural stack look
@@ -1061,6 +1059,7 @@ function applyStackedLayout() {
 
         container.classList.add('stacked');
         container.classList.remove('spread');
+        container.style.position = 'absolute';
         container.style.width = `${cardWidth}px`;
         container.style.height = `${cardHeight}px`;
         container.style.left = `calc(50% - ${cardWidth/2}px + ${offsetX}px)`;
@@ -1068,121 +1067,202 @@ function applyStackedLayout() {
         container.style.transform = `rotate(${rotation}deg)`;
         container.style.zIndex = index;
         container.style.transition = 'none';
+        container.style.opacity = '0';
+        container.style.marginLeft = '';
+        container.style.marginBottom = '';
     });
 }
 
-// Animate cards from stack to ellipse
-function animateToEllipse() {
-    // Play card spread sound effect
+// Get CSS padding for the card grid based on screen width
+function getGridPadding() {
+    const w = window.innerWidth;
+    if (w <= 480) return { padTop: 6, padBottom: 6, padSide: 8 };
+    if (w <= 768) return { padTop: 8, padBottom: 8, padSide: 10 };
+    return { padTop: 10, padBottom: 10, padSide: 10 };
+}
+
+// Calculate optimal overlapping card layout based on available space
+function calculateCardLayout() {
+    const grid = document.querySelector('.card-grid');
+    if (!grid) return null;
+
+    const totalCards = grid.querySelectorAll('.card-container').length;
+    if (totalCards === 0) return null;
+
+    const ASPECT = 1.78;        // card height / width ratio
+    const V_OVERLAP = 0.08;     // 8% vertical overlap between rows
+    const MAX_H_OVERLAP = 0.65; // max 65% horizontal overlap (35% of card visible)
+    const NUM_ROWS = 6;
+    const NUM_COLS = 13;        // 6 × 13 = 78 cards
+
+    // Use hardcoded padding (matches CSS media queries) to avoid stacked-state issues
+    const { padTop, padBottom, padSide } = getGridPadding();
+    const gridW = grid.clientWidth;
+    const gridH = grid.clientHeight;
+    const availH = gridH - padTop - padBottom;
+    const availW = gridW - padSide * 2;
+
+    if (availW <= 0 || availH <= 0) return null;
+
+    // Card size from vertical constraint (6 rows with overlap)
+    const cardH_fromH = availH / (NUM_ROWS * (1 - V_OVERLAP) + 2 * V_OVERLAP);
+    const cardW_fromH = cardH_fromH / ASPECT;
+
+    // Card size from horizontal constraint (13 cards with max allowed overlap)
+    // availW = cardW + (NUM_COLS-1) * cardW * (1 - MAX_H_OVERLAP)
+    const cardW_fromW = availW / (1 + (NUM_COLS - 1) * (1 - MAX_H_OVERLAP));
+
+    // Use the smaller to guarantee cards fit both ways (always 6 rows)
+    const cardW = Math.min(cardW_fromH, cardW_fromW);
+    const cardH = cardW * ASPECT;
+
+    // Horizontal overlap so 13 cards fit in available width
+    const hOverlap = Math.max(0, (NUM_COLS * cardW - availW) / (NUM_COLS - 1));
+    const vOverlap = cardH * V_OVERLAP;
+
+    // Calculate absolute positions for each card in the grid
+    const outerW = cardW - hOverlap;   // effective width per card slot
+    const outerH = cardH - vOverlap;   // effective height per card slot
+    const startX = padSide;             // first card left edge at content area start
+    const totalGridH = NUM_ROWS * outerH + vOverlap; // last row gets full height
+    const startY = padTop + (availH - totalGridH) / 2;  // vertically center
+
+    const positions = [];
+    for (let i = 0; i < totalCards; i++) {
+        const row = Math.floor(i / NUM_COLS);
+        const col = i % NUM_COLS;
+        positions.push({
+            x: startX + col * outerW,
+            y: startY + row * outerH
+        });
+    }
+
+    return {
+        rows: NUM_ROWS, cols: NUM_COLS, cardW, cardH, hOverlap, vOverlap,
+        positions, gridW, gridH
+    };
+}
+
+// Apply calculated overlapping layout to spread cards (absolute positioning)
+function applyCardLayout() {
+    const grid = document.querySelector('.card-grid');
+    if (!grid || grid.classList.contains('stacked')) return;
+
+    const layout = calculateCardLayout();
+    if (!layout) return;
+
+    const containers = grid.querySelectorAll('.card-container.spread');
+    containers.forEach((c, index) => {
+        const target = layout.positions[index];
+        if (!target) return;
+        c.style.position = 'absolute';
+        c.style.width = `${layout.cardW}px`;
+        c.style.height = `${layout.cardH}px`;
+        c.style.left = `${target.x}px`;
+        c.style.top = `${target.y}px`;
+        c.style.zIndex = index;
+        c.style.marginLeft = '';
+        c.style.marginBottom = '';
+    });
+}
+
+// Animate cards from stack to overlapping grid rows (fly from center)
+function animateToGrid() {
     playSoundEffect('cardSpread');
 
-    const containers = document.querySelectorAll('.card-container');
+    const grid = document.querySelector('.card-grid');
+    const containers = Array.from(document.querySelectorAll('.card-container'));
     const totalCards = containers.length;
-    const { radiusX, radiusY, cardWidth, cardHeight, offsetY } = getEllipseParams();
 
-    containers.forEach((container, index) => {
-        // Stagger the animation - deal from top card (highest z-index) first
-        const delay = (totalCards - 1 - index) * 15;
+    // Calculate target layout while still in stacked state
+    const layout = calculateCardLayout();
+    if (!layout || !grid) return;
+
+    // Make all stacked cards visible so the stack appears
+    containers.forEach(c => { c.style.opacity = '1'; });
+
+    // Deal cards: top-left first → right → next row (grid index 0 flies first)
+    const DELAY_PER_CARD = 12;  // ms between each card flying out
+    const FLY_DURATION = 400;   // ms for each card's flight
+
+    containers.forEach((container, gridIndex) => {
+        // Top of deck (highest z-index = last container) flies first to position 0 (top-left)
+        // Bottom of deck (z-index 0 = first container) flies last to position 77 (bottom-right)
+        const posIndex = totalCards - 1 - gridIndex;
+        const delay = posIndex * DELAY_PER_CARD;
+        const target = layout.positions[posIndex];
 
         setTimeout(() => {
             container.classList.remove('stacked');
             container.classList.add('spread');
-            container.style.transition = 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
 
-            const anglePerCard = (2 * Math.PI) / totalCards;
-            const angle = index * anglePerCard - Math.PI / 2;
+            // Step 1: Enable transitions (cards had transition: none from stacked state)
+            container.style.transition = `left ${FLY_DURATION}ms cubic-bezier(0.22, 1, 0.36, 1), top ${FLY_DURATION}ms cubic-bezier(0.22, 1, 0.36, 1), width ${FLY_DURATION}ms ease, height ${FLY_DURATION}ms ease, transform ${FLY_DURATION}ms ease`;
+            // Force reflow so browser registers the transition before position changes
+            void container.offsetHeight;
 
-            const x = radiusX * Math.cos(angle);
-            const y = radiusY * Math.sin(angle) + offsetY;
-            const rotationDeg = (angle * 180 / Math.PI) + 90;
-
-            container.style.left = `calc(50% + ${x}px - ${cardWidth/2}px)`;
-            container.style.top = `calc(50% + ${y}px - ${cardHeight/2}px)`;
-            container.style.transform = `rotate(${rotationDeg}deg)`;
-            container.style.zIndex = index;
-
-            // Reset transition and add floating animation after spread completes
-            setTimeout(() => {
-                // Set up CSS variables for animation
-                container.style.setProperty('--card-rotation', `rotate(${rotationDeg}deg)`);
-                container.style.setProperty('--float-delay', `${(index % 10) * 0.3}s`);
-                // Clear inline transform and add floating class in same frame
-                container.style.transition = 'none';
-                container.style.transform = '';
-                requestAnimationFrame(() => {
-                    container.classList.add('floating');
-                });
-            }, 600);
+            // Step 2: Set target — browser will now animate from center to grid position
+            // Use z-index above the stack (max stack z = totalCards-1) so cards peel off the top visually
+            // posIndex also orders grid cards correctly (right/bottom overlaps left/top)
+            container.style.position = 'absolute';
+            container.style.width = `${layout.cardW}px`;
+            container.style.height = `${layout.cardH}px`;
+            container.style.left = `${target.x}px`;
+            container.style.top = `${target.y}px`;
+            container.style.zIndex = totalCards + posIndex;
+            container.style.marginLeft = '';
+            container.style.marginBottom = '';
+            container.style.transform = 'rotate(0deg)';
         }, delay);
     });
+
+    // After all cards have landed, remove stacked class, set final z-indices, add floating
+    const totalAnimTime = (totalCards - 1) * DELAY_PER_CARD + FLY_DURATION + 50;
+    setTimeout(() => {
+        grid.classList.remove('stacked');
+        containers.forEach((container, gridIndex) => {
+            const posIndex = totalCards - 1 - gridIndex;
+            container.style.zIndex = posIndex;
+            container.style.transition = '';
+            container.style.setProperty('--float-delay', `${(gridIndex % 10) * 0.3}s`);
+            requestAnimationFrame(() => { container.classList.add('floating'); });
+        });
+    }, totalAnimTime);
 }
 
-// Get responsive elliptical parameters
-function getEllipseParams() {
+// Get responsive card parameters for stacked state
+function getStackParams() {
     const width = window.innerWidth;
-    const height = window.innerHeight;
-    // Account for footer height
-    const availableHeight = height - 50;
     if (width <= 480) {
-        // Mobile: tall ellipse along screen height
-        return {
-            radiusX: Math.min(width * 0.36, 140),   // Narrow horizontal
-            radiusY: Math.min(availableHeight * 0.30, 200),  // Tall vertical, fit within screen
-            cardWidth: 40,
-            cardHeight: 71,
-            offsetY: 0
-        };
+        return { cardWidth: 40, cardHeight: 71 };
     } else if (width <= 768) {
-        return {
-            radiusX: 150,   // Narrow
-            radiusY: Math.min(availableHeight * 0.35, 260),   // Fit within screen
-            cardWidth: 50,
-            cardHeight: 89,
-            offsetY: 0
-        };
+        return { cardWidth: 50, cardHeight: 89 };
     }
-    return {
-        radiusX: 180,   // Narrow
-        radiusY: Math.min(availableHeight * 0.38, 340),   // Fit within screen
-        cardWidth: 65,
-        cardHeight: 116,
-        offsetY: 0
-    };
+    return { cardWidth: 65, cardHeight: 116 };
 }
 
-// Get card transform based on index for elliptical layout
-function getCardTransform(index) {
-    const totalCards = 78;
-    const anglePerCard = (2 * Math.PI) / totalCards;
-    const angle = index * anglePerCard - Math.PI / 2; // Start from top
-    const rotationDeg = (angle * 180 / Math.PI) + 90; // Point outward
-    return `rotate(${rotationDeg}deg)`;
-}
-
-// Apply elliptical layout
-function applyCircularLayout() {
-    const containers = document.querySelectorAll('.card-container');
-    const totalCards = containers.length;
-    const { radiusX, radiusY, cardWidth, cardHeight, offsetY } = getEllipseParams();
+// Apply grid layout (after resize etc.)
+function applyGridLayout() {
+    const grid = document.querySelector('.card-grid');
+    if (!grid) return;
+    const containers = grid.querySelectorAll('.card-container');
+    const layout = calculateCardLayout();
+    if (!layout) return;
 
     containers.forEach((container, index) => {
-        const anglePerCard = (2 * Math.PI) / totalCards;
-        const angle = index * anglePerCard - Math.PI / 2; // Start from top
-
-        // Calculate position on ellipse
-        const x = radiusX * Math.cos(angle);
-        const y = radiusY * Math.sin(angle) + offsetY;
-
-        // Rotation to point outward from center
-        const rotationDeg = (angle * 180 / Math.PI) + 90;
-
-        container.style.width = `${cardWidth}px`;
-        container.style.height = `${cardHeight}px`;
-        container.style.left = `calc(50% + ${x}px - ${cardWidth/2}px)`;
-        container.style.top = `calc(50% + ${y}px - ${cardHeight/2}px)`;
-        container.style.transformOrigin = 'center center';
-        container.style.transform = `rotate(${rotationDeg}deg)`;
-        container.style.zIndex = index;
+        if (container.classList.contains('spread')) {
+            const target = layout.positions[index];
+            if (!target) return;
+            container.style.position = 'absolute';
+            container.style.width = `${layout.cardW}px`;
+            container.style.height = `${layout.cardH}px`;
+            container.style.left = `${target.x}px`;
+            container.style.top = `${target.y}px`;
+            container.style.transform = '';
+            container.style.zIndex = index;
+            container.style.marginLeft = '';
+            container.style.marginBottom = '';
+        }
     });
 }
 
@@ -1233,33 +1313,18 @@ function selectCard(cardId, cardElement) {
     // Play card flip sound effect when picking a card
     playSoundEffect('cardFlip');
 
-    // Reset hover scale immediately to prevent visual jump
-    const index = parseInt(cardElement.dataset.index);
-    const originalTransform = getCardTransform(index);
-    cardElement.style.transition = 'none';
-    cardElement.style.transform = originalTransform;
-    // Force reflow to apply the change immediately
-    cardElement.offsetHeight;
-
     // Set center card image
     document.getElementById('centerCardImage').src = `images/tarot/${card.image}`;
 
     // Reset center card flip state
     document.getElementById('centerCardInner').classList.remove('flipped');
 
-    // Get current rotation from CSS variable or computed style
-    const currentRotation = cardElement.style.getPropertyValue('--card-rotation') ||
-                           cardElement.style.transform || 'rotate(0deg)';
-    const rotationMatch = currentRotation.match(/rotate\(([-\d.]+)deg\)/);
-    const rotationDeg = rotationMatch ? parseFloat(rotationMatch[1]) : 0;
-
     // Track card pick journey and timing
     if (window.cardCounter) {
         window.cardCounter.trackJourneyStep('pick');
         window.cardCounter.trackTimeToFirstPick();
-        // Track card position (convert rotation to angle on circle)
-        const cardAngle = (rotationDeg - 90 + 360) % 360;
-        window.cardCounter.trackCardPosition(cardAngle);
+        const index = parseInt(cardElement.dataset.index);
+        window.cardCounter.trackCardPosition(index * (360 / 78));
     }
 
     // Step 1: Add selecting class for golden glow
@@ -1268,21 +1333,10 @@ function selectCard(cardId, cardElement) {
     // Create sparkle particles
     createSparkles(cardElement);
 
-    // Calculate slide direction - move outward from ellipse center
-    const slideDistance = 40;
-    // The card's rotation is (angle + 90), so subtract 90 to get the radial angle
-    const radialAngle = (rotationDeg - 90) * Math.PI / 180;
-    // Slide outward along the radial direction (away from center)
-    const slideX = Math.cos(radialAngle) * slideDistance;
-    const slideY = Math.sin(radialAngle) * slideDistance;
-
-    // Apply slide animation - card moves outward while keeping its rotation
-    cardElement.style.transition = 'transform 0.4s ease-out, left 0.4s ease-out, top 0.4s ease-out';
-    // Update position to slide outward
-    const currentLeft = cardElement.style.left;
-    const currentTop = cardElement.style.top;
-    cardElement.style.left = `calc(${currentLeft} + ${slideX}px)`;
-    cardElement.style.top = `calc(${currentTop} + ${slideY}px)`;
+    // Lift the selected card up
+    cardElement.style.transition = 'transform 0.4s ease-out';
+    cardElement.style.transform = 'translateY(-20px) scale(1.15)';
+    cardElement.style.zIndex = '100';
 
     // Disable other cards
     document.querySelectorAll('.card-container').forEach(c => {
@@ -1315,18 +1369,13 @@ function selectCard(cardId, cardElement) {
                 document.getElementById('resultPanel').classList.add('active');
                 isAnimating = false;
 
-                // Track card pick in Firebase
-                if (window.cardCounter && window.cardCounter.increment) {
-                    window.cardCounter.increment(card.id, card.name, getUserId());
-                }
-
                 // Track journey step: result
                 if (window.cardCounter) {
                     window.cardCounter.trackJourneyStep('result');
                 }
 
-                // Check if this card has comments and update button visibility
-                checkCardComments(card.id);
+                // Initialize comment form (show/hide name group)
+                initCommentForm();
 
                 // Show comments button now that result is visible
                 updateCommentsBtnVisibility();
@@ -1345,28 +1394,7 @@ function closeResult() {
 
     const cardGrid = document.getElementById('cardGrid');
 
-    // Reset accept actions container and buttons
-    const acceptActions = document.getElementById('acceptActions');
-    const commentToggleBtn = document.getElementById('commentToggleBtn');
-    const viewCommentsBtn = document.getElementById('viewCommentsBtn');
-    if (acceptActions) acceptActions.style.display = 'none';
-    if (commentToggleBtn) {
-        commentToggleBtn.style.display = 'inline-flex';
-        commentToggleBtn.classList.remove('active');
-        commentToggleBtn.classList.remove('commented');
-        commentToggleBtn.disabled = false;
-        const btnText = commentToggleBtn.querySelector('span');
-        if (btnText) btnText.textContent = t('result.acceptProphecy');
-        // Restore original checkmark icon
-        const svgIcon = commentToggleBtn.querySelector('svg');
-        if (svgIcon) {
-            svgIcon.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
-        }
-    }
-    // Reset view comments button
-    if (viewCommentsBtn) {
-        viewCommentsBtn.style.display = 'none';
-    }
+    // Reset comment form
     if (typeof resetCommentForm === 'function') resetCommentForm();
 
     // Hide result panel
@@ -1391,8 +1419,7 @@ function closeResult() {
 
             // Animate cards from stack to fan
             setTimeout(() => {
-                cardGrid.classList.remove('stacked');
-                animateToEllipse();
+                animateToGrid();
             }, 100);
         }, 400);
     }, 300);
@@ -1400,7 +1427,8 @@ function closeResult() {
 
 // Event listeners
 document.getElementById('spinningCardContainer').addEventListener('click', startExperience);
-document.getElementById('resultClose').addEventListener('click', closeResult);
+const resultCloseBtn = document.getElementById('resultClose');
+if (resultCloseBtn) resultCloseBtn.addEventListener('click', closeResult);
 
 // Keyboard support
 document.addEventListener('keydown', (e) => {
@@ -1420,7 +1448,7 @@ let resizeTimeout;
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
-        applyCircularLayout();
+        applyGridLayout();
     }, 100);
 });
 
@@ -1515,22 +1543,10 @@ function saveUserName(name) {
     localStorage.setItem(SAVED_NAME_KEY, name.trim());
 }
 
-function toggleAcceptActions() {
-    const acceptActions = document.getElementById('acceptActions');
-    const btn = document.getElementById('commentToggleBtn');
+// Show/hide name group based on saved name (called when result panel opens)
+function initCommentForm() {
     const nameGroup = document.getElementById('commentNameGroup');
     const savedName = getSavedUserName();
-
-    // Show accept actions and hide the button
-    acceptActions.style.display = 'block';
-    btn.style.display = 'none';
-
-    // Track accept action
-    if (window.cardCounter) {
-        window.cardCounter.trackCommentFormStart();
-    }
-
-    // Check if name is already saved
     if (savedName && nameGroup) {
         nameGroup.style.display = 'none';
     } else if (nameGroup) {
@@ -1538,44 +1554,10 @@ function toggleAcceptActions() {
     }
 }
 
-// Legacy function alias
-function toggleCommentForm() {
-    toggleAcceptActions();
-}
-
-// Check if current card has comments and update button visibility
-async function checkCardComments(cardId) {
-    const viewCommentsBtn = document.getElementById('viewCommentsBtn');
-    const commentToggleBtn = document.getElementById('commentToggleBtn');
-    const commentToggleBtnText = document.getElementById('commentToggleBtnText');
-
-    if (!viewCommentsBtn || !commentToggleBtn || !commentToggleBtnText) return;
-
-    // Default state: hide view button, show normal text
-    viewCommentsBtn.style.display = 'none';
-    commentToggleBtnText.textContent = t('result.acceptProphecy');
-
-    // Check if Firebase is available
-    if (!window.cardCounter || !window.cardCounter.fetchCommentsByCardId) {
-        return;
-    }
-
-    try {
-        const comments = await window.cardCounter.fetchCommentsByCardId(cardId, null, 1);
-
-        if (comments && comments.length > 0) {
-            // Card has comments: show both buttons
-            viewCommentsBtn.style.display = 'inline-flex';
-            commentToggleBtnText.textContent = t('result.acceptProphecy');
-        } else {
-            // Card has no comments: hide view button, change text
-            viewCommentsBtn.style.display = 'none';
-            commentToggleBtnText.textContent = t('cta.acceptFirst');
-        }
-    } catch (error) {
-        console.warn('Failed to check card comments:', error);
-    }
-}
+// Legacy function aliases
+function toggleAcceptActions() {}
+function toggleCommentForm() {}
+function checkCardComments() {}
 
 // Store card data for cardview tab
 let cardViewData = null;
@@ -1765,6 +1747,11 @@ async function submitComment() {
     submitBtn.disabled = true;
     submitText.textContent = t('comment.sending');
 
+    // Track card pick in Firebase (count on accept/submit)
+    if (window.cardCounter && window.cardCounter.increment && currentCardData) {
+        window.cardCounter.increment(currentCardData.id, currentCardData.name, getUserId());
+    }
+
     // Submit to Firebase
     if (window.cardCounter && window.cardCounter.submitComment) {
         const userId = getUserId();
@@ -1944,40 +1931,13 @@ function goToLandingPage() {
     const landingInstruction = document.querySelector('.landing-instruction');
     const cardClickHint = spinningCardContainer.querySelector('.card-click-hint');
     const cardGrid = document.getElementById('cardGrid');
-    const miniHeader = document.querySelector('.mini-header');
 
-    // Reset accept actions and buttons
-    const acceptActions = document.getElementById('acceptActions');
-    const commentToggleBtn = document.getElementById('commentToggleBtn');
-    const viewCommentsBtn = document.getElementById('viewCommentsBtn');
-    if (acceptActions) acceptActions.style.display = 'none';
-    if (commentToggleBtn) {
-        commentToggleBtn.style.display = 'inline-flex';
-        commentToggleBtn.classList.remove('active');
-        commentToggleBtn.classList.remove('commented');
-        commentToggleBtn.disabled = false;
-        const btnText = commentToggleBtn.querySelector('span');
-        if (btnText) btnText.textContent = t('result.acceptProphecy');
-        const svgIcon = commentToggleBtn.querySelector('svg');
-        if (svgIcon) {
-            svgIcon.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
-        }
-    }
-    if (viewCommentsBtn) {
-        viewCommentsBtn.style.display = 'none';
-    }
+    // Reset comment form
     if (typeof resetCommentForm === 'function') resetCommentForm();
 
     // Step 1: Fade out main page smoothly
     mainPage.style.transition = 'opacity 0.4s ease';
     mainPage.style.opacity = '0';
-
-    // Remove mini header with fade
-    if (miniHeader) {
-        miniHeader.style.transition = 'opacity 0.3s ease';
-        miniHeader.style.opacity = '0';
-        setTimeout(() => miniHeader.remove(), 300);
-    }
 
     // Step 2: After fade out, prepare landing page
     setTimeout(() => {
@@ -2050,6 +2010,14 @@ function goToLandingPage() {
         landingPage.classList.remove('hidden');
         landingPage.style.pointerEvents = 'auto';
 
+        // Restore UI buttons hidden during draw page
+        const langSwitcher = document.querySelector('.lang-switcher');
+        const totalCounter = document.querySelector('.total-counter');
+        const muteBtn = document.querySelector('.mute-btn');
+        if (langSwitcher) langSwitcher.style.display = '';
+        if (totalCounter) totalCounter.style.display = '';
+        if (muteBtn) muteBtn.style.display = '';
+
         // Show comments button on landing page
         updateCommentsBtnVisibility();
 
@@ -2096,26 +2064,7 @@ function goToLandingPage() {
 }
 
 function resetForNewPick() {
-    // Reset accept actions container and buttons
-    const acceptActions = document.getElementById('acceptActions');
-    const commentToggleBtn = document.getElementById('commentToggleBtn');
-    const viewCommentsBtn = document.getElementById('viewCommentsBtn');
-    if (acceptActions) acceptActions.style.display = 'none';
-    if (commentToggleBtn) {
-        commentToggleBtn.style.display = 'inline-flex';
-        commentToggleBtn.classList.remove('active');
-        commentToggleBtn.classList.remove('commented');
-        commentToggleBtn.disabled = false;
-        const btnText = commentToggleBtn.querySelector('span');
-        if (btnText) btnText.textContent = t('result.acceptProphecy');
-        const svgIcon = commentToggleBtn.querySelector('svg');
-        if (svgIcon) {
-            svgIcon.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
-        }
-    }
-    if (viewCommentsBtn) {
-        viewCommentsBtn.style.display = 'none';
-    }
+    // Reset comment form
     if (typeof resetCommentForm === 'function') resetCommentForm();
 
     // Track retry
@@ -2332,12 +2281,12 @@ function openCommentsPanel(skipLoadComments = false) {
     // Skip loading if we're switching to a specific tab (like cardview)
     if (skipLoadComments) return;
 
-    // Reset tab to "new"
-    currentCommentsTab = 'new';
+    // Reset tab to "me" (history)
+    currentCommentsTab = 'me';
     if (commentsTabs) {
         commentsTabs.querySelectorAll('.comments-tab').forEach(t => t.classList.remove('active'));
-        const newTab = commentsTabs.querySelector('[data-tab="new"]');
-        if (newTab) newTab.classList.add('active');
+        const meTab = commentsTabs.querySelector('[data-tab="me"]');
+        if (meTab) meTab.classList.add('active');
     }
 
     // Reset all state (matching switchCommentsTab)
@@ -2354,8 +2303,8 @@ function openCommentsPanel(skipLoadComments = false) {
         window.cardCounter.unsubscribeFromNewComments();
     }
 
-    // Load comments directly (same as switchCommentsTab)
-    loadComments(true);
+    // Load my comments (history)
+    loadMyComments();
 }
 
 // Check if user has any comments and show/hide the "Me" tab
@@ -2807,12 +2756,6 @@ async function loadMyCardComments() {
                 </div>
                 <div class="comments-empty-text">${t('comments.noComments')}</div>
                 <p class="cta-subtitle">${t('comments.goComment')}</p>
-                <button class="cta-draw-btn" onclick="switchCommentsTab('new')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                    </svg>
-                    <span>${t('comments.viewLatest')}</span>
-                </button>
             </div>
         `;
         isLoadingComments = false;
@@ -3441,7 +3384,7 @@ function saveImage(platform) {
 
         // Download
         const link = document.createElement('a');
-        link.download = `valentine-tarot-${currentCardData.name.toLowerCase().replace(/\s+/g, '-')}-${platform}.png`;
+        link.download = `card-of-the-day-${currentCardData.name.toLowerCase().replace(/\s+/g, '-')}-${platform}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
 
@@ -3452,7 +3395,7 @@ function saveImage(platform) {
         drawShareImage(ctx, null, size, platform);
 
         const link = document.createElement('a');
-        link.download = `valentine-tarot-${currentCardData.name.toLowerCase().replace(/\s+/g, '-')}-${platform}.png`;
+        link.download = `card-of-the-day-${currentCardData.name.toLowerCase().replace(/\s+/g, '-')}-${platform}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
 
@@ -3700,7 +3643,7 @@ function drawSquareLayout(ctx, cardImg, width, height) {
     ctx.fillStyle = 'rgba(160, 180, 220, 0.6)';
     ctx.font = '22px "Cormorant Garamond", serif';
     ctx.textAlign = 'left';
-    ctx.fillText('Valentine Tarot', textX, 140);
+    ctx.fillText('Card of the Day', textX, 140);
 
     // Card name - large (with dynamic sizing to fit)
     ctx.fillStyle = '#C0C8E0';
@@ -3786,7 +3729,7 @@ function drawWideLayout(ctx, cardImg, width, height) {
     ctx.fillStyle = 'rgba(160, 180, 220, 0.6)';
     ctx.font = '20px "Cormorant Garamond", serif';
     ctx.textAlign = 'left';
-    ctx.fillText('Valentine Tarot', textX, 80);
+    ctx.fillText('Card of the Day', textX, 80);
 
     // Card name - prominent (with dynamic sizing to fit)
     ctx.fillStyle = '#C0C8E0';

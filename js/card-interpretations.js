@@ -1,7 +1,7 @@
 /**
- * Valentine Tarot - Card Interpretations Data
+ * Card of the Day - Card Interpretations Data
  *
- * @description Love predictions for all 78 tarot cards
+ * @description Predictions for all 78 tarot cards
  * @version 1.1.0
  *
  * EXPORTS:

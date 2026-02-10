@@ -1,6 +1,6 @@
-# Valentine Tarot
+# Card of the Day
 
-A Valentine's Day themed tarot card reading web app with 78 cards, multi-language support, and social sharing features.
+A daily tarot card reading web app with 78 cards, multi-language support, and social sharing features.
 
 ## Quick Start
 

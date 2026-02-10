@@ -1,10 +1,10 @@
-// Facebook Login Integration for Valentine Tarot
+// Facebook Login Integration for Card of the Day
 // ============================================
 
-// Facebook App ID
-const FACEBOOK_APP_ID = '917069127345024';
+const FACEBOOK_APP_ID = '940915038262874';
+const FB_PICTURE_KEY = 'tarot_fb_picture';
+const FB_CONNECTED_KEY = 'tarot_fb_connected';
 
-// User state
 let fbUser = null;
 
 // Initialize Facebook SDK
@@ -13,10 +13,9 @@ window.fbAsyncInit = function() {
         appId: FACEBOOK_APP_ID,
         cookie: true,
         xfbml: true,
-        version: 'v18.0'
+        version: 'v21.0'
     });
 
-    // Check login status on page load
     FB.getLoginStatus(function(response) {
         handleStatusChange(response);
     });
@@ -25,19 +24,30 @@ window.fbAsyncInit = function() {
 // Handle login status changes
 function handleStatusChange(response) {
     if (response.status === 'connected') {
-        // User is logged in and has authorized the app
         fbUser = response.authResponse;
         fetchUserProfile();
     } else {
-        // User is not logged in or hasn't authorized
         fbUser = null;
-        updateFacebookButton(false);
+        // If was previously FB-connected but session expired, keep local data
+        if (!localStorage.getItem(FB_CONNECTED_KEY)) {
+            updateFacebookButton(false);
+        } else {
+            // Try to restore from localStorage
+            const savedName = localStorage.getItem('tarot_user_name');
+            const savedPic = localStorage.getItem(FB_PICTURE_KEY);
+            if (savedName && savedPic) {
+                updateFacebookButton(true, savedName, savedPic);
+            } else {
+                clearFacebookData();
+                updateFacebookButton(false);
+            }
+        }
     }
 }
 
 // Fetch user profile info
 function fetchUserProfile() {
-    FB.api('/me', { fields: 'id,name,picture' }, function(response) {
+    FB.api('/me', { fields: 'id,name,picture.type(normal)' }, function(response) {
         if (response && !response.error) {
             fbUser = {
                 ...fbUser,
@@ -45,25 +55,30 @@ function fetchUserProfile() {
                 name: response.name,
                 picture: response.picture?.data?.url
             };
-            updateFacebookButton(true, response.name);
-            console.log('Facebook connected:', response.name);
+
+            // Save to localStorage for integration with existing user system
+            localStorage.setItem('tarot_user_id', 'fb_' + response.id);
+            localStorage.setItem('tarot_user_name', response.name);
+            localStorage.setItem(FB_CONNECTED_KEY, 'true');
+            if (response.picture?.data?.url) {
+                localStorage.setItem(FB_PICTURE_KEY, response.picture.data.url);
+            }
+
+            updateFacebookButton(true, response.name, response.picture?.data?.url);
+
+            // Track FB login
+            if (window.cardCounter) {
+                window.cardCounter.trackFeatureUsage('facebookLogin', 'connected');
+            }
         }
     });
 }
 
-// Main connect function - called from button click
+// Main connect function
 function connectWithFacebook() {
-    if (FACEBOOK_APP_ID === 'YOUR_FACEBOOK_APP_ID') {
-        alert('กรุณาตั้งค่า Facebook App ID ก่อน\n\nPlease configure your Facebook App ID first.');
-        console.error('Facebook App ID not configured. Get one at https://developers.facebook.com');
-        return;
-    }
-
     if (fbUser && fbUser.id) {
-        // Already logged in - show options
         showFacebookOptions();
     } else {
-        // Not logged in - initiate login
         loginWithFacebook();
     }
 }
@@ -80,53 +95,72 @@ function loginWithFacebook() {
 
 // Logout from Facebook
 function logoutFromFacebook() {
-    FB.logout(function(response) {
+    FB.logout(function() {
         fbUser = null;
+        clearFacebookData();
         updateFacebookButton(false);
-        console.log('Logged out from Facebook');
     });
+}
+
+// Clear FB data from localStorage and generate new anonymous ID
+function clearFacebookData() {
+    localStorage.removeItem(FB_CONNECTED_KEY);
+    localStorage.removeItem(FB_PICTURE_KEY);
+    localStorage.removeItem('tarot_user_name');
+    // Generate new anonymous ID
+    const newId = 'user_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('tarot_user_id', newId);
 }
 
 // Show options when already connected
 function showFacebookOptions() {
     const choice = confirm(`เชื่อมต่อเป็น ${fbUser.name} อยู่\n\nกด OK เพื่อดูไพ่ของเพื่อน\nกด Cancel เพื่อออกจากระบบ`);
-
     if (choice) {
-        // View friends' cards (feature to be implemented)
         viewFriendsCards();
     } else {
         logoutFromFacebook();
     }
 }
 
-// View friends' cards (placeholder for future feature)
+// View friends' cards (placeholder)
 function viewFriendsCards() {
     alert('ฟีเจอร์ดูไพ่ของเพื่อนกำลังพัฒนา\n\nFriends\' cards feature coming soon!');
-    // TODO: Implement friends list and their card picks
 }
 
-// Update button appearance based on login state
-function updateFacebookButton(isLoggedIn, userName = '') {
+// Update button appearance
+function updateFacebookButton(isLoggedIn, userName = '', pictureUrl = '') {
     const btn = document.getElementById('facebookConnectBtn');
     const btnText = document.getElementById('fbBtnText');
+    const fbIcon = document.getElementById('fbIcon');
+    const profilePic = document.getElementById('fbProfilePic');
 
     if (!btn || !btnText) return;
 
-    if (isLoggedIn) {
+    if (isLoggedIn && userName) {
         btn.classList.add('connected');
-        btnText.textContent = userName ? `${userName}` : 'เชื่อมต่อแล้ว';
+        btnText.textContent = userName;
+        if (fbIcon) fbIcon.style.display = 'none';
+        if (profilePic && pictureUrl) {
+            profilePic.src = pictureUrl;
+            profilePic.style.display = 'block';
+        }
     } else {
         btn.classList.remove('connected');
-        btnText.textContent = 'เชื่อมต่อ Facebook';
+        btnText.textContent = '';
+        if (fbIcon) fbIcon.style.display = 'block';
+        if (profilePic) {
+            profilePic.src = '';
+            profilePic.style.display = 'none';
+        }
     }
 }
 
-// Get current user (for use by other scripts)
+// Get current user
 function getFacebookUser() {
     return fbUser;
 }
 
 // Check if user is connected
 function isFacebookConnected() {
-    return fbUser && fbUser.id ? true : false;
+    return (fbUser && fbUser.id) || localStorage.getItem(FB_CONNECTED_KEY) === 'true';
 }

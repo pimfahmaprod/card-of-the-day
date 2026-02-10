@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ดูดวงความรัก 2026 - จับไพ่ทาโรต์ฟรี ใครจะเป็นคนพิเศษของคุณ?</title>
-    <meta name="description" content="ดูดวงความรักวาเลนไทน์ฟรี! จับไพ่ทาโรต์ออนไลน์ ทำนายว่าใครจะเข้ามาในชีวิตคุณ พร้อมความหมายไพ่ยิปซี 78 ใบ แม่นยำ อ่านง่าย">
-    <meta name="keywords" content="ดูดวงความรัก, ไพ่ทาโรต์, ไพ่ยิปซี, ดูดวงวาเลนไทน์, ทำนายความรัก, ดูดวงฟรี, tarot, valentine">
+    <title>Card of the Day - จับไพ่ทาโรต์รายวัน ดูดวงประจำวันฟรี</title>
+    <meta name="description" content="จับไพ่ทาโรต์รายวัน ดูดวงประจำวันฟรี! เลือกไพ่ 1 ใบเพื่อรับข้อความประจำวัน พร้อมความหมายไพ่ยิปซี 78 ใบ แม่นยำ อ่านง่าย">
+    <meta name="keywords" content="ไพ่รายวัน, ไพ่ทาโรต์, ไพ่ยิปซี, ดูดวงรายวัน, card of the day, ดูดวงฟรี, tarot, daily tarot">
     <meta name="author" content="Pimfahmaprod">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#0a0e27">
@@ -14,18 +14,18 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
     <!-- Open Graph Meta Tags for Social Sharing -->
-    <meta property="og:title" content="ดูดวงความรัก 2026 - จับไพ่ทาโรต์ ใครจะเป็นคนพิเศษของคุณ?">
-    <meta property="og:description" content="จับไพ่ทาโรต์ฟรี! ทำนายว่าใครจะเข้ามาในชีวิตคุณช่วงวาเลนไทน์นี้ พร้อมความหมายไพ่แม่นยำ">
+    <meta property="og:title" content="Card of the Day - จับไพ่ทาโรต์รายวัน ดูดวงประจำวันฟรี">
+    <meta property="og:description" content="จับไพ่ทาโรต์รายวัน! เลือกไพ่ 1 ใบเพื่อรับข้อความประจำวัน พร้อมความหมายไพ่แม่นยำ">
     <meta property="og:image" content="https://pimfahmaprod.github.io/love-tarot/images/card_back_blue.png">
     <meta property="og:url" content="https://pimfahmaprod.github.io/love-tarot/">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Valentine Tarot - ดูดวงความรัก">
+    <meta property="og:site_name" content="Card of the Day - ไพ่ทาโรต์รายวัน">
     <meta property="og:locale" content="th_TH">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="ดูดวงความรัก 2026 - จับไพ่ทาโรต์ ใครจะเป็นคนพิเศษของคุณ?">
-    <meta name="twitter:description" content="จับไพ่ทาโรต์ฟรี! ทำนายว่าใครจะเข้ามาในชีวิตคุณช่วงวาเลนไทน์นี้">
+    <meta name="twitter:title" content="Card of the Day - จับไพ่ทาโรต์รายวัน ดูดวงประจำวันฟรี">
+    <meta name="twitter:description" content="จับไพ่ทาโรต์รายวัน! เลือกไพ่ 1 ใบเพื่อรับข้อความประจำวัน">
     <meta name="twitter:image" content="https://pimfahmaprod.github.io/love-tarot/images/card_back_blue.png">
 
     <!-- Canonical URL -->
@@ -84,7 +84,13 @@
 
     <!-- Landing Page -->
     <div class="landing-page" id="landingPage">
-        <h1 class="landing-heading">Who's Gonna Be My Next <span class="strikethrough-word"><span class="mistake" data-i18n="landing.mistake">Mistake?</span><span class="valentine" data-i18n="landing.valentine">Valentine!</span></span></h1>
+        <!-- Facebook Login Button -->
+        <button class="fb-login-btn" id="facebookConnectBtn" onclick="connectWithFacebook()">
+            <img id="fbProfilePic" class="fb-profile-pic" src="" alt="" style="display:none">
+            <svg id="fbIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            <span id="fbBtnText"></span>
+        </button>
+        <h1 class="landing-heading" data-i18n="landing.heading">Card of the Day</h1>
         <div class="spinning-card-container" id="spinningCardContainer">
             <div class="spinning-card-wrapper">
                 <div class="spinning-card" id="spinningCard">
@@ -98,7 +104,7 @@
             </div>
             <span class="card-click-hint loading-state" data-i18n="landing.loading">กำลังโหลด...</span>
         </div>
-        <p class="landing-instruction" data-i18n="landing.instruction">ใครจะเข้ามาในชีวิตคุณช่วงวาเลนไทน์?</p>
+        <p class="landing-instruction" data-i18n="landing.instruction">จับไพ่ทาโรต์ 1 ใบเพื่อดูดวงประจำวัน</p>
 
         <p class="landing-brand">Pimfahmaprod</p>
         <span class="version-tag">v1.2.0</span>
@@ -129,9 +135,9 @@
         <div class="container">
             <header>
                 <div class="header-seal">
-                    <span class="header-seal-text">Valentine<br>Tarot</span>
+                    <span class="header-seal-text">Card of<br>the Day</span>
                 </div>
-                <h1 class="title" data-i18n="main.title">ใครจะเข้ามาในชีวิตคุณช่วงวาเลนไทน์</h1>
+                <h1 class="title" data-i18n="main.title">เลือกไพ่ 1 ใบเพื่อรับข้อความประจำวัน</h1>
                 <p class="subtitle">"The Tastemaker Dictionary for Curation"</p>
                 <p class="instruction" data-i18n="main.instruction">เลือกไพ่ 1 ใบ เพื่อดูคำทำนาย</p>
             </header>
@@ -187,83 +193,26 @@
         <p class="result-quote" id="resultQuote"></p>
         <p class="result-interpretation" id="resultInterpretation"></p>
 
-        <!-- Accept Actions Container (shown after clicking น้อมรับคำทำนาย) -->
-        <div class="accept-actions" id="acceptActions" style="display: none;">
-            <!-- 1. Save Image Buttons -->
-            <div class="save-section">
-                <div class="save-row">
-                    <span class="save-label-inline" data-i18n="result.saveImage">เซฟรูป :</span>
-                    <button class="save-btn with-text" onclick="saveImage('ig-story')" title="Instagram Story (9:16)">
-                        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                        <span>Story</span>
-                    </button>
-                    <button class="save-btn with-text" onclick="saveImage('square')" title="Instagram Square (1:1)">
-                        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                        <span>Post</span>
-                    </button>
-                    <button class="save-btn icon-only" onclick="saveImage('facebook')" title="Facebook">
-                        <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                    </button>
-                    <button class="save-btn icon-only" onclick="saveImage('wide')" title="รูปกว้าง" data-i18n-title="result.wideImage">
-                        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                    </button>
+        <!-- Comment Section (shown immediately) -->
+        <div class="comment-section">
+            <div class="comment-form" id="commentForm">
+                <div class="comment-input-group" id="commentNameGroup">
+                    <label for="commentName" data-i18n="comment.yourName">ชื่อของคุณ</label>
+                    <input type="text" id="commentName" maxlength="15" data-i18n-placeholder="comment.namePlaceholder" placeholder="ใส่ชื่อ (ไม่เกิน 15 ตัวอักษร)">
+                    <span class="char-count"><span id="nameCharCount">0</span>/15</span>
                 </div>
-            </div>
-
-            <!-- 2. Share Buttons -->
-            <div class="share-section">
-                <div class="save-row">
-                    <span class="save-label-inline" data-i18n="result.share">บอกต่อ :</span>
-                    <button class="save-btn icon-only" onclick="shareToFacebook()" title="ส่งทาง Messenger" data-i18n-title="result.messenger">
-                        <svg viewBox="0 0 28 28"><path d="M14 0C6.268 0 0 5.842 0 13.053c0 4.106 2.007 7.77 5.143 10.163V28l4.638-2.548c1.236.343 2.545.528 3.919.528 7.732 0 14-5.842 14-13.053S21.732 0 14 0zm1.392 17.576l-3.567-3.805-6.962 3.805 7.659-8.132 3.654 3.805 6.875-3.805-7.659 8.132z"/></svg>
-                    </button>
-                    <button class="save-btn icon-only" onclick="shareToLine()" title="ส่งทาง LINE" data-i18n-title="result.line">
-                        <svg viewBox="0 0 24 24"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
-                    </button>
-                    <button class="save-btn with-text" onclick="copyLink()" title="คัดลอกลิงก์" data-i18n-title="result.copyLink">
-                        <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
-                        <span data-i18n="result.copy">คัดลอก</span>
-                    </button>
+                <div class="comment-input-group">
+                    <label for="commentText" data-i18n="comment.label">ความคิดเห็น</label>
+                    <textarea id="commentText" maxlength="250" data-i18n-placeholder="comment.placeholder" placeholder="น้อมรับคำทำนายจากแม่หมอพิมพ์ฟ้า"></textarea>
+                    <span class="char-count"><span id="commentCharCount">0</span>/250</span>
                 </div>
+                <button class="comment-submit-btn accept-btn" id="commentSubmitBtn" onclick="submitComment()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                    <span id="commentSubmitText" data-i18n="result.acceptProphecy">น้อมรับคำทำนาย</span>
+                </button>
             </div>
-
-            <!-- 3. Comment Section -->
-            <div class="comment-section">
-                <div class="comment-form" id="commentForm">
-                    <div class="comment-input-group" id="commentNameGroup">
-                        <label for="commentName" data-i18n="comment.yourName">ชื่อของคุณ</label>
-                        <input type="text" id="commentName" maxlength="15" data-i18n-placeholder="comment.namePlaceholder" placeholder="ใส่ชื่อ (ไม่เกิน 15 ตัวอักษร)">
-                        <span class="char-count"><span id="nameCharCount">0</span>/15</span>
-                    </div>
-                    <div class="comment-input-group">
-                        <label for="commentText" data-i18n="comment.label">ความคิดเห็น</label>
-                        <textarea id="commentText" maxlength="250" data-i18n-placeholder="comment.placeholder" placeholder="น้อมรับคำทำนายจากแม่หมอพิมพ์ฟ้า"></textarea>
-                        <span class="char-count"><span id="commentCharCount">0</span>/250</span>
-                    </div>
-                    <button class="comment-submit-btn" id="commentSubmitBtn" onclick="submitComment()">
-                        <span id="commentSubmitText" data-i18n="comment.submit">ส่งความคิดเห็น</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="retry-row">
-            <button class="comment-toggle-btn accept-btn" id="commentToggleBtn" onclick="toggleAcceptActions()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 6L9 17l-5-5"/>
-                </svg>
-                <span id="commentToggleBtnText" data-i18n="result.acceptProphecy">น้อมรับคำทำนาย</span>
-            </button>
-            <button class="view-comments-btn" id="viewCommentsBtn" onclick="viewCardComments()" style="display: none;" title="ส่อง" data-i18n-title="result.view">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                </svg>
-            </button>
-        </div>
-        <div class="retry-row retry-row-bottom">
-            <span class="retry-text" data-i18n="result.notSerious">ยังไม่เอาจริง</span>
-            <button class="result-close" id="resultClose" data-i18n="result.drawAgain">จับใหม่</button>
         </div>
     </div>
 
@@ -287,6 +236,47 @@
             <div class="blessing-comment-overlay">
                 <p class="blessing-name" id="blessingName"></p>
                 <p class="blessing-comment" id="blessingComment"></p>
+            </div>
+        </div>
+
+        <!-- Save & Share Section -->
+        <div class="blessing-save-share-section">
+            <!-- Save Image Buttons -->
+            <div class="save-section">
+                <div class="save-row">
+                    <span class="save-label-inline" data-i18n="result.saveImage">เซฟรูป :</span>
+                    <button class="save-btn with-text" onclick="saveImage('ig-story')" title="Instagram Story (9:16)">
+                        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        <span>Story</span>
+                    </button>
+                    <button class="save-btn with-text" onclick="saveImage('square')" title="Instagram Square (1:1)">
+                        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        <span>Post</span>
+                    </button>
+                    <button class="save-btn icon-only" onclick="saveImage('facebook')" title="Facebook">
+                        <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    </button>
+                    <button class="save-btn icon-only" onclick="saveImage('wide')" title="รูปกว้าง" data-i18n-title="result.wideImage">
+                        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Share Buttons -->
+            <div class="share-section">
+                <div class="save-row">
+                    <span class="save-label-inline" data-i18n="result.share">บอกต่อ :</span>
+                    <button class="save-btn icon-only" onclick="shareToFacebook()" title="ส่งทาง Messenger" data-i18n-title="result.messenger">
+                        <svg viewBox="0 0 28 28"><path d="M14 0C6.268 0 0 5.842 0 13.053c0 4.106 2.007 7.77 5.143 10.163V28l4.638-2.548c1.236.343 2.545.528 3.919.528 7.732 0 14-5.842 14-13.053S21.732 0 14 0zm1.392 17.576l-3.567-3.805-6.962 3.805 7.659-8.132 3.654 3.805 6.875-3.805-7.659 8.132z"/></svg>
+                    </button>
+                    <button class="save-btn icon-only" onclick="shareToLine()" title="ส่งทาง LINE" data-i18n-title="result.line">
+                        <svg viewBox="0 0 24 24"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+                    </button>
+                    <button class="save-btn with-text" onclick="copyLink()" title="คัดลอกลิงก์" data-i18n-title="result.copyLink">
+                        <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+                        <span data-i18n="result.copy">คัดลอก</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -334,10 +324,11 @@
         <div class="bar"></div>
     </div>
 
-    <!-- Comments Button -->
-    <button type="button" class="comments-btn" id="commentsBtn" aria-label="View comments">
+    <!-- History Button -->
+    <button type="button" class="comments-btn" id="commentsBtn" aria-label="View history">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
         </svg>
         <span class="comments-count" id="commentsCount"></span>
     </button>
@@ -356,9 +347,7 @@
             </button>
         </div>
         <div class="comments-tabs" id="commentsTabs">
-            <button class="comments-tab active" data-tab="new" data-i18n="comments.tabNew">ล่าสุด</button>
-            <button class="comments-tab" data-tab="hot" data-i18n="comments.tabHot">ยอดนิยม</button>
-            <button class="comments-tab" data-tab="mycard" style="display:none;" data-i18n="comments.tabMyCard">ไพ่ฉัน</button>
+            <button class="comments-tab active" data-tab="mycard" style="display:none;" data-i18n="comments.tabMyCard">ไพ่ฉัน</button>
             <button class="comments-tab" data-tab="me" data-i18n="comments.tabMine">ของฉัน</button>
             <button class="comments-tab comments-tab-cardview" data-tab="cardview" style="display:none;">
                 <img class="tab-card-preview" src="" alt="">
@@ -381,7 +370,7 @@
                     <line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
             </button>
-            <h1 class="analytics-title">Valentine Tarot Analytics</h1>
+            <h1 class="analytics-title">Card of the Day Analytics</h1>
             <p class="analytics-subtitle">Dashboard Overview</p>
         </div>
 
@@ -511,7 +500,7 @@
 
             <!-- Footer -->
             <div class="analytics-footer">
-                <p>Valentine Tarot Analytics Dashboard</p>
+                <p>Card of the Day Analytics Dashboard</p>
                 <p class="analytics-brand">Pimfahmaprod</p>
             </div>
         </div>
@@ -535,10 +524,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
+    <!-- Facebook SDK -->
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/th_TH/sdk.js"></script>
+
     <!-- Scripts -->
     <script src="js/translations.js?v=1.2.4"></script>
     <script src="js/card-interpretations.js?v=1.2.4"></script>
     <script src="js/app.js?v=1.2.14"></script>
+    <script src="js/facebook.js?v=1.2.0"></script>
     <script src="js/counter.js?v=1.2.8"></script>
 </body>
 </html>
