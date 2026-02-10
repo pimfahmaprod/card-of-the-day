@@ -46,9 +46,6 @@ const translations = {
             instruction: "เลือกไพ่ 1 ใบ เพื่อดูคำทำนาย",
             loadingCards: "กำลังโหลดไพ่..."
         },
-        ranking: {
-            title: "ไพ่ยอดนิยม"
-        },
         result: {
             saveImage: "เซฟรูป :",
             share: "บอกต่อ :",
@@ -160,9 +157,6 @@ const translations = {
             title: "Pick a card to reveal today's message",
             instruction: "Pick 1 card to see your fortune",
             loadingCards: "Loading cards..."
-        },
-        ranking: {
-            title: "Popular Cards"
         },
         result: {
             saveImage: "Save Image:",
@@ -276,9 +270,6 @@ const translations = {
             instruction: "选择1张牌看你的运势",
             loadingCards: "加载牌中..."
         },
-        ranking: {
-            title: "热门牌"
-        },
         result: {
             saveImage: "保存图片：",
             share: "分享：",
@@ -390,9 +381,6 @@ const translations = {
             title: "選一張牌揭示今日訊息",
             instruction: "選擇1張牌看你的運勢",
             loadingCards: "載入牌中..."
-        },
-        ranking: {
-            title: "熱門牌"
         },
         result: {
             saveImage: "儲存圖片：",
@@ -506,9 +494,6 @@ const translations = {
             instruction: "운세를 보려면 카드 1장을 선택하세요",
             loadingCards: "카드 로딩 중..."
         },
-        ranking: {
-            title: "인기 카드"
-        },
         result: {
             saveImage: "이미지 저장:",
             share: "공유:",
@@ -621,9 +606,6 @@ const translations = {
             instruction: "運勢を見るためにカードを1枚選んでください",
             loadingCards: "カードを読み込み中..."
         },
-        ranking: {
-            title: "人気カード"
-        },
         result: {
             saveImage: "画像を保存：",
             share: "シェア：",
@@ -735,9 +717,6 @@ const translations = {
             title: "Choisissez une carte pour le message du jour",
             instruction: "Choisissez 1 carte pour voir votre prédiction",
             loadingCards: "Chargement des cartes..."
-        },
-        ranking: {
-            title: "Cartes populaires"
         },
         result: {
             saveImage: "Enregistrer :",

@@ -893,10 +893,8 @@ function startExperience() {
 
         // Hide UI buttons for clean draw page
         const langSwitcher = document.querySelector('.lang-switcher');
-        const totalCounter = document.querySelector('.total-counter');
         const muteBtn = document.querySelector('.mute-btn');
         if (langSwitcher) langSwitcher.style.display = 'none';
-        if (totalCounter) totalCounter.style.display = 'none';
         if (muteBtn) muteBtn.style.display = 'none';
     }, 400);
 
@@ -2012,10 +2010,8 @@ function goToLandingPage() {
 
         // Restore UI buttons hidden during draw page
         const langSwitcher = document.querySelector('.lang-switcher');
-        const totalCounter = document.querySelector('.total-counter');
         const muteBtn = document.querySelector('.mute-btn');
         if (langSwitcher) langSwitcher.style.display = '';
-        if (totalCounter) totalCounter.style.display = '';
         if (muteBtn) muteBtn.style.display = '';
 
         // Show comments button on landing page
@@ -4102,95 +4098,6 @@ waitForResources();
 })();
 
 // =============================================
-// Ranking Panel
-// =============================================
-(function initRankingPanel() {
-    const totalCounter = document.getElementById('totalCounter');
-    const rankingPanel = document.getElementById('rankingPanel');
-    const rankingOverlay = document.getElementById('rankingOverlay');
-    const rankingList = document.getElementById('rankingList');
-
-    if (!totalCounter || !rankingPanel || !rankingOverlay) return;
-
-    // Trophy icons for each rank
-    const trophyIcons = ['🥇', '🥈', '🥉', '🏅', '🎖️'];
-
-    // Open ranking panel
-    totalCounter.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        if (!totalCounter.classList.contains('show')) return;
-
-        rankingPanel.classList.add('show');
-        rankingOverlay.classList.add('show');
-
-        // Track ranking panel opened
-        if (window.cardCounter) {
-            window.cardCounter.trackRankingPanel('opened');
-        }
-
-        await loadRankings();
-    });
-
-    // Close ranking panel
-    rankingOverlay.addEventListener('click', closeRankingPanel);
-
-    function closeRankingPanel() {
-        rankingPanel.classList.remove('show');
-        rankingOverlay.classList.remove('show');
-
-        // Track ranking panel closed
-        if (window.cardCounter) {
-            window.cardCounter.trackRankingPanel('closed');
-        }
-    }
-
-    // Load and display rankings
-    async function loadRankings() {
-        if (!window.cardCounter || !window.cardCounter.fetchCardRankings) {
-            rankingList.innerHTML = '<div class="ranking-loading">ไม่สามารถโหลดข้อมูลได้</div>';
-            return;
-        }
-
-        rankingList.innerHTML = '<div class="ranking-loading">' + t('common.loading') + '</div>';
-
-        try {
-            const rankings = await window.cardCounter.fetchCardRankings(5);
-
-            if (rankings.length === 0) {
-                rankingList.innerHTML = '<div class="ranking-loading">ยังไม่มีข้อมูล</div>';
-                return;
-            }
-
-            // Get total picks for percentage calculation
-            const totalPicks = await window.cardCounter.getTotal();
-            const totalCount = totalPicks || rankings.reduce((sum, r) => sum + r.count, 0);
-
-            // Get card data from tarotData
-            const rankingHTML = rankings.map((rank, index) => {
-                const cardData = (tarotData && tarotData.cards) ? tarotData.cards.find(c => c.id == rank.cardId) : null;
-                const cardNameRaw = cardData ? cardData.name : `Card ${rank.cardId}`;
-                const cardNameDisplay = getCardName(cardNameRaw);
-                const cardImage = cardData ? `images/tarot/${cardData.image}` : '';
-                const percentage = totalCount > 0 ? ((rank.count / totalCount) * 100).toFixed(1) : 0;
-
-                return `
-                    <div class="ranking-item">
-                        <span class="ranking-trophy">${trophyIcons[index] || '🎖️'}</span>
-                        ${cardImage ? `<img src="${cardImage}" alt="${cardNameDisplay}" class="ranking-card-image">` : ''}
-                        <span class="ranking-card-name">${escapeHtml(cardNameDisplay)}</span>
-                        <span class="ranking-count">${percentage}%</span>
-                    </div>
-                `;
-            }).join('');
-
-            rankingList.innerHTML = rankingHTML;
-        } catch (error) {
-            console.error('Error loading rankings:', error);
-            rankingList.innerHTML = '<div class="ranking-loading">เกิดข้อผิดพลาด</div>';
-        }
-    }
-})();
-
 // ========================================
 // Analytics Page - Secret Access
 // ========================================
@@ -4762,11 +4669,6 @@ waitForResources();
                     key: 'commentsPanel',
                     label: 'Comments Panel',
                     actions: ['opened', 'closed', 'tabSwitch_new', 'tabSwitch_hot', 'tabSwitch_mycard', 'tabSwitch_me']
-                },
-                {
-                    key: 'rankingPanel',
-                    label: 'Ranking Panel',
-                    actions: ['opened', 'closed']
                 },
                 {
                     key: 'commentForm',
