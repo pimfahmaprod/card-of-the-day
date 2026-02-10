@@ -915,10 +915,16 @@ async function saveUserProfile(fbUserId, profileData) {
     if (!isFirebaseInitialized || !database || !fbUserId) return null;
     try {
         const profileRef = database.ref('users/' + fbUserId + '/profile');
-        await profileRef.update({
+        // Set joinedAt only on first save (won't overwrite if exists)
+        const snapshot = await profileRef.child('joinedAt').once('value');
+        var dataToSave = {
             ...profileData,
             lastSeen: firebase.database.ServerValue.TIMESTAMP
-        });
+        };
+        if (!snapshot.exists()) {
+            dataToSave.joinedAt = firebase.database.ServerValue.TIMESTAMP;
+        }
+        await profileRef.update(dataToSave);
         clearCache('userProfile_' + fbUserId);
         return { success: true };
     } catch (error) {

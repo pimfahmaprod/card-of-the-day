@@ -78,6 +78,8 @@ const translations = {
             tabMyCard: "ไพ่ฉัน",
             tabMine: "ของฉัน",
             tabDraws: "ไพ่ที่จับ",
+            tabFeed: "วงไพ่",
+            tabActivity: "กิจกรรม",
             empty: "ยังไม่มีความคิดเห็น",
             myComments: "ความคิดเห็นของฉัน",
             repliedTo: "ที่ฉันเคยตอบ",
@@ -155,6 +157,17 @@ const translations = {
         draws: {
             empty: "ยังไม่ได้จับไพ่",
             emptyHint: "จับไพ่เพื่อบันทึกประวัติ"
+        },
+        feed: {
+            drewCard: "จับไพ่",
+            empty: "ยังไม่มีเรื่องเล่าจากวงไพ่"
+        },
+        activity: {
+            drewCard: "จับไพ่",
+            commented: "แสดงความคิดเห็นบนไพ่",
+            repliedTo: "ตอบกลับ",
+            empty: "ยังไม่มีกิจกรรม",
+            emptyHint: "จับไพ่เพื่อเริ่มบันทึกกิจกรรม"
         }
     },
     en: {
@@ -201,6 +214,8 @@ const translations = {
             tabMyCard: "My Card",
             tabMine: "Mine",
             tabDraws: "My Draws",
+            tabFeed: "Feed",
+            tabActivity: "Activity",
             empty: "No comments yet",
             myComments: "My Comments",
             repliedTo: "Replied To",
@@ -278,6 +293,17 @@ const translations = {
         draws: {
             empty: "No cards drawn yet",
             emptyHint: "Draw a card to start your history"
+        },
+        feed: {
+            drewCard: "drew",
+            empty: "No stories from the card circle yet"
+        },
+        activity: {
+            drewCard: "Drew a card",
+            commented: "Commented on",
+            repliedTo: "Replied to",
+            empty: "No activity yet",
+            emptyHint: "Draw a card to start recording activity"
         }
     },
     "zh-CN": {
@@ -324,6 +350,8 @@ const translations = {
             tabMyCard: "我的牌",
             tabMine: "我的",
             tabDraws: "抽牌记录",
+            tabFeed: "牌圈",
+            tabActivity: "动态",
             empty: "暂无评论",
             myComments: "我的评论",
             repliedTo: "我回复的",
@@ -401,6 +429,17 @@ const translations = {
         draws: {
             empty: "还没有抽过牌",
             emptyHint: "抽一张牌开始记录"
+        },
+        feed: {
+            drewCard: "抽了",
+            empty: "牌圈还没有故事"
+        },
+        activity: {
+            drewCard: "抽了一张牌",
+            commented: "评论了",
+            repliedTo: "回复了",
+            empty: "还没有动态",
+            emptyHint: "抽一张牌开始记录动态"
         }
     },
     "zh-TW": {
@@ -447,6 +486,8 @@ const translations = {
             tabMyCard: "我的牌",
             tabMine: "我的",
             tabDraws: "抽牌紀錄",
+            tabFeed: "牌圈",
+            tabActivity: "動態",
             empty: "暫無評論",
             myComments: "我的評論",
             repliedTo: "我回覆的",
@@ -524,6 +565,17 @@ const translations = {
         draws: {
             empty: "還沒有抽過牌",
             emptyHint: "抽一張牌開始紀錄"
+        },
+        feed: {
+            drewCard: "抽了",
+            empty: "牌圈還沒有故事"
+        },
+        activity: {
+            drewCard: "抽了一張牌",
+            commented: "評論了",
+            repliedTo: "回覆了",
+            empty: "還沒有動態",
+            emptyHint: "抽一張牌開始紀錄動態"
         }
     },
     ko: {
@@ -570,6 +622,8 @@ const translations = {
             tabMyCard: "내 카드",
             tabMine: "내 것",
             tabDraws: "뽑은 카드",
+            tabFeed: "피드",
+            tabActivity: "활동",
             empty: "댓글이 없습니다",
             myComments: "내 댓글",
             repliedTo: "내가 답글 단",
@@ -647,6 +701,17 @@ const translations = {
         draws: {
             empty: "아직 카드를 뽑지 않았습니다",
             emptyHint: "카드를 뽑아 기록을 시작하세요"
+        },
+        feed: {
+            drewCard: "뽑았어요",
+            empty: "아직 카드 이야기가 없습니다"
+        },
+        activity: {
+            drewCard: "카드를 뽑았습니다",
+            commented: "댓글을 남겼습니다",
+            repliedTo: "답글을 남겼습니다",
+            empty: "아직 활동이 없습니다",
+            emptyHint: "카드를 뽑아 활동을 시작하세요"
         }
     },
     ja: {
@@ -693,6 +758,8 @@ const translations = {
             tabMyCard: "私のカード",
             tabMine: "私の",
             tabDraws: "引いたカード",
+            tabFeed: "フィード",
+            tabActivity: "アクティビティ",
             empty: "コメントはまだありません",
             myComments: "私のコメント",
             repliedTo: "返信した",
@@ -770,6 +837,17 @@ const translations = {
         draws: {
             empty: "まだカードを引いていません",
             emptyHint: "カードを引いて記録を始めましょう"
+        },
+        feed: {
+            drewCard: "を引きました",
+            empty: "まだカードの物語がありません"
+        },
+        activity: {
+            drewCard: "カードを引きました",
+            commented: "コメントしました",
+            repliedTo: "返信しました",
+            empty: "まだアクティビティがありません",
+            emptyHint: "カードを引いてアクティビティを始めましょう"
         }
     },
     fr: {
@@ -816,6 +894,8 @@ const translations = {
             tabMyCard: "Ma carte",
             tabMine: "Mes posts",
             tabDraws: "Mes tirages",
+            tabFeed: "Fil",
+            tabActivity: "Activité",
             empty: "Pas encore de commentaires",
             myComments: "Mes commentaires",
             repliedTo: "Commentaires auxquels j'ai répondu",
@@ -892,6 +972,17 @@ const translations = {
         },
         draws: {
             empty: "Aucune carte tirée",
+            emptyHint: "Tirez une carte pour commencer"
+        },
+        feed: {
+            drewCard: "a tiré",
+            empty: "Pas encore d'histoires du cercle de tarot"
+        },
+        activity: {
+            drewCard: "A tiré une carte",
+            commented: "A commenté sur",
+            repliedTo: "A répondu à",
+            empty: "Pas encore d'activité",
             emptyHint: "Tirez une carte pour commencer"
         }
     }

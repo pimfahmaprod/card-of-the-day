@@ -71,12 +71,16 @@ function fetchUserProfileFB() {
                 window.cardCounter.trackFeatureUsage('facebookLogin', 'connected');
             }
 
-            // Save/update profile in Firebase
+            // Save/update profile in Firebase (comprehensive for social features)
             if (window.cardCounter && window.cardCounter.saveUserProfile) {
-                window.cardCounter.saveUserProfile(response.id, {
+                var profileData = {
                     fbName: response.name,
                     displayName: localStorage.getItem('tarot_user_name') || response.name
-                });
+                };
+                if (response.picture && response.picture.data && response.picture.data.url) {
+                    profileData.fbPicture = response.picture.data.url;
+                }
+                window.cardCounter.saveUserProfile(response.id, profileData);
             }
 
             // Sync draw history from Firebase
@@ -85,9 +89,15 @@ function fetchUserProfileFB() {
             // Check if custom display name exists in Firebase
             if (window.cardCounter && window.cardCounter.fetchUserProfile) {
                 window.cardCounter.fetchUserProfile(response.id).then(function(savedProfile) {
-                    if (savedProfile && savedProfile.displayName && savedProfile.displayName !== response.name) {
-                        localStorage.setItem('tarot_user_name', savedProfile.displayName);
-                        updateFacebookButton(true, savedProfile.displayName, response.picture?.data?.url);
+                    if (savedProfile && savedProfile.displayName) {
+                        // Update in-memory display name cache
+                        if (typeof userDisplayNames !== 'undefined') {
+                            userDisplayNames.set(response.id, savedProfile.displayName);
+                        }
+                        if (savedProfile.displayName !== response.name) {
+                            localStorage.setItem('tarot_user_name', savedProfile.displayName);
+                            updateFacebookButton(true, savedProfile.displayName, response.picture?.data?.url);
+                        }
                     }
                 });
             }
@@ -148,13 +158,17 @@ function editDisplayName() {
         // Update FB button text
         updateFacebookButton(true, trimmed, localStorage.getItem(FB_PICTURE_KEY));
 
-        // Sync to Firebase
+        // Sync to Firebase and update in-memory display name cache
         const fbUserId = getFbUserId();
         if (fbUserId && window.cardCounter && window.cardCounter.saveUserProfile) {
             window.cardCounter.saveUserProfile(fbUserId, {
                 displayName: trimmed,
                 fbName: (fbUser && fbUser.name) || ''
             });
+            // Update in-memory cache so all rendered comments update on next load
+            if (typeof userDisplayNames !== 'undefined') {
+                userDisplayNames.set(fbUserId, trimmed);
+            }
         }
     }
 }
@@ -204,11 +218,23 @@ function loginWithFacebook() {
 
 // Logout from Facebook
 function logoutFromFacebook() {
-    FB.logout(function() {
-        fbUser = null;
-        clearFacebookData();
-        updateFacebookButton(false);
-    });
+    // Always clear local state first (FB.logout may fail if session expired)
+    fbUser = null;
+    clearFacebookData();
+    updateFacebookButton(false);
+
+    // Then try to end FB session if SDK is available
+    try {
+        if (typeof FB !== 'undefined') {
+            FB.getLoginStatus(function(response) {
+                if (response.status === 'connected') {
+                    FB.logout(function() {});
+                }
+            });
+        }
+    } catch (e) {
+        // Ignore - local state already cleared
+    }
 }
 
 // Clear FB data from localStorage and generate new anonymous ID
@@ -240,7 +266,7 @@ function updateFacebookButton(isLoggedIn, userName = '', pictureUrl = '') {
         }
     } else {
         btn.classList.remove('connected');
-        btnText.textContent = '';
+        btnText.textContent = 'Login';
         if (fbIcon) fbIcon.style.display = 'block';
         if (profilePic) {
             profilePic.src = '';

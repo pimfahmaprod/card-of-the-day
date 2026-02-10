@@ -894,8 +894,10 @@ function startExperience() {
         // Hide UI buttons for clean draw page
         const langSwitcher = document.querySelector('.lang-switcher');
         const muteBtn = document.querySelector('.mute-btn');
+        const profileSwitcher = document.querySelector('.profile-switcher');
         if (langSwitcher) langSwitcher.style.display = 'none';
         if (muteBtn) muteBtn.style.display = 'none';
+        if (profileSwitcher) profileSwitcher.style.display = 'none';
     }, 400);
 
     // Step 3: Shrink the card and move to stack center
@@ -1434,6 +1436,11 @@ document.addEventListener('keydown', (e) => {
         closeResult();
     }
     if (e.key === 'Enter' || e.key === ' ') {
+        // Only trigger from landing page when no interactive element is focused
+        const tag = e.target.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON' || tag === 'A' || e.target.closest('button, a, [role="button"]')) {
+            return;
+        }
         const landingPage = document.getElementById('landingPage');
         if (!landingPage.classList.contains('hidden')) {
             startExperience();
@@ -1539,6 +1546,79 @@ function getSavedUserName() {
 
 function saveUserName(name) {
     localStorage.setItem(SAVED_NAME_KEY, name.trim());
+}
+
+// ========================================
+// Display Name & Profile Picture Resolution (live from Firebase profiles)
+// ========================================
+// In-memory caches: fbUserId (without prefix) → value
+const userDisplayNames = new Map();
+const userProfilePictures = new Map();
+
+async function resolveDisplayNames(items) {
+    if (!items || items.length === 0) return;
+    if (!window.cardCounter || !window.cardCounter.fetchUserProfile) return;
+
+    // Seed current user's picture from localStorage (instant, no read)
+    var currentUserId = localStorage.getItem('tarot_user_id');
+    var currentFbPic = localStorage.getItem('tarot_fb_picture');
+    if (currentUserId && currentUserId.startsWith('fb_') && currentFbPic) {
+        var currentFbId = currentUserId.replace('fb_', '');
+        if (!userProfilePictures.has(currentFbId)) {
+            userProfilePictures.set(currentFbId, currentFbPic);
+        }
+    }
+
+    // Collect unique FB user IDs that aren't cached yet
+    const uncachedFbIds = new Set();
+    items.forEach(function(item) {
+        if (item.userId && item.userId.startsWith('fb_')) {
+            const fbId = item.userId.replace('fb_', '');
+            if (!userDisplayNames.has(fbId)) {
+                uncachedFbIds.add(fbId);
+            }
+        }
+    });
+
+    // Fetch profiles in parallel
+    if (uncachedFbIds.size > 0) {
+        await Promise.all(Array.from(uncachedFbIds).map(async function(fbId) {
+            try {
+                const profile = await window.cardCounter.fetchUserProfile(fbId);
+                if (profile && profile.displayName) {
+                    userDisplayNames.set(fbId, profile.displayName);
+                }
+                if (profile && profile.fbPicture) {
+                    userProfilePictures.set(fbId, profile.fbPicture);
+                }
+            } catch (e) { /* ignore */ }
+        }));
+    }
+
+    // Update items with resolved names and pictures
+    items.forEach(function(item) {
+        if (item.userId && item.userId.startsWith('fb_')) {
+            const fbId = item.userId.replace('fb_', '');
+            if (userDisplayNames.has(fbId)) {
+                item.userName = userDisplayNames.get(fbId);
+            }
+            if (userProfilePictures.has(fbId)) {
+                item.profilePicture = userProfilePictures.get(fbId);
+            }
+        }
+    });
+}
+
+// Avatar helpers
+function getDefaultAvatarSvg() {
+    return '<div class="comment-avatar comment-avatar-default"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>';
+}
+
+function getProfilePictureHtml(item) {
+    if (item && item.profilePicture) {
+        return '<img class="comment-avatar" src="' + escapeHtml(item.profilePicture) + '" alt="" onerror="this.outerHTML=getDefaultAvatarSvg()">';
+    }
+    return getDefaultAvatarSvg();
 }
 
 // ========================================
@@ -1806,15 +1886,25 @@ async function submitComment() {
 
             // Save draw history
             saveDrawToLocal(currentCardData, commentText);
-            if (typeof isFacebookConnected === 'function' && isFacebookConnected() && window.cardCounter && window.cardCounter.saveUserDraw) {
+            if (typeof isFacebookConnected === 'function' && isFacebookConnected()) {
                 const fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
                 if (fbUserId) {
-                    window.cardCounter.saveUserDraw(fbUserId, {
-                        cardId: currentCardData.id,
-                        cardName: currentCardData.name,
-                        cardImage: currentCardData.image,
-                        comment: commentText
-                    });
+                    if (window.cardCounter && window.cardCounter.saveUserDraw) {
+                        window.cardCounter.saveUserDraw(fbUserId, {
+                            cardId: currentCardData.id,
+                            cardName: currentCardData.name,
+                            cardImage: currentCardData.image,
+                            comment: commentText
+                        });
+                    }
+                    // Keep user profile up-to-date on every activity
+                    if (window.cardCounter && window.cardCounter.saveUserProfile) {
+                        window.cardCounter.saveUserProfile(fbUserId, {
+                            displayName: userName
+                        });
+                        // Update in-memory cache
+                        userDisplayNames.set(fbUserId, userName);
+                    }
                 }
             }
 
@@ -2053,8 +2143,10 @@ function goToLandingPage() {
         // Restore UI buttons hidden during draw page
         const langSwitcher = document.querySelector('.lang-switcher');
         const muteBtn = document.querySelector('.mute-btn');
+        const profileSwitcher = document.querySelector('.profile-switcher');
         if (langSwitcher) langSwitcher.style.display = '';
         if (muteBtn) muteBtn.style.display = '';
+        if (profileSwitcher) profileSwitcher.style.display = '';
 
         // Show comments button on landing page
         updateCommentsBtnVisibility();
@@ -2174,12 +2266,16 @@ function initCommentsPanel() {
     // Lazy loading on scroll DOWN (load older comments) - only for 'new' tab
     if (commentsList) {
         commentsList.addEventListener('scroll', () => {
-            if (isLoadingComments || !commentsHasMore || currentCommentsTab !== 'new') return;
+            if (isLoadingComments || !commentsHasMore || (currentCommentsTab !== 'new' && currentCommentsTab !== 'feed')) return;
 
             // Load more when scrolling near bottom
             const { scrollTop, scrollHeight, clientHeight } = commentsList;
             if (scrollTop + clientHeight >= scrollHeight - 100) {
-                loadMoreComments();
+                if (currentCommentsTab === 'feed') {
+                    loadFeed(false);
+                } else {
+                    loadMoreComments();
+                }
             }
         });
     }
@@ -2250,6 +2346,11 @@ function switchCommentsTab(tabName) {
         loadMyComments();
     } else if (tabName === 'draws') {
         loadDrawHistory();
+    } else if (tabName === 'feed') {
+        newestCommentTimestamp = 0;
+        loadFeed(true);
+    } else if (tabName === 'activity') {
+        loadActivityTimeline();
     } else if (tabName === 'cardview') {
         loadCardViewComments();
     }
@@ -2335,6 +2436,325 @@ function createDrawHistoryCard(draw) {
     return div;
 }
 
+// ========================================
+// Feed Tab (Facebook-style social feed)
+// ========================================
+async function loadFeed(reset) {
+    if (isLoadingComments) return;
+    isLoadingComments = true;
+
+    var commentsList = document.getElementById('commentsList');
+    var loadingEl = getOrCreateLoadingEl();
+
+    if (reset) {
+        commentsList.innerHTML = '';
+        commentsList.appendChild(loadingEl);
+        loadingEl.style.display = 'block';
+        expandedCommentCard = null;
+        commentsLastKey = null;
+    }
+
+    if (!window.cardCounter || !window.cardCounter.fetchComments) {
+        loadingEl.innerHTML = '<span>' + t('common.loadError') + '</span>';
+        isLoadingComments = false;
+        return;
+    }
+
+    var result = await window.cardCounter.fetchComments(commentsLastKey, 10);
+    await resolveDisplayNames(result.comments);
+
+    loadingEl.style.display = 'none';
+
+    if (result.comments.length === 0 && reset && displayedCommentIds.size === 0) {
+        newestCommentTimestamp = Date.now();
+        commentsList.innerHTML = '<div class="comments-empty"><div class="comments-empty-icon">✦</div><div class="comments-empty-text">' + t('feed.empty') + '</div></div>';
+        isLoadingComments = false;
+        if (window.cardCounter && window.cardCounter.subscribeToNewComments) {
+            window.cardCounter.subscribeToNewComments(handleNewFeedItem);
+        }
+        return;
+    }
+
+    if (reset && result.comments.length > 0) {
+        newestCommentTimestamp = result.comments[0].timestamp || Date.now();
+    }
+
+    result.comments.forEach(function(comment) {
+        if (displayedCommentIds.has(comment.id)) return;
+        var card = createFeedCard(comment);
+        commentsList.appendChild(card);
+        displayedCommentIds.add(comment.id);
+    });
+
+    commentsLastKey = result.lastKey;
+    commentsHasMore = result.hasMore;
+    isLoadingComments = false;
+
+    if (reset && window.cardCounter && window.cardCounter.subscribeToNewComments) {
+        window.cardCounter.subscribeToNewComments(handleNewFeedItem);
+    }
+}
+
+async function handleNewFeedItem(comment) {
+    if (displayedCommentIds.has(comment.id)) return;
+    if ((comment.timestamp || 0) <= newestCommentTimestamp) return;
+
+    var commentsList = document.getElementById('commentsList');
+    if (!commentsList) return;
+
+    await resolveDisplayNames([comment]);
+
+    var emptyMsg = commentsList.querySelector('.comments-empty');
+    if (emptyMsg) emptyMsg.remove();
+
+    var card = createFeedCard(comment);
+    card.classList.add('new-comment');
+
+    if (commentsList.firstChild) {
+        commentsList.insertBefore(card, commentsList.firstChild);
+    } else {
+        commentsList.appendChild(card);
+    }
+
+    displayedCommentIds.add(comment.id);
+    newestCommentTimestamp = comment.timestamp;
+    commentsList.scrollTop = 0;
+    setTimeout(function() { card.classList.remove('new-comment'); }, 500);
+}
+
+function createFeedCard(comment) {
+    var card = document.createElement('div');
+    card.className = 'feed-card';
+    card.dataset.commentId = comment.id;
+    card.dataset.cardId = comment.cardId;
+
+    var date = comment.timestamp ? new Date(comment.timestamp) : new Date();
+    var dateStr = formatCommentDate(date);
+
+    var cardImagePath = '';
+    if (comment.cardImage && comment.cardImage.length > 0) {
+        cardImagePath = comment.cardImage;
+    } else if (comment.cardName && comment.cardName.length > 0) {
+        cardImagePath = comment.cardName + '.png';
+    }
+
+    var avatarHtml = getProfilePictureHtml(comment);
+    var imageHtml = cardImagePath
+        ? '<div class="feed-card-image"><img src="images/tarot/' + escapeHtml(cardImagePath) + '" alt="' + escapeHtml(comment.cardName || 'Tarot') + '" onerror="this.parentElement.style.display=\'none\'"></div>'
+        : '';
+
+    card.innerHTML =
+        '<div class="feed-card-header">' +
+            avatarHtml +
+            '<div class="feed-card-author">' +
+                '<span class="feed-card-name">' + escapeHtml(comment.userName || 'Anonymous') + '</span>' +
+                '<span class="feed-card-meta">' + t('feed.drewCard') + ' <strong>' + escapeHtml(comment.cardName || '') + '</strong></span>' +
+                '<span class="feed-card-date">' + dateStr + '</span>' +
+            '</div>' +
+        '</div>' +
+        '<div class="feed-card-body">' +
+            '<div class="feed-card-comment">' + escapeHtml(comment.comment || '') + '</div>' +
+            imageHtml +
+        '</div>' +
+        '<div class="feed-card-actions">' +
+            '<button class="feed-reply-btn" data-comment-id="' + comment.id + '">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
+                '<span>' + t('comment.reply') + '</span>' +
+                '<span class="reply-count" style="display: none;">0</span>' +
+            '</button>' +
+        '</div>' +
+        '<div class="feed-card-replies-section">' +
+            '<div class="replies-list"></div>' +
+            '<div class="reply-form">' +
+                '<div class="reply-input-wrapper">' +
+                    '<input type="text" class="reply-input" placeholder="' + t('comment.replyPlaceholder') + '" maxlength="150">' +
+                    '<button class="reply-submit-btn" disabled>' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
+                    '</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+    // Wire up reply button
+    var replyBtn = card.querySelector('.feed-reply-btn');
+    var repliesSection = card.querySelector('.feed-card-replies-section');
+    var replyForm = card.querySelector('.reply-form');
+    var replyInput = card.querySelector('.reply-input');
+    var replySubmitBtn = card.querySelector('.reply-submit-btn');
+
+    replyBtn.addEventListener('click', async function(e) {
+        e.stopPropagation();
+        if (!repliesSection.classList.contains('open')) {
+            repliesSection.classList.add('open');
+            await loadReplies(card, comment.id);
+        }
+        replyForm.classList.toggle('show');
+        if (replyForm.classList.contains('show')) replyInput.focus();
+    });
+
+    replyInput.addEventListener('input', function() {
+        replySubmitBtn.disabled = replyInput.value.trim().length === 0;
+    });
+
+    replySubmitBtn.addEventListener('click', async function(e) {
+        e.stopPropagation();
+        var text = replyInput.value.trim();
+        if (!text) return;
+        replySubmitBtn.disabled = true;
+        replyInput.disabled = true;
+
+        var userId = getUserId();
+        var userName = getSavedUserName() || 'Anonymous';
+
+        if (window.cardCounter && window.cardCounter.submitReply) {
+            var res = await window.cardCounter.submitReply(comment.id, userId, userName, text);
+            if (res.success) {
+                if (window.cardCounter) window.cardCounter.trackFeatureUsage('reply', 'submitted');
+                if (typeof isFacebookConnected === 'function' && isFacebookConnected() && window.cardCounter.saveUserProfile) {
+                    var fbUid = typeof getFbUserId === 'function' ? getFbUserId() : null;
+                    if (fbUid) {
+                        window.cardCounter.saveUserProfile(fbUid, { displayName: userName });
+                        userDisplayNames.set(fbUid, userName);
+                    }
+                }
+                replyInput.value = '';
+                replyForm.classList.remove('show');
+                await loadReplies(card, comment.id);
+                showToast(t('toast.replySuccess'));
+            } else {
+                showToast(t('toast.error'));
+            }
+        }
+        replySubmitBtn.disabled = false;
+        replyInput.disabled = false;
+    });
+
+    replyInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !replySubmitBtn.disabled) replySubmitBtn.click();
+    });
+
+    loadReplyCount(card, comment.id);
+
+    return card;
+}
+
+// ========================================
+// Activity Timeline Tab
+// ========================================
+async function loadActivityTimeline() {
+    if (isLoadingComments) return;
+    isLoadingComments = true;
+
+    var commentsList = document.getElementById('commentsList');
+    var loadingEl = getOrCreateLoadingEl();
+    commentsList.innerHTML = '';
+    commentsList.appendChild(loadingEl);
+    loadingEl.style.display = 'block';
+
+    var userId = getUserId();
+    var activities = [];
+
+    // Fetch draws
+    var draws = [];
+    if (typeof isFacebookConnected === 'function' && isFacebookConnected() && window.cardCounter && window.cardCounter.fetchUserDraws) {
+        var fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
+        if (fbUserId) draws = await window.cardCounter.fetchUserDraws(fbUserId);
+    }
+    if (draws.length === 0) draws = getLocalDrawHistory();
+    draws.forEach(function(d) {
+        activities.push({ type: 'draw', timestamp: d.timestamp, data: d });
+    });
+
+    // Fetch user comments
+    if (window.cardCounter && window.cardCounter.fetchCommentsByUserId) {
+        var comments = await window.cardCounter.fetchCommentsByUserId(userId, 50);
+        comments.forEach(function(c) {
+            activities.push({ type: 'comment', timestamp: c.timestamp, data: c });
+        });
+    }
+
+    // Fetch comments user replied to
+    if (window.cardCounter && window.cardCounter.fetchCommentsUserRepliedTo) {
+        var repliedTo = await window.cardCounter.fetchCommentsUserRepliedTo(userId, 20);
+        repliedTo.forEach(function(r) {
+            activities.push({ type: 'replied', timestamp: r.timestamp, data: r });
+        });
+    }
+
+    // Sort by timestamp descending
+    activities.sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+
+    // Deduplicate
+    var seen = {};
+    var uniqueActivities = activities.filter(function(a) {
+        var key = a.type + '_' + (a.data.cardId || a.data.id || '') + '_' + a.timestamp;
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+    });
+
+    loadingEl.style.display = 'none';
+
+    if (uniqueActivities.length === 0) {
+        commentsList.innerHTML = '<div class="comments-empty comments-empty-cta">' +
+            '<div class="comments-empty-text">' + t('activity.empty') + '</div>' +
+            '<p class="cta-subtitle">' + t('activity.emptyHint') + '</p></div>';
+        isLoadingComments = false;
+        return;
+    }
+
+    uniqueActivities.forEach(function(activity) {
+        commentsList.appendChild(createActivityCard(activity));
+    });
+
+    isLoadingComments = false;
+}
+
+function createActivityCard(activity) {
+    var div = document.createElement('div');
+    div.className = 'activity-card';
+
+    var date = new Date(activity.timestamp);
+    var dateStr = formatCommentDate(date);
+    var d = activity.data;
+    var iconSvg, actionText, detailHtml;
+
+    switch (activity.type) {
+        case 'draw':
+            iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="7" height="10" rx="1" transform="rotate(-10 6.5 9)"/><rect x="14" y="4" width="7" height="10" rx="1" transform="rotate(10 17.5 9)"/></svg>';
+            actionText = t('activity.drewCard');
+            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt=""></div>' +
+                '<div class="activity-card-info"><span class="activity-card-name">' + escapeHtml(d.cardName) + '</span>' +
+                (d.comment ? '<span class="activity-card-comment">"' + escapeHtml(d.comment) + '"</span>' : '') + '</div></div>';
+            break;
+        case 'comment':
+            iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+            actionText = t('activity.commented');
+            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt=""></div>' +
+                '<div class="activity-card-info"><span class="activity-card-name">' + escapeHtml(d.cardName) + '</span>' +
+                '<span class="activity-card-comment">"' + escapeHtml(d.comment || '') + '"</span></div></div>';
+            break;
+        case 'replied':
+            iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>';
+            actionText = t('activity.repliedTo') + ' ' + escapeHtml(d.userName || 'Anonymous');
+            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt=""></div>' +
+                '<div class="activity-card-info"><span class="activity-card-name">' + escapeHtml(d.cardName || '') + '</span>' +
+                '<span class="activity-card-comment">"' + escapeHtml(d.comment || '') + '"</span></div></div>';
+            break;
+    }
+
+    div.innerHTML = '<div class="activity-timeline-dot"></div>' +
+        '<div class="activity-card-content">' +
+            '<div class="activity-card-header">' +
+                '<span class="activity-icon">' + iconSvg + '</span>' +
+                '<span class="activity-action">' + actionText + '</span>' +
+                '<span class="activity-date">' + dateStr + '</span>' +
+            '</div>' + detailHtml +
+        '</div>';
+
+    return div;
+}
+
 // Track displayed comment IDs to avoid duplicates
 let displayedCommentIds = new Set();
 
@@ -2389,12 +2809,12 @@ function openCommentsPanel(skipLoadComments = false) {
     // Skip loading if we're switching to a specific tab (like cardview)
     if (skipLoadComments) return;
 
-    // Reset tab to "me" (history)
-    currentCommentsTab = 'me';
+    // Reset tab to "feed" (social feed)
+    currentCommentsTab = 'feed';
     if (commentsTabs) {
         commentsTabs.querySelectorAll('.comments-tab').forEach(t => t.classList.remove('active'));
-        const meTab = commentsTabs.querySelector('[data-tab="me"]');
-        if (meTab) meTab.classList.add('active');
+        const feedTab = commentsTabs.querySelector('[data-tab="feed"]');
+        if (feedTab) feedTab.classList.add('active');
     }
 
     // Reset all state (matching switchCommentsTab)
@@ -2411,8 +2831,8 @@ function openCommentsPanel(skipLoadComments = false) {
         window.cardCounter.unsubscribeFromNewComments();
     }
 
-    // Load my comments (history)
-    loadMyComments();
+    // Load social feed
+    loadFeed(true);
 }
 
 // Check if user has any comments and show/hide the "Me" tab
@@ -2551,7 +2971,7 @@ window.addEventListener('popstate', () => {
 });
 
 // Handle new comment from real-time listener
-function handleNewComment(comment) {
+async function handleNewComment(comment) {
     // Skip if already displayed
     if (displayedCommentIds.has(comment.id)) return;
 
@@ -2562,6 +2982,9 @@ function handleNewComment(comment) {
 
     const commentsList = document.getElementById('commentsList');
     if (!commentsList) return;
+
+    // Resolve display name from profile
+    await resolveDisplayNames([comment]);
 
     // Remove empty message if exists
     const emptyMsg = commentsList.querySelector('.comments-empty');
@@ -2622,6 +3045,7 @@ async function loadComments(reset = false) {
     // On first load, fetch top comments by replies first
     if (reset && window.cardCounter.fetchTopCommentsByReplies) {
         const topComments = await window.cardCounter.fetchTopCommentsByReplies(3);
+        await resolveDisplayNames(topComments);
 
         if (topComments.length > 0) {
             // Create top comments section header
@@ -2646,6 +3070,7 @@ async function loadComments(reset = false) {
     }
 
     const result = await window.cardCounter.fetchComments(commentsLastKey, 10);
+    await resolveDisplayNames(result.comments);
 
     loadingEl.style.display = 'none';
 
@@ -2719,6 +3144,7 @@ async function loadHotComments() {
     }
 
     const comments = await window.cardCounter.fetchHotComments(30);
+    await resolveDisplayNames(comments);
 
     loadingEl.style.display = 'none';
 
@@ -2764,6 +3190,7 @@ async function loadMyComments() {
     }
 
     const comments = await window.cardCounter.fetchCommentsByUserId(userId, 50);
+    await resolveDisplayNames(comments);
 
     loadingEl.style.display = 'none';
 
@@ -2838,6 +3265,7 @@ async function loadMyCardComments() {
         window.cardCounter.fetchCommentsByUserId ? window.cardCounter.fetchCommentsByUserId(userId, 50) : [],
         window.cardCounter.fetchCommentsUserRepliedTo ? window.cardCounter.fetchCommentsUserRepliedTo(userId, 20) : []
     ]);
+    await resolveDisplayNames(myComments.concat(repliedComments));
 
     loadingEl.style.display = 'none';
 
@@ -2944,6 +3372,7 @@ async function loadCardViewComments() {
     }
 
     const comments = await window.cardCounter.fetchCommentsByCardId(cardViewData.id, null, 50);
+    await resolveDisplayNames(comments);
 
     loadingEl.style.display = 'none';
 
@@ -3000,15 +3429,20 @@ function createCommentCard(comment, showReplyBadge = false) {
         ? `<div class="comment-reply-badge">💬 ${comment.replyCount} ${t('common.replyCount')}</div>`
         : '';
 
+    const avatarHtml = getProfilePictureHtml(comment);
+
     card.innerHTML = `
         ${imageHtml}
         <div class="comment-card-content">
             <div class="comment-card-header">
-                <span class="comment-card-name">${escapeHtml(comment.userName || 'Anonymous')}</span>
+                ${avatarHtml}
+                <div class="comment-card-author">
+                    <span class="comment-card-name">${escapeHtml(comment.userName || 'Anonymous')}</span>
+                    <span class="comment-card-date">${dateStr}</span>
+                </div>
                 ${replyBadgeHtml}
             </div>
             <div class="comment-card-text">${escapeHtml(comment.comment || '')}</div>
-            <div class="comment-card-date">${dateStr}</div>
 
             <!-- Expanded content: Interpretation first -->
             <div class="comment-card-full">
@@ -3147,6 +3581,15 @@ function setupReplyFeature(card, comment) {
                     window.cardCounter.trackFeatureUsage('reply', 'submitted');
                 }
 
+                // Keep user profile up-to-date on reply activity
+                if (typeof isFacebookConnected === 'function' && isFacebookConnected() && window.cardCounter.saveUserProfile) {
+                    const fbUid = typeof getFbUserId === 'function' ? getFbUserId() : null;
+                    if (fbUid) {
+                        window.cardCounter.saveUserProfile(fbUid, { displayName: userName });
+                        userDisplayNames.set(fbUid, userName);
+                    }
+                }
+
                 // Clear input and hide form
                 replyInput.value = '';
                 replyForm.classList.remove('show');
@@ -3196,16 +3639,21 @@ async function loadReplies(card, commentId) {
     if (repliesEmptyBtn) repliesEmptyBtn.style.display = 'none';
 
     const replies = await window.cardCounter.fetchReplies(commentId);
+    await resolveDisplayNames(replies);
 
     if (replies.length > 0) {
         repliesList.innerHTML = replies.map(reply => {
             const replyDate = reply.timestamp ? new Date(reply.timestamp) : new Date();
             const replyDateStr = formatCommentDate(replyDate);
+            const replyAvatar = getProfilePictureHtml(reply);
             return `
                 <div class="reply-item">
                     <div class="reply-header">
-                        <span class="reply-name">${escapeHtml(reply.userName || 'Anonymous')}</span>
-                        <span class="reply-date">${replyDateStr}</span>
+                        ${replyAvatar}
+                        <div class="reply-author">
+                            <span class="reply-name">${escapeHtml(reply.userName || 'Anonymous')}</span>
+                            <span class="reply-date">${replyDateStr}</span>
+                        </div>
                     </div>
                     <div class="reply-text">${escapeHtml(reply.text || '')}</div>
                 </div>
@@ -3289,6 +3737,7 @@ async function expandCommentCard(card, comment) {
             comment.id,
             5
         );
+        await resolveDisplayNames(relatedComments);
 
         if (relatedComments.length > 0) {
             // Fetch reply counts for all related comments
@@ -3318,9 +3767,11 @@ async function expandCommentCard(card, comment) {
                     comment: rc.comment || '',
                     timestamp: rc.timestamp
                 });
+                const rcAvatar = getProfilePictureHtml(rc);
                 return `
                     <div class="related-comment" data-comment-id="${rc.id}" data-comment='${commentDataJson.replace(/'/g, "&#39;")}' style="cursor: pointer;">
                         <div class="related-comment-header">
+                            ${rcAvatar}
                             <span class="related-comment-name">${escapeHtml(rc.userName || 'Anonymous')}</span>
                             ${replyBadge}
                             <span class="related-comment-date">${rcDateStr}</span>
@@ -4564,6 +5015,7 @@ waitForResources();
 
         try {
             const hotComments = await window.cardCounter.fetchHotComments(5);
+            await resolveDisplayNames(hotComments);
 
             if (!hotComments || hotComments.length === 0) {
                 container.innerHTML = '<div class="analytics-empty">ยังไม่มีความคิดเห็น</div>';
