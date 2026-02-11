@@ -3405,19 +3405,44 @@ async function loadFriendsCards() {
             return;
         }
 
+        // Read last-seen timestamp BEFORE rendering (don't auto-update)
+        var lastSeenTs = parseInt(localStorage.getItem('tarot_friends_last_seen_ts') || '0', 10);
+        var unseenCount = 0;
+
         friendComments.forEach(function(comment) {
             if (displayedCommentIds.has(comment.id)) return;
             var card = createFeedCard(comment);
+
+            // Mark unseen cards
+            if ((comment.timestamp || 0) > lastSeenTs) {
+                card.classList.add('feed-card-unseen');
+                var nameEl = card.querySelector('.feed-card-name');
+                if (nameEl) {
+                    var badge = document.createElement('span');
+                    badge.className = 'feed-card-unseen-badge';
+                    badge.textContent = t('friends.newBadge');
+                    nameEl.appendChild(badge);
+                }
+                unseenCount++;
+            }
+
             commentsList.appendChild(card);
             displayedCommentIds.add(comment.id);
         });
 
-        // Mark all friend cards as seen (update last-seen timestamp)
-        if (friendComments.length > 0) {
-            var newestTs = Math.max.apply(null, friendComments.map(function(c) { return c.timestamp || 0; }));
-            localStorage.setItem('tarot_friends_last_seen_ts', String(newestTs));
-            var stack = document.getElementById('friendsCircleStack');
-            if (stack) stack.innerHTML = '';
+        // Show mark-all-read bar if there are unseen cards
+        if (unseenCount > 0) {
+            var bar = document.createElement('div');
+            bar.className = 'friends-mark-all-bar';
+            bar.id = 'friendsMarkAllBar';
+            bar.innerHTML =
+                '<span class="unseen-count-text">' + unseenCount + ' ' + t('friends.newBadge') + '</span>' +
+                '<button class="friends-mark-all-btn">' + t('friends.markAllRead') + '</button>';
+            bar.querySelector('.friends-mark-all-btn').addEventListener('click', function() {
+                markAllFriendsRead(friendComments);
+            });
+            // Insert at the top of the list
+            commentsList.insertBefore(bar, commentsList.firstChild);
         }
     } catch (e) {
         console.warn('Failed to load friends cards:', e.message);
@@ -3426,6 +3451,39 @@ async function loadFriendsCards() {
     }
 
     isLoadingComments = false;
+}
+
+// Mark all friend cards as read
+function markAllFriendsRead(friendComments) {
+    // Update timestamp to newest
+    if (friendComments && friendComments.length > 0) {
+        var newestTs = Math.max.apply(null, friendComments.map(function(c) { return c.timestamp || 0; }));
+        localStorage.setItem('tarot_friends_last_seen_ts', String(newestTs));
+    }
+
+    // Remove all unseen badges and highlights
+    var commentsList = document.getElementById('commentsList');
+    if (commentsList) {
+        commentsList.querySelectorAll('.feed-card-unseen').forEach(function(card) {
+            card.classList.remove('feed-card-unseen');
+            var badge = card.querySelector('.feed-card-unseen-badge');
+            if (badge) badge.remove();
+        });
+    }
+
+    // Remove the mark-all bar
+    var bar = document.getElementById('friendsMarkAllBar');
+    if (bar) {
+        bar.style.transition = 'opacity 0.3s ease, max-height 0.3s ease';
+        bar.style.opacity = '0';
+        bar.style.maxHeight = '0';
+        bar.style.overflow = 'hidden';
+        setTimeout(function() { bar.remove(); }, 300);
+    }
+
+    // Clear circle stack on landing page
+    var stack = document.getElementById('friendsCircleStack');
+    if (stack) stack.innerHTML = '';
 }
 
 // Get Facebook friend IDs who also use this app
@@ -3621,9 +3679,11 @@ async function checkFriendsNewCards() {
             return (b.timestamp || 0) - (a.timestamp || 0);
         });
 
-        // Render circles (max 8)
+        // Render circles (max 12) + scrollable + dismiss button
         stack.innerHTML = '';
-        friends.slice(0, 8).forEach(function(comment, index) {
+        stack.classList.add('scrollable');
+        var maxCircles = 12;
+        friends.slice(0, maxCircles).forEach(function(comment, index) {
             var circle = document.createElement('div');
             circle.className = 'friends-circle-item';
             circle.style.animationDelay = (index * 0.06) + 's';
@@ -3657,6 +3717,9 @@ async function checkFriendsNewCards() {
             stack.appendChild(circle);
         });
 
+        // Add X dismiss button at the bottom
+        appendDismissButton(stack, friendComments);
+
     } catch (e) {
         console.warn('Failed to check friends new cards:', e.message);
         stack.innerHTML = '';
@@ -3686,6 +3749,71 @@ function onFriendCircleClick(circleEl) {
 
     currentCommentsTab = 'friends';
     switchCommentsTab('friends');
+}
+
+// Append X dismiss button to circle stack
+function appendDismissButton(stack, friendComments) {
+    var dismissBtn = document.createElement('div');
+    dismissBtn.className = 'friends-circle-dismiss';
+    var circleCount = stack.querySelectorAll('.friends-circle-item').length;
+    dismissBtn.style.animationDelay = (circleCount * 0.06 + 0.1) + 's';
+    dismissBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    dismissBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dismissAllFriendCircles(friendComments);
+    });
+    stack.appendChild(dismissBtn);
+
+    // Setup touch drag for the stack
+    setupCircleStackDrag(stack);
+}
+
+// Dismiss all circles + mark as seen
+function dismissAllFriendCircles(friendComments) {
+    var stack = document.getElementById('friendsCircleStack');
+    if (!stack) return;
+
+    // Update last-seen timestamp
+    if (friendComments && friendComments.length > 0) {
+        var newestTs = Math.max.apply(null, friendComments.map(function(c) { return c.timestamp || 0; }));
+        localStorage.setItem('tarot_friends_last_seen_ts', String(newestTs));
+    }
+
+    // Animate out all circles
+    var items = stack.querySelectorAll('.friends-circle-item, .friends-circle-dismiss');
+    items.forEach(function(item, i) {
+        item.style.transition = 'opacity 0.25s ease ' + (i * 0.03) + 's, transform 0.25s ease ' + (i * 0.03) + 's';
+        item.style.opacity = '0';
+        item.style.transform = 'scale(0.5) translateX(16px)';
+    });
+    setTimeout(function() {
+        stack.innerHTML = '';
+        stack.classList.remove('scrollable');
+    }, 350);
+}
+
+// Touch drag support for scrollable circle stack
+function setupCircleStackDrag(stack) {
+    var startY = 0;
+    var startScroll = 0;
+    var isDragging = false;
+
+    stack.addEventListener('touchstart', function(e) {
+        if (e.target.closest('.friends-circle-dismiss')) return;
+        startY = e.touches[0].clientY;
+        startScroll = stack.scrollTop;
+        isDragging = true;
+    }, { passive: true });
+
+    stack.addEventListener('touchmove', function(e) {
+        if (!isDragging) return;
+        var dy = startY - e.touches[0].clientY;
+        stack.scrollTop = startScroll + dy;
+    }, { passive: true });
+
+    stack.addEventListener('touchend', function() {
+        isDragging = false;
+    }, { passive: true });
 }
 
 // ========================================
@@ -4486,13 +4614,19 @@ function testFriendsCircles() {
     var stack = document.getElementById('friendsCircleStack');
     if (!stack) return;
     stack.innerHTML = '';
+    stack.classList.add('scrollable');
 
     var fakeFriends = [
         { name: 'Alice', pic: 'https://i.pravatar.cc/80?u=alice' },
         { name: 'Bob', pic: 'https://i.pravatar.cc/80?u=bob' },
         { name: 'Carol', pic: 'https://i.pravatar.cc/80?u=carol' },
         { name: 'Dave', pic: 'https://i.pravatar.cc/80?u=dave' },
-        { name: 'Eve', pic: 'https://i.pravatar.cc/80?u=eve' }
+        { name: 'Eve', pic: 'https://i.pravatar.cc/80?u=eve' },
+        { name: 'Frank', pic: 'https://i.pravatar.cc/80?u=frank' },
+        { name: 'Grace', pic: 'https://i.pravatar.cc/80?u=grace' },
+        { name: 'Hank', pic: 'https://i.pravatar.cc/80?u=hank' },
+        { name: 'Iris', pic: 'https://i.pravatar.cc/80?u=iris' },
+        { name: 'Jack', pic: 'https://i.pravatar.cc/80?u=jack' }
     ];
 
     fakeFriends.forEach(function(friend, index) {
@@ -4522,6 +4656,10 @@ function testFriendsCircles() {
 
         stack.appendChild(circle);
     });
+
+    // Add X dismiss button
+    var fakeComments = fakeFriends.map(function(f) { return { timestamp: Date.now() }; });
+    appendDismissButton(stack, fakeComments);
 }
 
 function testReplyNotif() {

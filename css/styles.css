@@ -888,6 +888,134 @@ body {
     50% { opacity: 0.6; transform: scale(1.06); }
 }
 
+/* Circle stack scrollable + dismiss */
+.friends-circle-stack.scrollable {
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.friends-circle-stack.scrollable::-webkit-scrollbar {
+    display: none;
+}
+
+.friends-circle-dismiss {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(154, 170, 212, 0.2);
+    background: rgba(13, 19, 51, 0.85);
+    color: rgba(154, 170, 212, 0.5);
+    cursor: pointer;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0;
+    animation: friendCircleSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transition: all 0.25s ease;
+}
+.friends-circle-dismiss:hover {
+    border-color: rgba(154, 170, 212, 0.45);
+    color: rgba(154, 170, 212, 0.8);
+    background: rgba(20, 27, 69, 0.95);
+    transform: scale(1.1);
+}
+.friends-circle-dismiss:active {
+    transform: scale(0.9);
+}
+.friends-circle-dismiss svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Friends tab: unseen card badge */
+.feed-card-unseen-badge {
+    display: inline-block;
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: #0d1333;
+    background: linear-gradient(135deg, rgba(154, 170, 212, 0.9), rgba(192, 200, 224, 0.95));
+    padding: 1px 6px;
+    border-radius: 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+    animation: newBadgePulse 2s ease-in-out infinite;
+    box-shadow: 0 1px 6px rgba(154, 170, 212, 0.25);
+}
+@keyframes newBadgePulse {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; box-shadow: 0 1px 10px rgba(154, 170, 212, 0.4); }
+}
+
+.feed-card.feed-card-unseen {
+    border-left: 2px solid rgba(154, 170, 212, 0.35);
+}
+
+/* Mark all read bar */
+.friends-mark-all-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    margin-bottom: 4px;
+}
+.friends-mark-all-bar .unseen-count-text {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.72rem;
+    color: rgba(154, 170, 212, 0.6);
+    font-weight: 300;
+}
+.friends-mark-all-btn {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: rgba(154, 170, 212, 0.7);
+    background: rgba(154, 170, 212, 0.08);
+    border: 1px solid rgba(154, 170, 212, 0.15);
+    border-radius: 14px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+.friends-mark-all-btn:hover {
+    background: rgba(154, 170, 212, 0.15);
+    border-color: rgba(154, 170, 212, 0.3);
+    color: rgba(192, 200, 224, 0.9);
+}
+.friends-mark-all-btn:active {
+    transform: scale(0.96);
+}
+
+/* Light theme overrides */
+.comments-panel.light-theme .feed-card-unseen-badge {
+    color: #fff;
+    background: linear-gradient(135deg, #7c6dc9, #9b8dd8);
+    box-shadow: 0 1px 6px rgba(124, 109, 201, 0.3);
+}
+.comments-panel.light-theme .feed-card.feed-card-unseen {
+    border-left-color: rgba(124, 109, 201, 0.35);
+}
+.comments-panel.light-theme .friends-mark-all-bar .unseen-count-text {
+    color: rgba(60, 50, 100, 0.6);
+}
+.comments-panel.light-theme .friends-mark-all-btn {
+    color: rgba(60, 50, 100, 0.7);
+    background: rgba(100, 80, 160, 0.06);
+    border-color: rgba(100, 80, 160, 0.15);
+}
+.comments-panel.light-theme .friends-mark-all-btn:hover {
+    background: rgba(100, 80, 160, 0.12);
+    border-color: rgba(100, 80, 160, 0.3);
+    color: rgba(50, 40, 90, 0.85);
+}
+
 /* Social Icons */
 .social-icons {
     display: flex;
@@ -1343,8 +1471,106 @@ header {
 
 /* Share Buttons */
 .share-section {
-    margin-top: 20px;
+    margin-top: 28px;
     text-align: center;
+}
+
+/* Social share circle buttons */
+.share-section .save-row {
+    gap: 14px;
+}
+
+.social-share-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.social-share-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.social-share-btn:hover {
+    transform: scale(1.12);
+}
+
+.social-share-btn:active {
+    transform: scale(0.95);
+}
+
+.social-share-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: white;
+    position: relative;
+    z-index: 1;
+}
+
+/* Messenger */
+.social-share-btn.messenger {
+    background: linear-gradient(135deg, #00b2ff, #006aff);
+    box-shadow: 0 3px 14px rgba(0, 106, 255, 0.35);
+}
+
+.social-share-btn.messenger:hover {
+    box-shadow: 0 4px 20px rgba(0, 106, 255, 0.55);
+}
+
+/* LINE */
+.social-share-btn.line {
+    background: linear-gradient(135deg, #00C300, #00B900);
+    box-shadow: 0 3px 14px rgba(0, 185, 0, 0.35);
+}
+
+.social-share-btn.line:hover {
+    box-shadow: 0 4px 20px rgba(0, 185, 0, 0.55);
+}
+
+/* Copy link */
+.social-share-btn.copy-link {
+    background: linear-gradient(135deg, rgba(154, 170, 212, 0.25), rgba(154, 170, 212, 0.12));
+    border: 1.5px solid rgba(154, 170, 212, 0.4);
+    box-shadow: 0 3px 14px rgba(154, 170, 212, 0.15);
+}
+
+.social-share-btn.copy-link svg {
+    fill: #C0C8E0;
+}
+
+.social-share-btn.copy-link:hover {
+    background: linear-gradient(135deg, rgba(154, 170, 212, 0.4), rgba(154, 170, 212, 0.2));
+    box-shadow: 0 4px 20px rgba(154, 170, 212, 0.3);
+}
+
+.social-share-btn .share-btn-label {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 300;
+    color: rgba(192, 200, 224, 0.6);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.social-share-btn:hover .share-btn-label {
+    opacity: 1;
 }
 
 .share-label {

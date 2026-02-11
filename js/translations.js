@@ -184,7 +184,9 @@ const translations = {
             reconnect: "เซสชัน Facebook หมดอายุ",
             reconnectHint: "กรุณาเชื่อมต่อใหม่เพื่อดูการ์ดของเพื่อน",
             reconnectBtn: "เชื่อมต่อ Facebook อีกครั้ง",
-            newCards: "เพื่อนจับไพ่ใหม่"
+            newCards: "เพื่อนจับไพ่ใหม่",
+            markAllRead: "อ่านทั้งหมดแล้ว",
+            newBadge: "NEW"
         }
     },
     en: {
@@ -337,7 +339,9 @@ const translations = {
             reconnect: "Facebook session expired",
             reconnectHint: "Please reconnect to see your friends' cards",
             reconnectBtn: "Reconnect Facebook",
-            newCards: "Friends drew new cards"
+            newCards: "Friends drew new cards",
+            markAllRead: "Mark all read",
+            newBadge: "NEW"
         }
     },
     "zh-CN": {
@@ -490,7 +494,9 @@ const translations = {
             reconnect: "Facebook会话已过期",
             reconnectHint: "请重新连接以查看好友的卡牌",
             reconnectBtn: "重新连接Facebook",
-            newCards: "好友抽了新牌"
+            newCards: "好友抽了新牌",
+            markAllRead: "全部已读",
+            newBadge: "NEW"
         }
     },
     "zh-TW": {
@@ -643,7 +649,9 @@ const translations = {
             reconnect: "Facebook會話已過期",
             reconnectHint: "請重新連接以查看好友的卡牌",
             reconnectBtn: "重新連接Facebook",
-            newCards: "好友抽了新牌"
+            newCards: "好友抽了新牌",
+            markAllRead: "全部已讀",
+            newBadge: "NEW"
         }
     },
     ko: {
@@ -796,7 +804,9 @@ const translations = {
             reconnect: "Facebook 세션이 만료되었습니다",
             reconnectHint: "친구의 카드를 보려면 다시 연결해주세요",
             reconnectBtn: "Facebook 다시 연결",
-            newCards: "친구가 새 카드를 뽑았어요"
+            newCards: "친구가 새 카드를 뽑았어요",
+            markAllRead: "모두 읽음",
+            newBadge: "NEW"
         }
     },
     ja: {
@@ -949,7 +959,9 @@ const translations = {
             reconnect: "Facebookセッションが期限切れです",
             reconnectHint: "友達のカードを見るには再接続してください",
             reconnectBtn: "Facebookに再接続",
-            newCards: "友達が新しいカードを引きました"
+            newCards: "友達が新しいカードを引きました",
+            markAllRead: "すべて既読",
+            newBadge: "NEW"
         }
     },
     fr: {
@@ -1102,7 +1114,9 @@ const translations = {
             reconnect: "Session Facebook expirée",
             reconnectHint: "Veuillez vous reconnecter pour voir les cartes de vos amis",
             reconnectBtn: "Reconnecter Facebook",
-            newCards: "Vos amis ont tiré de nouvelles cartes"
+            newCards: "Vos amis ont tiré de nouvelles cartes",
+            markAllRead: "Tout marquer comme lu",
+            newBadge: "NEW"
         }
     }
 };
