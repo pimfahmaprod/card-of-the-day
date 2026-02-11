@@ -3920,14 +3920,6 @@ function renderReplyNotifCircles(newReplies) {
 }
 
 function onReplyNotifClick(commentId, replyId, circleEl, replyTimestamp) {
-    // Remove this circle with animation
-    if (circleEl) {
-        circleEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        circleEl.style.opacity = '0';
-        circleEl.style.transform = 'scale(0.5)';
-        setTimeout(function() { circleEl.remove(); }, 300);
-    }
-
     // Mark this reply as seen
     if (replyTimestamp) {
         var currentTs = parseInt(localStorage.getItem('tarot_replies_last_seen_ts') || '0', 10);
@@ -3959,29 +3951,39 @@ function onReplyNotifClick(commentId, replyId, circleEl, replyTimestamp) {
     switchCommentsTab('mycard');
 
     // Wait for mycard tab to load, then navigate to the specific comment
-    waitForFeedCardAndExpand(commentId, replyId);
+    // Circle will be removed after the reply is found and highlighted
+    waitForFeedCardAndExpand(commentId, replyId, circleEl);
 }
 
-function waitForFeedCardAndExpand(commentId, replyId) {
+function waitForFeedCardAndExpand(commentId, replyId, circleEl) {
     var attempts = 0;
     var maxAttempts = 40; // 4 seconds max
     var interval = setInterval(function() {
         attempts++;
         var commentsList = document.getElementById('commentsList');
-        if (!commentsList) { clearInterval(interval); return; }
+        if (!commentsList) { clearInterval(interval); removeNotifCircle(circleEl); return; }
 
         var targetCard = commentsList.querySelector('.feed-card[data-comment-id="' + commentId + '"]');
         if (targetCard) {
             clearInterval(interval);
-            expandAndHighlightReply(targetCard, commentId, replyId);
+            expandAndHighlightReply(targetCard, commentId, replyId, circleEl);
         } else if (attempts >= maxAttempts) {
             clearInterval(interval);
             _replyNotifPending = null;
+            removeNotifCircle(circleEl);
         }
     }, 100);
 }
 
-function expandAndHighlightReply(card, commentId, replyId) {
+function removeNotifCircle(circleEl) {
+    if (!circleEl) return;
+    circleEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    circleEl.style.opacity = '0';
+    circleEl.style.transform = 'scale(0.5)';
+    setTimeout(function() { circleEl.remove(); }, 300);
+}
+
+function expandAndHighlightReply(card, commentId, replyId, circleEl) {
     // Scroll card into view first
     card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -4000,6 +4002,9 @@ function expandAndHighlightReply(card, commentId, replyId) {
         if (targetReply) {
             clearInterval(replyInterval);
             _replyNotifPending = null;
+
+            // Now that the reply is found, remove the notification circle
+            removeNotifCircle(circleEl);
 
             // Small delay to let expansion animation finish
             setTimeout(function() {
@@ -4022,6 +4027,7 @@ function expandAndHighlightReply(card, commentId, replyId) {
         } else if (replyAttempts >= replyMaxAttempts) {
             clearInterval(replyInterval);
             _replyNotifPending = null;
+            removeNotifCircle(circleEl);
         }
     }, 100);
 }
@@ -4704,10 +4710,8 @@ function testReplyNotif() {
         circle.appendChild(pulse);
 
         circle.addEventListener('click', function() {
-            circle.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-            circle.style.opacity = '0';
-            circle.style.transform = 'scale(0.5)';
-            setTimeout(function() { circle.remove(); }, 300);
+            // In test mode, just remove via shared helper (same as real flow)
+            removeNotifCircle(circle);
         });
 
         bar.appendChild(circle);
