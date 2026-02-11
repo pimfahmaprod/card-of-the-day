@@ -249,42 +249,47 @@ function clearFacebookData() {
 
 // Text morph/scramble effect (like AI thinking animation)
 // Smoothly transitions from one text to another via random characters
+// Length gradually changes character-by-character so no abrupt jump
 function morphText(element, newText, duration = 600) {
     if (!element) return Promise.resolve();
     const oldText = element.textContent || '';
     if (oldText === newText) return Promise.resolve();
 
     return new Promise(resolve => {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        const maxLen = Math.max(oldText.length, newText.length);
-        const steps = 12;
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        const oldLen = oldText.length;
+        const newLen = newText.length;
+        const maxLen = Math.max(oldLen, newLen);
+        const steps = 14;
         const stepTime = duration / steps;
         let step = 0;
 
-        // Build array of final characters (padded)
-        const finalChars = newText.padEnd(maxLen).split('');
-        const startChars = oldText.padEnd(maxLen).split('');
-
-        // Each character "locks in" at a staggered time
-        const lockStep = new Array(maxLen);
-        for (let i = 0; i < maxLen; i++) {
-            // Characters lock in from left to right across ~60% of the duration
-            lockStep[i] = Math.floor((i / maxLen) * steps * 0.6) + Math.floor(steps * 0.3);
+        // Each character "locks in" at a staggered time (left to right)
+        const lockStep = new Array(newLen);
+        for (let i = 0; i < newLen; i++) {
+            lockStep[i] = Math.floor((i / Math.max(newLen, 1)) * steps * 0.55) + Math.floor(steps * 0.35);
         }
 
         const timer = setInterval(() => {
             step++;
+            // Smoothly transition visible length from oldLen to newLen
+            const progress = step / steps;
+            const currentLen = Math.round(oldLen + (newLen - oldLen) * progress);
+
             let display = '';
-            for (let i = 0; i < maxLen; i++) {
-                if (step >= lockStep[i]) {
-                    display += finalChars[i];
-                } else if (step <= 2 && startChars[i] !== ' ') {
-                    display += startChars[i];
+            for (let i = 0; i < currentLen; i++) {
+                if (i < newLen && step >= lockStep[i]) {
+                    // This character is locked in — show final
+                    display += newText[i];
+                } else if (step <= 2 && i < oldLen) {
+                    // First 2 steps — show original character
+                    display += oldText[i];
                 } else {
+                    // Scramble phase
                     display += chars[Math.floor(Math.random() * chars.length)];
                 }
             }
-            element.textContent = display.trimEnd();
+            element.textContent = display;
 
             if (step >= steps) {
                 clearInterval(timer);
