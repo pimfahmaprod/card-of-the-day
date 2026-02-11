@@ -3416,8 +3416,8 @@ async function loadFriendsCards() {
         if (friendComments.length > 0) {
             var newestTs = Math.max.apply(null, friendComments.map(function(c) { return c.timestamp || 0; }));
             localStorage.setItem('tarot_friends_last_seen_ts', String(newestTs));
-            var bubble = document.getElementById('friendsBubble');
-            if (bubble) bubble.classList.remove('show');
+            var stack = document.getElementById('friendsCircleStack');
+            if (stack) stack.innerHTML = '';
         }
     } catch (e) {
         console.warn('Failed to load friends cards:', e.message);
@@ -3566,43 +3566,36 @@ function inviteFriendsViaMessenger() {
 }
 
 // ========================================
-// Friends New Cards Notification Bubble
+// Friends New Cards – Profile Circle Stack
 // ========================================
 
 async function checkFriendsNewCards() {
-    var bubble = document.getElementById('friendsBubble');
-    if (!bubble) return;
+    var stack = document.getElementById('friendsCircleStack');
+    if (!stack) return;
 
     // Only for FB-connected users
     if (!isFacebookConnected()) {
-        bubble.classList.remove('show');
-        return;
-    }
-
-    // Only when landing page is visible
-    var landingPage = document.getElementById('landingPage');
-    if (!landingPage || landingPage.style.display === 'none') {
-        bubble.classList.remove('show');
+        stack.innerHTML = '';
         return;
     }
 
     try {
         var friendResult = await getFacebookFriendIds();
         if (friendResult.status !== 'ok' || friendResult.ids.length === 0) {
-            bubble.classList.remove('show');
+            stack.innerHTML = '';
             return;
         }
 
         var friendUserIds = friendResult.ids.map(function(id) { return 'fb_' + id; });
 
         if (!window.cardCounter || !window.cardCounter.fetchCommentsByUserIds) {
-            bubble.classList.remove('show');
+            stack.innerHTML = '';
             return;
         }
 
         var friendComments = await window.cardCounter.fetchCommentsByUserIds(friendUserIds, 50);
         if (friendComments.length === 0) {
-            bubble.classList.remove('show');
+            stack.innerHTML = '';
             return;
         }
 
@@ -3610,49 +3603,73 @@ async function checkFriendsNewCards() {
         var newComments = friendComments.filter(function(c) { return (c.timestamp || 0) > lastSeenTs; });
 
         if (newComments.length === 0) {
-            bubble.classList.remove('show');
+            stack.innerHTML = '';
             return;
         }
 
-        // Populate count
-        var countEl = document.getElementById('friendsBubbleCount');
-        var textEl = document.getElementById('friendsBubbleText');
-        if (countEl) countEl.textContent = newComments.length > 99 ? '99+' : newComments.length;
-        if (textEl) textEl.textContent = t('friends.newCards');
-
-        // Show up to 3 unique friend avatars
-        var avatarsEl = document.getElementById('friendsBubbleAvatars');
-        if (avatarsEl) {
-            avatarsEl.innerHTML = '';
-            var seenUsers = {};
-            var avatarCount = 0;
-            for (var i = 0; i < newComments.length && avatarCount < 3; i++) {
-                var comment = newComments[i];
-                if (comment.profilePicture && comment.userId && !seenUsers[comment.userId]) {
-                    seenUsers[comment.userId] = true;
-                    var img = document.createElement('img');
-                    img.src = comment.profilePicture;
-                    img.alt = '';
-                    img.onerror = function() { this.style.display = 'none'; };
-                    avatarsEl.appendChild(img);
-                    avatarCount++;
-                }
+        // Group by friend userId – keep the newest comment per friend
+        var byUser = {};
+        newComments.forEach(function(c) {
+            var uid = c.userId;
+            if (!byUser[uid] || (c.timestamp || 0) > (byUser[uid].timestamp || 0)) {
+                byUser[uid] = c;
             }
-        }
+        });
 
-        // Show bubble with animation
-        bubble.classList.add('show');
+        // Sort friends by newest comment first
+        var friends = Object.values(byUser).sort(function(a, b) {
+            return (b.timestamp || 0) - (a.timestamp || 0);
+        });
+
+        // Render circles (max 8)
+        stack.innerHTML = '';
+        friends.slice(0, 8).forEach(function(comment, index) {
+            var circle = document.createElement('div');
+            circle.className = 'friends-circle-item';
+            circle.style.animationDelay = (index * 0.06) + 's';
+
+            var picUrl = comment.profilePicture || '';
+            if (picUrl) {
+                var img = document.createElement('img');
+                img.src = picUrl;
+                img.alt = '';
+                img.onerror = function() {
+                    this.style.display = 'none';
+                    var fallback = document.createElement('div');
+                    fallback.className = 'friends-circle-item-default';
+                    fallback.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+                    circle.insertBefore(fallback, circle.firstChild);
+                };
+                circle.appendChild(img);
+            } else {
+                circle.innerHTML = '<div class="friends-circle-item-default"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
+            }
+
+            // Pulse ring
+            var pulse = document.createElement('span');
+            pulse.className = 'friends-circle-pulse';
+            circle.appendChild(pulse);
+
+            circle.addEventListener('click', function() {
+                onFriendCircleClick(circle);
+            });
+
+            stack.appendChild(circle);
+        });
 
     } catch (e) {
         console.warn('Failed to check friends new cards:', e.message);
-        bubble.classList.remove('show');
+        stack.innerHTML = '';
     }
 }
 
-function onFriendsBubbleClick() {
-    var bubble = document.getElementById('friendsBubble');
-    if (bubble) {
-        bubble.classList.remove('show');
+function onFriendCircleClick(circleEl) {
+    // Animate out the clicked circle
+    if (circleEl) {
+        circleEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        circleEl.style.opacity = '0';
+        circleEl.style.transform = 'scale(0.5) translateX(16px)';
+        setTimeout(function() { circleEl.remove(); }, 300);
     }
 
     // Open comments panel and switch to friends tab
@@ -4458,6 +4475,104 @@ function formatCommentDate(date) {
         day: 'numeric',
         month: 'short',
         year: 'numeric'
+    });
+}
+
+// ========================================
+// DEBUG: Test functions (remove before deploy)
+// ========================================
+
+function testFriendsCircles() {
+    var stack = document.getElementById('friendsCircleStack');
+    if (!stack) return;
+    stack.innerHTML = '';
+
+    var fakeFriends = [
+        { name: 'Alice', pic: 'https://i.pravatar.cc/80?u=alice' },
+        { name: 'Bob', pic: 'https://i.pravatar.cc/80?u=bob' },
+        { name: 'Carol', pic: 'https://i.pravatar.cc/80?u=carol' },
+        { name: 'Dave', pic: 'https://i.pravatar.cc/80?u=dave' },
+        { name: 'Eve', pic: 'https://i.pravatar.cc/80?u=eve' }
+    ];
+
+    fakeFriends.forEach(function(friend, index) {
+        var circle = document.createElement('div');
+        circle.className = 'friends-circle-item';
+        circle.style.animationDelay = (index * 0.06) + 's';
+
+        var img = document.createElement('img');
+        img.src = friend.pic;
+        img.alt = friend.name;
+        img.onerror = function() {
+            this.style.display = 'none';
+            var fb = document.createElement('div');
+            fb.className = 'friends-circle-item-default';
+            fb.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+            circle.insertBefore(fb, circle.firstChild);
+        };
+        circle.appendChild(img);
+
+        var pulse = document.createElement('span');
+        pulse.className = 'friends-circle-pulse';
+        circle.appendChild(pulse);
+
+        circle.addEventListener('click', function() {
+            onFriendCircleClick(circle);
+        });
+
+        stack.appendChild(circle);
+    });
+}
+
+function testReplyNotif() {
+    var bar = document.getElementById('replyNotifBar');
+    if (!bar) {
+        // If comments panel isn't open, open it first
+        openCommentsPanel(true);
+        bar = document.getElementById('replyNotifBar');
+        if (!bar) return;
+    }
+    // Make sure panel is open
+    var panel = document.getElementById('commentsPanel');
+    if (!panel || !panel.classList.contains('show')) {
+        openCommentsPanel(true);
+    }
+
+    bar.innerHTML = '';
+
+    var fakeRepliers = [
+        { name: 'Replier1', pic: 'https://i.pravatar.cc/80?u=rep1' },
+        { name: 'Replier2', pic: 'https://i.pravatar.cc/80?u=rep2' },
+        { name: 'Replier3', pic: 'https://i.pravatar.cc/80?u=rep3' }
+    ];
+
+    fakeRepliers.forEach(function(r, index) {
+        var circle = document.createElement('div');
+        circle.className = 'reply-notif-circle';
+        circle.style.animationDelay = (index * 0.08) + 's';
+
+        var img = document.createElement('img');
+        img.src = r.pic;
+        img.alt = r.name;
+        circle.appendChild(img);
+
+        var badge = document.createElement('span');
+        badge.className = 'reply-notif-badge';
+        badge.textContent = index + 1;
+        circle.appendChild(badge);
+
+        var pulse = document.createElement('span');
+        pulse.className = 'reply-notif-pulse';
+        circle.appendChild(pulse);
+
+        circle.addEventListener('click', function() {
+            circle.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            circle.style.opacity = '0';
+            circle.style.transform = 'scale(0.5)';
+            setTimeout(function() { circle.remove(); }, 300);
+        });
+
+        bar.appendChild(circle);
     });
 }
 

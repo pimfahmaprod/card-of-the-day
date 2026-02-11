@@ -791,154 +791,101 @@ body {
     z-index: 1;
 }
 
-/* Friends Notification Bubble on Landing Page */
-.friends-bubble {
+/* Friends Profile Circle Stack (below profile pic) */
+.friends-circle-stack {
     position: absolute;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: none;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 16px 10px 14px;
-    background: linear-gradient(135deg, rgba(20, 27, 69, 0.92), rgba(13, 19, 51, 0.92));
-    border: 1px solid rgba(154, 170, 212, 0.2);
-    border-radius: 28px;
-    cursor: pointer;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow:
-        0 4px 24px rgba(0, 0, 0, 0.35),
-        0 0 12px rgba(154, 170, 212, 0.06),
-        inset 0 1px 0 rgba(154, 170, 212, 0.08);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 10;
-    white-space: nowrap;
-    max-width: 90vw;
-    opacity: 0;
-}
-
-.friends-bubble.show {
+    top: calc(100% + 10px);
+    right: 0;
     display: flex;
-    animation: friendsBubbleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    pointer-events: none;
 }
 
-.friends-bubble:hover {
-    transform: translateX(-50%) translateY(-2px);
-    border-color: rgba(154, 170, 212, 0.35);
-    box-shadow:
-        0 6px 28px rgba(0, 0, 0, 0.4),
-        0 0 18px rgba(154, 170, 212, 0.1),
-        inset 0 1px 0 rgba(154, 170, 212, 0.12);
-}
-
-.friends-bubble:active {
-    transform: translateX(-50%) scale(0.97);
-    transition-duration: 0.1s;
-}
-
-.friends-bubble-avatars {
-    display: flex;
-    flex-shrink: 0;
-}
-
-.friends-bubble-avatars img {
-    width: 26px;
-    height: 26px;
+.friends-circle-item {
+    position: relative;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    border: 2px solid rgba(13, 19, 51, 0.9);
+    cursor: pointer;
+    pointer-events: auto;
+    flex-shrink: 0;
+    opacity: 0;
+    animation: friendCircleSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.friends-circle-item img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
     object-fit: cover;
-    margin-left: -8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-.friends-bubble-avatars img:first-child {
-    margin-left: 0;
-}
-
-.friends-bubble-content {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.friends-bubble-text {
-    font-family: 'Prompt', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 400;
-    color: rgba(192, 200, 224, 0.85);
-    letter-spacing: 0.01em;
-}
-
-.friends-bubble-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-    background: linear-gradient(135deg, rgba(154, 170, 212, 0.25), rgba(154, 170, 212, 0.12));
-    border: 1px solid rgba(154, 170, 212, 0.25);
-    border-radius: 10px;
-    font-family: 'Prompt', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: #C0C8E0;
-}
-
-.friends-bubble-arrow {
-    display: flex;
-    align-items: center;
-    color: rgba(154, 170, 212, 0.4);
+    border: 2px solid rgba(154, 170, 212, 0.3);
+    box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.3),
+        0 0 8px rgba(154, 170, 212, 0.06);
     transition: all 0.25s ease;
 }
 
-.friends-bubble:hover .friends-bubble-arrow {
-    transform: translateX(2px);
-    color: rgba(154, 170, 212, 0.7);
+.friends-circle-item:hover img {
+    transform: scale(1.1);
+    border-color: rgba(154, 170, 212, 0.55);
+    box-shadow:
+        0 3px 14px rgba(0, 0, 0, 0.4),
+        0 0 14px rgba(154, 170, 212, 0.12);
 }
 
-.friends-bubble-glow {
+.friends-circle-item:active img {
+    transform: scale(0.95);
+}
+
+.friends-circle-item-default {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(13, 19, 51, 0.85);
+    border: 2px solid rgba(154, 170, 212, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(154, 170, 212, 0.5);
+    box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.3),
+        0 0 8px rgba(154, 170, 212, 0.06);
+    transition: all 0.25s ease;
+}
+
+.friends-circle-item:hover .friends-circle-item-default {
+    transform: scale(1.1);
+    border-color: rgba(154, 170, 212, 0.55);
+}
+
+.friends-circle-pulse {
     position: absolute;
-    top: -6px;
-    left: -6px;
-    right: -6px;
-    bottom: -6px;
-    border-radius: 34px;
-    background: radial-gradient(ellipse at center, rgba(154, 170, 212, 0.06) 0%, transparent 70%);
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(154, 170, 212, 0.25);
+    animation: friendCirclePulse 2.5s ease-in-out infinite;
     pointer-events: none;
-    z-index: -1;
-    animation: friendsBubblePulse 3s ease-in-out infinite;
 }
 
-@keyframes friendsBubbleIn {
+@keyframes friendCircleSlideIn {
     from {
         opacity: 0;
-        transform: translateX(-50%) translateY(16px) scale(0.95);
+        transform: translateX(16px) scale(0.7);
     }
     to {
         opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
+        transform: translateX(0) scale(1);
     }
 }
 
-@keyframes friendsBubblePulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
-}
-
-@media (max-height: 700px) {
-    .friends-bubble {
-        bottom: 60px;
-        padding: 8px 14px 8px 10px;
-    }
-    .friends-bubble-avatars img {
-        width: 22px;
-        height: 22px;
-    }
-    .friends-bubble-text {
-        font-size: 0.72rem;
-    }
+@keyframes friendCirclePulse {
+    0%, 100% { opacity: 0.25; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.06); }
 }
 
 /* Social Icons */
