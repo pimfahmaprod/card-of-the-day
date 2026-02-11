@@ -1287,6 +1287,55 @@ html[lang="ja"] .landing-tagline {
     display: none;
 }
 
+/* Collapsed state: only show first (primary) circle + expand button */
+.collapsed .notif-circle-item:not(.notif-circle-primary),
+.collapsed .notif-circle-dismiss {
+    display: none;
+}
+:not(.collapsed) > .notif-circle-expand-btn {
+    display: none;
+}
+
+/* Expand button */
+.notif-circle-expand-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(154, 170, 212, 0.25);
+    background: rgba(13, 19, 51, 0.85);
+    color: rgba(154, 170, 212, 0.7);
+    cursor: pointer;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-end;
+    flex-shrink: 0;
+    gap: 1px;
+    opacity: 0;
+    animation: friendCircleSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transition: all 0.25s ease;
+}
+.notif-circle-expand-btn:hover {
+    border-color: rgba(154, 170, 212, 0.5);
+    background: rgba(20, 27, 69, 0.95);
+    transform: scale(1.1);
+    color: rgba(154, 170, 212, 0.95);
+}
+.notif-circle-expand-btn:active {
+    transform: scale(0.9);
+}
+.notif-circle-expand-count {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1;
+}
+.notif-circle-expand-btn svg {
+    opacity: 0.6;
+}
+
 .notif-circle-dismiss,
 .friends-circle-dismiss {
     width: 38px;
@@ -4600,151 +4649,30 @@ footer {
     word-break: break-word;
 }
 
-/* Reply Notification Profile Circles */
+/* Reply Notification Circle Stack (inside comments panel) — mirrors notif-circle-stack */
 .reply-notif-bar {
     position: absolute;
-    bottom: 12px;
-    right: 12px;
+    right: 8px;
+    bottom: 70px;
     display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 8px;
     z-index: 5;
     pointer-events: none;
 }
-
-.reply-notif-circle {
-    position: relative;
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    cursor: pointer;
-    pointer-events: auto;
-    flex-shrink: 0;
-    animation: replyCircleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    opacity: 0;
+.reply-notif-bar.scrollable {
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 8px 8px 8px 14px;
+    margin: -8px -8px -8px -14px;
 }
-
-.reply-notif-circle img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(154, 170, 212, 0.35);
-    box-shadow:
-        0 3px 14px rgba(0, 0, 0, 0.35),
-        0 0 10px rgba(154, 170, 212, 0.08);
-    transition: all 0.25s ease;
-}
-
-.reply-notif-circle:hover img {
-    transform: scale(1.1);
-    border-color: rgba(154, 170, 212, 0.6);
-    box-shadow:
-        0 4px 18px rgba(0, 0, 0, 0.4),
-        0 0 16px rgba(154, 170, 212, 0.15);
-}
-
-.reply-notif-circle:active img {
-    transform: scale(0.95);
-}
-
-.reply-notif-circle-default {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: rgba(20, 27, 69, 0.9);
-    border: 2px solid rgba(154, 170, 212, 0.35);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(154, 170, 212, 0.5);
-    box-shadow:
-        0 3px 14px rgba(0, 0, 0, 0.35),
-        0 0 10px rgba(154, 170, 212, 0.08);
-    transition: all 0.25s ease;
-}
-
-.reply-notif-circle:hover .reply-notif-circle-default {
-    transform: scale(1.1);
-    border-color: rgba(154, 170, 212, 0.6);
-}
-
-.reply-notif-badge {
-    position: absolute;
-    top: -3px;
-    right: -3px;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-    border-radius: 9px;
-    background: rgba(154, 170, 212, 0.85);
-    color: #0d1333;
-    font-family: 'Prompt', sans-serif;
-    font-size: 0.6rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1.5px solid rgba(13, 19, 51, 0.8);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-.reply-notif-circle .reply-notif-pulse {
-    position: absolute;
-    top: -3px;
-    left: -3px;
-    right: -3px;
-    bottom: -3px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(154, 170, 212, 0.3);
-    animation: replyNotifPulse 2s ease-in-out infinite;
-    pointer-events: none;
-}
-
-@keyframes replyCircleIn {
-    0% {
-        opacity: 0;
-        transform: translateY(20px) scale(0.3);
-        filter: blur(4px);
-    }
-    50% {
-        opacity: 0.9;
-        transform: translateY(-5px) scale(1.1);
-        filter: blur(0);
-    }
-    75% {
-        transform: translateY(2px) scale(0.95);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes replyNotifPulse {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(1.08); }
-}
-
-/* Reply circle exit animation */
-.reply-notif-circle.reply-notif-exit {
-    animation: replyCircleOut 0.4s cubic-bezier(0.55, 0, 1, 0.45) forwards !important;
-}
-
-@keyframes replyCircleOut {
-    0% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    30% {
-        transform: scale(1.1);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(0.3) translateY(20px);
-        filter: blur(4px);
-    }
+.reply-notif-bar.scrollable::-webkit-scrollbar {
+    display: none;
 }
 
 /* Reply highlight effect */
@@ -4758,26 +4686,6 @@ footer {
 .reply-item.reply-highlight-fade {
     background: transparent;
     box-shadow: none;
-}
-
-/* Light theme overrides */
-.comments-panel.light-theme .reply-notif-circle img {
-    border-color: rgba(100, 80, 160, 0.3);
-    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.12), 0 0 10px rgba(100, 80, 160, 0.06);
-}
-
-.comments-panel.light-theme .reply-notif-circle:hover img {
-    border-color: rgba(100, 80, 160, 0.5);
-}
-
-.comments-panel.light-theme .reply-notif-badge {
-    background: rgba(100, 80, 160, 0.8);
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.8);
-}
-
-.comments-panel.light-theme .reply-notif-circle .reply-notif-pulse {
-    border-color: rgba(100, 80, 160, 0.25);
 }
 
 .comments-panel.light-theme .reply-item.reply-highlight {

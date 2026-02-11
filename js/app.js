@@ -4029,12 +4029,10 @@ function onFriendCircleClick(circleEl) {
         setTimeout(function() { circleEl.remove(); }, 300);
     }
 
-    // If no more items remain, clear the stack entirely
+    // Re-render both containers after state change
     setTimeout(function() {
-        if (_pollState.friendDrawsData.length === 0 && _pollState.repliesData.length === 0) {
-            var stack = document.getElementById('notifCircleStack');
-            if (stack) stack.innerHTML = '';
-        }
+        renderNotifCircleStack();
+        renderReplyNotifCirclesFromState();
     }, 350);
 
     // Open comments panel and switch to friends tab
@@ -4081,20 +4079,30 @@ function dismissAllNotifCircles() {
     _pollState.repliesData = [];
     updateNotificationBadges();
 
-    // Clear reply notif bar in comments panel too
-    var replyBar = document.getElementById('replyNotifBar');
-    if (replyBar) replyBar.innerHTML = '';
-
-    // Animate out all circles with CSS cascade animation
-    var items = stack.querySelectorAll('.notif-circle-item, .notif-circle-dismiss');
-    items.forEach(function(item, i) {
-        item.style.animationDelay = (i * 0.04) + 's';
-        item.classList.add('friends-circle-dismiss-out');
+    // Animate out all circles in both containers with CSS cascade animation
+    var containers = [stack, document.getElementById('replyNotifBar')];
+    var maxLen = 0;
+    containers.forEach(function(container) {
+        if (!container) return;
+        // Uncollapse first so hidden items become visible for animation
+        container.classList.remove('collapsed');
+        var expandBtn = container.querySelector('.notif-circle-expand-btn');
+        if (expandBtn) expandBtn.remove();
+        var items = container.querySelectorAll('.notif-circle-item, .notif-circle-dismiss');
+        if (items.length > maxLen) maxLen = items.length;
+        items.forEach(function(item, i) {
+            item.style.animationDelay = (i * 0.04) + 's';
+            item.classList.add('friends-circle-dismiss-out');
+        });
     });
     setTimeout(function() {
-        stack.innerHTML = '';
-        stack.classList.remove('scrollable');
-    }, 400 + items.length * 40);
+        containers.forEach(function(container) {
+            if (!container) return;
+            container.innerHTML = '';
+            container.classList.remove('scrollable', 'collapsed');
+            delete container.dataset.expanded;
+        });
+    }, 400 + maxLen * 40);
 }
 
 // Touch drag support for scrollable circle stack
@@ -4160,68 +4168,15 @@ async function checkReplyNotifications() {
             return;
         }
 
-        renderReplyNotifCircles(newReplies);
+        // Store into poll state so shared renderer can use it
+        _pollState.repliesData = newReplies;
+        _pollState.unseenReplies = newReplies.length;
+        updateNotificationBadges();
+        renderReplyNotifCirclesFromState();
     } catch (e) {
         console.warn('Failed to check reply notifications:', e.message);
         bar.innerHTML = '';
     }
-}
-
-function renderReplyNotifCircles(newReplies) {
-    var bar = document.getElementById('replyNotifBar');
-    if (!bar) return;
-    bar.innerHTML = '';
-
-    // Group by replier userId, keep the latest reply per user
-    var byUser = {};
-    newReplies.forEach(function(item) {
-        var uid = item.reply.userId;
-        if (!byUser[uid] || (item.reply.timestamp || 0) > (byUser[uid].reply.timestamp || 0)) {
-            byUser[uid] = item;
-        }
-    });
-
-    // Count replies per user for badge
-    var countByUser = {};
-    newReplies.forEach(function(item) {
-        var uid = item.reply.userId;
-        countByUser[uid] = (countByUser[uid] || 0) + 1;
-    });
-
-    var users = Object.keys(byUser);
-    // Limit to 5 circles max
-    if (users.length > 5) users = users.slice(0, 5);
-
-    users.forEach(function(uid, index) {
-        var item = byUser[uid];
-        var count = countByUser[uid];
-
-        var circle = document.createElement('div');
-        circle.className = 'reply-notif-circle';
-        circle.style.animationDelay = (index * 0.08) + 's';
-
-        var picUrl = item.reply.profilePicture || '';
-        var defaultSvg = '<div class="reply-notif-circle-default"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
-        var badgeHtml = count > 1 ? '<span class="reply-notif-badge">' + count + '</span>' : '';
-        var pulseHtml = '<span class="reply-notif-pulse"></span>';
-
-        if (picUrl) {
-            var img = document.createElement('img');
-            img.src = picUrl;
-            img.alt = '';
-            img.onerror = function() { this.style.display = 'none'; circle.insertAdjacentHTML('afterbegin', defaultSvg); };
-            circle.appendChild(img);
-            circle.insertAdjacentHTML('beforeend', badgeHtml + pulseHtml);
-        } else {
-            circle.innerHTML = defaultSvg + badgeHtml + pulseHtml;
-        }
-
-        circle.addEventListener('click', function() {
-            onReplyNotifClick(item.commentId, item.reply.id, circle, item.reply.timestamp);
-        });
-
-        bar.appendChild(circle);
-    });
 }
 
 function onReplyNotifClick(commentId, replyId, circleEl, replyTimestamp) {
@@ -4238,6 +4193,7 @@ function onReplyNotifClick(commentId, replyId, circleEl, replyTimestamp) {
         _pollState.unseenReplies = _pollState.repliesData.length;
         updateNotificationBadges();
         renderNotifCircleStack();
+        renderReplyNotifCirclesFromState();
     }
 
     // Store the target for after tab loads
@@ -4289,7 +4245,7 @@ function waitForFeedCardAndExpand(commentId, replyId, circleEl) {
 
 function removeNotifCircle(circleEl) {
     if (!circleEl) return;
-    circleEl.classList.add('reply-notif-exit');
+    circleEl.classList.add('friends-circle-dismiss-out');
     setTimeout(function() { circleEl.remove(); }, 400);
 }
 
@@ -4588,18 +4544,15 @@ function updateTabBadge(tabElement, count) {
 // State-based Rendering
 // ========================================
 
-// Unified notification circle stack: friend draws + replies sorted by time
-function renderNotifCircleStack() {
-    var stack = document.getElementById('notifCircleStack');
-    if (!stack) return;
-
+// Shared helper: build unified notification circles (friend draws + replies) into a container
+function buildUnifiedNotifCircles(container) {
     var hasFriends = _pollState.friendDrawsData.length > 0;
     var hasReplies = _pollState.repliesData.length > 0;
 
     if (!hasFriends && !hasReplies) {
-        if (stack.children.length > 0) {
-            stack.innerHTML = '';
-            stack.classList.remove('scrollable');
+        if (container.children.length > 0) {
+            container.innerHTML = '';
+            container.classList.remove('scrollable');
         }
         return;
     }
@@ -4645,15 +4598,22 @@ function renderNotifCircleStack() {
 
     // Detect NEW vs already rendered
     var existingIds = {};
-    stack.querySelectorAll('.notif-circle-item').forEach(function(el) {
+    container.querySelectorAll('.notif-circle-item').forEach(function(el) {
         if (el.dataset.notifKey) existingIds[el.dataset.notifKey] = true;
     });
     var hasNewItems = unified.some(function(u) { return !existingIds[u.type + '_' + u.userId]; });
-    if (!hasNewItems && Object.keys(existingIds).length > 0) return;
+    var itemsChanged = Object.keys(existingIds).length !== unified.length;
+    if (!hasNewItems && !itemsChanged && Object.keys(existingIds).length > 0) return;
+
+    // Reset expanded state when new items arrive
+    if (hasNewItems) {
+        delete container.dataset.expanded;
+    }
 
     // Full re-render
-    stack.innerHTML = '';
-    stack.classList.add('scrollable');
+    container.innerHTML = '';
+    container.classList.add('scrollable');
+    container.classList.remove('collapsed');
 
     unified.forEach(function(item, index) {
         var circle = document.createElement('div');
@@ -4719,7 +4679,7 @@ function renderNotifCircleStack() {
             })(replyItem);
         }
 
-        stack.appendChild(circle);
+        container.appendChild(circle);
     });
 
     // Single dismiss button at the bottom
@@ -4731,20 +4691,44 @@ function renderNotifCircleStack() {
         e.stopPropagation();
         dismissAllNotifCircles();
     });
-    stack.appendChild(dismissBtn);
+    container.appendChild(dismissBtn);
 
-    setupCircleStackDrag(stack);
+    setupCircleStackDrag(container);
+
+    // Collapse if multiple items and not manually expanded
+    if (unified.length > 1 && container.dataset.expanded !== 'true') {
+        container.classList.add('collapsed');
+
+        // Mark first circle as primary (stays visible when collapsed)
+        var firstCircle = container.querySelector('.notif-circle-item');
+        if (firstCircle) firstCircle.classList.add('notif-circle-primary');
+
+        // Insert expand button after first circle
+        var expandBtn = document.createElement('div');
+        expandBtn.className = 'notif-circle-expand-btn';
+        expandBtn.style.animationDelay = '0.12s';
+        expandBtn.innerHTML = '<span class="notif-circle-expand-count">+' + (unified.length - 1) + '</span>' +
+            '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>';
+        container.insertBefore(expandBtn, firstCircle ? firstCircle.nextSibling : null);
+
+        expandBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            container.dataset.expanded = 'true';
+            container.classList.remove('collapsed');
+        });
+    }
 }
 
+// Unified notification circle stack on landing page
+function renderNotifCircleStack() {
+    var stack = document.getElementById('notifCircleStack');
+    if (stack) buildUnifiedNotifCircles(stack);
+}
+
+// Unified notification circle stack inside comments panel
 function renderReplyNotifCirclesFromState() {
     var bar = document.getElementById('replyNotifBar');
-    if (!bar) return;
-
-    if (_pollState.unseenReplies === 0 || _pollState.repliesData.length === 0) {
-        bar.innerHTML = '';
-        return;
-    }
-    renderReplyNotifCircles(_pollState.repliesData);
+    if (bar) buildUnifiedNotifCircles(bar);
 }
 
 // Load comments for cardview tab (viewing a specific card's comments from ส่อง button)
@@ -5456,53 +5440,23 @@ function testFriendsCircles() {
 }
 
 function testReplyNotif() {
-    var bar = document.getElementById('replyNotifBar');
-    if (!bar) {
-        // If comments panel isn't open, open it first
-        openCommentsPanel(true);
-        bar = document.getElementById('replyNotifBar');
-        if (!bar) return;
-    }
     // Make sure panel is open
     var panel = document.getElementById('commentsPanel');
     if (!panel || !panel.classList.contains('show')) {
         openCommentsPanel(true);
     }
 
-    bar.innerHTML = '';
-
-    var fakeRepliers = [
-        { name: 'Replier1', pic: 'https://i.pravatar.cc/80?u=rep1' },
-        { name: 'Replier2', pic: 'https://i.pravatar.cc/80?u=rep2' },
-        { name: 'Replier3', pic: 'https://i.pravatar.cc/80?u=rep3' }
+    // Inject fake reply data into poll state
+    var now = Date.now();
+    _pollState.repliesData = [
+        { commentId: 'test1', reply: { id: 'r1', userId: 'rep1', userName: 'Replier1', profilePicture: 'https://i.pravatar.cc/80?u=rep1', timestamp: now - 1000 } },
+        { commentId: 'test2', reply: { id: 'r2', userId: 'rep2', userName: 'Replier2', profilePicture: 'https://i.pravatar.cc/80?u=rep2', timestamp: now - 2000 } },
+        { commentId: 'test3', reply: { id: 'r3', userId: 'rep3', userName: 'Replier3', profilePicture: 'https://i.pravatar.cc/80?u=rep3', timestamp: now - 3000 } }
     ];
-
-    fakeRepliers.forEach(function(r, index) {
-        var circle = document.createElement('div');
-        circle.className = 'reply-notif-circle';
-        circle.style.animationDelay = (index * 0.08) + 's';
-
-        var img = document.createElement('img');
-        img.src = r.pic;
-        img.alt = r.name;
-        circle.appendChild(img);
-
-        var badge = document.createElement('span');
-        badge.className = 'reply-notif-badge';
-        badge.textContent = index + 1;
-        circle.appendChild(badge);
-
-        var pulse = document.createElement('span');
-        pulse.className = 'reply-notif-pulse';
-        circle.appendChild(pulse);
-
-        circle.addEventListener('click', function() {
-            // In test mode, just remove via shared helper (same as real flow)
-            removeNotifCircle(circle);
-        });
-
-        bar.appendChild(circle);
-    });
+    _pollState.unseenReplies = 3;
+    updateNotificationBadges();
+    renderNotifCircleStack();
+    renderReplyNotifCirclesFromState();
 }
 
 function escapeHtml(text) {
