@@ -2148,6 +2148,9 @@ function goToLandingPage() {
         // Show comments button on landing page
         updateCommentsBtnVisibility();
 
+        // Re-check friends notification bubble
+        setTimeout(checkFriendsNewCards, 1000);
+
         // Scroll to top instantly
         window.scrollTo({ top: 0, behavior: 'instant' });
 
@@ -2834,6 +2837,9 @@ function openCommentsPanel(skipLoadComments = false) {
     // Check if user has picked a card and show/hide "ไพ่ฉัน" tab
     checkMyCardTab();
 
+    // Check for reply notifications (profile circles at bottom)
+    setTimeout(checkReplyNotifications, 500);
+
     // Skip loading if we're switching to a specific tab (like cardview)
     if (skipLoadComments) return;
 
@@ -3405,6 +3411,14 @@ async function loadFriendsCards() {
             commentsList.appendChild(card);
             displayedCommentIds.add(comment.id);
         });
+
+        // Mark all friend cards as seen (update last-seen timestamp)
+        if (friendComments.length > 0) {
+            var newestTs = Math.max.apply(null, friendComments.map(function(c) { return c.timestamp || 0; }));
+            localStorage.setItem('tarot_friends_last_seen_ts', String(newestTs));
+            var bubble = document.getElementById('friendsBubble');
+            if (bubble) bubble.classList.remove('show');
+        }
     } catch (e) {
         console.warn('Failed to load friends cards:', e.message);
         loadingEl.style.display = 'none';
@@ -3549,6 +3563,322 @@ function inviteFriendsViaMessenger() {
     }, function(response) {
         // Optional callback
     });
+}
+
+// ========================================
+// Friends New Cards Notification Bubble
+// ========================================
+
+async function checkFriendsNewCards() {
+    var bubble = document.getElementById('friendsBubble');
+    if (!bubble) return;
+
+    // Only for FB-connected users
+    if (!isFacebookConnected()) {
+        bubble.classList.remove('show');
+        return;
+    }
+
+    // Only when landing page is visible
+    var landingPage = document.getElementById('landingPage');
+    if (!landingPage || landingPage.style.display === 'none') {
+        bubble.classList.remove('show');
+        return;
+    }
+
+    try {
+        var friendResult = await getFacebookFriendIds();
+        if (friendResult.status !== 'ok' || friendResult.ids.length === 0) {
+            bubble.classList.remove('show');
+            return;
+        }
+
+        var friendUserIds = friendResult.ids.map(function(id) { return 'fb_' + id; });
+
+        if (!window.cardCounter || !window.cardCounter.fetchCommentsByUserIds) {
+            bubble.classList.remove('show');
+            return;
+        }
+
+        var friendComments = await window.cardCounter.fetchCommentsByUserIds(friendUserIds, 50);
+        if (friendComments.length === 0) {
+            bubble.classList.remove('show');
+            return;
+        }
+
+        var lastSeenTs = parseInt(localStorage.getItem('tarot_friends_last_seen_ts') || '0', 10);
+        var newComments = friendComments.filter(function(c) { return (c.timestamp || 0) > lastSeenTs; });
+
+        if (newComments.length === 0) {
+            bubble.classList.remove('show');
+            return;
+        }
+
+        // Populate count
+        var countEl = document.getElementById('friendsBubbleCount');
+        var textEl = document.getElementById('friendsBubbleText');
+        if (countEl) countEl.textContent = newComments.length > 99 ? '99+' : newComments.length;
+        if (textEl) textEl.textContent = t('friends.newCards');
+
+        // Show up to 3 unique friend avatars
+        var avatarsEl = document.getElementById('friendsBubbleAvatars');
+        if (avatarsEl) {
+            avatarsEl.innerHTML = '';
+            var seenUsers = {};
+            var avatarCount = 0;
+            for (var i = 0; i < newComments.length && avatarCount < 3; i++) {
+                var comment = newComments[i];
+                if (comment.profilePicture && comment.userId && !seenUsers[comment.userId]) {
+                    seenUsers[comment.userId] = true;
+                    var img = document.createElement('img');
+                    img.src = comment.profilePicture;
+                    img.alt = '';
+                    img.onerror = function() { this.style.display = 'none'; };
+                    avatarsEl.appendChild(img);
+                    avatarCount++;
+                }
+            }
+        }
+
+        // Show bubble with animation
+        bubble.classList.add('show');
+
+    } catch (e) {
+        console.warn('Failed to check friends new cards:', e.message);
+        bubble.classList.remove('show');
+    }
+}
+
+function onFriendsBubbleClick() {
+    var bubble = document.getElementById('friendsBubble');
+    if (bubble) {
+        bubble.classList.remove('show');
+    }
+
+    // Open comments panel and switch to friends tab
+    openCommentsPanel(true);
+
+    var commentsTabs = document.getElementById('commentsTabs');
+    if (commentsTabs) {
+        commentsTabs.querySelectorAll('.comments-tab').forEach(function(tab) {
+            tab.classList.remove('active');
+        });
+        var friendsTab = commentsTabs.querySelector('[data-tab="friends"]');
+        if (friendsTab) friendsTab.classList.add('active');
+    }
+
+    currentCommentsTab = 'friends';
+    switchCommentsTab('friends');
+}
+
+// ========================================
+// Reply Notification Profile Circles
+// ========================================
+
+var _replyNotifPending = null; // { commentId, replyId } to navigate to after tab loads
+
+async function checkReplyNotifications() {
+    var bar = document.getElementById('replyNotifBar');
+    if (!bar) return;
+
+    // Only for FB-connected users
+    if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
+        bar.innerHTML = '';
+        return;
+    }
+
+    var userId = getUserId();
+    if (!userId || !window.cardCounter || !window.cardCounter.fetchRepliesToMyComments) {
+        bar.innerHTML = '';
+        return;
+    }
+
+    try {
+        var allReplies = await window.cardCounter.fetchRepliesToMyComments(userId);
+        if (allReplies.length === 0) {
+            bar.innerHTML = '';
+            return;
+        }
+
+        var lastSeenTs = parseInt(localStorage.getItem('tarot_replies_last_seen_ts') || '0', 10);
+        var newReplies = allReplies.filter(function(item) {
+            return (item.reply.timestamp || 0) > lastSeenTs;
+        });
+
+        if (newReplies.length === 0) {
+            bar.innerHTML = '';
+            return;
+        }
+
+        renderReplyNotifCircles(newReplies);
+    } catch (e) {
+        console.warn('Failed to check reply notifications:', e.message);
+        bar.innerHTML = '';
+    }
+}
+
+function renderReplyNotifCircles(newReplies) {
+    var bar = document.getElementById('replyNotifBar');
+    if (!bar) return;
+    bar.innerHTML = '';
+
+    // Group by replier userId, keep the latest reply per user
+    var byUser = {};
+    newReplies.forEach(function(item) {
+        var uid = item.reply.userId;
+        if (!byUser[uid] || (item.reply.timestamp || 0) > (byUser[uid].reply.timestamp || 0)) {
+            byUser[uid] = item;
+        }
+    });
+
+    // Count replies per user for badge
+    var countByUser = {};
+    newReplies.forEach(function(item) {
+        var uid = item.reply.userId;
+        countByUser[uid] = (countByUser[uid] || 0) + 1;
+    });
+
+    var users = Object.keys(byUser);
+    // Limit to 5 circles max
+    if (users.length > 5) users = users.slice(0, 5);
+
+    users.forEach(function(uid, index) {
+        var item = byUser[uid];
+        var count = countByUser[uid];
+
+        var circle = document.createElement('div');
+        circle.className = 'reply-notif-circle';
+        circle.style.animationDelay = (index * 0.08) + 's';
+
+        var picUrl = item.reply.profilePicture || '';
+        var defaultSvg = '<div class="reply-notif-circle-default"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
+        var badgeHtml = count > 1 ? '<span class="reply-notif-badge">' + count + '</span>' : '';
+        var pulseHtml = '<span class="reply-notif-pulse"></span>';
+
+        if (picUrl) {
+            var img = document.createElement('img');
+            img.src = picUrl;
+            img.alt = '';
+            img.onerror = function() { this.style.display = 'none'; circle.insertAdjacentHTML('afterbegin', defaultSvg); };
+            circle.appendChild(img);
+            circle.insertAdjacentHTML('beforeend', badgeHtml + pulseHtml);
+        } else {
+            circle.innerHTML = defaultSvg + badgeHtml + pulseHtml;
+        }
+
+        circle.addEventListener('click', function() {
+            onReplyNotifClick(item.commentId, item.reply.id, circle, item.reply.timestamp);
+        });
+
+        bar.appendChild(circle);
+    });
+}
+
+function onReplyNotifClick(commentId, replyId, circleEl, replyTimestamp) {
+    // Remove this circle with animation
+    if (circleEl) {
+        circleEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        circleEl.style.opacity = '0';
+        circleEl.style.transform = 'scale(0.5)';
+        setTimeout(function() { circleEl.remove(); }, 300);
+    }
+
+    // Mark this reply as seen
+    if (replyTimestamp) {
+        var currentTs = parseInt(localStorage.getItem('tarot_replies_last_seen_ts') || '0', 10);
+        if (replyTimestamp > currentTs) {
+            localStorage.setItem('tarot_replies_last_seen_ts', String(replyTimestamp));
+        }
+    }
+
+    // Store the target for after tab loads
+    _replyNotifPending = { commentId: commentId, replyId: replyId };
+
+    // Make sure the panel is open
+    var commentsPanel = document.getElementById('commentsPanel');
+    if (!commentsPanel || !commentsPanel.classList.contains('show')) {
+        openCommentsPanel(true);
+    }
+
+    // Switch to "ไพ่ฉัน" tab
+    var commentsTabs = document.getElementById('commentsTabs');
+    if (commentsTabs) {
+        commentsTabs.querySelectorAll('.comments-tab').forEach(function(tab) {
+            tab.classList.remove('active');
+        });
+        var mycardTab = commentsTabs.querySelector('[data-tab="mycard"]');
+        if (mycardTab) mycardTab.classList.add('active');
+    }
+
+    currentCommentsTab = 'mycard';
+    switchCommentsTab('mycard');
+
+    // Wait for mycard tab to load, then navigate to the specific comment
+    waitForFeedCardAndExpand(commentId, replyId);
+}
+
+function waitForFeedCardAndExpand(commentId, replyId) {
+    var attempts = 0;
+    var maxAttempts = 40; // 4 seconds max
+    var interval = setInterval(function() {
+        attempts++;
+        var commentsList = document.getElementById('commentsList');
+        if (!commentsList) { clearInterval(interval); return; }
+
+        var targetCard = commentsList.querySelector('.feed-card[data-comment-id="' + commentId + '"]');
+        if (targetCard) {
+            clearInterval(interval);
+            expandAndHighlightReply(targetCard, commentId, replyId);
+        } else if (attempts >= maxAttempts) {
+            clearInterval(interval);
+            _replyNotifPending = null;
+        }
+    }, 100);
+}
+
+function expandAndHighlightReply(card, commentId, replyId) {
+    // Scroll card into view first
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Expand the card
+    var header = card.querySelector('.feed-card-header');
+    if (header && !card.classList.contains('expanded')) {
+        header.click();
+    }
+
+    // Wait for replies to load, then highlight the specific reply
+    var replyAttempts = 0;
+    var replyMaxAttempts = 30; // 3 seconds
+    var replyInterval = setInterval(function() {
+        replyAttempts++;
+        var targetReply = card.querySelector('.reply-item[data-reply-id="' + replyId + '"]');
+        if (targetReply) {
+            clearInterval(replyInterval);
+            _replyNotifPending = null;
+
+            // Small delay to let expansion animation finish
+            setTimeout(function() {
+                targetReply.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Apply highlight
+                setTimeout(function() {
+                    targetReply.classList.add('reply-highlight');
+
+                    // After 5 seconds, fade it out
+                    setTimeout(function() {
+                        targetReply.classList.add('reply-highlight-fade');
+                        // Clean up after fade transition
+                        setTimeout(function() {
+                            targetReply.classList.remove('reply-highlight', 'reply-highlight-fade');
+                        }, 800);
+                    }, 5000);
+                }, 300);
+            }, 400);
+        } else if (replyAttempts >= replyMaxAttempts) {
+            clearInterval(replyInterval);
+            _replyNotifPending = null;
+        }
+    }, 100);
 }
 
 // Load comments for cardview tab (viewing a specific card's comments from ส่อง button)
@@ -3873,7 +4203,7 @@ async function loadReplies(card, commentId, commentData) {
             const selfClass = isSelf ? ' reply-self' : '';
 
             if (isOwner) {
-                return '<div class="reply-item ' + bubbleClass + selfClass + '">' +
+                return '<div class="reply-item ' + bubbleClass + selfClass + '" data-reply-id="' + escapeHtml(reply.id || '') + '">' +
                     '<div class="reply-avatar-col">' + replyAvatar + '</div>' +
                     '<div class="reply-bubble">' +
                         '<div class="reply-bubble-header">' +
@@ -3884,7 +4214,7 @@ async function loadReplies(card, commentId, commentData) {
                     '</div>' +
                 '</div>';
             } else {
-                return '<div class="reply-item ' + bubbleClass + selfClass + '">' +
+                return '<div class="reply-item ' + bubbleClass + selfClass + '" data-reply-id="' + escapeHtml(reply.id || '') + '">' +
                     '<div class="reply-bubble">' +
                         '<div class="reply-bubble-header">' +
                             '<span class="reply-name">' + escapeHtml(reply.userName || 'Anonymous') + '</span>' +
@@ -4142,6 +4472,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initLanguageSwitcher();
     initCommentsPanel();
     updateCommentsBtnVisibility();
+
+    // Check for unseen friend cards after FB SDK + Firebase are ready
+    setTimeout(function() {
+        if (typeof isFacebookConnected === 'function' && isFacebookConnected()) {
+            checkFriendsNewCards();
+        }
+    }, 3000);
 });
 
 // Save Image Functions

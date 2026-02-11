@@ -183,7 +183,8 @@ const translations = {
             inviteMsg: "มาจับไพ่ทาโรต์รายวันกัน! ดูดวงความรักและรับข้อความจากจักรวาล ✨🔮",
             reconnect: "เซสชัน Facebook หมดอายุ",
             reconnectHint: "กรุณาเชื่อมต่อใหม่เพื่อดูการ์ดของเพื่อน",
-            reconnectBtn: "เชื่อมต่อ Facebook อีกครั้ง"
+            reconnectBtn: "เชื่อมต่อ Facebook อีกครั้ง",
+            newCards: "เพื่อนจับไพ่ใหม่"
         }
     },
     en: {
@@ -335,7 +336,8 @@ const translations = {
             inviteMsg: "Draw your daily tarot card! Discover love predictions and receive messages from the universe ✨🔮",
             reconnect: "Facebook session expired",
             reconnectHint: "Please reconnect to see your friends' cards",
-            reconnectBtn: "Reconnect Facebook"
+            reconnectBtn: "Reconnect Facebook",
+            newCards: "Friends drew new cards"
         }
     },
     "zh-CN": {
@@ -487,7 +489,8 @@ const translations = {
             inviteMsg: "一起来抽每日塔罗牌吧！探索爱情运势，接收来自宇宙的讯息 ✨🔮",
             reconnect: "Facebook会话已过期",
             reconnectHint: "请重新连接以查看好友的卡牌",
-            reconnectBtn: "重新连接Facebook"
+            reconnectBtn: "重新连接Facebook",
+            newCards: "好友抽了新牌"
         }
     },
     "zh-TW": {
@@ -639,7 +642,8 @@ const translations = {
             inviteMsg: "一起來抽每日塔羅牌吧！探索愛情運勢，接收來自宇宙的訊息 ✨🔮",
             reconnect: "Facebook會話已過期",
             reconnectHint: "請重新連接以查看好友的卡牌",
-            reconnectBtn: "重新連接Facebook"
+            reconnectBtn: "重新連接Facebook",
+            newCards: "好友抽了新牌"
         }
     },
     ko: {
@@ -791,7 +795,8 @@ const translations = {
             inviteMsg: "매일 타로 카드를 뽑아보세요! 사랑 운세를 알아보고 우주의 메시지를 받아보세요 ✨🔮",
             reconnect: "Facebook 세션이 만료되었습니다",
             reconnectHint: "친구의 카드를 보려면 다시 연결해주세요",
-            reconnectBtn: "Facebook 다시 연결"
+            reconnectBtn: "Facebook 다시 연결",
+            newCards: "친구가 새 카드를 뽑았어요"
         }
     },
     ja: {
@@ -943,7 +948,8 @@ const translations = {
             inviteMsg: "毎日タロットカードを引いてみよう！恋愛運を占って、宇宙からのメッセージを受け取ろう ✨🔮",
             reconnect: "Facebookセッションが期限切れです",
             reconnectHint: "友達のカードを見るには再接続してください",
-            reconnectBtn: "Facebookに再接続"
+            reconnectBtn: "Facebookに再接続",
+            newCards: "友達が新しいカードを引きました"
         }
     },
     fr: {
@@ -1095,7 +1101,8 @@ const translations = {
             inviteMsg: "Tirez votre carte de tarot quotidienne ! Découvrez les prédictions d'amour et recevez des messages de l'univers ✨🔮",
             reconnect: "Session Facebook expirée",
             reconnectHint: "Veuillez vous reconnecter pour voir les cartes de vos amis",
-            reconnectBtn: "Reconnecter Facebook"
+            reconnectBtn: "Reconnecter Facebook",
+            newCards: "Vos amis ont tiré de nouvelles cartes"
         }
     }
 };

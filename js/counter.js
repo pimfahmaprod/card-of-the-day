@@ -899,6 +899,50 @@ async function fetchUserProfile(fbUserId) {
     }
 }
 
+// Fetch replies from other users to my comments
+async function fetchRepliesToMyComments(userId, limit = 50) {
+    if (!isFirebaseInitialized || !database || !userId) return [];
+
+    const cacheKey = `repliesToMe_${userId}`;
+    const cached = getCached(cacheKey);
+    if (cached !== null) return cached;
+
+    try {
+        // Get user's own comments
+        const myComments = await fetchCommentsByUserId(userId, limit);
+        if (myComments.length === 0) return [];
+
+        // Fetch replies for each comment in parallel
+        const allResults = [];
+        await Promise.all(myComments.map(async function(comment) {
+            const replies = await fetchReplies(comment.id);
+            replies.forEach(function(reply) {
+                // Only include replies from OTHER users
+                if (reply.userId !== userId) {
+                    allResults.push({
+                        reply: reply,
+                        commentId: comment.id,
+                        commentData: comment
+                    });
+                }
+            });
+        }));
+
+        // Sort newest first
+        allResults.sort(function(a, b) {
+            return (b.reply.timestamp || 0) - (a.reply.timestamp || 0);
+        });
+
+        if (allResults.length > 0) {
+            setCache(cacheKey, allResults, CACHE_DURATION);
+        }
+        return allResults;
+    } catch (error) {
+        console.warn('Failed to fetch replies to my comments:', error.message);
+        return [];
+    }
+}
+
 // ========================================
 // Export for use in app.js
 // ========================================
@@ -931,5 +975,6 @@ window.cardCounter = {
     fetchUserDraws: fetchUserDraws,
     saveUserProfile: saveUserProfile,
     fetchUserProfile: fetchUserProfile,
-    clearProfileCache: function(fbUserId) { clearCache('userProfile_' + fbUserId); }
+    clearProfileCache: function(fbUserId) { clearCache('userProfile_' + fbUserId); },
+    fetchRepliesToMyComments: fetchRepliesToMyComments
 };

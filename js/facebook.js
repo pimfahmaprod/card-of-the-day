@@ -104,6 +104,11 @@ function fetchUserProfileFB() {
                 // No Firebase available — fall back to FB name
                 localStorage.setItem('tarot_user_name', response.name);
             }
+
+            // Check for unseen friend cards after login
+            if (typeof checkFriendsNewCards === 'function') {
+                setTimeout(checkFriendsNewCards, 2000);
+            }
         }
     });
 }

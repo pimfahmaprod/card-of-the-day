@@ -131,6 +131,19 @@
         </div>
         <p class="landing-instruction" data-i18n="landing.instruction">จับไพ่ทาโรต์ 1 ใบเพื่อดูดวงประจำวัน</p>
 
+        <!-- Friends New Cards Notification Bubble -->
+        <div class="friends-bubble" id="friendsBubble" onclick="onFriendsBubbleClick()">
+            <div class="friends-bubble-avatars" id="friendsBubbleAvatars"></div>
+            <div class="friends-bubble-content">
+                <span class="friends-bubble-text" id="friendsBubbleText" data-i18n="friends.newCards">เพื่อนจับไพ่ใหม่</span>
+                <span class="friends-bubble-count" id="friendsBubbleCount"></span>
+            </div>
+            <div class="friends-bubble-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="friends-bubble-glow"></div>
+        </div>
+
         <p class="landing-brand">Pimfahmaprod</p>
         <span class="version-tag">v1.2.0</span>
     </div>
@@ -398,6 +411,8 @@
                 <span data-i18n="common.loading">กำลังโหลด...</span>
             </div>
         </div>
+        <!-- Reply notification profile circles -->
+        <div class="reply-notif-bar" id="replyNotifBar"></div>
     </div>
     <div class="comments-overlay" id="commentsOverlay"></div>
 
