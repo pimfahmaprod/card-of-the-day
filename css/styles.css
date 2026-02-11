@@ -106,6 +106,23 @@ body {
 }
 
 /* ==================== LANDING PAGE ==================== */
+
+/* Landing header wrapper */
+.landing-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5vh;
+    margin-bottom: 0;
+    padding-bottom: 1.5rem;
+    opacity: 0;
+    transform: translateY(-40px);
+}
+
+.landing-header.revealed {
+    animation: headerReveal 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
 .landing-heading {
     font-family: 'Caveat', cursive;
     font-size: 2.5rem;
@@ -115,12 +132,89 @@ body {
     line-height: 1.3;
     max-width: 350px;
     padding: 0 20px;
-    margin-top: 5vh;
-    margin-bottom: 0;
-    padding-bottom: 2.5rem;
-    /* Hidden initially for loading */
-    opacity: 0;
-    transform: translateY(-40px);
+    margin: 0;
+    opacity: 1;
+    transform: none;
+}
+
+/* Sparkle divider between title and tagline */
+.landing-sparkles {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 6px 0 8px;
+}
+
+.landing-spark {
+    color: rgba(168, 184, 216, 0.6);
+    font-size: 0.9rem;
+    animation: landingSparkle 2.5s ease-in-out infinite;
+}
+
+.landing-spark.s2 {
+    font-size: 1.1rem;
+    animation-delay: 0.4s;
+    color: rgba(168, 184, 216, 0.8);
+}
+
+.landing-spark.s3 {
+    animation-delay: 0.8s;
+}
+
+@keyframes landingSparkle {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Tagline — per-language modern fonts */
+.landing-tagline {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: rgba(192, 204, 228, 0.9);
+    text-align: center;
+    letter-spacing: 0.5px;
+    margin: 0;
+    padding: 0 20px;
+}
+
+/* Thai — Kanit: modern geometric Thai */
+html[lang="th"] .landing-tagline {
+    font-family: 'Kanit', sans-serif;
+    font-weight: 200;
+    font-size: 1.25rem;
+    letter-spacing: 0.5px;
+}
+
+/* English / French — Outfit (default above) */
+
+/* Chinese Simplified */
+html[lang="zh-Hans"] .landing-tagline {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 1.5px;
+}
+
+/* Chinese Traditional */
+html[lang="zh-Hant"] .landing-tagline {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 1.5px;
+}
+
+/* Korean — Gowun Dodum: modern rounded */
+html[lang="ko"] .landing-tagline {
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
+}
+
+/* Japanese — Zen Kaku Gothic New: clean modern */
+html[lang="ja"] .landing-tagline {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 1.15rem;
+    letter-spacing: 1px;
 }
 
 /* Epic reveal animation for header */
@@ -140,10 +234,6 @@ body {
         opacity: 1;
         transform: translateY(0) scale(1);
     }
-}
-
-.landing-heading.revealed {
-    animation: headerReveal 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .strikethrough-word {
@@ -361,7 +451,7 @@ body {
 }
 
 /* Animation for header moving to top-left corner */
-.landing-heading.revealed {
+.landing-header.revealed {
     transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
                 top 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
                 left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
@@ -369,7 +459,7 @@ body {
                 padding 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.landing-heading.fade-out {
+.landing-header.fade-out {
     animation: none !important;
     opacity: 0 !important;
     transition: opacity 0.6s ease !important;
@@ -5392,10 +5482,13 @@ footer {
         height: 85px;
     }
 
+    .landing-header {
+        margin-top: 6vh;
+    }
+
     .landing-heading {
         font-size: 2.2rem;
         max-width: 300px;
-        margin-top: 6vh;
     }
 
     .spinning-card-container {
@@ -5451,10 +5544,13 @@ footer {
         height: 72px;
     }
 
+    .landing-header {
+        margin-top: 5vh;
+    }
+
     .landing-heading {
         font-size: 2.3rem;
         max-width: 280px;
-        margin-top: 5vh;
     }
 
     .spinning-card-container {

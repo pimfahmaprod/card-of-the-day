@@ -37,6 +37,7 @@ const translations = {
     th: {
         landing: {
             heading: "Card of the Day",
+            tagline: "ไพ่วันนี้ มีอะไรจะบอกคุณ",
             loading: "กำลังโหลด...",
             instruction: "จับไพ่ทาโรต์ 1 ใบเพื่อดูดวงประจำวัน",
             clickToDraw: "แตะไพ่เพื่อเริ่มดูดวง"
@@ -195,6 +196,7 @@ const translations = {
     en: {
         landing: {
             heading: "Card of the Day",
+            tagline: "The universe has a message for you",
             loading: "Loading...",
             instruction: "Draw a tarot card to reveal today's message",
             clickToDraw: "Tap card to draw"
@@ -353,6 +355,7 @@ const translations = {
     "zh-CN": {
         landing: {
             heading: "Card of the Day",
+            tagline: "今天的牌 有话对你说",
             loading: "加载中...",
             instruction: "抽一张塔罗牌，揭示今日讯息",
             clickToDraw: "点击抽牌"
@@ -511,6 +514,7 @@ const translations = {
     "zh-TW": {
         landing: {
             heading: "Card of the Day",
+            tagline: "今天的牌 有話對你說",
             loading: "載入中...",
             instruction: "抽一張塔羅牌，揭示今日訊息",
             clickToDraw: "點擊抽牌"
@@ -669,6 +673,7 @@ const translations = {
     ko: {
         landing: {
             heading: "Card of the Day",
+            tagline: "오늘의 카드가 당신에게 전하는 이야기",
             loading: "로딩 중...",
             instruction: "타로 카드를 뽑아 오늘의 메시지를 확인하세요",
             clickToDraw: "카드를 탭하여 뽑기"
@@ -827,6 +832,7 @@ const translations = {
     ja: {
         landing: {
             heading: "Card of the Day",
+            tagline: "今日のカードがあなたに届けるメッセージ",
             loading: "読み込み中...",
             instruction: "タロットカードを引いて今日のメッセージを受け取りましょう",
             clickToDraw: "カードをタップして引く"
@@ -985,6 +991,7 @@ const translations = {
     fr: {
         landing: {
             heading: "Card of the Day",
+            tagline: "L'univers a un message pour vous",
             loading: "Chargement...",
             instruction: "Tirez une carte de tarot pour découvrir le message du jour",
             clickToDraw: "Touchez la carte pour tirer"

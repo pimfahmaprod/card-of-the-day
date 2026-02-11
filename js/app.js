@@ -542,7 +542,7 @@ function markPageReady() {
     tryPlayMusic(true);
 
     // Reveal the header with epic animation
-    const header = document.querySelector('.landing-heading');
+    const header = document.querySelector('.landing-header');
     if (header) {
         header.classList.add('revealed');
     }
