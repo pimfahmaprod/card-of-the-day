@@ -3091,6 +3091,9 @@ function openCommentsPanel(skipLoadComments = false) {
     // Check if user has picked a card and show/hide "ไพ่ฉัน" tab
     checkMyCardTab();
 
+    // Restore tab badges (checkMyCardTab resets textContent)
+    if (_pollState.initialized) updateNotificationBadges();
+
     // Check for reply notifications (profile circles at bottom)
     setTimeout(function() {
         if (_pollState.initialized) {
@@ -3173,7 +3176,10 @@ async function checkMyCardTab() {
 
     const myCardTab = commentsTabs.querySelector('[data-tab="mycard"]');
     if (myCardTab) {
+        // Preserve badge if present before resetting text
+        var badge = myCardTab.querySelector('.tab-badge');
         myCardTab.textContent = t('comments.tabMyCard');
+        if (badge) myCardTab.appendChild(badge);
     }
 }
 
@@ -3940,69 +3946,11 @@ async function checkFriendsNewCards() {
             return;
         }
 
-        // Group by friend userId – keep the newest comment per friend
-        var byUser = {};
-        newComments.forEach(function(c) {
-            var uid = c.userId;
-            if (!byUser[uid] || (c.timestamp || 0) > (byUser[uid].timestamp || 0)) {
-                byUser[uid] = c;
-            }
-        });
-
-        // Sort friends by newest comment first
-        var friends = Object.values(byUser).sort(function(a, b) {
-            return (b.timestamp || 0) - (a.timestamp || 0);
-        });
-
-        // Render circles (max 12) + scrollable + dismiss button
-        stack.innerHTML = '';
-        stack.classList.add('scrollable');
-        var maxCircles = 12;
-        friends.slice(0, maxCircles).forEach(function(comment, index) {
-            var circle = document.createElement('div');
-            circle.className = 'notif-circle-item';
-            circle.dataset.userId = comment.userId;
-            circle.dataset.notifType = 'friend';
-            circle.style.animationDelay = (index * 0.06) + 's';
-
-            var picUrl = comment.profilePicture || '';
-            if (picUrl) {
-                var img = document.createElement('img');
-                img.src = picUrl;
-                img.alt = '';
-                img.onerror = function() {
-                    this.style.display = 'none';
-                    circle.insertAdjacentHTML('afterbegin', getFriendCircleInitial(comment.userName));
-                };
-                circle.appendChild(img);
-            } else {
-                circle.innerHTML = getFriendCircleInitial(comment.userName);
-            }
-
-            // Pulse ring
-            var pulse = document.createElement('span');
-            pulse.className = 'friends-circle-pulse';
-            circle.appendChild(pulse);
-
-            circle.addEventListener('click', function() {
-                onFriendCircleClick(circle);
-            });
-
-            stack.appendChild(circle);
-        });
-
-        // Add X dismiss button at the bottom
-        var circleCount = stack.querySelectorAll('.notif-circle-item').length;
-        var dismissBtn = document.createElement('div');
-        dismissBtn.className = 'notif-circle-dismiss';
-        dismissBtn.style.animationDelay = (circleCount * 0.06 + 0.1) + 's';
-        dismissBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-        dismissBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            dismissAllNotifCircles();
-        });
-        stack.appendChild(dismissBtn);
-        setupCircleStackDrag(stack);
+        // Store into poll state so shared renderer can use it
+        _pollState.friendDrawsData = newComments;
+        _pollState.unseenFriendDraws = newComments.length;
+        updateNotificationBadges();
+        renderNotifCircleStack();
 
     } catch (e) {
         console.warn('Failed to check friends new cards:', e.message);
@@ -4112,7 +4060,7 @@ function setupCircleStackDrag(stack) {
     var isDragging = false;
 
     stack.addEventListener('touchstart', function(e) {
-        if (e.target.closest('.notif-circle-dismiss')) return;
+        if (e.target.closest('.notif-circle-collapse-btn') || e.target.closest('.notif-circle-expand-btn')) return;
         startY = e.touches[0].clientY;
         startScroll = stack.scrollTop;
         isDragging = true;
@@ -4682,16 +4630,19 @@ function buildUnifiedNotifCircles(container) {
         container.appendChild(circle);
     });
 
-    // Single dismiss button at the bottom
-    var dismissBtn = document.createElement('div');
-    dismissBtn.className = 'notif-circle-dismiss';
-    dismissBtn.style.animationDelay = (unified.length * 0.06 + 0.1) + 's';
-    dismissBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-    dismissBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        dismissAllNotifCircles();
-    });
-    container.appendChild(dismissBtn);
+    // Collapse button at the bottom (only when expanded with multiple items)
+    if (unified.length > 1) {
+        var collapseBtn = document.createElement('div');
+        collapseBtn.className = 'notif-circle-collapse-btn';
+        collapseBtn.style.animationDelay = (unified.length * 0.06 + 0.1) + 's';
+        collapseBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>';
+        collapseBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            delete container.dataset.expanded;
+            container.classList.add('collapsed');
+        });
+        container.appendChild(collapseBtn);
+    }
 
     setupCircleStackDrag(container);
 
@@ -4715,7 +4666,100 @@ function buildUnifiedNotifCircles(container) {
             e.stopPropagation();
             container.dataset.expanded = 'true';
             container.classList.remove('collapsed');
+
+            var isHorizontal = container.classList.contains('reply-notif-bar');
+            var primaryEl = container.querySelector('.notif-circle-primary');
+            var items = container.querySelectorAll('.notif-circle-item:not(.notif-circle-primary), .notif-circle-collapse-btn');
+
+            // Disable CSS animations, keep items invisible
+            items.forEach(function(item) {
+                item.style.animation = 'none';
+                item.style.transition = 'none';
+                item.style.opacity = '0';
+            });
+            void container.offsetHeight;
+
+            // For horizontal: scroll to keep primary circle in view (right end)
+            if (isHorizontal) {
+                container.scrollLeft = container.scrollWidth - container.clientWidth;
+            }
+
+            // Calculate offset from each item to the primary circle
+            var primaryRect = primaryEl.getBoundingClientRect();
+            items.forEach(function(item) {
+                var rect = item.getBoundingClientRect();
+                if (isHorizontal) {
+                    var dx = primaryRect.left - rect.left;
+                    item.style.transform = 'translateX(' + dx + 'px) scale(0.3)';
+                } else {
+                    var dy = primaryRect.top - rect.top;
+                    item.style.transform = 'translateY(' + dy + 'px) scale(0.3)';
+                }
+            });
+            void container.offsetHeight;
+
+            // Cascade: slide each item from primary to its final position
+            items.forEach(function(item, index) {
+                var delay = (index + 1) * 70;
+                setTimeout(function() {
+                    item.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease';
+                    item.style.transform = 'translateX(0) scale(1)';
+                    item.style.opacity = '1';
+                }, delay);
+            });
+
+            // After slide-out completes: clean up transforms, then scroll
+            var animDone = (items.length + 1) * 70 + 550;
+            setTimeout(function() {
+                items.forEach(function(item) {
+                    item.style.transition = '';
+                    item.style.transform = '';
+                    // Keep opacity:1 and animation:none so items stay visible
+                });
+
+                // Smooth scroll with easing
+                function animateScroll(el, prop, from, to, duration) {
+                    var startTime = null;
+                    function ease(t) {
+                        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                    }
+                    function step(ts) {
+                        if (!startTime) startTime = ts;
+                        var p = Math.min((ts - startTime) / duration, 1);
+                        el[prop] = from + (to - from) * ease(p);
+                        if (p < 1) requestAnimationFrame(step);
+                    }
+                    requestAnimationFrame(step);
+                }
+
+                requestAnimationFrame(function() {
+                    if (isHorizontal) {
+                        var maxScroll = container.scrollWidth - container.clientWidth;
+                        if (maxScroll > 0) {
+                            container.scrollLeft = maxScroll;
+                            requestAnimationFrame(function() {
+                                animateScroll(container, 'scrollLeft', maxScroll, 0, 1200);
+                            });
+                        }
+                    } else {
+                        var peekDist = Math.min(container.scrollHeight - container.clientHeight, 120);
+                        if (peekDist > 0) {
+                            animateScroll(container, 'scrollTop', 0, peekDist, 600);
+                            setTimeout(function() {
+                                animateScroll(container, 'scrollTop', peekDist, 0, 600);
+                            }, 800);
+                        }
+                    }
+                });
+            }, animDone);
         });
+    }
+
+    // For horizontal bar (reply-notif-bar): reverse DOM children order
+    // so flex-direction: row gives the correct visual (collapse btn at left, newest at right)
+    if (container.classList.contains('reply-notif-bar') && container.children.length > 1) {
+        var children = Array.from(container.children);
+        children.reverse().forEach(function(child) { container.appendChild(child); });
     }
 }
 
@@ -5382,82 +5426,72 @@ function formatCommentDate(date) {
 // DEBUG: Test functions (remove before deploy)
 // ========================================
 
-function testFriendsCircles() {
-    var stack = document.getElementById('notifCircleStack');
-    if (!stack) return;
-    stack.innerHTML = '';
-    stack.classList.add('scrollable');
-
-    var fakeFriends = [
-        { name: 'Alice', pic: 'https://i.pravatar.cc/80?u=alice' },
-        { name: 'Bob', pic: 'https://i.pravatar.cc/80?u=bob' },
-        { name: 'Carol', pic: 'https://i.pravatar.cc/80?u=carol' },
-        { name: 'Dave', pic: 'https://i.pravatar.cc/80?u=dave' },
-        { name: 'Eve', pic: 'https://i.pravatar.cc/80?u=eve' },
-        { name: 'Frank', pic: 'https://i.pravatar.cc/80?u=frank' },
-        { name: 'Grace', pic: 'https://i.pravatar.cc/80?u=grace' },
-        { name: 'Hank', pic: 'https://i.pravatar.cc/80?u=hank' },
-        { name: 'Iris', pic: 'https://i.pravatar.cc/80?u=iris' },
-        { name: 'Jack', pic: 'https://i.pravatar.cc/80?u=jack' }
-    ];
-
-    fakeFriends.forEach(function(friend, index) {
-        var circle = document.createElement('div');
-        circle.className = 'notif-circle-item';
-        circle.style.animationDelay = (index * 0.06) + 's';
-
-        var img = document.createElement('img');
-        img.src = friend.pic;
-        img.alt = friend.name;
-        img.onerror = function() {
-            this.style.display = 'none';
-            circle.insertAdjacentHTML('afterbegin', getFriendCircleInitial(friend.name));
-        };
-        circle.appendChild(img);
-
-        var pulse = document.createElement('span');
-        pulse.className = 'friends-circle-pulse';
-        circle.appendChild(pulse);
-
-        circle.addEventListener('click', function() {
-            onFriendCircleClick(circle);
-        });
-
-        stack.appendChild(circle);
-    });
-
-    // Add X dismiss button
-    var dismissBtn = document.createElement('div');
-    dismissBtn.className = 'notif-circle-dismiss';
-    dismissBtn.style.animationDelay = (fakeFriends.length * 0.06 + 0.1) + 's';
-    dismissBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-    dismissBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        dismissAllNotifCircles();
-    });
-    stack.appendChild(dismissBtn);
-    setupCircleStackDrag(stack);
-}
-
-function testReplyNotif() {
-    // Make sure panel is open
-    var panel = document.getElementById('commentsPanel');
-    if (!panel || !panel.classList.contains('show')) {
-        openCommentsPanel(true);
-    }
-
-    // Inject fake reply data into poll state
+function testNotifBubbles() {
     var now = Date.now();
-    _pollState.repliesData = [
-        { commentId: 'test1', reply: { id: 'r1', userId: 'rep1', userName: 'Replier1', profilePicture: 'https://i.pravatar.cc/80?u=rep1', timestamp: now - 1000 } },
-        { commentId: 'test2', reply: { id: 'r2', userId: 'rep2', userName: 'Replier2', profilePicture: 'https://i.pravatar.cc/80?u=rep2', timestamp: now - 2000 } },
-        { commentId: 'test3', reply: { id: 'r3', userId: 'rep3', userName: 'Replier3', profilePicture: 'https://i.pravatar.cc/80?u=rep3', timestamp: now - 3000 } }
-    ];
-    _pollState.unseenReplies = 3;
+    var names = ['Alice','Bob','Carol','Dave','Eve','Frank','Grace','Hank','Iris','Jack',
+        'Kate','Leo','Mia','Noah','Olivia','Pete','Quinn','Ruby','Sam','Tina',
+        'Uma','Vic','Wendy','Xander','Yuki','Zara','Aria','Blake','Chloe','Dylan'];
+    var total = 10 + Math.floor(Math.random() * 21); // 10-30
+    var friendCount = Math.floor(total * 0.6);
+    var replyCount = total - friendCount;
+
+    // Reset expanded state so collapse kicks in
+    var stack = document.getElementById('notifCircleStack');
+    if (stack) delete stack.dataset.expanded;
+    var bar = document.getElementById('replyNotifBar');
+    if (bar) delete bar.dataset.expanded;
+
+    // Shuffle names
+    var shuffled = names.slice().sort(function() { return Math.random() - 0.5; });
+
+    // Generate friend draws
+    _pollState.friendDrawsData = [];
+    for (var i = 0; i < friendCount && i < shuffled.length; i++) {
+        var n = shuffled[i];
+        _pollState.friendDrawsData.push({
+            userId: n.toLowerCase(),
+            userName: n,
+            profilePicture: 'https://i.pravatar.cc/80?u=' + n.toLowerCase() + now,
+            timestamp: now - (i * 1000)
+        });
+    }
+    _pollState.unseenFriendDraws = _pollState.friendDrawsData.length;
+
+    // Generate replies
+    _pollState.repliesData = [];
+    for (var j = 0; j < replyCount && (friendCount + j) < shuffled.length; j++) {
+        var rn = shuffled[friendCount + j];
+        _pollState.repliesData.push({
+            commentId: 'c' + j,
+            reply: {
+                id: 'r' + j,
+                userId: rn.toLowerCase(),
+                userName: rn,
+                profilePicture: 'https://i.pravatar.cc/80?u=' + rn.toLowerCase() + now,
+                timestamp: now - (j * 800) - 500
+            }
+        });
+    }
+    _pollState.unseenReplies = _pollState.repliesData.length;
+    _pollState.initialized = true;
+
     updateNotificationBadges();
     renderNotifCircleStack();
     renderReplyNotifCirclesFromState();
 }
+
+// Show test button only on localhost
+(function() {
+    var h = window.location.hostname;
+    if (h !== 'localhost' && h !== '127.0.0.1') return;
+    document.addEventListener('DOMContentLoaded', function() {
+        var btn = document.createElement('button');
+        btn.textContent = 'Test Bubbles';
+        btn.style.cssText = 'position:fixed;bottom:60px;right:20px;z-index:99999;padding:6px 12px;font-size:11px;border-radius:8px;border:1px solid rgba(154,170,212,0.3);background:rgba(13,19,51,0.9);color:rgba(154,170,212,0.8);cursor:pointer;';
+        btn.addEventListener('click', testNotifBubbles);
+        document.body.appendChild(btn);
+    });
+})();
 
 function escapeHtml(text) {
     const div = document.createElement('div');

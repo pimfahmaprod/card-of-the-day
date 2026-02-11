@@ -733,6 +733,15 @@ html[lang="ja"] .landing-tagline {
     opacity: 0.6;
 }
 
+@media (max-width: 480px) {
+    .mute-btn {
+        bottom: 14px;
+        right: 14px;
+        width: 40px;
+        height: 40px;
+    }
+}
+
 /* Sound Wave Indicator */
 .sound-indicator {
     position: fixed;
@@ -1288,12 +1297,15 @@ html[lang="ja"] .landing-tagline {
 }
 
 /* Collapsed state: only show first (primary) circle + expand button */
-.collapsed .notif-circle-item:not(.notif-circle-primary),
-.collapsed .notif-circle-dismiss {
-    display: none;
+.notif-circle-stack.collapsed > .notif-circle-item:not(.notif-circle-primary),
+.notif-circle-stack.collapsed > .notif-circle-collapse-btn,
+.reply-notif-bar.collapsed > .notif-circle-item:not(.notif-circle-primary),
+.reply-notif-bar.collapsed > .notif-circle-collapse-btn {
+    display: none !important;
 }
-:not(.collapsed) > .notif-circle-expand-btn {
-    display: none;
+.notif-circle-stack:not(.collapsed) > .notif-circle-expand-btn,
+.reply-notif-bar:not(.collapsed) > .notif-circle-expand-btn {
+    display: none !important;
 }
 
 /* Expand button */
@@ -1334,6 +1346,42 @@ html[lang="ja"] .landing-tagline {
 }
 .notif-circle-expand-btn svg {
     opacity: 0.6;
+}
+/* Horizontal bar: rotate chevrons for left/right direction */
+.reply-notif-bar .notif-circle-expand-btn svg {
+    transform: rotate(90deg);
+}
+.reply-notif-bar .notif-circle-collapse-btn svg {
+    transform: rotate(90deg);
+}
+
+/* Collapse button (chevron-up, shown when expanded) */
+.notif-circle-collapse-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(154, 170, 212, 0.2);
+    background: rgba(13, 19, 51, 0.85);
+    color: rgba(154, 170, 212, 0.5);
+    cursor: pointer;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-end;
+    flex-shrink: 0;
+    opacity: 0;
+    animation: friendCircleSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transition: all 0.25s ease;
+}
+.notif-circle-collapse-btn:hover {
+    border-color: rgba(154, 170, 212, 0.45);
+    color: rgba(154, 170, 212, 0.8);
+    background: rgba(20, 27, 69, 0.95);
+    transform: scale(1.1);
+}
+.notif-circle-collapse-btn:active {
+    transform: scale(0.9);
 }
 
 .notif-circle-dismiss,
@@ -4649,27 +4697,27 @@ footer {
     word-break: break-word;
 }
 
-/* Reply Notification Circle Stack (inside comments panel) — mirrors notif-circle-stack */
+/* Reply Notification Circles (inside comments panel) — horizontal bar */
 .reply-notif-bar {
     position: absolute;
     right: 8px;
-    bottom: 70px;
+    bottom: 12px;
     display: flex;
-    flex-direction: column-reverse;
-    align-items: flex-end;
+    flex-direction: row;
+    align-items: center;
     gap: 8px;
     z-index: 5;
     pointer-events: none;
 }
 .reply-notif-bar.scrollable {
-    max-height: calc(100vh - 180px);
-    overflow-y: auto;
-    overflow-x: hidden;
+    max-width: calc(100% - 16px);
+    overflow-x: auto;
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding: 8px 8px 8px 14px;
-    margin: -8px -8px -8px -14px;
+    padding: 8px;
+    margin: -8px;
 }
 .reply-notif-bar.scrollable::-webkit-scrollbar {
     display: none;
