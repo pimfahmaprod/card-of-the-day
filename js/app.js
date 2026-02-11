@@ -1593,6 +1593,42 @@ async function resolveDisplayNames(items) {
     });
 }
 
+// Check localStorage directly — works before facebook.js or FB SDK is ready
+function wasPreviouslyConnected() {
+    return localStorage.getItem('tarot_fb_connected') === 'true';
+}
+
+// Loading animation shown while waiting for FB SDK to confirm login
+function buildSocialLoadingCta() {
+    return '<div class="comments-empty comments-empty-cta social-loading-cta">' +
+        '<div class="social-loading-spinner"></div>' +
+        '<div class="comments-empty-text">' + t('common.loading') + '</div>' +
+    '</div>';
+}
+
+// Called from facebook.js when FB login status is confirmed
+function onFacebookStatusReady() {
+    // Refresh the current comments tab if it was showing a loading placeholder
+    var commentsList = document.getElementById('commentsList');
+    if (commentsList && commentsList.querySelector('.social-loading-cta')) {
+        switchCommentsTab(currentCommentsTab);
+    }
+    // Refresh blessing screen login CTA if visible
+    var blessingScreen = document.getElementById('blessingScreen');
+    if (blessingScreen && blessingScreen.classList.contains('active')) {
+        var blessingLoginCta = document.getElementById('blessingLoginCta');
+        var commentOverlay = document.querySelector('.blessing-comment-overlay');
+        var isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
+        if (isLoggedIn) {
+            if (commentOverlay) commentOverlay.style.display = '';
+            if (blessingLoginCta) blessingLoginCta.style.display = 'none';
+        } else {
+            if (commentOverlay) commentOverlay.style.display = 'none';
+            if (blessingLoginCta) blessingLoginCta.style.display = '';
+        }
+    }
+}
+
 // Avatar helpers
 function getFriendCircleInitial(name) {
     var initial = (name || '?').charAt(0).toUpperCase();
@@ -1953,6 +1989,10 @@ function showBlessingScreen(userName, comment) {
         if (blessingLoginCta) blessingLoginCta.style.display = 'none';
         blessingName.textContent = userName === 'Anonymous' ? '' : `— ${userName} —`;
         blessingComment.textContent = `"${comment}"`;
+    } else if (wasPreviouslyConnected()) {
+        // Previously connected but FB SDK not ready yet — hide both, wait for callback
+        if (commentOverlay) commentOverlay.style.display = 'none';
+        if (blessingLoginCta) blessingLoginCta.style.display = 'none';
     } else {
         // Not logged in: hide comment overlay, show login CTA
         if (commentOverlay) commentOverlay.style.display = 'none';
@@ -2692,7 +2732,7 @@ async function loadActivityTimeline() {
 
     // Require Facebook login
     if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
-        commentsList.innerHTML = buildLoginRequiredCta('login.required', 'blessing.loginToSee');
+        commentsList.innerHTML = wasPreviouslyConnected() ? buildSocialLoadingCta() : buildLoginRequiredCta('login.required', 'blessing.loginToSee');
         isLoadingComments = false;
         return;
     }
@@ -3278,7 +3318,7 @@ async function loadMyComments() {
 
     // Require Facebook login
     if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
-        commentsList.innerHTML = buildLoginRequiredCta('login.required', 'blessing.loginToSee');
+        commentsList.innerHTML = wasPreviouslyConnected() ? buildSocialLoadingCta() : buildLoginRequiredCta('login.required', 'blessing.loginToSee');
         isLoadingComments = false;
         return;
     }
@@ -3355,7 +3395,7 @@ async function loadMyCardComments() {
 
     // Require Facebook login
     if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
-        commentsList.innerHTML = buildLoginRequiredCta('login.required', 'blessing.loginToSee');
+        commentsList.innerHTML = wasPreviouslyConnected() ? buildSocialLoadingCta() : buildLoginRequiredCta('login.required', 'blessing.loginToSee');
         isLoadingComments = false;
         return;
     }
@@ -3431,7 +3471,7 @@ async function loadFriendsCards() {
     // Check if user is logged in via Facebook
     if (!isFacebookConnected()) {
         loadingEl.style.display = 'none';
-        commentsList.innerHTML = buildFriendsLoginCta();
+        commentsList.innerHTML = wasPreviouslyConnected() ? buildSocialLoadingCta() : buildFriendsLoginCta();
         isLoadingComments = false;
         return;
     }
@@ -3441,10 +3481,10 @@ async function loadFriendsCards() {
         var friendResult = await getFacebookFriendIds();
         if (gen !== tabSwitchGeneration) return; // Tab changed, abort
 
-        // If FB session expired, show reconnect CTA
+        // If FB session expired or SDK not ready, show loading if previously connected
         if (friendResult.status === 'not_connected' || friendResult.status === 'no_sdk') {
             loadingEl.style.display = 'none';
-            commentsList.innerHTML = buildFriendsReconnectCta();
+            commentsList.innerHTML = wasPreviouslyConnected() ? buildSocialLoadingCta() : buildFriendsReconnectCta();
             isLoadingComments = false;
             return;
         }

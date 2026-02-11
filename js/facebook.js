@@ -1,7 +1,7 @@
 // Facebook Login Integration for Card of the Day
 // ============================================
 
-const FACEBOOK_APP_ID = '940915038262874';
+const FACEBOOK_APP_ID = '1642741772659598';
 const FB_PICTURE_KEY = 'tarot_fb_picture';
 const FB_CONNECTED_KEY = 'tarot_fb_connected';
 
@@ -42,6 +42,10 @@ function handleStatusChange(response) {
                 updateFacebookButton(false);
             }
         }
+    }
+    // Notify app.js that FB status is now known — refresh loading placeholders
+    if (typeof onFacebookStatusReady === 'function') {
+        onFacebookStatusReady();
     }
 }
 

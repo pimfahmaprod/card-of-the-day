@@ -3193,6 +3193,42 @@ footer {
     width: 20px;
 }
 
+/* Social loading CTA — shown while waiting for FB SDK to confirm login */
+.social-loading-cta {
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.social-loading-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(154, 170, 212, 0.15);
+    border-top-color: rgba(154, 170, 212, 0.6);
+    border-radius: 50%;
+    animation: socialLoadingSpin 0.8s linear infinite;
+}
+
+@keyframes socialLoadingSpin {
+    to { transform: rotate(360deg); }
+}
+
+.social-loading-cta .comments-empty-text {
+    font-size: 0.8rem;
+    color: rgba(154, 170, 212, 0.5);
+}
+
+.comments-panel.light-theme .social-loading-spinner {
+    border-color: rgba(100, 80, 160, 0.12);
+    border-top-color: rgba(100, 80, 160, 0.5);
+}
+
+.comments-panel.light-theme .social-loading-cta .comments-empty-text {
+    color: rgba(50, 40, 90, 0.5);
+}
+
 /* Friends tab */
 .friends-cta {
     padding: 40px 20px;
