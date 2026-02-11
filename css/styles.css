@@ -974,6 +974,8 @@ body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    padding: 8px 8px 8px 14px;
+    margin: -8px -8px -8px -14px;
 }
 .friends-circle-stack.scrollable::-webkit-scrollbar {
     display: none;
@@ -2233,6 +2235,42 @@ footer {
 
 .comments-count.show {
     display: flex;
+}
+
+/* Mobile: compact circle button (icon only) */
+@media (max-width: 480px) {
+    .comments-btn {
+        height: 40px;
+        width: 40px;
+        border-radius: 50%;
+        padding: 0;
+        justify-content: center;
+        bottom: 14px;
+        left: 14px;
+    }
+    .comments-btn-label {
+        display: none;
+    }
+    .comments-btn-glow {
+        border-radius: 50%;
+    }
+    .comments-btn-icon {
+        width: 20px;
+        height: 20px;
+    }
+    .comments-btn-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+    .comments-count {
+        top: -5px;
+        right: -5px;
+        min-width: 18px;
+        height: 18px;
+        font-size: 0.65rem;
+        padding: 0 4px;
+        border-radius: 9px;
+    }
 }
 
 /* Comments Panel */

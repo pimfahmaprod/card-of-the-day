@@ -4358,9 +4358,14 @@ function updateNotificationBadges() {
     var friendsTab = document.querySelector('.comments-tab[data-tab="friends"]');
     if (friendsTab) updateTabBadge(friendsTab, _pollState.unseenFriendDraws);
 
-    // 3. MyCard tab badge
+    // 3. MyCard tab badge — show tab if there are unseen replies
     var mycardTab = document.querySelector('.comments-tab[data-tab="mycard"]');
-    if (mycardTab && mycardTab.style.display !== 'none') updateTabBadge(mycardTab, _pollState.unseenReplies);
+    if (mycardTab) {
+        if (_pollState.unseenReplies > 0 && mycardTab.style.display === 'none') {
+            mycardTab.style.display = '';
+        }
+        updateTabBadge(mycardTab, _pollState.unseenReplies);
+    }
 }
 
 function updateTabBadge(tabElement, count) {
@@ -4752,6 +4757,32 @@ function markRepliesAsRead(card, commentId) {
             setSeenReplyCount(commentId, count);
         }
         replyCountEl.classList.remove('unread-replies');
+    }
+
+    // Update poll state — remove replies for this comment from unseen
+    if (_pollState.repliesData.length > 0) {
+        var removedReplies = _pollState.repliesData.filter(function(item) {
+            return item.commentId === commentId;
+        });
+        if (removedReplies.length > 0) {
+            // Update last-seen timestamp from the removed replies
+            var maxTs = Math.max.apply(null, removedReplies.map(function(item) {
+                return item.reply ? (item.reply.timestamp || 0) : 0;
+            }));
+            if (maxTs > 0) {
+                var currentTs = parseInt(localStorage.getItem('tarot_replies_last_seen_ts') || '0', 10);
+                if (maxTs > currentTs) {
+                    localStorage.setItem('tarot_replies_last_seen_ts', String(maxTs));
+                }
+            }
+
+            _pollState.repliesData = _pollState.repliesData.filter(function(item) {
+                return item.commentId !== commentId;
+            });
+            _pollState.unseenReplies = _pollState.repliesData.length;
+            updateNotificationBadges();
+            renderReplyNotifCirclesFromState();
+        }
     }
 }
 
