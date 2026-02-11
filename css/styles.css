@@ -3583,11 +3583,179 @@ footer {
 
 .comments-loading {
     text-align: center;
-    padding: 40px;
+    padding: 50px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
     color: var(--burgundy);
     font-family: 'Prompt', sans-serif;
     font-weight: 300;
-    opacity: 0.7;
+}
+
+/* Tarot Mystic Loader */
+.tarot-loader {
+    position: relative;
+    width: 64px;
+    height: 64px;
+}
+
+/* Outer mystic ring — slowly rotating dashed circle */
+.tarot-loader-ring {
+    position: absolute;
+    inset: 0;
+    border: 1.5px dashed rgba(154, 170, 212, 0.3);
+    border-radius: 50%;
+    animation: tarotRingSpin 8s linear infinite;
+}
+
+/* Inner ring — counter-rotating with dotted pattern */
+.tarot-loader-ring-inner {
+    position: absolute;
+    inset: 8px;
+    border: 1px dotted rgba(154, 170, 212, 0.2);
+    border-radius: 50%;
+    animation: tarotRingSpin 6s linear infinite reverse;
+}
+
+/* Center star symbol — pulsing glow */
+.tarot-loader-star {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    color: rgba(154, 170, 212, 0.85);
+    text-shadow: 0 0 12px rgba(154, 170, 212, 0.6), 0 0 24px rgba(154, 170, 212, 0.2);
+    animation: tarotStarPulse 2.5s ease-in-out infinite;
+}
+
+/* Orbiting particles */
+.tarot-loader-orbit {
+    position: absolute;
+    inset: 0;
+    animation: tarotRingSpin 3s linear infinite;
+}
+
+.tarot-loader-orbit::before {
+    content: '✦';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: rgba(154, 170, 212, 0.7);
+    text-shadow: 0 0 6px rgba(154, 170, 212, 0.5);
+}
+
+.tarot-loader-orbit:nth-child(4) {
+    animation-delay: -1s;
+}
+
+.tarot-loader-orbit:nth-child(5) {
+    animation-delay: -2s;
+}
+
+/* Loading text with shimmer */
+.tarot-loader-text {
+    font-size: 0.8rem;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    background: linear-gradient(
+        90deg,
+        rgba(154, 170, 212, 0.4) 0%,
+        rgba(192, 200, 224, 0.9) 50%,
+        rgba(154, 170, 212, 0.4) 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: tarotTextShimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes tarotRingSpin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes tarotStarPulse {
+    0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.9); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+@keyframes tarotTextShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Light theme overrides */
+.comments-panel.light-theme .tarot-loader-ring {
+    border-color: rgba(100, 80, 160, 0.2);
+}
+
+.comments-panel.light-theme .tarot-loader-ring-inner {
+    border-color: rgba(100, 80, 160, 0.12);
+}
+
+.comments-panel.light-theme .tarot-loader-star {
+    color: rgba(100, 80, 160, 0.7);
+    text-shadow: 0 0 12px rgba(100, 80, 160, 0.3), 0 0 24px rgba(100, 80, 160, 0.1);
+}
+
+.comments-panel.light-theme .tarot-loader-orbit::before {
+    color: rgba(100, 80, 160, 0.5);
+    text-shadow: 0 0 6px rgba(100, 80, 160, 0.3);
+}
+
+.comments-panel.light-theme .tarot-loader-text {
+    background: linear-gradient(
+        90deg,
+        rgba(100, 80, 160, 0.3) 0%,
+        rgba(80, 60, 140, 0.8) 50%,
+        rgba(100, 80, 160, 0.3) 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: tarotTextShimmer 2.5s ease-in-out infinite;
+}
+
+/* Mini loader for related comments & replies */
+.tarot-loader-mini {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+}
+
+.tarot-loader-mini-dot {
+    width: 5px;
+    height: 5px;
+    background: rgba(154, 170, 212, 0.5);
+    border-radius: 50%;
+    animation: tarotDotBounce 1.4s ease-in-out infinite;
+}
+
+.tarot-loader-mini-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.tarot-loader-mini-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.tarot-loader-mini-star {
+    font-size: 8px;
+    color: rgba(154, 170, 212, 0.6);
+    animation: tarotDotBounce 1.4s ease-in-out infinite;
+    animation-delay: 0.3s;
+}
+
+@keyframes tarotDotBounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+    40% { transform: scale(1.2); opacity: 1; }
 }
 
 /* Comments section titles */
@@ -6616,7 +6784,7 @@ footer {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    margin: auto 0;
+    margin: auto 0 0;
     padding: 20px 0;
 }
 
@@ -6964,7 +7132,7 @@ footer {
     flex-direction: column;
     align-items: center;
     gap: 16px;
-    margin-top: 30px;
+    margin-top: 80px;
     opacity: 0;
     animation: socialItemFadeIn 0.6s ease 0.8s forwards;
 }
@@ -7161,7 +7329,7 @@ footer {
 /* Responsive */
 @media (max-width: 480px) {
     .blessing-screen {
-        padding-bottom: 70px;
+        padding-bottom: 50px;
     }
 
     .blessing-card-container {
@@ -7190,7 +7358,7 @@ footer {
     }
 
     .blessing-save-share-section {
-        margin-top: 18px;
+        margin-top: 65px;
     }
 
     .blessing-restart-btn {
@@ -7218,7 +7386,7 @@ footer {
 /* Short viewport (e.g. iPhone SE, landscape) */
 @media (max-height: 700px) {
     .blessing-screen {
-        padding-bottom: 60px;
+        padding-bottom: 40px;
     }
 
     .blessing-content {
@@ -7236,7 +7404,7 @@ footer {
     }
 
     .blessing-save-share-section {
-        margin-top: 12px;
+        margin-top: 35px;
     }
 }
 

@@ -1613,8 +1613,15 @@ function wasPreviouslyConnected() {
 // Loading animation shown while waiting for FB SDK to confirm login
 function buildSocialLoadingCta() {
     return '<div class="comments-empty comments-empty-cta social-loading-cta">' +
-        '<div class="social-loading-spinner"></div>' +
-        '<div class="comments-empty-text">' + t('common.loading') + '</div>' +
+        '<div class="tarot-loader" style="width:48px;height:48px">' +
+            '<div class="tarot-loader-ring"></div>' +
+            '<div class="tarot-loader-ring-inner"></div>' +
+            '<div class="tarot-loader-star">✦</div>' +
+            '<div class="tarot-loader-orbit"></div>' +
+            '<div class="tarot-loader-orbit"></div>' +
+            '<div class="tarot-loader-orbit"></div>' +
+        '</div>' +
+        '<div class="comments-empty-text tarot-loader-text">' + t('common.loading') + '</div>' +
     '</div>';
 }
 
@@ -2973,6 +2980,30 @@ let newestCommentTimestamp = 0;
 let expandedCommentCard = null;
 let navigatedCommentCard = null; // Track the card that was navigated from related comments
 
+// Tarot-themed loader HTML
+function buildTarotLoaderHtml() {
+    return '<div class="tarot-loader">' +
+        '<div class="tarot-loader-ring"></div>' +
+        '<div class="tarot-loader-ring-inner"></div>' +
+        '<div class="tarot-loader-star">✦</div>' +
+        '<div class="tarot-loader-orbit"></div>' +
+        '<div class="tarot-loader-orbit"></div>' +
+        '<div class="tarot-loader-orbit"></div>' +
+        '</div>' +
+        '<span class="tarot-loader-text">' + t('common.loading') + '</span>';
+}
+
+// Mini loader for inline use (related comments, replies)
+function buildMiniLoaderHtml() {
+    return '<div class="tarot-loader-mini">' +
+        '<div class="tarot-loader-mini-dot"></div>' +
+        '<div class="tarot-loader-mini-star">✦</div>' +
+        '<div class="tarot-loader-mini-dot"></div>' +
+        '<div class="tarot-loader-mini-star">✦</div>' +
+        '<div class="tarot-loader-mini-dot"></div>' +
+        '</div>';
+}
+
 // Get or create loading element for comments list
 function getOrCreateLoadingEl() {
     let loadingEl = document.getElementById('commentsLoading');
@@ -2980,7 +3011,7 @@ function getOrCreateLoadingEl() {
         loadingEl = document.createElement('div');
         loadingEl.className = 'comments-loading';
         loadingEl.id = 'commentsLoading';
-        loadingEl.innerHTML = '<span>' + t('common.loading') + '</span>';
+        loadingEl.innerHTML = buildTarotLoaderHtml();
     }
     return loadingEl;
 }
@@ -4879,7 +4910,7 @@ function createCommentCard(comment, showReplyBadge = false) {
             <div class="comment-card-related">
                 <div class="comment-card-related-title">${t('common.otherComments')}</div>
                 <div class="related-comments-list">
-                    <div class="related-comment-loading">${t('common.loading')}</div>
+                    <div class="related-comment-loading">${buildMiniLoaderHtml()}</div>
                 </div>
             </div>
         </div>
@@ -5083,7 +5114,7 @@ async function loadReplies(card, commentId, commentData) {
     const repliesEmptyBtn = card.querySelector('.replies-empty-btn');
 
     repliesList.style.display = '';
-    repliesList.innerHTML = '<div class="related-comment-loading">' + t('common.loading') + '</div>';
+    repliesList.innerHTML = '<div class="related-comment-loading">' + buildMiniLoaderHtml() + '</div>';
     if (repliesEmptyBtn) repliesEmptyBtn.style.display = 'none';
 
     const replies = await window.cardCounter.fetchReplies(commentId);
@@ -5215,7 +5246,7 @@ async function expandCommentCard(card, comment) {
         console.warn('relatedListEl not found in card');
         return;
     }
-    relatedListEl.innerHTML = '<div class="related-comment-loading">' + t('common.loading') + '</div>';
+    relatedListEl.innerHTML = '<div class="related-comment-loading">' + buildMiniLoaderHtml() + '</div>';
 
     if (window.cardCounter && window.cardCounter.fetchCommentsByCardId) {
         const relatedComments = await window.cardCounter.fetchCommentsByCardId(
