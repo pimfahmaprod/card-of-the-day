@@ -586,12 +586,27 @@ async function waitForResources() {
 
     // Load data and essential images simultaneously
     await Promise.all([
-        // Load tarot data
+        // Load tarot data + daily readings
         (async () => {
             if (!tarotData) {
                 try {
-                    const response = await fetch('valentine_tarot.json');
-                    tarotData = await response.json();
+                    const [valentineRes, dailyRes] = await Promise.all([
+                        fetch('valentine_tarot.json'),
+                        fetch('tarot_cards.json')
+                    ]);
+                    tarotData = await valentineRes.json();
+                    const dailyData = await dailyRes.json();
+                    // Merge card_of_the_day into interpretation (match by normalized name)
+                    const dailyLookup = {};
+                    for (const c of dailyData.tarot_cards) {
+                        dailyLookup[c.card_name.replace(/\s+/g, ' ').trim()] = c.readings.card_of_the_day;
+                    }
+                    for (const card of tarotData.cards) {
+                        const key = card.name.replace(/\s+/g, ' ').trim();
+                        if (dailyLookup[key]) {
+                            card.interpretation = dailyLookup[key];
+                        }
+                    }
                 } catch (error) {
                     console.error('Error loading tarot data:', error);
                 }
@@ -956,8 +971,23 @@ function startExperience() {
 // Load tarot data
 async function loadTarotData() {
     try {
-        const response = await fetch('valentine_tarot.json');
-        tarotData = await response.json();
+        const [valentineRes, dailyRes] = await Promise.all([
+            fetch('valentine_tarot.json'),
+            fetch('tarot_cards.json')
+        ]);
+        tarotData = await valentineRes.json();
+        const dailyData = await dailyRes.json();
+        // Merge card_of_the_day into interpretation
+        const dailyLookup = {};
+        for (const c of dailyData.tarot_cards) {
+            dailyLookup[c.card_name.replace(/\s+/g, ' ').trim()] = c.readings.card_of_the_day;
+        }
+        for (const card of tarotData.cards) {
+            const key = card.name.replace(/\s+/g, ' ').trim();
+            if (dailyLookup[key]) {
+                card.interpretation = dailyLookup[key];
+            }
+        }
         renderCards();
     } catch (error) {
         console.error('Error loading tarot data:', error);
@@ -3684,21 +3714,6 @@ async function loadFriendsCards() {
             commentsList.insertBefore(bar, commentsList.firstChild);
         }
 
-        // Auto-clear notification badges when viewing friends tab
-        // (visual NEW markers stay until "mark all read" is clicked)
-        if (_pollState.unseenFriendDraws > 0) {
-            if (friendComments.length > 0) {
-                var newestTs = Math.max.apply(null, friendComments.map(function(c) { return c.timestamp || 0; }));
-                localStorage.setItem('tarot_friends_last_seen_ts', String(newestTs));
-            }
-            _pollState.unseenFriendDraws = 0;
-            _pollState.friendDrawsData = [];
-            updateNotificationBadges();
-
-            // Clear friend circles on landing page
-            var stack = document.getElementById('friendsCircleStack');
-            if (stack) stack.innerHTML = '';
-        }
     } catch (e) {
         if (gen !== tabSwitchGeneration) return; // Tab changed, abort
         console.warn('Failed to load friends cards:', e.message);
@@ -4562,7 +4577,7 @@ function renderFriendCircleStackFromState() {
     var stack = document.getElementById('friendsCircleStack');
     if (!stack) return;
 
-    if (_pollState.unseenFriendDraws === 0 || _pollState.friendDrawsData.length === 0) {
+    if (_pollState.friendDrawsData.length === 0) {
         if (stack.children.length > 0) {
             stack.innerHTML = '';
             stack.classList.remove('scrollable');
