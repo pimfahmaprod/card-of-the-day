@@ -893,22 +893,15 @@ html[lang="ja"] .landing-tagline {
     pointer-events: none;
 }
 
-/* Friends draw circle stack */
-.friends-circle-stack {
+/* Unified notification circle stack */
+.notif-circle-stack {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 8px;
 }
 
-/* Reply circle stack */
-.reply-circle-stack {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-}
-
+.notif-circle-item,
 .friends-circle-item {
     position: relative;
     width: 38px;
@@ -921,6 +914,7 @@ html[lang="ja"] .landing-tagline {
     animation: friendCircleSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+.notif-circle-item img,
 .friends-circle-item img {
     width: 100%;
     height: 100%;
@@ -933,6 +927,7 @@ html[lang="ja"] .landing-tagline {
     transition: all 0.25s ease;
 }
 
+.notif-circle-item:hover img,
 .friends-circle-item:hover img {
     transform: scale(1.1);
     border-color: rgba(154, 170, 212, 0.55);
@@ -941,6 +936,7 @@ html[lang="ja"] .landing-tagline {
         0 0 14px rgba(154, 170, 212, 0.12);
 }
 
+.notif-circle-item:active img,
 .friends-circle-item:active img {
     transform: scale(0.95);
 }
@@ -970,6 +966,7 @@ html[lang="ja"] .landing-tagline {
     border-color: rgba(154, 170, 212, 0.4);
 }
 
+.notif-circle-item:hover .friends-circle-item-default,
 .friends-circle-item:hover .friends-circle-item-default {
     transform: scale(1.1);
     border-color: rgba(154, 170, 212, 0.55);
@@ -1004,6 +1001,7 @@ html[lang="ja"] .landing-tagline {
 }
 
 /* Type indicator badges on circles */
+.notif-circle-item::after,
 .friends-circle-item::after {
     content: '';
     position: absolute;
@@ -1018,6 +1016,39 @@ html[lang="ja"] .landing-tagline {
     border: 1.5px solid rgba(13, 19, 51, 0.9);
     z-index: 2;
     pointer-events: none;
+}
+
+/* Reply-type notif circles: pink border + chat badge instead of card badge */
+.notif-circle-item.notif-circle-reply img {
+    border-color: rgba(236, 72, 153, 0.4);
+    box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.3),
+        0 0 8px rgba(236, 72, 153, 0.1);
+}
+.notif-circle-item.notif-circle-reply:hover img {
+    border-color: rgba(236, 72, 153, 0.65);
+    box-shadow:
+        0 3px 14px rgba(0, 0, 0, 0.4),
+        0 0 14px rgba(236, 72, 153, 0.15);
+}
+.notif-circle-item.notif-circle-reply .reply-circle-item-default {
+    border-color: rgba(236, 72, 153, 0.4);
+    color: rgba(236, 72, 153, 0.6);
+    box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.3),
+        0 0 8px rgba(236, 72, 153, 0.1);
+}
+.notif-circle-item.notif-circle-reply::after {
+    content: '💬';
+    background: linear-gradient(135deg, #ec4899, #f472b6);
+    font-size: 0.45rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.notif-circle-item.notif-circle-reply .reply-circle-pulse {
+    border-color: rgba(236, 72, 153, 0.25);
+    animation-name: replyCirclePulse;
 }
 
 /* Reply circle items (inside reply-circle-stack on landing/result) */
@@ -1166,7 +1197,8 @@ html[lang="ja"] .landing-tagline {
     height: 14px;
 }
 
-/* Enhanced entrance for newly detected friend draws (via polling) */
+/* Enhanced entrance for newly detected notifications (via polling) */
+.notif-circle-item.friends-circle-entrance,
 .friends-circle-item.friends-circle-entrance {
     animation: friendCircleEntrancePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
@@ -1190,6 +1222,7 @@ html[lang="ja"] .landing-tagline {
 }
 
 /* Glow ring on newly entered circles */
+.notif-circle-item.friends-circle-entrance .friends-circle-pulse,
 .friends-circle-item.friends-circle-entrance .friends-circle-pulse {
     animation: friendCircleGlowIn 0.8s ease-out, friendCirclePulse 2.5s ease-in-out 0.8s infinite;
     border-width: 2px;
@@ -1215,6 +1248,8 @@ html[lang="ja"] .landing-tagline {
 }
 
 /* Cascade dismiss animation */
+.notif-circle-item.friends-circle-dismiss-out,
+.notif-circle-dismiss.friends-circle-dismiss-out,
 .friends-circle-item.friends-circle-dismiss-out,
 .friends-circle-dismiss.friends-circle-dismiss-out {
     animation: friendCircleDismissOut 0.35s cubic-bezier(0.55, 0, 1, 0.45) forwards;
@@ -1236,6 +1271,7 @@ html[lang="ja"] .landing-tagline {
 }
 
 /* Circle stack scrollable + dismiss */
+.notif-circle-stack.scrollable,
 .friends-circle-stack.scrollable {
     max-height: calc(100vh - 120px);
     overflow-y: auto;
@@ -1246,13 +1282,15 @@ html[lang="ja"] .landing-tagline {
     padding: 8px 8px 8px 14px;
     margin: -8px -8px -8px -14px;
 }
+.notif-circle-stack.scrollable::-webkit-scrollbar,
 .friends-circle-stack.scrollable::-webkit-scrollbar {
     display: none;
 }
 
+.notif-circle-dismiss,
 .friends-circle-dismiss {
-    width: 28px;
-    height: 28px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     border: 1.5px solid rgba(154, 170, 212, 0.2);
     background: rgba(13, 19, 51, 0.85);
@@ -1262,24 +1300,27 @@ html[lang="ja"] .landing-tagline {
     display: flex;
     align-items: center;
     justify-content: center;
-    align-self: center;
+    align-self: flex-end;
     flex-shrink: 0;
     opacity: 0;
     animation: friendCircleSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     transition: all 0.25s ease;
 }
+.notif-circle-dismiss:hover,
 .friends-circle-dismiss:hover {
     border-color: rgba(154, 170, 212, 0.45);
     color: rgba(154, 170, 212, 0.8);
     background: rgba(20, 27, 69, 0.95);
     transform: scale(1.1);
 }
+.notif-circle-dismiss:active,
 .friends-circle-dismiss:active {
     transform: scale(0.9);
 }
+.notif-circle-dismiss svg,
 .friends-circle-dismiss svg {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
 }
 
 /* Friends tab: unseen card badge */
@@ -3589,13 +3630,19 @@ footer {
     align-items: center;
     justify-content: center;
     gap: 18px;
-    width: 100%;
     box-sizing: border-box;
-    margin-left: auto;
-    margin-right: auto;
+    /* compensate asymmetric .comments-list padding (25px left, 15px right) */
+    width: calc(100% + 10px);
+    margin-left: -5px;
     color: var(--burgundy);
     font-family: 'Prompt', sans-serif;
     font-weight: 300;
+}
+
+/* In feed-mode padding is 0, no compensation needed */
+.comments-list.feed-mode .comments-loading {
+    width: 100%;
+    margin-left: 0;
 }
 
 /* Tarot Mystic Loader */
