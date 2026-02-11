@@ -9,16 +9,28 @@ let fbUser = null;
 
 // Initialize Facebook SDK
 window.fbAsyncInit = function() {
+    // FB SDK requires HTTPS — skip initialization on HTTP to avoid errors
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        console.warn('Facebook SDK requires HTTPS. Skipping FB init on HTTP.');
+        if (typeof onFacebookStatusReady === 'function') onFacebookStatusReady();
+        return;
+    }
+
     FB.init({
         appId: FACEBOOK_APP_ID,
         cookie: true,
-        xfbml: true,
+        xfbml: false,
         version: 'v21.0'
     });
 
-    FB.getLoginStatus(function(response) {
-        handleStatusChange(response);
-    });
+    try {
+        FB.getLoginStatus(function(response) {
+            handleStatusChange(response);
+        });
+    } catch (e) {
+        console.warn('FB.getLoginStatus failed:', e.message);
+        if (typeof onFacebookStatusReady === 'function') onFacebookStatusReady();
+    }
 };
 
 // Handle login status changes
@@ -85,7 +97,7 @@ function fetchUserProfileFB() {
                     }
 
                     localStorage.setItem('tarot_user_name', displayName);
-                    updateFacebookButton(true, displayName, picUrl);
+                    updateFacebookButton(true, displayName, picUrl, true);
 
                     // Update in-memory display name cache
                     if (typeof userDisplayNames !== 'undefined') {
@@ -235,8 +247,56 @@ function clearFacebookData() {
     localStorage.setItem('tarot_user_id', newId);
 }
 
+// Text morph/scramble effect (like AI thinking animation)
+// Smoothly transitions from one text to another via random characters
+function morphText(element, newText, duration = 600) {
+    if (!element) return Promise.resolve();
+    const oldText = element.textContent || '';
+    if (oldText === newText) return Promise.resolve();
+
+    return new Promise(resolve => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const maxLen = Math.max(oldText.length, newText.length);
+        const steps = 12;
+        const stepTime = duration / steps;
+        let step = 0;
+
+        // Build array of final characters (padded)
+        const finalChars = newText.padEnd(maxLen).split('');
+        const startChars = oldText.padEnd(maxLen).split('');
+
+        // Each character "locks in" at a staggered time
+        const lockStep = new Array(maxLen);
+        for (let i = 0; i < maxLen; i++) {
+            // Characters lock in from left to right across ~60% of the duration
+            lockStep[i] = Math.floor((i / maxLen) * steps * 0.6) + Math.floor(steps * 0.3);
+        }
+
+        const timer = setInterval(() => {
+            step++;
+            let display = '';
+            for (let i = 0; i < maxLen; i++) {
+                if (step >= lockStep[i]) {
+                    display += finalChars[i];
+                } else if (step <= 2 && startChars[i] !== ' ') {
+                    display += startChars[i];
+                } else {
+                    display += chars[Math.floor(Math.random() * chars.length)];
+                }
+            }
+            element.textContent = display.trimEnd();
+
+            if (step >= steps) {
+                clearInterval(timer);
+                element.textContent = newText;
+                resolve();
+            }
+        }, stepTime);
+    });
+}
+
 // Update button appearance
-function updateFacebookButton(isLoggedIn, userName = '', pictureUrl = '') {
+function updateFacebookButton(isLoggedIn, userName = '', pictureUrl = '', animate = false) {
     const btn = document.getElementById('facebookConnectBtn');
     const btnText = document.getElementById('fbBtnText');
     const fbIcon = document.getElementById('fbIcon');
@@ -246,7 +306,11 @@ function updateFacebookButton(isLoggedIn, userName = '', pictureUrl = '') {
 
     if (isLoggedIn && userName) {
         btn.classList.add('connected');
-        btnText.textContent = userName;
+        if (animate && btnText.textContent !== userName && btnText.textContent !== 'Login') {
+            morphText(btnText, userName, 500);
+        } else {
+            btnText.textContent = userName;
+        }
         if (fbIcon) fbIcon.style.display = 'none';
         if (profilePic && pictureUrl) {
             profilePic.src = pictureUrl;

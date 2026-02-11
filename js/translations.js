@@ -96,7 +96,9 @@ const translations = {
         },
         login: {
             required: "ล็อกอิน Facebook เพื่อใช้ฟีเจอร์นี้",
-            loginBtn: "เข้าสู่ระบบด้วย Facebook"
+            loginBtn: "เข้าสู่ระบบด้วย Facebook",
+            saveDraws: "เข้าสู่ระบบเพื่อบันทึกไพ่ที่จับได้",
+            saveDrawsSub: "ไพ่ทุกใบจะถูกบันทึกไว้ให้คุณย้อนดูได้เสมอ"
         },
         toast: {
             copied: "คัดลอกลิงก์แล้ว!",
@@ -252,7 +254,9 @@ const translations = {
         },
         login: {
             required: "Login with Facebook to use this feature",
-            loginBtn: "Login with Facebook"
+            loginBtn: "Login with Facebook",
+            saveDraws: "Login to save your card draws",
+            saveDrawsSub: "Every card you draw will be saved for you to revisit anytime"
         },
         toast: {
             copied: "Link copied!",
@@ -408,7 +412,9 @@ const translations = {
         },
         login: {
             required: "请登录Facebook使用此功能",
-            loginBtn: "用Facebook登录"
+            loginBtn: "用Facebook登录",
+            saveDraws: "登录以保存您抽到的牌",
+            saveDrawsSub: "每一张牌都会被保存，随时可以回顾"
         },
         toast: {
             copied: "链接已复制！",
@@ -564,7 +570,9 @@ const translations = {
         },
         login: {
             required: "請登入Facebook使用此功能",
-            loginBtn: "用Facebook登入"
+            loginBtn: "用Facebook登入",
+            saveDraws: "登入以儲存您抽到的牌",
+            saveDrawsSub: "每一張牌都會被儲存，隨時可以回顧"
         },
         toast: {
             copied: "連結已複製！",
@@ -720,7 +728,9 @@ const translations = {
         },
         login: {
             required: "이 기능을 사용하려면 Facebook으로 로그인하세요",
-            loginBtn: "Facebook으로 로그인"
+            loginBtn: "Facebook으로 로그인",
+            saveDraws: "카드 기록을 저장하려면 로그인하세요",
+            saveDrawsSub: "뽑은 카드가 모두 저장되어 언제든 다시 볼 수 있어요"
         },
         toast: {
             copied: "링크 복사됨!",
@@ -876,7 +886,9 @@ const translations = {
         },
         login: {
             required: "この機能を使うにはFacebookでログインしてください",
-            loginBtn: "Facebookでログイン"
+            loginBtn: "Facebookでログイン",
+            saveDraws: "カードの記録を保存するにはログイン",
+            saveDrawsSub: "引いたカードはすべて保存され、いつでも振り返れます"
         },
         toast: {
             copied: "リンクをコピーしました！",
@@ -1032,7 +1044,9 @@ const translations = {
         },
         login: {
             required: "Connectez-vous avec Facebook pour utiliser cette fonctionnalité",
-            loginBtn: "Se connecter avec Facebook"
+            loginBtn: "Se connecter avec Facebook",
+            saveDraws: "Connectez-vous pour sauvegarder vos tirages",
+            saveDrawsSub: "Chaque carte tirée sera conservée pour que vous puissiez la revisiter"
         },
         toast: {
             copied: "Lien copié !",

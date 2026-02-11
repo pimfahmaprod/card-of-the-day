@@ -356,6 +356,23 @@ async function submitCommentToFirebase(cardId, cardName, cardImage, userId, user
     }
 }
 
+// Update an existing comment's text
+async function updateCommentText(commentId, newText) {
+    if (!isFirebaseInitialized || !database || !commentId) {
+        return { success: false, error: 'Firebase not initialized or missing ID' };
+    }
+    try {
+        var commentRef = database.ref('comments/' + commentId);
+        await commentRef.update({ comment: newText.trim() });
+        clearCache('commentsFirstPage_10');
+        clearCache('hotComments_20');
+        return { success: true };
+    } catch (error) {
+        console.warn('Failed to update comment:', error.message);
+        return { success: false, error: error.message };
+    }
+}
+
 // Get comments count (with cache)
 async function getCommentsCount() {
     if (!isFirebaseInitialized || !database) return 0;
@@ -1005,6 +1022,7 @@ window.cardCounter = {
     isEnabled: () => isFirebaseInitialized,
     // Comments & replies
     submitComment: submitCommentToFirebase,
+    updateComment: updateCommentText,
     fetchComments: fetchComments,
     fetchCommentsByCardId: fetchCommentsByCardId,
     getCommentsCount: getCommentsCount,

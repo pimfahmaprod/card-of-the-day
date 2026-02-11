@@ -31,6 +31,11 @@ let selectedCardElement = null;
 let isAnimating = false;
 let isPageReady = false;
 
+// Auto-save draw state: tracks the Firebase comment ID for the current draw
+let _currentDrawCommentId = null;
+// Pending draw for non-FB users: saved to Firebase after login
+let _pendingDraw = null;
+
 // ========================================
 // Internationalization (i18n)
 // ========================================
@@ -181,9 +186,9 @@ function refreshDynamicContent() {
         loadMyCardComments();
     }
 
-    // Refresh My Card tab text if visible
+    // Refresh My Card tab text
     const myCardTab = document.querySelector('[data-tab="mycard"]');
-    if (myCardTab && myCardTab.style.display !== 'none') {
+    if (myCardTab) {
         myCardTab.textContent = t('comments.tabMyCard');
     }
 }
@@ -1112,7 +1117,8 @@ function calculateCardLayout() {
     // Calculate absolute positions for each card in the grid
     const outerW = cardW - hOverlap;   // effective width per card slot
     const outerH = cardH - vOverlap;   // effective height per card slot
-    const startX = padSide;             // first card left edge at content area start
+    const totalRowW = (NUM_COLS - 1) * outerW + cardW;
+    const startX = padSide + (availW - totalRowW) / 2;  // horizontally center
     const totalGridH = NUM_ROWS * outerH + vOverlap; // last row gets full height
     const startY = padTop + (availH - totalGridH) / 2;  // vertically center
 
@@ -1350,8 +1356,13 @@ function selectCard(cardId, cardElement) {
                 document.getElementById('resultPanel').classList.add('active');
                 isAnimating = false;
 
-                // Initialize comment form (show/hide name group)
+                // Initialize comment form
                 initCommentForm();
+
+                // Auto-save draw to Firebase (FB users: empty comment; non-FB: store pending)
+                _currentDrawCommentId = null;
+                _pendingDraw = null;
+                autoSaveDrawOnReveal(card);
 
                 // Show comments button now that result is visible
                 updateCommentsBtnVisibility();
@@ -1367,8 +1378,9 @@ function closeResult() {
 
     const cardGrid = document.getElementById('cardGrid');
 
-    // Reset comment form
+    // Reset comment form and draw state
     if (typeof resetCommentForm === 'function') resetCommentForm();
+    _currentDrawCommentId = null;
 
     // Hide result panel
     document.getElementById('resultPanel').classList.remove('active');
@@ -1622,10 +1634,64 @@ function onFacebookStatusReady() {
         if (isLoggedIn) {
             if (commentOverlay) commentOverlay.style.display = '';
             if (blessingLoginCta) blessingLoginCta.style.display = 'none';
+
+            // Save pending draw from non-FB user who just logged in
+            savePendingDrawAfterLogin();
         } else {
             if (commentOverlay) commentOverlay.style.display = 'none';
             if (blessingLoginCta) blessingLoginCta.style.display = '';
         }
+    }
+}
+
+// Save pending draw data to Firebase after a non-FB user logs in
+async function savePendingDrawAfterLogin() {
+    if (!_pendingDraw) return;
+
+    var draw = _pendingDraw;
+    _pendingDraw = null; // Clear immediately to prevent double-save
+
+    if (!window.cardCounter || !window.cardCounter.submitComment) return;
+
+    var userId = getUserId();
+    var userName = getSavedUserName() || 'Anonymous';
+    var commentText = draw.comment || '';
+
+    // Track card pick
+    if (window.cardCounter.increment) {
+        window.cardCounter.increment(draw.cardId, draw.cardName, userId);
+    }
+
+    var result = await window.cardCounter.submitComment(
+        draw.cardId, draw.cardName, draw.cardImage,
+        userId, userName, commentText, getCurrentProfilePicture()
+    );
+
+    if (result.success) {
+        if (result.id && _pollState.initialized && _pollState.myCommentIds.indexOf(result.id) === -1) {
+            _pollState.myCommentIds.push(result.id);
+        }
+        checkMyCardTab();
+
+        // Save draw history to Firebase
+        var fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
+        if (fbUserId && window.cardCounter.saveUserDraw) {
+            window.cardCounter.saveUserDraw(fbUserId, {
+                cardId: draw.cardId,
+                cardName: draw.cardName,
+                cardImage: draw.cardImage,
+                comment: commentText
+            });
+        }
+        saveDrawToLocal({ id: draw.cardId, name: draw.cardName, image: draw.cardImage }, commentText);
+
+        // Update blessing screen to show comment overlay
+        var commentOverlay = document.querySelector('.blessing-comment-overlay');
+        var blessingName = document.getElementById('blessingName');
+        var blessingComment = document.getElementById('blessingComment');
+        if (commentOverlay) commentOverlay.style.display = '';
+        if (blessingName) blessingName.textContent = userName === 'Anonymous' ? '' : '— ' + userName + ' —';
+        if (blessingComment) blessingComment.textContent = commentText ? '"' + commentText + '"' : '';
     }
 }
 
@@ -1676,15 +1742,63 @@ function getLocalDrawHistory() {
 
 // Show/hide name group based on saved name (called when result panel opens)
 function initCommentForm() {
-    const nameGroup = document.getElementById('commentNameGroup');
-    const isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
-    const savedName = getSavedUserName();
+    // Name input has been removed; nothing to initialize
+}
 
-    // Hide name input if logged in with FB or has a saved name
-    if ((isLoggedIn || savedName) && nameGroup) {
-        nameGroup.style.display = 'none';
-    } else if (nameGroup) {
-        nameGroup.style.display = 'block';
+// Auto-save draw to Firebase for FB-connected users (empty comment)
+async function autoSaveDrawOnReveal(card) {
+    if (!card) return;
+
+    // Only auto-save if logged in with Facebook
+    var isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
+    if (!isLoggedIn || !window.cardCounter || !window.cardCounter.submitComment) {
+        // Non-FB user: store pending draw data for later
+        _pendingDraw = {
+            cardId: card.id,
+            cardName: card.name,
+            cardImage: card.image
+        };
+        return;
+    }
+
+    var userId = getUserId();
+    var userName = getSavedUserName() || 'Anonymous';
+
+    // Track card pick in Firebase
+    if (window.cardCounter.increment) {
+        window.cardCounter.increment(card.id, card.name, userId);
+    }
+
+    var result = await window.cardCounter.submitComment(
+        card.id,
+        card.name,
+        card.image,
+        userId,
+        userName,
+        '', // empty comment
+        getCurrentProfilePicture()
+    );
+
+    if (result.success && result.id) {
+        _currentDrawCommentId = result.id;
+
+        // Track for reply polling
+        if (_pollState.initialized && _pollState.myCommentIds.indexOf(result.id) === -1) {
+            _pollState.myCommentIds.push(result.id);
+        }
+        checkMyCardTab();
+
+        // Save draw history to Firebase
+        var fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
+        if (fbUserId && window.cardCounter.saveUserDraw) {
+            window.cardCounter.saveUserDraw(fbUserId, {
+                cardId: card.id,
+                cardName: card.name,
+                cardImage: card.image,
+                comment: ''
+            });
+        }
+        saveDrawToLocal(card, '');
     }
 }
 
@@ -1728,19 +1842,6 @@ async function viewCardComments() {
 }
 
 function resetCommentForm() {
-    const savedName = getSavedUserName();
-    const isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
-    const nameInput = document.getElementById('commentName');
-    const nameGroup = document.getElementById('commentNameGroup');
-
-    if (!savedName && !isLoggedIn && nameInput) {
-        nameInput.value = '';
-        document.getElementById('nameCharCount').textContent = '0';
-    }
-    if (nameGroup) {
-        nameGroup.style.display = (isLoggedIn || savedName) ? 'none' : 'block';
-    }
-
     document.getElementById('commentText').value = '';
     document.getElementById('commentCharCount').textContent = '0';
     document.getElementById('commentSubmitBtn').disabled = false;
@@ -1838,14 +1939,7 @@ function resetCommentForm() {
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
-    const nameInput = document.getElementById('commentName');
     const commentInput = document.getElementById('commentText');
-
-    if (nameInput) {
-        nameInput.addEventListener('input', () => {
-            document.getElementById('nameCharCount').textContent = nameInput.value.length;
-        });
-    }
 
     if (commentInput) {
         commentInput.addEventListener('input', () => {
@@ -1874,20 +1968,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function submitComment() {
-    const nameInput = document.getElementById('commentName');
     const commentInput = document.getElementById('commentText');
     const submitBtn = document.getElementById('commentSubmitBtn');
     const submitText = document.getElementById('commentSubmitText');
 
     const isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
-
-    // Use saved name or input value, default to "Anonymous"
-    const savedName = getSavedUserName();
-    const userName = savedName || nameInput.value.trim() || 'Anonymous';
-
-    // Use input text or placeholder as default
-    const defaultComment = t('comment.placeholder');
-    const commentText = commentInput.value.trim() || defaultComment;
+    const userName = getSavedUserName() || 'Anonymous';
+    const commentText = commentInput.value.trim() || t('comment.placeholder');
 
     if (!currentCardData) {
         showToast(t('toast.error'));
@@ -1898,36 +1985,14 @@ async function submitComment() {
     submitBtn.disabled = true;
     submitText.textContent = t('comment.sending');
 
-    // Only save to Firebase if logged in with Facebook
-    if (isLoggedIn && window.cardCounter && window.cardCounter.submitComment) {
-        // Track card pick in Firebase
-        if (window.cardCounter.increment) {
-            window.cardCounter.increment(currentCardData.id, currentCardData.name, getUserId());
-        }
-
-        const userId = getUserId();
-        const result = await window.cardCounter.submitComment(
-            currentCardData.id,
-            currentCardData.name,
-            currentCardData.image,
-            userId,
-            userName,
-            commentText,
-            getCurrentProfilePicture()
-        );
+    if (isLoggedIn && _currentDrawCommentId && window.cardCounter && window.cardCounter.updateComment) {
+        // FB user with auto-saved draw: update the existing comment text
+        var result = await window.cardCounter.updateComment(_currentDrawCommentId, commentText);
 
         if (result.success) {
-            if (userName !== 'Anonymous') {
-                saveUserName(userName);
-            }
-            // Track new comment for reply polling
-            if (result.id && _pollState.initialized && _pollState.myCommentIds.indexOf(result.id) === -1) {
-                _pollState.myCommentIds.push(result.id);
-            }
-            checkMyCardTab();
-
-            // Save draw history to Firebase
-            const fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
+            // Update draw history locally and in Firebase with the comment text
+            saveDrawToLocal(currentCardData, commentText);
+            var fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
             if (fbUserId && window.cardCounter.saveUserDraw) {
                 window.cardCounter.saveUserDraw(fbUserId, {
                     cardId: currentCardData.id,
@@ -1936,7 +2001,6 @@ async function submitComment() {
                     comment: commentText
                 });
             }
-            saveDrawToLocal(currentCardData, commentText);
 
             submitBtn.classList.add('success');
             submitText.textContent = t('toast.submitSuccess');
@@ -1950,8 +2014,15 @@ async function submitComment() {
             submitText.textContent = t('comment.submit');
             showToast(t('toast.error'));
         }
-    } else {
-        // Not logged in: skip Firebase, go straight to blessing with CTA
+    } else if (!isLoggedIn) {
+        // Not logged in: store pending draw data, go to blessing with login CTA
+        _pendingDraw = {
+            cardId: currentCardData.id,
+            cardName: currentCardData.name,
+            cardImage: currentCardData.image,
+            comment: commentText
+        };
+
         playSoundEffect('accept');
         submitBtn.classList.add('success');
         submitText.textContent = t('toast.submitSuccess');
@@ -1959,6 +2030,44 @@ async function submitComment() {
         setTimeout(() => {
             showBlessingScreen(userName, commentText);
         }, 800);
+    } else {
+        // FB user but auto-save failed or no comment ID — submit fresh
+        var userId = getUserId();
+        var result = await window.cardCounter.submitComment(
+            currentCardData.id, currentCardData.name, currentCardData.image,
+            userId, userName, commentText, getCurrentProfilePicture()
+        );
+
+        if (result.success) {
+            if (result.id && _pollState.initialized && _pollState.myCommentIds.indexOf(result.id) === -1) {
+                _pollState.myCommentIds.push(result.id);
+            }
+            checkMyCardTab();
+
+            if (window.cardCounter.increment) {
+                window.cardCounter.increment(currentCardData.id, currentCardData.name, userId);
+            }
+            saveDrawToLocal(currentCardData, commentText);
+            var fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
+            if (fbUserId && window.cardCounter.saveUserDraw) {
+                window.cardCounter.saveUserDraw(fbUserId, {
+                    cardId: currentCardData.id, cardName: currentCardData.name,
+                    cardImage: currentCardData.image, comment: commentText
+                });
+            }
+
+            submitBtn.classList.add('success');
+            submitText.textContent = t('toast.submitSuccess');
+            playSoundEffect('accept');
+
+            setTimeout(() => {
+                showBlessingScreen(userName, commentText);
+            }, 800);
+        } else {
+            submitBtn.disabled = false;
+            submitText.textContent = t('comment.submit');
+            showToast(t('toast.error'));
+        }
     }
 }
 
@@ -2197,10 +2306,11 @@ function goToLandingPage() {
         // Show comments button on landing page
         updateCommentsBtnVisibility();
 
-        // Re-render friends notification bubble from poll state
+        // Re-render notification circles from poll state
         setTimeout(function() {
             if (_pollState.initialized) {
                 renderFriendCircleStackFromState();
+                renderLandingReplyCircles();
             } else {
                 checkFriendsNewCards();
             }
@@ -2997,29 +3107,12 @@ async function checkUserHasComments() {
 
 // Check if user has any comments and show/hide the "ไพ่ฉัน" tab
 async function checkMyCardTab() {
+    // MyCard tab is always visible — no need to hide/show
     const commentsTabs = document.getElementById('commentsTabs');
     if (!commentsTabs) return;
 
     const myCardTab = commentsTabs.querySelector('[data-tab="mycard"]');
-    if (!myCardTab) return;
-
-    // Hide by default
-    myCardTab.style.display = 'none';
-
-    // Only show for FB-connected users
-    if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) return;
-
-    // Check if Firebase is ready
-    if (!window.cardCounter || !window.cardCounter.fetchCommentsByUserId) {
-        return;
-    }
-
-    // Check if user has any comments
-    const userId = getUserId();
-    const comments = await window.cardCounter.fetchCommentsByUserId(userId, 1);
-
-    if (comments.length > 0) {
-        myCardTab.style.display = '';
+    if (myCardTab) {
         myCardTab.textContent = t('comments.tabMyCard');
     }
 }
@@ -3318,7 +3411,7 @@ async function loadMyComments() {
 
     // Require Facebook login
     if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
-        commentsList.innerHTML = wasPreviouslyConnected() ? buildSocialLoadingCta() : buildLoginRequiredCta('login.required', 'blessing.loginToSee');
+        commentsList.innerHTML = wasPreviouslyConnected() ? buildSocialLoadingCta() : buildLoginRequiredCta('login.saveDraws', 'login.saveDrawsSub');
         isLoadingComments = false;
         return;
     }
@@ -3395,7 +3488,7 @@ async function loadMyCardComments() {
 
     // Require Facebook login
     if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
-        commentsList.innerHTML = wasPreviouslyConnected() ? buildSocialLoadingCta() : buildLoginRequiredCta('login.required', 'blessing.loginToSee');
+        commentsList.innerHTML = wasPreviouslyConnected() ? buildSocialLoadingCta() : buildLoginRequiredCta('login.saveDraws', 'login.saveDrawsSub');
         isLoadingComments = false;
         return;
     }
@@ -4081,6 +4174,7 @@ function onReplyNotifClick(commentId, replyId, circleEl, replyTimestamp) {
         });
         _pollState.unseenReplies = _pollState.repliesData.length;
         updateNotificationBadges();
+        renderLandingReplyCircles();
     }
 
     // Store the target for after tab loads
@@ -4252,6 +4346,7 @@ async function initNotificationPolling() {
     // Step 4: Update UI
     updateNotificationBadges();
     renderFriendCircleStackFromState();
+    renderLandingReplyCircles();
 
     // Step 5: Start polling + visibility listener
     startPolling();
@@ -4344,6 +4439,7 @@ async function pollForNotifications() {
     if (changed) {
         updateNotificationBadges();
         renderFriendCircleStackFromState();
+        renderLandingReplyCircles();
         // Update reply notif bar only if panel is open
         var panel = document.getElementById('commentsPanel');
         if (panel && panel.classList.contains('show')) {
@@ -4398,12 +4494,9 @@ function updateNotificationBadges() {
     var friendsTab = document.querySelector('.comments-tab[data-tab="friends"]');
     if (friendsTab) updateTabBadge(friendsTab, _pollState.unseenFriendDraws);
 
-    // 3. MyCard tab badge — show tab if there are unseen replies
+    // 3. MyCard tab badge
     var mycardTab = document.querySelector('.comments-tab[data-tab="mycard"]');
     if (mycardTab) {
-        if (_pollState.unseenReplies > 0 && mycardTab.style.display === 'none') {
-            mycardTab.style.display = '';
-        }
         updateTabBadge(mycardTab, _pollState.unseenReplies);
     }
 }
@@ -4507,6 +4600,135 @@ function renderReplyNotifCirclesFromState() {
         return;
     }
     renderReplyNotifCircles(_pollState.repliesData);
+}
+
+// Render reply circles on landing/result page (below profile pic, alongside friend circles)
+function renderLandingReplyCircles() {
+    var stack = document.getElementById('replyCircleStack');
+    if (!stack) return;
+
+    if (_pollState.unseenReplies === 0 || _pollState.repliesData.length === 0) {
+        if (stack.children.length > 0) {
+            stack.innerHTML = '';
+        }
+        return;
+    }
+
+    // Group by replier userId, keep latest per user
+    var byUser = {};
+    _pollState.repliesData.forEach(function(item) {
+        var uid = item.reply.userId;
+        if (!byUser[uid] || (item.reply.timestamp || 0) > (byUser[uid].reply.timestamp || 0)) {
+            byUser[uid] = item;
+        }
+    });
+
+    // Count replies per user
+    var countByUser = {};
+    _pollState.repliesData.forEach(function(item) {
+        var uid = item.reply.userId;
+        countByUser[uid] = (countByUser[uid] || 0) + 1;
+    });
+
+    var users = Object.keys(byUser);
+    if (users.length > 5) users = users.slice(0, 5);
+
+    // Check for new items
+    var existingUserIds = {};
+    stack.querySelectorAll('.reply-circle-item').forEach(function(el) {
+        if (el.dataset.userId) existingUserIds[el.dataset.userId] = true;
+    });
+    var hasNewItems = users.some(function(uid) { return !existingUserIds[uid]; });
+    if (!hasNewItems && Object.keys(existingUserIds).length > 0) return;
+
+    // Full re-render
+    stack.innerHTML = '';
+
+    users.forEach(function(uid, index) {
+        var item = byUser[uid];
+        var count = countByUser[uid];
+
+        var circle = document.createElement('div');
+        circle.className = 'reply-circle-item';
+        circle.dataset.userId = uid;
+        circle.style.animationDelay = (index * 0.06) + 's';
+
+        var picUrl = item.reply.profilePicture || '';
+        var defaultSvg = '<div class="reply-circle-item-default"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
+        var badgeHtml = count > 1 ? '<span class="reply-circle-badge">' + count + '</span>' : '';
+        var pulseHtml = '<span class="reply-circle-pulse"></span>';
+
+        if (picUrl) {
+            var img = document.createElement('img');
+            img.src = picUrl;
+            img.alt = '';
+            img.onerror = function() { this.style.display = 'none'; circle.insertAdjacentHTML('afterbegin', defaultSvg); };
+            circle.appendChild(img);
+            circle.insertAdjacentHTML('beforeend', badgeHtml + pulseHtml);
+        } else {
+            circle.innerHTML = defaultSvg + badgeHtml + pulseHtml;
+        }
+
+        circle.addEventListener('click', function() {
+            // Animate out
+            circle.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            circle.style.opacity = '0';
+            circle.style.transform = 'scale(0.5) translateX(16px)';
+            setTimeout(function() { circle.remove(); }, 300);
+
+            onReplyNotifClick(item.commentId, item.reply.id, circle, item.reply.timestamp);
+        });
+
+        stack.appendChild(circle);
+    });
+
+    // Add dismiss button
+    if (users.length > 0) {
+        var dismissBtn = document.createElement('div');
+        dismissBtn.className = 'reply-circle-dismiss';
+        dismissBtn.style.animationDelay = (users.length * 0.06 + 0.1) + 's';
+        dismissBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+        dismissBtn.addEventListener('click', function() {
+            dismissAllReplyCircles();
+        });
+        stack.appendChild(dismissBtn);
+    }
+}
+
+// Dismiss all reply circles and mark as read
+function dismissAllReplyCircles() {
+    var stack = document.getElementById('replyCircleStack');
+
+    // Update last-seen timestamp
+    if (_pollState.repliesData.length > 0) {
+        var newestTs = Math.max.apply(null, _pollState.repliesData.map(function(item) {
+            return item.reply ? (item.reply.timestamp || 0) : 0;
+        }));
+        if (newestTs > 0) {
+            localStorage.setItem('tarot_replies_last_seen_ts', String(newestTs));
+        }
+    }
+
+    // Reset poll state
+    _pollState.unseenReplies = 0;
+    _pollState.repliesData = [];
+    updateNotificationBadges();
+
+    // Clear reply notif bar in comments panel too
+    var replyBar = document.getElementById('replyNotifBar');
+    if (replyBar) replyBar.innerHTML = '';
+
+    // Animate out circles
+    if (stack) {
+        var items = stack.querySelectorAll('.reply-circle-item, .reply-circle-dismiss');
+        items.forEach(function(item, i) {
+            item.style.animationDelay = (i * 0.04) + 's';
+            item.classList.add('friends-circle-dismiss-out');
+        });
+        setTimeout(function() {
+            stack.innerHTML = '';
+        }, 400 + items.length * 40);
+    }
 }
 
 // Load comments for cardview tab (viewing a specific card's comments from ส่อง button)
@@ -4822,6 +5044,7 @@ function markRepliesAsRead(card, commentId) {
             _pollState.unseenReplies = _pollState.repliesData.length;
             updateNotificationBadges();
             renderReplyNotifCirclesFromState();
+            renderLandingReplyCircles();
         }
     }
 }
@@ -5451,13 +5674,19 @@ function drawLineIcon(ctx, x, y, size, color) {
 }
 
 function drawVerticalLayout(ctx, cardImg, width, height) {
-    // Card image - large and centered at top
-    let cardBottomY = 100;
+    // "Card of the Day" title at top
+    ctx.fillStyle = 'rgba(160, 180, 220, 0.6)';
+    ctx.font = '28px "Cormorant Garamond", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Card of the Day', width / 2, 80);
+
+    // Card image - large and centered
+    let cardBottomY = 120;
     if (cardImg) {
         const cardWidth = 520;
         const cardHeight = cardWidth * (cardImg.height / cardImg.width);
         const cardX = (width - cardWidth) / 2;
-        const cardY = 100;
+        const cardY = 120;
 
         // Card shadow
         ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
