@@ -1879,6 +1879,10 @@ async function submitComment() {
             if (userName !== 'Anonymous') {
                 saveUserName(userName);
             }
+            // Track new comment for reply polling
+            if (result.id && _pollState.initialized && _pollState.myCommentIds.indexOf(result.id) === -1) {
+                _pollState.myCommentIds.push(result.id);
+            }
             checkMyCardTab();
 
             // Save draw history to Firebase
@@ -2148,8 +2152,14 @@ function goToLandingPage() {
         // Show comments button on landing page
         updateCommentsBtnVisibility();
 
-        // Re-check friends notification bubble
-        setTimeout(checkFriendsNewCards, 1000);
+        // Re-render friends notification bubble from poll state
+        setTimeout(function() {
+            if (_pollState.initialized) {
+                renderFriendCircleStackFromState();
+            } else {
+                checkFriendsNewCards();
+            }
+        }, 1000);
 
         // Scroll to top instantly
         window.scrollTo({ top: 0, behavior: 'instant' });
@@ -2212,6 +2222,24 @@ let commentsLastKey = null;
 let commentsHasMore = true;
 let isLoadingComments = false;
 let currentCommentsTab = 'new'; // 'new', 'hot', 'me'
+
+// ========================================
+// Notification Polling State
+// ========================================
+var _pollingIntervalId = null;
+var _pollingPaused = false;
+var _pollState = {
+    friendUserIds: [],
+    myCommentIds: [],
+    friendsLastCheckedTs: 0,
+    repliesLastCheckedTs: 0,
+    unseenFriendDraws: 0,
+    unseenReplies: 0,
+    friendDrawsData: [],
+    repliesData: [],
+    initialized: false,
+    lastPollTime: 0
+};
 
 function initCommentsPanel() {
     const commentsBtn = document.getElementById('commentsBtn');
@@ -2305,9 +2333,13 @@ function initCommentsPanel() {
     }
 
     // Subscribe to comments count for badge
+    // Badge is now driven by notification polling for FB users.
+    // For non-FB users, fall back to total comments count.
     setTimeout(() => {
-        if (window.cardCounter && window.cardCounter.subscribeToCommentsCount) {
-            window.cardCounter.subscribeToCommentsCount(updateCommentsCountBadge);
+        if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
+            if (window.cardCounter && window.cardCounter.subscribeToCommentsCount) {
+                window.cardCounter.subscribeToCommentsCount(updateCommentsCountBadge);
+            }
         }
     }, 1000);
 }
@@ -2838,7 +2870,14 @@ function openCommentsPanel(skipLoadComments = false) {
     checkMyCardTab();
 
     // Check for reply notifications (profile circles at bottom)
-    setTimeout(checkReplyNotifications, 500);
+    setTimeout(function() {
+        if (_pollState.initialized) {
+            renderReplyNotifCirclesFromState();
+            pollForNotifications(); // catch up immediately
+        } else {
+            checkReplyNotifications(); // fallback for non-FB users
+        }
+    }, 500);
 
     // Skip loading if we're switching to a specific tab (like cardview)
     if (skipLoadComments) return;
@@ -3484,6 +3523,11 @@ function markAllFriendsRead(friendComments) {
     // Clear circle stack on landing page
     var stack = document.getElementById('friendsCircleStack');
     if (stack) stack.innerHTML = '';
+
+    // Reset poll state
+    _pollState.unseenFriendDraws = 0;
+    _pollState.friendDrawsData = [];
+    updateNotificationBadges();
 }
 
 // Get Facebook friend IDs who also use this app
@@ -3779,17 +3823,21 @@ function dismissAllFriendCircles(friendComments) {
         localStorage.setItem('tarot_friends_last_seen_ts', String(newestTs));
     }
 
-    // Animate out all circles
+    // Reset poll state
+    _pollState.unseenFriendDraws = 0;
+    _pollState.friendDrawsData = [];
+    updateNotificationBadges();
+
+    // Animate out all circles with CSS cascade animation
     var items = stack.querySelectorAll('.friends-circle-item, .friends-circle-dismiss');
     items.forEach(function(item, i) {
-        item.style.transition = 'opacity 0.25s ease ' + (i * 0.03) + 's, transform 0.25s ease ' + (i * 0.03) + 's';
-        item.style.opacity = '0';
-        item.style.transform = 'scale(0.5) translateX(16px)';
+        item.style.animationDelay = (i * 0.04) + 's';
+        item.classList.add('friends-circle-dismiss-out');
     });
     setTimeout(function() {
         stack.innerHTML = '';
         stack.classList.remove('scrollable');
-    }, 350);
+    }, 400 + items.length * 40);
 }
 
 // Touch drag support for scrollable circle stack
@@ -3926,6 +3974,12 @@ function onReplyNotifClick(commentId, replyId, circleEl, replyTimestamp) {
         if (replyTimestamp > currentTs) {
             localStorage.setItem('tarot_replies_last_seen_ts', String(replyTimestamp));
         }
+        // Update poll state
+        _pollState.repliesData = _pollState.repliesData.filter(function(item) {
+            return (item.reply.timestamp || 0) > replyTimestamp;
+        });
+        _pollState.unseenReplies = _pollState.repliesData.length;
+        updateNotificationBadges();
     }
 
     // Store the target for after tab loads
@@ -3977,10 +4031,8 @@ function waitForFeedCardAndExpand(commentId, replyId, circleEl) {
 
 function removeNotifCircle(circleEl) {
     if (!circleEl) return;
-    circleEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-    circleEl.style.opacity = '0';
-    circleEl.style.transform = 'scale(0.5)';
-    setTimeout(function() { circleEl.remove(); }, 300);
+    circleEl.classList.add('reply-notif-exit');
+    setTimeout(function() { circleEl.remove(); }, 400);
 }
 
 function expandAndHighlightReply(card, commentId, replyId, circleEl) {
@@ -4030,6 +4082,328 @@ function expandAndHighlightReply(card, commentId, replyId, circleEl) {
             removeNotifCircle(circleEl);
         }
     }, 100);
+}
+
+// ========================================
+// Notification Polling System
+// ========================================
+
+async function initNotificationPolling() {
+    if (_pollState.initialized) return; // Already initialized
+    if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) return;
+
+    var userId = getUserId();
+    if (!userId || !window.cardCounter) return;
+
+    // Step 1: Cache friend IDs
+    try {
+        var friendResult = await getFacebookFriendIds();
+        if (friendResult.status === 'ok' && friendResult.ids.length > 0) {
+            _pollState.friendUserIds = friendResult.ids.map(function(id) { return 'fb_' + id; });
+        }
+    } catch (e) { /* ignore */ }
+
+    // Step 2: Get user's comment IDs (for reply checking)
+    try {
+        if (window.cardCounter.fetchCommentsByUserId) {
+            var myComments = await window.cardCounter.fetchCommentsByUserId(userId, 50);
+            _pollState.myCommentIds = myComments.map(function(c) { return c.id; });
+        }
+    } catch (e) { /* ignore */ }
+
+    // Step 3: Initial full fetch to populate counts
+    var friendsLastSeen = parseInt(localStorage.getItem('tarot_friends_last_seen_ts') || '0', 10);
+    var repliesLastSeen = parseInt(localStorage.getItem('tarot_replies_last_seen_ts') || '0', 10);
+
+    // Set safe defaults so polling doesn't download everything
+    _pollState.friendsLastCheckedTs = Date.now();
+    _pollState.repliesLastCheckedTs = Date.now();
+
+    // Friend draws
+    if (_pollState.friendUserIds.length > 0 && window.cardCounter.fetchCommentsByUserIds) {
+        try {
+            var friendComments = await window.cardCounter.fetchCommentsByUserIds(_pollState.friendUserIds, 50);
+            var unseenFriends = friendComments.filter(function(c) { return (c.timestamp || 0) > friendsLastSeen; });
+            _pollState.unseenFriendDraws = unseenFriends.length;
+            _pollState.friendDrawsData = unseenFriends;
+            _pollState.friendsLastCheckedTs = friendComments.length > 0
+                ? Math.max.apply(null, friendComments.map(function(c) { return c.timestamp || 0; }))
+                : Date.now();
+        } catch (e) { /* ignore */ }
+    }
+
+    // Replies
+    if (_pollState.myCommentIds.length > 0 && window.cardCounter.fetchRepliesToMyComments) {
+        try {
+            var allReplies = await window.cardCounter.fetchRepliesToMyComments(userId);
+            var unseenReplies = allReplies.filter(function(item) { return (item.reply.timestamp || 0) > repliesLastSeen; });
+            _pollState.unseenReplies = unseenReplies.length;
+            _pollState.repliesData = unseenReplies;
+            _pollState.repliesLastCheckedTs = allReplies.length > 0
+                ? Math.max.apply(null, allReplies.map(function(item) { return item.reply.timestamp || 0; }))
+                : Date.now();
+        } catch (e) { /* ignore */ }
+    }
+
+    _pollState.initialized = true;
+    _pollState.lastPollTime = Date.now();
+
+    // Step 4: Update UI
+    updateNotificationBadges();
+    renderFriendCircleStackFromState();
+
+    // Step 5: Start polling + visibility listener
+    startPolling();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+}
+
+async function pollForNotifications() {
+    if (_pollingPaused || !_pollState.initialized || !window.cardCounter) return;
+
+    var userId = getUserId();
+    var friendsLastSeen = parseInt(localStorage.getItem('tarot_friends_last_seen_ts') || '0', 10);
+    var repliesLastSeen = parseInt(localStorage.getItem('tarot_replies_last_seen_ts') || '0', 10);
+    var changed = false;
+
+    // --- Friend draws delta ---
+    if (_pollState.friendUserIds.length > 0 && window.cardCounter.fetchNewCommentsSince) {
+        try {
+            var newComments = await window.cardCounter.fetchNewCommentsSince(_pollState.friendsLastCheckedTs);
+            var friendSet = {};
+            _pollState.friendUserIds.forEach(function(id) { friendSet[id] = true; });
+            var newFriendComments = newComments.filter(function(c) { return friendSet[c.userId]; });
+
+            if (newFriendComments.length > 0) {
+                // Merge into state (avoid duplicates)
+                var existingIds = {};
+                _pollState.friendDrawsData.forEach(function(d) { existingIds[d.id] = true; });
+                newFriendComments.forEach(function(c) {
+                    if (!existingIds[c.id]) _pollState.friendDrawsData.push(c);
+                });
+            }
+
+            // Update checked timestamp from all new comments (not just friends)
+            if (newComments.length > 0) {
+                var maxTs = Math.max.apply(null, newComments.map(function(c) { return c.timestamp || 0; }));
+                if (maxTs > _pollState.friendsLastCheckedTs) _pollState.friendsLastCheckedTs = maxTs;
+            }
+
+            // Recount unseen
+            _pollState.friendDrawsData = _pollState.friendDrawsData.filter(function(c) {
+                return (c.timestamp || 0) > friendsLastSeen;
+            });
+            var newFriendCount = _pollState.friendDrawsData.length;
+            if (newFriendCount !== _pollState.unseenFriendDraws) {
+                _pollState.unseenFriendDraws = newFriendCount;
+                changed = true;
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    // --- Replies delta ---
+    if (_pollState.myCommentIds.length > 0 && window.cardCounter.fetchNewRepliesForComments) {
+        try {
+            var newReplies = await window.cardCounter.fetchNewRepliesForComments(
+                _pollState.myCommentIds,
+                _pollState.repliesLastCheckedTs
+            );
+            var otherReplies = newReplies.filter(function(r) { return r.userId !== userId; });
+
+            if (otherReplies.length > 0) {
+                var existingReplyIds = {};
+                _pollState.repliesData.forEach(function(d) { if (d.reply) existingReplyIds[d.reply.id || d.replyId] = true; });
+                otherReplies.forEach(function(r) {
+                    if (!existingReplyIds[r.replyId]) {
+                        _pollState.repliesData.push({
+                            reply: { id: r.replyId, userId: r.userId, name: r.name, profilePicture: r.profilePicture, timestamp: r.timestamp, text: r.text },
+                            commentId: r.commentId
+                        });
+                    }
+                });
+            }
+
+            if (newReplies.length > 0) {
+                var maxReplyTs = Math.max.apply(null, newReplies.map(function(r) { return r.timestamp || 0; }));
+                if (maxReplyTs > _pollState.repliesLastCheckedTs) _pollState.repliesLastCheckedTs = maxReplyTs;
+            }
+
+            _pollState.repliesData = _pollState.repliesData.filter(function(item) {
+                return (item.reply.timestamp || 0) > repliesLastSeen;
+            });
+            var newReplyCount = _pollState.repliesData.length;
+            if (newReplyCount !== _pollState.unseenReplies) {
+                _pollState.unseenReplies = newReplyCount;
+                changed = true;
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    _pollState.lastPollTime = Date.now();
+
+    if (changed) {
+        updateNotificationBadges();
+        renderFriendCircleStackFromState();
+        // Update reply notif bar only if panel is open
+        var panel = document.getElementById('commentsPanel');
+        if (panel && panel.classList.contains('show')) {
+            renderReplyNotifCirclesFromState();
+        }
+    }
+}
+
+function startPolling() {
+    stopPolling();
+    _pollingPaused = false;
+    _pollingIntervalId = setInterval(pollForNotifications, 10000);
+}
+
+function stopPolling() {
+    if (_pollingIntervalId) {
+        clearInterval(_pollingIntervalId);
+        _pollingIntervalId = null;
+    }
+}
+
+function handleVisibilityChange() {
+    if (document.hidden) {
+        _pollingPaused = true;
+    } else {
+        _pollingPaused = false;
+        if (_pollState.initialized && Date.now() - _pollState.lastPollTime > 10000) {
+            pollForNotifications();
+        }
+    }
+}
+
+// ========================================
+// Badge Rendering
+// ========================================
+
+function updateNotificationBadges() {
+    var totalUnseen = _pollState.unseenFriendDraws + _pollState.unseenReplies;
+
+    // 1. Comments button badge (combined count)
+    var btnBadge = document.getElementById('commentsCount');
+    if (btnBadge) {
+        if (totalUnseen > 0) {
+            btnBadge.textContent = totalUnseen > 99 ? '99+' : totalUnseen;
+            btnBadge.classList.add('show');
+        } else {
+            btnBadge.classList.remove('show');
+        }
+    }
+
+    // 2. Friends tab badge
+    var friendsTab = document.querySelector('.comments-tab[data-tab="friends"]');
+    if (friendsTab) updateTabBadge(friendsTab, _pollState.unseenFriendDraws);
+
+    // 3. MyCard tab badge
+    var mycardTab = document.querySelector('.comments-tab[data-tab="mycard"]');
+    if (mycardTab && mycardTab.style.display !== 'none') updateTabBadge(mycardTab, _pollState.unseenReplies);
+}
+
+function updateTabBadge(tabElement, count) {
+    var badge = tabElement.querySelector('.tab-badge');
+    if (count > 0) {
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'tab-badge';
+            tabElement.appendChild(badge);
+        }
+        var prev = badge.textContent;
+        badge.textContent = count > 99 ? '99+' : count;
+        badge.classList.add('show');
+        // Pop animation on count change
+        if (prev !== badge.textContent) {
+            badge.style.animation = 'none';
+            badge.offsetHeight; // force reflow
+            badge.style.animation = '';
+        }
+    } else if (badge) {
+        badge.classList.remove('show');
+    }
+}
+
+// ========================================
+// State-based Rendering
+// ========================================
+
+function renderFriendCircleStackFromState() {
+    var stack = document.getElementById('friendsCircleStack');
+    if (!stack) return;
+
+    if (_pollState.unseenFriendDraws === 0 || _pollState.friendDrawsData.length === 0) {
+        if (stack.children.length > 0) {
+            stack.innerHTML = '';
+            stack.classList.remove('scrollable');
+        }
+        return;
+    }
+
+    // Group by friend userId – keep newest per friend
+    var byUser = {};
+    _pollState.friendDrawsData.forEach(function(c) {
+        var uid = c.userId;
+        if (!byUser[uid] || (c.timestamp || 0) > (byUser[uid].timestamp || 0)) byUser[uid] = c;
+    });
+    var friends = Object.values(byUser).sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+
+    // Detect which are NEW vs already rendered
+    var existingUserIds = {};
+    stack.querySelectorAll('.friends-circle-item').forEach(function(el) {
+        if (el.dataset.userId) existingUserIds[el.dataset.userId] = true;
+    });
+    var hasNewItems = friends.some(function(f) { return !existingUserIds[f.userId]; });
+    if (!hasNewItems && Object.keys(existingUserIds).length > 0) return;
+
+    // Full re-render with entrance animation for new items
+    stack.innerHTML = '';
+    stack.classList.add('scrollable');
+    var maxCircles = 12;
+    friends.slice(0, maxCircles).forEach(function(comment, index) {
+        var isNew = !existingUserIds[comment.userId];
+        var circle = document.createElement('div');
+        circle.className = 'friends-circle-item' + (isNew ? ' friends-circle-entrance' : '');
+        circle.dataset.userId = comment.userId;
+        circle.style.animationDelay = (index * 0.06) + 's';
+
+        var picUrl = comment.profilePicture || '';
+        if (picUrl) {
+            var img = document.createElement('img');
+            img.src = picUrl;
+            img.alt = '';
+            img.onerror = function() {
+                this.style.display = 'none';
+                var fallback = document.createElement('div');
+                fallback.className = 'friends-circle-item-default';
+                fallback.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+                circle.insertBefore(fallback, circle.firstChild);
+            };
+            circle.appendChild(img);
+        } else {
+            circle.innerHTML = '<div class="friends-circle-item-default"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
+        }
+
+        var pulse = document.createElement('span');
+        pulse.className = 'friends-circle-pulse';
+        circle.appendChild(pulse);
+
+        circle.addEventListener('click', function() { onFriendCircleClick(circle); });
+        stack.appendChild(circle);
+    });
+
+    appendDismissButton(stack, _pollState.friendDrawsData);
+}
+
+function renderReplyNotifCirclesFromState() {
+    var bar = document.getElementById('replyNotifBar');
+    if (!bar) return;
+
+    if (_pollState.unseenReplies === 0 || _pollState.repliesData.length === 0) {
+        bar.innerHTML = '';
+        return;
+    }
+    renderReplyNotifCircles(_pollState.repliesData);
 }
 
 // Load comments for cardview tab (viewing a specific card's comments from ส่อง button)
@@ -4730,10 +5104,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initCommentsPanel();
     updateCommentsBtnVisibility();
 
-    // Check for unseen friend cards after FB SDK + Firebase are ready
+    // Initialize notification polling after FB SDK + Firebase are ready
     setTimeout(function() {
         if (typeof isFacebookConnected === 'function' && isFacebookConnected()) {
-            checkFriendsNewCards();
+            initNotificationPolling();
         }
     }, 3000);
 });

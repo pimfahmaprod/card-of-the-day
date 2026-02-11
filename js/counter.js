@@ -944,6 +944,56 @@ async function fetchRepliesToMyComments(userId, limit = 50) {
 }
 
 // ========================================
+// Lightweight Polling Functions (minimal Firebase reads)
+// ========================================
+
+// Fetch all new comments since a timestamp (1 Firebase read)
+async function fetchNewCommentsSince(sinceTimestamp) {
+    if (!isFirebaseInitialized || !database) return [];
+    try {
+        var commentsRef = database.ref('comments');
+        var query = commentsRef
+            .orderByChild('timestamp')
+            .startAt(sinceTimestamp + 1);
+        var snapshot = await query.once('value');
+        var data = snapshot.val();
+        if (!data) return [];
+        return Object.entries(data).map(function(entry) {
+            return Object.assign({ id: entry[0] }, entry[1]);
+        });
+    } catch (error) {
+        console.warn('fetchNewCommentsSince failed:', error.message);
+        return [];
+    }
+}
+
+// Fetch new replies for specific comments since a timestamp (1 read per commentId, capped at 10)
+async function fetchNewRepliesForComments(commentIds, sinceTimestamp) {
+    if (!isFirebaseInitialized || !database || !commentIds || commentIds.length === 0) return [];
+    var idsToCheck = commentIds.slice(0, 10);
+    var results = [];
+    try {
+        await Promise.all(idsToCheck.map(async function(commentId) {
+            var repliesRef = database.ref('replies/' + commentId);
+            var query = repliesRef
+                .orderByChild('timestamp')
+                .startAt(sinceTimestamp + 1);
+            var snapshot = await query.once('value');
+            var data = snapshot.val();
+            if (data) {
+                Object.entries(data).forEach(function(entry) {
+                    results.push(Object.assign({ replyId: entry[0], commentId: commentId }, entry[1]));
+                });
+            }
+        }));
+        return results;
+    } catch (error) {
+        console.warn('fetchNewRepliesForComments failed:', error.message);
+        return [];
+    }
+}
+
+// ========================================
 // Export for use in app.js
 // ========================================
 window.cardCounter = {
@@ -976,5 +1026,8 @@ window.cardCounter = {
     saveUserProfile: saveUserProfile,
     fetchUserProfile: fetchUserProfile,
     clearProfileCache: function(fbUserId) { clearCache('userProfile_' + fbUserId); },
-    fetchRepliesToMyComments: fetchRepliesToMyComments
+    fetchRepliesToMyComments: fetchRepliesToMyComments,
+    // Lightweight polling
+    fetchNewCommentsSince: fetchNewCommentsSince,
+    fetchNewRepliesForComments: fetchNewRepliesForComments
 };

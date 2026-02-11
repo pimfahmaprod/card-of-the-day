@@ -105,8 +105,10 @@ function fetchUserProfileFB() {
                 localStorage.setItem('tarot_user_name', response.name);
             }
 
-            // Check for unseen friend cards after login
-            if (typeof checkFriendsNewCards === 'function') {
+            // Initialize notification polling after login
+            if (typeof initNotificationPolling === 'function') {
+                setTimeout(initNotificationPolling, 2000);
+            } else if (typeof checkFriendsNewCards === 'function') {
                 setTimeout(checkFriendsNewCards, 2000);
             }
         }
