@@ -2332,16 +2332,8 @@ function initCommentsPanel() {
         });
     }
 
-    // Subscribe to comments count for badge
-    // Badge is now driven by notification polling for FB users.
-    // For non-FB users, fall back to total comments count.
-    setTimeout(() => {
-        if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
-            if (window.cardCounter && window.cardCounter.subscribeToCommentsCount) {
-                window.cardCounter.subscribeToCommentsCount(updateCommentsCountBadge);
-            }
-        }
-    }, 1000);
+    // Badge is driven solely by notification polling (friend draws + replies).
+    // No fallback to total comments count — badge only shows when logged in via FB.
 }
 
 // Update comments button visibility based on current page state
@@ -2423,6 +2415,9 @@ function switchCommentsTab(tabName) {
 }
 
 function updateCommentsCountBadge(count) {
+    // When notification polling is active, badge is driven by updateNotificationBadges()
+    if (_pollState.initialized) return;
+
     const badge = document.getElementById('commentsCount');
     if (!badge) return;
 
@@ -2620,6 +2615,7 @@ function createFeedCard(comment) {
         card.classList.add('expanded');
         repliesSection.classList.add('open');
         replyForm.classList.add('show');
+        markRepliesAsRead(card, comment.id);
         if (!repliesLoaded) {
             repliesLoaded = true;
             loadReplies(card, comment.id, comment);
@@ -4667,6 +4663,32 @@ function setupReplyFeature(card, comment) {
 }
 
 // Load reply count for a comment
+function getSeenReplyCounts() {
+    try {
+        return JSON.parse(localStorage.getItem('tarot_seen_reply_counts') || '{}');
+    } catch (e) {
+        return {};
+    }
+}
+
+function setSeenReplyCount(commentId, count) {
+    var seen = getSeenReplyCounts();
+    seen[commentId] = count;
+    localStorage.setItem('tarot_seen_reply_counts', JSON.stringify(seen));
+}
+
+function markRepliesAsRead(card, commentId) {
+    var replyCountEl = card.querySelector('.feed-card-reply-count');
+    if (replyCountEl) {
+        var countText = replyCountEl.querySelector('.reply-count-num').textContent;
+        var count = parseInt(countText, 10) || 0;
+        if (count > 0) {
+            setSeenReplyCount(commentId, count);
+        }
+        replyCountEl.classList.remove('unread-replies');
+    }
+}
+
 async function loadReplyCount(card, commentId) {
     if (!window.cardCounter || !window.cardCounter.getReplyCount) return;
 
@@ -4677,8 +4699,17 @@ async function loadReplyCount(card, commentId) {
         if (count > 0) {
             replyCountEl.querySelector('.reply-count-num').textContent = count;
             replyCountEl.style.display = 'inline-flex';
+
+            var seen = getSeenReplyCounts();
+            var lastSeen = seen[commentId] || 0;
+            if (count > lastSeen) {
+                replyCountEl.classList.add('unread-replies');
+            } else {
+                replyCountEl.classList.remove('unread-replies');
+            }
         } else {
             replyCountEl.style.display = 'none';
+            replyCountEl.classList.remove('unread-replies');
         }
     }
 }
@@ -4785,6 +4816,7 @@ async function toggleCommentCardExpand(card, comment) {
     // Expand the clicked card
     await expandCommentCard(card, comment);
     expandedCommentCard = card;
+    markRepliesAsRead(card, comment.id);
 
     // Scroll the card into view smoothly
     setTimeout(() => {

@@ -114,7 +114,8 @@ const translations = {
             loadError: "ไม่สามารถโหลดความคิดเห็นได้",
             noHotComments: "ยังไม่มีความคิดเห็นยอดนิยม",
             tryReply: "ลองตอบกลับความคิดเห็นสิ!",
-            replyCount: "ตอบกลับ"
+            replyCount: "ตอบกลับ",
+            social: "โซเชียล"
         },
         time: {
             justNow: "เมื่อสักครู่",
@@ -269,7 +270,8 @@ const translations = {
             loadError: "Unable to load comments",
             noHotComments: "No popular comments yet",
             tryReply: "Try replying to a comment!",
-            replyCount: "replies"
+            replyCount: "replies",
+            social: "Social"
         },
         time: {
             justNow: "Just now",
@@ -424,7 +426,8 @@ const translations = {
             loadError: "无法加载评论",
             noHotComments: "还没有热门评论",
             tryReply: "试着回复一条评论吧！",
-            replyCount: "回复"
+            replyCount: "回复",
+            social: "社交"
         },
         time: {
             justNow: "刚刚",
@@ -579,7 +582,8 @@ const translations = {
             loadError: "無法載入評論",
             noHotComments: "還沒有熱門評論",
             tryReply: "試著回覆一條評論吧！",
-            replyCount: "回覆"
+            replyCount: "回覆",
+            social: "社交"
         },
         time: {
             justNow: "剛剛",
@@ -734,7 +738,8 @@ const translations = {
             loadError: "댓글을 불러올 수 없습니다",
             noHotComments: "인기 댓글이 아직 없습니다",
             tryReply: "댓글에 답글을 달아보세요!",
-            replyCount: "답글"
+            replyCount: "답글",
+            social: "소셜"
         },
         time: {
             justNow: "방금 전",
@@ -889,7 +894,8 @@ const translations = {
             loadError: "コメントを読み込めません",
             noHotComments: "人気コメントはまだありません",
             tryReply: "コメントに返信してみましょう！",
-            replyCount: "返信"
+            replyCount: "返信",
+            social: "ソーシャル"
         },
         time: {
             justNow: "たった今",
@@ -1044,7 +1050,8 @@ const translations = {
             loadError: "Impossible de charger les commentaires",
             noHotComments: "Pas encore de commentaires populaires",
             tryReply: "Essayez de répondre à un commentaire !",
-            replyCount: "réponses"
+            replyCount: "réponses",
+            social: "Social"
         },
         time: {
             justNow: "À l'instant",
