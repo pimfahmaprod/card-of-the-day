@@ -855,6 +855,15 @@ body {
     transition: all 0.25s ease;
 }
 
+.friends-circle-initial {
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: 'Prompt', sans-serif;
+    color: rgba(200, 210, 240, 0.9);
+    background: linear-gradient(135deg, rgba(80, 60, 140, 0.85), rgba(40, 30, 80, 0.9));
+    border-color: rgba(154, 170, 212, 0.4);
+}
+
 .friends-circle-item:hover .friends-circle-item-default {
     transform: scale(1.1);
     border-color: rgba(154, 170, 212, 0.55);

@@ -1599,10 +1599,6 @@ function getFriendCircleInitial(name) {
     return '<div class="friends-circle-item-default friends-circle-initial">' + escapeHtml(initial) + '</div>';
 }
 
-function getFriendCircleFallbackHtml(name) {
-    return '<div class="friends-circle-item-default"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
-}
-
 function getDefaultAvatarSvg() {
     return '<div class="comment-avatar comment-avatar-default"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>';
 }
