@@ -1594,6 +1594,15 @@ async function resolveDisplayNames(items) {
 }
 
 // Avatar helpers
+function getFriendCircleInitial(name) {
+    var initial = (name || '?').charAt(0).toUpperCase();
+    return '<div class="friends-circle-item-default friends-circle-initial">' + escapeHtml(initial) + '</div>';
+}
+
+function getFriendCircleFallbackHtml(name) {
+    return '<div class="friends-circle-item-default"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
+}
+
 function getDefaultAvatarSvg() {
     return '<div class="comment-avatar comment-avatar-default"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>';
 }
@@ -2222,6 +2231,7 @@ let commentsLastKey = null;
 let commentsHasMore = true;
 let isLoadingComments = false;
 let currentCommentsTab = 'new'; // 'new', 'hot', 'me'
+let tabSwitchGeneration = 0; // Incremented on every tab switch to cancel stale async loads
 
 // ========================================
 // Notification Polling State
@@ -2364,6 +2374,7 @@ function switchCommentsTab(tabName) {
     expandedCommentCard = null;
     navigatedCommentCard = null;
     isLoadingComments = false; // Reset to ensure fresh load
+    tabSwitchGeneration++; // Cancel any in-flight async loads from previous tab
 
     // Unsubscribe from real-time updates
     if (window.cardCounter && window.cardCounter.unsubscribeFromNewComments) {
@@ -2435,6 +2446,7 @@ function updateCommentsCountBadge(count) {
 async function loadFeed(reset) {
     if (isLoadingComments) return;
     isLoadingComments = true;
+    var gen = tabSwitchGeneration;
 
     var commentsList = document.getElementById('commentsList');
     var loadingEl = getOrCreateLoadingEl();
@@ -2454,7 +2466,10 @@ async function loadFeed(reset) {
     }
 
     var result = await window.cardCounter.fetchComments(commentsLastKey, 10);
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
+
     await resolveDisplayNames(result.comments);
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
 
     loadingEl.style.display = 'none';
 
@@ -2674,6 +2689,7 @@ function createFeedCard(comment) {
 async function loadActivityTimeline() {
     if (isLoadingComments) return;
     isLoadingComments = true;
+    var gen = tabSwitchGeneration;
 
     var commentsList = document.getElementById('commentsList');
     var loadingEl = getOrCreateLoadingEl();
@@ -2698,6 +2714,8 @@ async function loadActivityTimeline() {
         var fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
         if (fbUserId) draws = await window.cardCounter.fetchUserDraws(fbUserId);
     }
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
+
     if (draws.length === 0) draws = getLocalDrawHistory();
     draws.forEach(function(d) {
         activities.push({ type: 'draw', timestamp: d.timestamp, data: d });
@@ -2706,6 +2724,7 @@ async function loadActivityTimeline() {
     // Fetch user comments
     if (window.cardCounter && window.cardCounter.fetchCommentsByUserId) {
         var comments = await window.cardCounter.fetchCommentsByUserId(userId, 50);
+        if (gen !== tabSwitchGeneration) return; // Tab changed, abort
         comments.forEach(function(c) {
             activities.push({ type: 'comment', timestamp: c.timestamp, data: c });
         });
@@ -2714,6 +2733,7 @@ async function loadActivityTimeline() {
     // Fetch comments user replied to
     if (window.cardCounter && window.cardCounter.fetchCommentsUserRepliedTo) {
         var repliedTo = await window.cardCounter.fetchCommentsUserRepliedTo(userId, 20);
+        if (gen !== tabSwitchGeneration) return; // Tab changed, abort
         repliedTo.forEach(function(r) {
             activities.push({ type: 'replied', timestamp: r.timestamp, data: r });
         });
@@ -3095,6 +3115,7 @@ async function handleNewComment(comment) {
 async function loadComments(reset = false) {
     if (isLoadingComments) return;
     isLoadingComments = true;
+    var gen = tabSwitchGeneration;
 
     const commentsList = document.getElementById('commentsList');
     const loadingEl = getOrCreateLoadingEl();
@@ -3116,7 +3137,10 @@ async function loadComments(reset = false) {
     // On first load, fetch top comments by replies first
     if (reset && window.cardCounter.fetchTopCommentsByReplies) {
         const topComments = await window.cardCounter.fetchTopCommentsByReplies(3);
+        if (gen !== tabSwitchGeneration) return; // Tab changed, abort
+
         await resolveDisplayNames(topComments);
+        if (gen !== tabSwitchGeneration) return; // Tab changed, abort
 
         if (topComments.length > 0) {
             // Create top comments section header
@@ -3141,7 +3165,10 @@ async function loadComments(reset = false) {
     }
 
     const result = await window.cardCounter.fetchComments(commentsLastKey, 10);
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
+
     await resolveDisplayNames(result.comments);
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
 
     loadingEl.style.display = 'none';
 
@@ -3200,6 +3227,7 @@ function loadMoreComments() {
 async function loadHotComments() {
     if (isLoadingComments) return;
     isLoadingComments = true;
+    var gen = tabSwitchGeneration;
 
     const commentsList = document.getElementById('commentsList');
     const loadingEl = getOrCreateLoadingEl();
@@ -3215,7 +3243,10 @@ async function loadHotComments() {
     }
 
     const comments = await window.cardCounter.fetchHotComments(30);
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
+
     await resolveDisplayNames(comments);
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
 
     loadingEl.style.display = 'none';
 
@@ -3244,6 +3275,7 @@ async function loadHotComments() {
 async function loadMyComments() {
     if (isLoadingComments) return;
     isLoadingComments = true;
+    var gen = tabSwitchGeneration;
 
     const commentsList = document.getElementById('commentsList');
     const loadingEl = getOrCreateLoadingEl();
@@ -3268,7 +3300,10 @@ async function loadMyComments() {
     }
 
     const comments = await window.cardCounter.fetchCommentsByUserId(userId, 50);
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
+
     await resolveDisplayNames(comments);
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
 
     loadingEl.style.display = 'none';
 
@@ -3317,6 +3352,7 @@ async function loadMyComments() {
 async function loadMyCardComments() {
     if (isLoadingComments) return;
     isLoadingComments = true;
+    var gen = tabSwitchGeneration;
 
     const commentsList = document.getElementById('commentsList');
     const loadingEl = getOrCreateLoadingEl();
@@ -3341,7 +3377,10 @@ async function loadMyCardComments() {
     }
 
     const myComments = await window.cardCounter.fetchCommentsByUserId(userId, 50);
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
+
     await resolveDisplayNames(myComments);
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
 
     loadingEl.style.display = 'none';
 
@@ -3384,6 +3423,7 @@ async function loadMyCardComments() {
 async function loadFriendsCards() {
     if (isLoadingComments) return;
     isLoadingComments = true;
+    var gen = tabSwitchGeneration;
 
     var commentsList = document.getElementById('commentsList');
     var loadingEl = getOrCreateLoadingEl();
@@ -3403,6 +3443,7 @@ async function loadFriendsCards() {
     // Fetch Facebook friends who also use this app
     try {
         var friendResult = await getFacebookFriendIds();
+        if (gen !== tabSwitchGeneration) return; // Tab changed, abort
 
         // If FB session expired, show reconnect CTA
         if (friendResult.status === 'not_connected' || friendResult.status === 'no_sdk') {
@@ -3430,7 +3471,10 @@ async function loadFriendsCards() {
         }
 
         var friendComments = await window.cardCounter.fetchCommentsByUserIds(friendUserIds, 50);
+        if (gen !== tabSwitchGeneration) return; // Tab changed, abort
+
         await resolveDisplayNames(friendComments);
+        if (gen !== tabSwitchGeneration) return; // Tab changed, abort
 
         loadingEl.style.display = 'none';
 
@@ -3479,7 +3523,24 @@ async function loadFriendsCards() {
             // Insert at the top of the list
             commentsList.insertBefore(bar, commentsList.firstChild);
         }
+
+        // Auto-clear notification badges when viewing friends tab
+        // (visual NEW markers stay until "mark all read" is clicked)
+        if (_pollState.unseenFriendDraws > 0) {
+            if (friendComments.length > 0) {
+                var newestTs = Math.max.apply(null, friendComments.map(function(c) { return c.timestamp || 0; }));
+                localStorage.setItem('tarot_friends_last_seen_ts', String(newestTs));
+            }
+            _pollState.unseenFriendDraws = 0;
+            _pollState.friendDrawsData = [];
+            updateNotificationBadges();
+
+            // Clear friend circles on landing page
+            var stack = document.getElementById('friendsCircleStack');
+            if (stack) stack.innerHTML = '';
+        }
     } catch (e) {
+        if (gen !== tabSwitchGeneration) return; // Tab changed, abort
         console.warn('Failed to load friends cards:', e.message);
         loadingEl.style.display = 'none';
         commentsList.innerHTML = buildFriendsInviteCta();
@@ -3726,6 +3787,7 @@ async function checkFriendsNewCards() {
         friends.slice(0, maxCircles).forEach(function(comment, index) {
             var circle = document.createElement('div');
             circle.className = 'friends-circle-item';
+            circle.dataset.userId = comment.userId;
             circle.style.animationDelay = (index * 0.06) + 's';
 
             var picUrl = comment.profilePicture || '';
@@ -3735,14 +3797,11 @@ async function checkFriendsNewCards() {
                 img.alt = '';
                 img.onerror = function() {
                     this.style.display = 'none';
-                    var fallback = document.createElement('div');
-                    fallback.className = 'friends-circle-item-default';
-                    fallback.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
-                    circle.insertBefore(fallback, circle.firstChild);
+                    circle.insertAdjacentHTML('afterbegin', getFriendCircleInitial(comment.userName));
                 };
                 circle.appendChild(img);
             } else {
-                circle.innerHTML = '<div class="friends-circle-item-default"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
+                circle.innerHTML = getFriendCircleInitial(comment.userName);
             }
 
             // Pulse ring
@@ -3767,6 +3826,16 @@ async function checkFriendsNewCards() {
 }
 
 function onFriendCircleClick(circleEl) {
+    // Update poll state — remove this friend's draws
+    var userId = circleEl ? circleEl.dataset.userId : null;
+    if (userId && _pollState.friendDrawsData.length > 0) {
+        _pollState.friendDrawsData = _pollState.friendDrawsData.filter(function(c) {
+            return c.userId !== userId;
+        });
+        _pollState.unseenFriendDraws = _pollState.friendDrawsData.length;
+        updateNotificationBadges();
+    }
+
     // Animate out the clicked circle
     if (circleEl) {
         circleEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
@@ -4370,14 +4439,11 @@ function renderFriendCircleStackFromState() {
             img.alt = '';
             img.onerror = function() {
                 this.style.display = 'none';
-                var fallback = document.createElement('div');
-                fallback.className = 'friends-circle-item-default';
-                fallback.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
-                circle.insertBefore(fallback, circle.firstChild);
+                circle.insertAdjacentHTML('afterbegin', getFriendCircleInitial(comment.userName));
             };
             circle.appendChild(img);
         } else {
-            circle.innerHTML = '<div class="friends-circle-item-default"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
+            circle.innerHTML = getFriendCircleInitial(comment.userName);
         }
 
         var pulse = document.createElement('span');
@@ -4406,6 +4472,7 @@ function renderReplyNotifCirclesFromState() {
 async function loadCardViewComments() {
     if (isLoadingComments) return;
     isLoadingComments = true;
+    var gen = tabSwitchGeneration;
 
     const commentsList = document.getElementById('commentsList');
     const loadingEl = getOrCreateLoadingEl();
@@ -4432,7 +4499,10 @@ async function loadCardViewComments() {
     }
 
     const comments = await window.cardCounter.fetchCommentsByCardId(cardViewData.id, null, 50);
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
+
     await resolveDisplayNames(comments);
+    if (gen !== tabSwitchGeneration) return; // Tab changed, abort
 
     loadingEl.style.display = 'none';
 
@@ -5051,10 +5121,7 @@ function testFriendsCircles() {
         img.alt = friend.name;
         img.onerror = function() {
             this.style.display = 'none';
-            var fb = document.createElement('div');
-            fb.className = 'friends-circle-item-default';
-            fb.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
-            circle.insertBefore(fb, circle.firstChild);
+            circle.insertAdjacentHTML('afterbegin', getFriendCircleInitial(friend.name));
         };
         circle.appendChild(img);
 
