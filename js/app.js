@@ -903,20 +903,9 @@ function startExperience() {
         return;
     }
 
-    // Increment global pick counter immediately
-    if (window.cardCounter && window.cardCounter.increment) {
-        window.cardCounter.increment('landing', 'landing_tap', getUserId()).then(function() {
-            if (window.cardCounter.getTotal) {
-                window.cardCounter.getTotal().then(function(total) {
-                    var el = document.getElementById('totalPickCount');
-                    var ctr = document.getElementById('totalCounter');
-                    if (el && total) {
-                        el.textContent = total.toLocaleString('th-TH');
-                        if (ctr) ctr.classList.add('show');
-                    }
-                });
-            }
-        });
+    // Increment global draw counter in Firebase (updates display automatically)
+    if (window.cardCounter && window.cardCounter.incrementGlobalDraw) {
+        window.cardCounter.incrementGlobalDraw();
     }
 
     // Play music on first user interaction (guaranteed to work)

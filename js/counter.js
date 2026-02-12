@@ -49,7 +49,7 @@ let isFirebaseInitialized = false;
 // ========================================
 // Local Cache System (reduces Firebase reads)
 // ========================================
-const CACHE_VERSION = 'v2'; // Increment to clear old caches
+const CACHE_VERSION = 'v3'; // Increment to clear old caches
 const CACHE_PREFIX = `tarot_cache_${CACHE_VERSION}_`;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes (default)
 const CACHE_DURATION_LONG = 30 * 60 * 1000; // 30 minutes (for rankings, hot comments)
@@ -76,6 +76,7 @@ const CACHE_DURATION_MEDIUM = 15 * 60 * 1000; // 15 minutes (for user-specific d
 
 // Cache durations per key type
 const CACHE_DURATIONS = {
+    globalDrawCount: CACHE_DURATION_LONG,
     totalPicks: CACHE_DURATION_LONG,
     cardRankings: CACHE_DURATION_LONG,
     hotComments: CACHE_DURATION_LONG,
@@ -236,11 +237,50 @@ async function handleCardPickCounter(cardId) {
     return newCount;
 }
 
-// Get total picks (with cache)
+// ========================================
+// Global Draw Counter (single atomic counter at /globalDrawCount)
+// ========================================
+async function incrementGlobalDrawCount() {
+    if (!isFirebaseInitialized || !database) return null;
+    try {
+        const ref = database.ref('globalDrawCount');
+        const result = await ref.transaction(function(current) {
+            return (current || 0) + 1;
+        });
+        clearCache('globalDrawCount');
+        if (result.committed) {
+            var newVal = result.snapshot.val();
+            updateTotalCounterDisplayValue(newVal);
+            return newVal;
+        }
+        return null;
+    } catch (error) {
+        console.warn('Failed to increment global draw count:', error.message);
+        return null;
+    }
+}
+
+async function getGlobalDrawCount() {
+    if (!isFirebaseInitialized || !database) return null;
+
+    var cached = getCached('globalDrawCount');
+    if (cached !== null) return cached;
+
+    try {
+        var snapshot = await database.ref('globalDrawCount').once('value');
+        var total = snapshot.val() || 0;
+        setCache('globalDrawCount', total);
+        return total;
+    } catch (error) {
+        console.warn('Failed to get global draw count:', error.message);
+        return null;
+    }
+}
+
+// Get total picks (legacy — sums per-card picks, used for analytics)
 async function getTotalPicks() {
     if (!isFirebaseInitialized || !database) return null;
 
-    // Check cache first
     const cached = getCached('totalPicks');
     if (cached !== null) return cached;
 
@@ -277,11 +317,11 @@ function updateTotalCounterDisplayValue(total) {
     }
 }
 
-// Load total picks once (NO real-time listener)
+// Load global draw count on page load
 async function loadTotalPicks() {
     if (!isFirebaseInitialized || !database) return;
 
-    const total = await getTotalPicks();
+    const total = await getGlobalDrawCount();
     updateTotalCounterDisplayValue(total);
 }
 
@@ -1018,6 +1058,8 @@ window.cardCounter = {
     increment: handleCardPickCounter,
     getCount: getCardCount,
     getTotal: getTotalPicks,
+    incrementGlobalDraw: incrementGlobalDrawCount,
+    getGlobalDrawCount: getGlobalDrawCount,
     updateDisplay: updateCounterDisplay,
     isEnabled: () => isFirebaseInitialized,
     // Comments & replies
