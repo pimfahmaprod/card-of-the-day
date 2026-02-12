@@ -1608,7 +1608,9 @@ header {
 
 .card-container.disabled {
     pointer-events: none;
-    /* Keep normal appearance, just disable clicks */
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 .card-container.selecting {
@@ -1765,6 +1767,77 @@ header {
     opacity: 1;
 }
 
+/* Center card info (name + quote + tap to continue) */
+.center-card-info {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    width: 300px;
+    padding-top: 18px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+}
+
+.center-card-container.show-info {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.center-card-container.show-info .center-card-info {
+    opacity: 1;
+}
+
+.center-card-info-name {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #C0C8E0;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.center-card-info-quote {
+    font-size: 0.88rem;
+    color: #9AAAD4;
+    font-style: italic;
+    line-height: 1.5;
+    margin-bottom: 18px;
+}
+
+.center-card-info-continue {
+    font-size: 0.8rem;
+    color: rgba(192, 200, 224, 0.5);
+    letter-spacing: 1px;
+    animation: pulseContinue 2s ease-in-out infinite;
+}
+
+@keyframes pulseContinue {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+.center-card-container.fly-to-header .center-card-info {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.center-card-container.fly-to-header {
+    animation: flyToHeader 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes flyToHeader {
+    0% {
+        transform: translate(-50%, -90%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-45vw, -90vh) scale(0.15);
+        opacity: 0;
+    }
+}
+
 .center-card {
     width: 100%;
     height: 100%;
@@ -1802,77 +1875,223 @@ header {
     overflow: hidden;
 }
 
-/* Result Panel */
+/* Result Panel — full-screen scrollable */
 .result-panel {
     position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     bottom: 0;
-    left: 50%;
-    width: 100%;
-    max-width: 520px;
-    background: var(--cream);
-    border-top: 4px solid var(--burgundy);
-    border-radius: 30px 30px 0 0;
-    padding: 30px;
+    background: rgba(13, 19, 51, 0.82);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     z-index: 1002;
-    transform: translateX(-50%) translateY(100%);
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0s 0.4s;
 }
 
 .result-panel.active {
-    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease, visibility 0s 0s;
 }
 
-.result-card-name {
+/* Entrance animations for content */
+.result-panel.active .result-sticky-card {
+    animation: resultFadeIn 0.5s ease 0.15s both;
+}
+
+.result-panel.active .result-glass-card {
+    animation: resultFadeUp 0.6s ease 0.4s both;
+}
+
+@keyframes resultFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes resultFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Content wrapper for centered layout */
+.result-content-wrapper {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.result-panel .comment-section {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+/* Sticky card at top of result panel — row layout: card left, info right */
+.result-sticky-card {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 24px 22px 20px;
+    gap: 18px;
+    background: rgba(13, 19, 51, 0.80);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: padding 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                gap 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                border-bottom-color 0.4s ease,
+                box-shadow 0.4s ease,
+                background 0.4s ease;
+}
+
+.result-sticky-card-img {
+    width: 120px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                border-radius 0.3s ease,
+                box-shadow 0.4s ease;
+    flex-shrink: 0;
+}
+
+/* Info container — always visible (card name + quote beside card) */
+.result-sticky-card-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    opacity: 1;
+    transition: opacity 0.35s ease, gap 0.3s ease;
+}
+
+.result-sticky-card-name {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1.8rem;
-    text-align: center;
-    color: var(--burgundy);
-    margin-bottom: 10px;
-    font-weight: 600;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #d4daf0;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1.3;
+    text-shadow: 0 0 16px rgba(154, 170, 212, 0.2);
+    transition: font-size 0.35s ease;
 }
 
-.result-quote {
+.result-sticky-card-quote {
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
-    font-size: 1.1rem;
-    text-align: center;
-    color: var(--burgundy);
-    margin-bottom: 15px;
-    padding: 12px;
-    background: rgba(160, 180, 220, 0.05);
-    border-radius: 10px;
-    border-left: 4px solid var(--burgundy);
+    font-size: 0.88rem;
+    color: rgba(192, 200, 224, 0.7);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: font-size 0.35s ease, -webkit-line-clamp 0s;
 }
 
+/* Minimized state — compact header bar */
+.result-sticky-card.minimized {
+    padding: 10px 20px;
+    gap: 14px;
+    border-bottom: 1px solid rgba(160, 180, 220, 0.12);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    background: rgba(13, 19, 51, 0.95);
+}
+
+.result-sticky-card.minimized .result-sticky-card-img {
+    width: 50px;
+    border-radius: 6px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+}
+
+.result-sticky-card.minimized .result-sticky-card-name {
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+}
+
+.result-sticky-card.minimized .result-sticky-card-quote {
+    font-size: 0.78rem;
+    -webkit-line-clamp: 1;
+}
+
+.result-sticky-card.minimized .result-sticky-card-info {
+    gap: 3px;
+}
+
+/* Sentinel — invisible marker for IntersectionObserver */
+.result-card-sentinel {
+    height: 1px;
+    width: 100%;
+}
+
+/* Card name & quote — hidden (shown in sticky header only) */
+.result-card-name,
+.result-quote-block,
+.result-star-divider {
+    display: none;
+}
+
+/* Glass card for interpretation */
+.result-glass-card {
+    background: rgba(13, 19, 51, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(154, 170, 212, 0.12);
+    border-radius: 16px;
+    padding: 20px 22px 24px;
+    margin-top: 12px;
+    margin-bottom: 70px; /* space for fixed bottom button */
+}
+
+/* Section header with star icon */
+.result-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 400;
+    font-size: 0.82rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(154, 170, 212, 0.6);
+}
+
+.result-section-icon {
+    flex-shrink: 0;
+}
+
+/* Interpretation — flows naturally, no internal scroll */
 .result-interpretation {
     font-size: 0.95rem;
-    line-height: 1.8;
+    line-height: 1.85;
     color: var(--burgundy);
     text-align: left;
     white-space: pre-line;
-    max-width: 600px;
-    margin: 0 auto;
-    max-height: 40vh;
-    overflow-y: auto;
-    padding-right: 8px;
-}
-
-.result-interpretation::-webkit-scrollbar {
-    width: 6px;
-}
-
-.result-interpretation::-webkit-scrollbar-track {
-    background: rgba(160, 180, 220, 0.1);
-    border-radius: 3px;
-}
-
-.result-interpretation::-webkit-scrollbar-thumb {
-    background: rgba(160, 180, 220, 0.3);
-    border-radius: 3px;
-}
-
-.result-interpretation::-webkit-scrollbar-thumb:hover {
-    background: rgba(160, 180, 220, 0.5);
+    padding-bottom: 4px;
 }
 
 /* Pick Counter */
@@ -2244,7 +2463,123 @@ footer {
 /* Comment Section */
 .comment-section {
     margin-top: 20px;
+    padding-bottom: 40px;
     text-align: center;
+}
+
+/* ===== Minimizable Comment Section ===== */
+
+/* Scroll-down arrow: hidden by default, shown when minimized */
+.scroll-down-arrow {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    display: none;
+    animation: scrollArrowBounce 1.5s ease-in-out infinite;
+}
+
+@keyframes scrollArrowBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+}
+
+/* Minimized: hide input group */
+.comment-section.minimized .comment-input-group {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-bottom: 0;
+    padding: 0;
+    pointer-events: none;
+    transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease;
+}
+
+.comment-section:not(.minimized) .comment-input-group {
+    max-height: 200px;
+    opacity: 1;
+    overflow: visible;
+    transition: max-height 0.4s ease, opacity 0.3s ease 0.1s, margin 0.35s ease;
+}
+
+/* Minimized: fixed bar at bottom of screen */
+.comment-section.minimized {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1003;
+    margin-top: 0;
+    padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+    max-width: none;
+    background: rgba(13, 19, 51, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(154, 170, 212, 0.1);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.comment-section.minimized .comment-form {
+    padding: 0;
+    background: transparent;
+    max-width: 520px;
+    margin: 0 auto;
+    transition: padding 0.35s ease, background 0.35s ease;
+}
+
+.comment-section:not(.minimized) .comment-form {
+    transition: padding 0.35s ease, background 0.35s ease;
+}
+
+/* Minimized button: compact pill style */
+.comment-section.minimized .comment-submit-btn {
+    padding: 12px 24px;
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    gap: 6px;
+    animation: none;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25), 0 0 8px rgba(154, 170, 212, 0.1);
+    background: linear-gradient(135deg, #151d48 0%, #1c2658 100%);
+    border-color: rgba(154, 170, 212, 0.2);
+}
+
+.comment-section.minimized .accept-btn-glow {
+    opacity: 0;
+}
+
+.comment-section.minimized .accept-btn-sparkles {
+    display: none;
+}
+
+.comment-section.minimized .accept-btn-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Show arrow when minimized */
+.comment-section.minimized .scroll-down-arrow {
+    display: inline-block;
+}
+
+/* Fade overlay: no longer needed (panel scrolls instead of interpretation) */
+.interpretation-fade-overlay {
+    display: none;
+}
+
+.interpretation-fade-overlay::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(to top, rgba(13, 19, 51, 0.85), transparent);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.interpretation-fade-overlay.hidden::before {
+    opacity: 0;
 }
 
 .comment-buttons-row {
@@ -2437,6 +2772,7 @@ footer {
 /* Accept Prophecy Button — Mystical Blessing Style */
 .comment-submit-btn {
     width: 100%;
+    max-width: 100%;
     padding: 16px 28px;
     border-radius: 30px;
     border: 1px solid rgba(154, 170, 212, 0.3);
@@ -5872,12 +6208,43 @@ footer {
         height: 429px;
     }
 
-    .result-panel {
-        padding: 20px;
+    .result-content-wrapper,
+    .result-panel .comment-section {
+        padding-left: 18px;
+        padding-right: 18px;
     }
 
-    .result-card-name {
-        font-size: 1.5rem;
+    .result-sticky-card {
+        padding: 20px 18px 16px;
+        gap: 16px;
+    }
+
+    .result-sticky-card-img {
+        width: 110px;
+    }
+
+    .result-sticky-card.minimized .result-sticky-card-img {
+        width: 48px;
+    }
+
+    .result-sticky-card-name {
+        font-size: 1.15rem;
+    }
+
+    .result-sticky-card-quote {
+        font-size: 0.82rem;
+    }
+
+    .result-sticky-card.minimized .result-sticky-card-name {
+        font-size: 0.88rem;
+    }
+
+    .result-sticky-card.minimized .result-sticky-card-quote {
+        font-size: 0.75rem;
+    }
+
+    .result-glass-card {
+        padding: 18px 18px 20px;
     }
 }
 
@@ -5961,6 +6328,53 @@ footer {
     .center-card-container {
         width: 200px;
         height: 357px;
+    }
+
+    .result-sticky-card {
+        padding: 16px 14px 14px;
+        gap: 14px;
+    }
+
+    .result-sticky-card-img {
+        width: 95px;
+    }
+
+    .result-sticky-card-name {
+        font-size: 1.05rem;
+    }
+
+    .result-sticky-card-quote {
+        font-size: 0.8rem;
+        -webkit-line-clamp: 2;
+    }
+
+    .result-sticky-card.minimized {
+        padding: 8px 14px;
+        gap: 10px;
+    }
+
+    .result-sticky-card.minimized .result-sticky-card-img {
+        width: 42px;
+    }
+
+    .result-sticky-card.minimized .result-sticky-card-name {
+        font-size: 0.82rem;
+    }
+
+    .result-sticky-card.minimized .result-sticky-card-quote {
+        font-size: 0.72rem;
+        -webkit-line-clamp: 1;
+    }
+
+    .result-glass-card {
+        padding: 16px 16px 18px;
+        border-radius: 14px;
+    }
+
+    .result-content-wrapper,
+    .result-panel .comment-section:not(.minimized) {
+        padding-left: 16px;
+        padding-right: 16px;
     }
 }
 

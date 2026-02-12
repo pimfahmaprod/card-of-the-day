@@ -203,13 +203,59 @@
                 <img id="centerCardImage" alt="Card">
             </div>
         </div>
+        <div class="center-card-info" id="centerCardInfo">
+            <div class="center-card-info-name" id="centerCardInfoName"></div>
+            <div class="center-card-info-quote" id="centerCardInfoQuote"></div>
+            <div class="center-card-info-continue" id="centerCardInfoContinue">แตะเพื่อดูคำทำนาย</div>
+        </div>
     </div>
 
     <!-- Result Panel -->
     <div class="result-panel" id="resultPanel">
-        <h3 class="result-card-name" id="resultCardName"></h3>
-        <p class="result-quote" id="resultQuote"></p>
-        <p class="result-interpretation" id="resultInterpretation"></p>
+        <!-- Sticky card that minimizes on scroll -->
+        <div class="result-sticky-card" id="resultStickyCard">
+            <img class="result-sticky-card-img" id="resultStickyCardImg" alt="Card">
+            <div class="result-sticky-card-info">
+                <span class="result-sticky-card-name" id="resultStickyCardName"></span>
+                <span class="result-sticky-card-quote" id="resultStickyCardQuote"></span>
+            </div>
+        </div>
+        <div class="result-card-sentinel" id="resultCardSentinel"></div>
+
+        <!-- Content wrapper for centered layout -->
+        <div class="result-content-wrapper">
+            <!-- Hero: Card name -->
+            <h3 class="result-card-name" id="resultCardName"></h3>
+
+            <!-- Decorative quote block -->
+            <div class="result-quote-block">
+                <span class="result-quote-mark">"</span>
+                <p class="result-quote" id="resultQuote"></p>
+                <span class="result-quote-mark result-quote-mark-end">"</span>
+            </div>
+
+            <!-- Star divider -->
+            <div class="result-star-divider">
+                <span class="result-divider-line"></span>
+                <svg class="result-divider-star" viewBox="0 0 24 24" fill="none" width="18" height="18">
+                    <path d="M12 2l2.09 6.26L20.18 9l-4.64 4.14L16.73 20 12 16.77 7.27 20l1.19-6.86L3.82 9l6.09-.74L12 2z" fill="rgba(154,170,212,0.5)" stroke="rgba(192,200,224,0.3)" stroke-width="0.5"/>
+                </svg>
+                <span class="result-divider-line"></span>
+            </div>
+
+            <!-- Interpretation glass card -->
+            <div class="result-glass-card">
+                <div class="result-section-header">
+                    <svg class="result-section-icon" viewBox="0 0 24 24" fill="none" width="16" height="16">
+                        <path d="M12 2l2.09 6.26L20.18 9l-4.64 4.14L16.73 20 12 16.77 7.27 20l1.19-6.86L3.82 9l6.09-.74L12 2z" fill="rgba(154,170,212,0.6)" stroke="none"/>
+                    </svg>
+                    <span data-i18n="result.prophecyTitle">คำทำนาย</span>
+                </div>
+                <p class="result-interpretation" id="resultInterpretation"></p>
+            </div>
+
+            <div class="interpretation-fade-overlay" id="interpretationFade"></div>
+        </div>
 
         <!-- Comment Section (shown immediately) -->
         <div class="comment-section">
@@ -235,6 +281,7 @@
                         <path d="M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke-linecap="round" opacity="0.5"/>
                     </svg>
                     <span id="commentSubmitText" data-i18n="result.acceptProphecy">น้อมรับคำทำนาย</span>
+                    <svg class="scroll-down-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg>
                 </button>
             </div>
         </div>

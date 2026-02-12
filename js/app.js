@@ -171,7 +171,7 @@ function refreshDynamicContent() {
             resultCardName.textContent = getCardName(currentCardData.name);
         }
         if (resultQuote) {
-            resultQuote.textContent = `"${getCardQuote(currentCardData)}"`;
+            resultQuote.textContent = getCardQuote(currentCardData);
         }
         if (resultInterpretation) {
             resultInterpretation.textContent = getCardInterpretation(currentCardData);
@@ -1415,50 +1415,155 @@ function selectCard(cardId, cardElement) {
     cardElement.style.transform = 'translateY(-20px) scale(1.15)';
     cardElement.style.zIndex = '100';
 
-    // Disable other cards
+    // Fade out and disable other cards
     document.querySelectorAll('.card-container').forEach(c => {
         if (c !== cardElement) {
+            c.style.opacity = '';
             c.classList.add('disabled');
         }
     });
 
-    // Step 2: Fade out card and show overlay
-    setTimeout(() => {
-        cardElement.classList.add('slide-out');
-    }, 300);
-
-    // Step 3: Show overlay and center card slides down
-    setTimeout(() => {
+    // Step 2: Fly selected card to center
+    setTimeout(function() {
+        // Show overlay
         document.getElementById('overlay').classList.add('active');
-        document.getElementById('centerCard').classList.add('active');
 
-        // Step 4: Flip center card
-        setTimeout(() => {
+        // Get grid card position (after lift transform)
+        var rect = cardElement.getBoundingClientRect();
+        var centerEl = document.getElementById('centerCard');
+
+        // Get center card's CSS dimensions (responsive: 280/240/200)
+        var centerStyle = getComputedStyle(centerEl);
+        var centerW = parseFloat(centerStyle.width);
+        var centerH = parseFloat(centerStyle.height);
+
+        // Reference point: center card is fixed at top:50% left:50%
+        var refX = window.innerWidth / 2;
+        var refY = window.innerHeight / 2;
+
+        // Grid card center
+        var rectCx = rect.left + rect.width / 2;
+        var rectCy = rect.top + rect.height / 2;
+
+        // Scale to match grid card size
+        var startScale = rect.width / centerW;
+
+        // Compute translate so visual center lands on grid card center
+        // With translate(tx,ty) scale(s) and transform-origin:center,
+        // visual center = (refX + centerW/2 + tx, refY + centerH/2 + ty)
+        var startTx = rectCx - refX - centerW / 2;
+        var startTy = rectCy - refY - centerH / 2;
+
+        // Position center card at grid card location (no transition)
+        centerEl.classList.add('active');
+        centerEl.style.transition = 'none';
+        centerEl.style.transform = 'translate(' + startTx + 'px, ' + startTy + 'px) scale(' + startScale + ')';
+        centerEl.style.opacity = '1';
+        centerEl.offsetHeight; // force reflow
+
+        // Hide original grid card
+        cardElement.style.transition = 'opacity 0.2s ease';
+        cardElement.style.opacity = '0';
+
+        // Animate to center position
+        centerEl.style.transition = 'transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        centerEl.style.transform = 'translate(-50%, -90%) scale(1)';
+
+        // Step 3: After arriving at center, flip
+        setTimeout(function() {
+            // Clean up inline styles — .active class handles final state
+            centerEl.style.transition = 'none';
+            centerEl.style.transform = '';
+            centerEl.style.opacity = '';
+            centerEl.offsetHeight;
+            centerEl.style.transition = '';
+
+            // Flip the card
             document.getElementById('centerCardInner').classList.add('flipped');
-            playSoundEffect('cardReveal'); // Play card reveal sound
+            playSoundEffect('cardReveal');
 
-            // Step 5: Show result panel
-            setTimeout(() => {
-                currentCardData = card; // Store for save image
-                document.getElementById('resultCardName').textContent = getCardName(card.name);
-                document.getElementById('resultQuote').textContent = `"${getCardQuote(card)}"`;
-                document.getElementById('resultInterpretation').textContent = getCardInterpretation(card);
-                document.getElementById('resultPanel').classList.add('active');
-                isAnimating = false;
+            // Step 4: Show card name + quote after flip, wait for user tap
+            setTimeout(function() {
+                document.getElementById('centerCardInfoName').textContent = getCardName(card.name);
+                document.getElementById('centerCardInfoQuote').textContent = '"' + getCardQuote(card) + '"';
+                var continueText = translations[currentLang] && translations[currentLang].result && translations[currentLang].result.tapToContinue;
+                document.getElementById('centerCardInfoContinue').textContent = continueText || 'Tap to see your reading';
 
-                // Initialize comment form
-                initCommentForm();
+                centerEl.classList.add('show-info');
 
-                // Auto-save draw to Firebase (FB users: empty comment; non-FB: store pending)
-                _currentDrawCommentId = null;
-                _pendingDraw = null;
-                autoSaveDrawOnReveal(card);
+                function onContinueTap() {
+                    centerEl.removeEventListener('click', onContinueTap);
+                    document.getElementById('overlay').removeEventListener('click', onContinueTap);
+                    proceedToResult(card);
+                }
+                centerEl.addEventListener('click', onContinueTap);
+                document.getElementById('overlay').addEventListener('click', onContinueTap);
+            }, 600);
+        }, 750);
+    }, 400);
+}
 
-                // Show comments button now that result is visible
-                updateCommentsBtnVisibility();
-            }, 800);
-        }, 500);
-    }, 600);
+// Step 6: Card flies to header + show result panel (called after user taps)
+function proceedToResult(card) {
+    currentCardData = card;
+
+    // Populate sticky card image, name and quote
+    document.getElementById('resultStickyCardImg').src = `images/tarot/${card.image}`;
+    document.getElementById('resultStickyCardName').textContent = getCardName(card.name);
+    document.getElementById('resultStickyCardQuote').textContent = getCardQuote(card);
+
+    document.getElementById('resultCardName').textContent = getCardName(card.name);
+    document.getElementById('resultQuote').textContent = getCardQuote(card);
+    document.getElementById('resultInterpretation').textContent = getCardInterpretation(card);
+
+    // Start sticky card expanded (hero state) — minimizes on scroll
+    document.getElementById('resultStickyCard').classList.remove('minimized');
+
+    // Animate center card flying to top-left corner
+    var centerCard = document.getElementById('centerCard');
+    centerCard.classList.remove('show-info');
+    centerCard.classList.add('fly-to-header');
+
+    // Show result panel after short delay (card is still flying)
+    setTimeout(() => {
+        const resultPanel = document.getElementById('resultPanel');
+        resultPanel.scrollTop = 0;
+        resultPanel.classList.add('active');
+    }, 200);
+
+    // Clean up center card + overlay after fly animation
+    setTimeout(() => {
+        var el = document.getElementById('centerCard');
+        el.classList.remove('active');
+        el.classList.remove('fly-to-header');
+        el.style.transition = '';
+        el.style.transform = '';
+        el.style.opacity = '';
+        document.getElementById('overlay').classList.remove('active');
+    }, 500);
+
+    // Fade out the selected card in the grid
+    if (selectedCardElement) {
+        selectedCardElement.style.transition = 'opacity 0.5s ease';
+        selectedCardElement.style.opacity = '0';
+    }
+
+    isAnimating = false;
+
+    // Initialize sticky card minimizer (scroll up = expand, scroll down = minimize)
+    initStickyCardObserver();
+
+    // Initialize comment form
+    initCommentForm();
+    initCommentMinimizer();
+
+    // Auto-save draw to Firebase (FB users: empty comment; non-FB: store pending)
+    _currentDrawCommentId = null;
+    _pendingDraw = null;
+    autoSaveDrawOnReveal(card);
+
+    // Show comments button now that result is visible
+    updateCommentsBtnVisibility();
 }
 
 // Close and reset
@@ -1472,6 +1577,23 @@ function closeResult() {
     if (typeof resetCommentForm === 'function') resetCommentForm();
     _currentDrawCommentId = null;
 
+    // Reset comment minimizer
+    var cs = document.querySelector('.comment-section');
+    if (cs) cs.classList.remove('minimized');
+    var rp = document.getElementById('resultPanel');
+    if (rp && rp._commentScrollHandler) {
+        rp.removeEventListener('scroll', rp._commentScrollHandler);
+        rp._commentScrollHandler = null;
+    }
+    _commentMinimized = false;
+
+    // Clean up sticky card observer
+    destroyStickyCardObserver();
+
+    // Reset sticky card state
+    var stickyCard = document.getElementById('resultStickyCard');
+    if (stickyCard) stickyCard.classList.remove('minimized');
+
     // Hide result panel
     document.getElementById('resultPanel').classList.remove('active');
 
@@ -1479,8 +1601,14 @@ function closeResult() {
     updateCommentsBtnVisibility();
 
     setTimeout(() => {
-        // Hide center card
-        document.getElementById('centerCard').classList.remove('active');
+        // Hide center card (may already be hidden) + clean up inline styles
+        var centerEl = document.getElementById('centerCard');
+        centerEl.classList.remove('active');
+        centerEl.classList.remove('fly-to-header');
+        centerEl.classList.remove('show-info');
+        centerEl.style.transition = '';
+        centerEl.style.transform = '';
+        centerEl.style.opacity = '';
 
         // Hide overlay
         document.getElementById('overlay').classList.remove('active');
@@ -1843,6 +1971,116 @@ function initCommentForm() {
     // Name input has been removed; nothing to initialize
 }
 
+// Sticky card observer: minimize card when scrolled past
+var _stickyCardScrollHandler = null;
+
+function initStickyCardObserver() {
+    destroyStickyCardObserver();
+
+    var stickyCard = document.getElementById('resultStickyCard');
+    var resultPanel = document.getElementById('resultPanel');
+    if (!stickyCard || !resultPanel) return;
+
+    var minimizeAt = 60;  // minimize when scrolled past card header
+    var restoreAt = 20;   // restore only when scrolled back above this (hysteresis)
+
+    _stickyCardScrollHandler = function() {
+        var isMinimized = stickyCard.classList.contains('minimized');
+        var scrollY = resultPanel.scrollTop;
+        if (!isMinimized && scrollY > minimizeAt) {
+            stickyCard.classList.add('minimized');
+        } else if (isMinimized && scrollY < restoreAt) {
+            stickyCard.classList.remove('minimized');
+        }
+    };
+
+    resultPanel.addEventListener('scroll', _stickyCardScrollHandler, { passive: true });
+}
+
+function destroyStickyCardObserver() {
+    if (_stickyCardScrollHandler) {
+        var resultPanel = document.getElementById('resultPanel');
+        if (resultPanel) {
+            resultPanel.removeEventListener('scroll', _stickyCardScrollHandler);
+        }
+        _stickyCardScrollHandler = null;
+    }
+}
+
+// Minimizable comment section: collapse when panel has scrollable content
+var _commentMinimized = false;
+var _panelLastScrollTop = 0;
+
+function initCommentMinimizer() {
+    var resultPanel = document.getElementById('resultPanel');
+    var commentSection = resultPanel ? resultPanel.querySelector('.comment-section') : null;
+
+    if (!resultPanel || !commentSection) return;
+
+    // Clean up previous listener
+    if (resultPanel._commentScrollHandler) {
+        resultPanel.removeEventListener('scroll', resultPanel._commentScrollHandler);
+        resultPanel._commentScrollHandler = null;
+    }
+
+    // Reset state
+    _commentMinimized = false;
+    _panelLastScrollTop = 0;
+    commentSection.classList.remove('minimized');
+
+    // Wait one frame for layout after text is set
+    requestAnimationFrame(function() {
+        // Measure content-only scrollability (without comment form in flow)
+        commentSection.classList.add('minimized');
+        var contentOnly = resultPanel.scrollHeight;
+        commentSection.classList.remove('minimized');
+        var isScrollable = contentOnly > resultPanel.clientHeight + 50;
+
+        if (!isScrollable) {
+            commentSection.classList.remove('minimized');
+            return;
+        }
+
+        // Long content: start minimized (fixed at bottom)
+        commentSection.classList.add('minimized');
+        _commentMinimized = true;
+
+        var bottomThreshold = 60;
+        var scrollUpDelta = -20;
+        var _expandedAt = 0; // timestamp when expanded, to prevent immediate re-minimize
+
+        resultPanel._commentScrollHandler = function() {
+            var st = resultPanel.scrollTop;
+            var now = Date.now();
+
+            if (_commentMinimized) {
+                // While minimized (fixed): check if scrolled to bottom of content
+                var atBottom = (st + resultPanel.clientHeight >= resultPanel.scrollHeight - bottomThreshold);
+                if (atBottom) {
+                    _commentMinimized = false;
+                    commentSection.classList.remove('minimized');
+                    _expandedAt = now;
+                }
+            } else {
+                // While expanded (in flow): re-minimize if user scrolls up significantly
+                // Guard: don't re-minimize within 500ms of expanding (scroll height changes)
+                if (now - _expandedAt > 500) {
+                    var delta = st - _panelLastScrollTop;
+                    var atBottom2 = (st + resultPanel.clientHeight >= resultPanel.scrollHeight - bottomThreshold);
+                    if (!atBottom2 && delta < scrollUpDelta) {
+                        _commentMinimized = true;
+                        commentSection.classList.add('minimized');
+                    }
+                }
+            }
+
+            _panelLastScrollTop = st;
+        };
+
+        resultPanel.addEventListener('scroll', resultPanel._commentScrollHandler, { passive: true });
+    });
+}
+
 // Auto-save draw to Firebase for FB-connected users (empty comment)
 async function autoSaveDrawOnReveal(card) {
     if (!card) return;
@@ -2066,6 +2304,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function submitComment() {
+    // If comment section is minimized, scroll panel to bottom instead of submitting
+    var commentSection = document.querySelector('.comment-section');
+    if (commentSection && commentSection.classList.contains('minimized')) {
+        var rPanel = document.getElementById('resultPanel');
+        if (rPanel) {
+            rPanel.scrollTo({ top: rPanel.scrollHeight, behavior: 'smooth' });
+        }
+        return;
+    }
+
     const commentInput = document.getElementById('commentText');
     const submitBtn = document.getElementById('commentSubmitBtn');
     const submitText = document.getElementById('commentSubmitText');
@@ -2205,6 +2453,11 @@ function showBlessingScreen(userName, comment) {
     } else {
         if (blessingLoginCta) blessingLoginCta.style.display = '';
     }
+
+    // Clean up sticky card observer
+    destroyStickyCardObserver();
+    var stickyCard = document.getElementById('resultStickyCard');
+    if (stickyCard) stickyCard.classList.remove('minimized');
 
     // Hide other panels
     document.getElementById('resultPanel').classList.remove('active');
@@ -6374,6 +6627,31 @@ waitForResources();
     document.addEventListener('touchstart', startMusicOnInteraction);
 
     console.log('Audio setup complete - waiting for user interaction');
+
+    // Pause music when tab is hidden, screen off, or app minimized
+    let wasPlayingBeforeHidden = false;
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            // Tab hidden / screen off / minimized
+            wasPlayingBeforeHidden = audioElement && !audioElement.paused;
+            if (audioElement && !audioElement.paused) {
+                audioElement.pause();
+            }
+        } else {
+            // Tab visible again — resume if was playing and not muted
+            if (wasPlayingBeforeHidden && audioElement && !isMuted && musicStarted) {
+                audioElement.play().catch(() => {});
+            }
+        }
+    });
+
+    // For iOS Safari: pagehide fires more reliably when closing/switching
+    window.addEventListener('pagehide', () => {
+        if (audioElement && !audioElement.paused) {
+            audioElement.pause();
+        }
+    });
 })();
 
 // =============================================

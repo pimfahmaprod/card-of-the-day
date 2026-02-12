@@ -52,6 +52,7 @@ const translations = {
             share: "บอกต่อ :",
             copy: "คัดลอก",
             acceptProphecy: "น้อมรับคำทำนาย",
+            prophecyTitle: "คำทำนาย",
             hideSection: "ซ่อน",
             view: "ส่อง",
             notSerious: "ยังไม่เอาจริง",
@@ -59,7 +60,8 @@ const translations = {
             wideImage: "รูปกว้าง",
             messenger: "ส่งทาง Messenger",
             line: "ส่งทาง LINE",
-            copyLink: "คัดลอกลิงก์"
+            copyLink: "คัดลอกลิงก์",
+            tapToContinue: "แตะเพื่อดูคำทำนาย"
         },
         comment: {
             yourName: "ชื่อของคุณ",
@@ -214,6 +216,7 @@ const translations = {
             share: "Share:",
             copy: "Copy",
             acceptProphecy: "Accept the Prophecy",
+            prophecyTitle: "Prophecy",
             hideSection: "Hide",
             view: "View",
             notSerious: "I drew it by accident",
@@ -221,7 +224,8 @@ const translations = {
             wideImage: "Wide image",
             messenger: "Share via Messenger",
             line: "Share via LINE",
-            copyLink: "Copy link"
+            copyLink: "Copy link",
+            tapToContinue: "Tap to see your reading"
         },
         comment: {
             yourName: "Your Name",
@@ -376,6 +380,7 @@ const translations = {
             share: "分享：",
             copy: "复制",
             acceptProphecy: "接受预言",
+            prophecyTitle: "预言",
             hideSection: "隐藏",
             view: "查看",
             notSerious: "手滑了啦~",
@@ -383,7 +388,8 @@ const translations = {
             wideImage: "宽图",
             messenger: "分享到Messenger",
             line: "分享到LINE",
-            copyLink: "复制链接"
+            copyLink: "复制链接",
+            tapToContinue: "点击查看解读"
         },
         comment: {
             yourName: "你的名字",
@@ -538,6 +544,7 @@ const translations = {
             share: "分享：",
             copy: "複製",
             acceptProphecy: "接受預言",
+            prophecyTitle: "預言",
             hideSection: "隱藏",
             view: "查看",
             notSerious: "手滑了啦~",
@@ -545,7 +552,8 @@ const translations = {
             wideImage: "寬圖",
             messenger: "分享到Messenger",
             line: "分享到LINE",
-            copyLink: "複製連結"
+            copyLink: "複製連結",
+            tapToContinue: "點擊查看解讀"
         },
         comment: {
             yourName: "你的名字",
@@ -700,6 +708,7 @@ const translations = {
             share: "공유:",
             copy: "복사",
             acceptProphecy: "예언 받아들이기",
+            prophecyTitle: "예언",
             hideSection: "숨기기",
             view: "보기",
             notSerious: "실수로 뽑았어요~",
@@ -707,7 +716,8 @@ const translations = {
             wideImage: "와이드 이미지",
             messenger: "메신저로 공유",
             line: "LINE으로 공유",
-            copyLink: "링크 복사"
+            copyLink: "링크 복사",
+            tapToContinue: "탭하여 해석 보기"
         },
         comment: {
             yourName: "이름",
@@ -862,6 +872,7 @@ const translations = {
             share: "シェア：",
             copy: "コピー",
             acceptProphecy: "予言を受け入れる",
+            prophecyTitle: "予言",
             hideSection: "隠す",
             view: "見る",
             notSerious: "手が滑った~",
@@ -869,7 +880,8 @@ const translations = {
             wideImage: "ワイド画像",
             messenger: "メッセンジャーでシェア",
             line: "LINEでシェア",
-            copyLink: "リンクをコピー"
+            copyLink: "リンクをコピー",
+            tapToContinue: "タップして占い結果を見る"
         },
         comment: {
             yourName: "名前",
@@ -1024,6 +1036,7 @@ const translations = {
             share: "Partager :",
             copy: "Copier",
             acceptProphecy: "Accepter la prophétie",
+            prophecyTitle: "Prophétie",
             hideSection: "Masquer",
             view: "Voir",
             notSerious: "Oups, main glissée~",
@@ -1031,7 +1044,8 @@ const translations = {
             wideImage: "Image large",
             messenger: "Partager via Messenger",
             line: "Partager via LINE",
-            copyLink: "Copier le lien"
+            copyLink: "Copier le lien",
+            tapToContinue: "Appuyez pour voir votre tirage"
         },
         comment: {
             yourName: "Votre nom",
