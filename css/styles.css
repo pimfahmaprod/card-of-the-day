@@ -287,7 +287,6 @@ html[lang="ja"] .landing-tagline {
     justify-content: center;
     gap: 5px;
     margin-top: 10px;
-    color: rgba(192, 200, 224, 0.5);
     font-size: 0.75rem;
     letter-spacing: 0.3px;
     opacity: 0;
@@ -8639,14 +8638,11 @@ footer {
     }
 }
 
-/* ==================== SOCIAL FEATURES HIDDEN BY DEFAULT ==================== */
-/* Unlocked via Easter egg: tap "Pimfahmaprod" brand text 5 times */
-body:not(.social-unlocked) #profileSwitcher,
-body:not(.social-unlocked) .footer-social,
-body:not(.social-unlocked) .blessing-login-cta,
-body:not(.social-unlocked) .result-page .share-section,
-body:not(.social-unlocked) .friends-cta,
-body:not(.social-unlocked) .social-loading-cta,
-body:not(.social-unlocked) #commentsBtn {
+/* ==================== SOCIAL FEATURES ==================== */
+/* Hide Facebook login and social sharing — only Social button visible */
+#profileSwitcher,
+.footer-social,
+.blessing-login-cta,
+.result-page .share-section {
     display: none !important;
 }

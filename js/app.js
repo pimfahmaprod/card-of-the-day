@@ -1889,7 +1889,7 @@ async function savePendingDrawAfterLogin() {
     if (!window.cardCounter || !window.cardCounter.submitComment) return;
 
     var userId = getUserId();
-    var userName = getSavedUserName() || 'Anonymous';
+    var userName = getSavedUserName() || 'Me';
     var commentText = draw.comment || '';
 
     var result = await window.cardCounter.submitComment(
@@ -1920,7 +1920,7 @@ async function savePendingDrawAfterLogin() {
         var blessingName = document.getElementById('blessingName');
         var blessingComment = document.getElementById('blessingComment');
         if (commentOverlay) commentOverlay.style.display = '';
-        if (blessingName) blessingName.textContent = userName === 'Anonymous' ? '' : '— ' + userName + ' —';
+        if (blessingName) blessingName.textContent = userName === 'Me' ? '' : '— ' + userName + ' —';
         if (blessingComment) blessingComment.textContent = commentText ? '"' + commentText + '"' : '';
     }
 }
@@ -2104,7 +2104,7 @@ async function autoSaveDrawOnReveal(card) {
         return;
     }
 
-    var userName = getSavedUserName() || 'Anonymous';
+    var userName = getSavedUserName() || 'Me';
 
     var result = await window.cardCounter.submitComment(
         card.id,
@@ -2378,7 +2378,7 @@ async function submitComment() {
     const submitText = document.getElementById('commentSubmitText');
 
     const isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
-    const userName = getSavedUserName() || 'Anonymous';
+    const userName = getSavedUserName() || 'Me';
     const commentText = commentInput.value.trim() || t('comment.placeholder');
 
     if (!currentCardData) {
@@ -2500,7 +2500,7 @@ function showBlessingScreen(userName, comment) {
 
     // Always show comment overlay with user's text
     if (commentOverlay) commentOverlay.style.display = '';
-    blessingName.textContent = userName === 'Anonymous' ? '' : `— ${userName} —`;
+    blessingName.textContent = userName === 'Me' ? '' : `— ${userName} —`;
     blessingComment.textContent = `"${comment}"`;
 
     if (isLoggedIn) {
@@ -3132,7 +3132,7 @@ function createFeedCard(comment) {
                 '</span>' +
             '</div>' +
             '<div class="feed-card-author">' +
-                '<span class="feed-card-name">' + escapeHtml(comment.userName || 'Anonymous') + '</span>' +
+                '<span class="feed-card-name">' + escapeHtml(comment.userName || 'Me') + '</span>' +
                 '<span class="feed-card-meta">' + t('feed.drewCard') + ' <strong>' + escapeHtml(comment.cardName || '') + '</strong><span class="feed-card-date">' + dateStr + '</span></span>' +
             '</div>' +
         '</div>' +
@@ -3210,7 +3210,7 @@ function createFeedCard(comment) {
         replyInput.disabled = true;
 
         var userId = getUserId();
-        var userName = getSavedUserName() || 'Anonymous';
+        var userName = getSavedUserName() || 'Me';
 
         if (window.cardCounter && window.cardCounter.submitReply) {
             var res = await window.cardCounter.submitReply(comment.id, userId, userName, text, getCurrentProfilePicture());
@@ -3347,7 +3347,7 @@ function createActivityCard(activity) {
             break;
         case 'replied':
             dotIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>';
-            actionText = t('activity.repliedTo') + ' <strong>' + escapeHtml(d.userName || 'Anonymous') + '</strong>';
+            actionText = t('activity.repliedTo') + ' <strong>' + escapeHtml(d.userName || 'Me') + '</strong>';
             detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>' +
                 '<div class="activity-card-info"><span class="activity-card-name">' + escapeHtml(d.cardName || '') + '</span>' +
                 '<span class="activity-card-comment">"' + escapeHtml(d.comment || '') + '"</span></div></div>';
@@ -3600,7 +3600,7 @@ function updateCommentsPanelUser() {
         userElement.textContent = savedName;
         userElement.classList.remove('anonymous');
     } else {
-        userElement.textContent = 'Anonymous';
+        userElement.textContent = 'Me';
         userElement.classList.add('anonymous');
     }
 }
@@ -3976,7 +3976,7 @@ async function loadMyCardComments() {
             isLoadingComments = false;
             return;
         }
-        var savedName = getSavedUserName() || 'Anonymous';
+        var savedName = getSavedUserName() || 'Me';
         localDraws.forEach(function(draw, idx) {
             var fakeComment = {
                 id: 'local_' + idx,
@@ -5339,7 +5339,7 @@ function createCommentCard(comment, showReplyBadge = false) {
             <div class="comment-card-header">
                 ${avatarHtml}
                 <div class="comment-card-author">
-                    <span class="comment-card-name">${escapeHtml(comment.userName || 'Anonymous')}</span>
+                    <span class="comment-card-name">${escapeHtml(comment.userName || 'Me')}</span>
                     <span class="comment-card-date">${dateStr}</span>
                 </div>
                 ${replyBadgeHtml}
@@ -5477,7 +5477,7 @@ function setupReplyFeature(card, comment) {
         replyInput.disabled = true;
 
         const userId = getUserId();
-        const userName = getSavedUserName() || 'Anonymous';
+        const userName = getSavedUserName() || 'Me';
 
         if (window.cardCounter && window.cardCounter.submitReply) {
             const result = await window.cardCounter.submitReply(comment.id, userId, userName, text, getCurrentProfilePicture());
@@ -5600,22 +5600,25 @@ async function loadReplies(card, commentId, commentData) {
 
     const currentUserId = getUserId();
 
-    // Build the original comment as the first left-aligned bubble
+    // Build the original comment as the first left-aligned bubble (skip if empty)
     var commentText = commentData.comment || commentData.text || '';
-    var commentDate = commentData.timestamp ? new Date(commentData.timestamp) : new Date();
-    var commentDateStr = formatCommentDate(commentDate);
-    var commentAvatar = getProfilePictureHtml(commentData);
-    var isSelfComment = commentOwnerId === currentUserId;
-    var firstBubble = '<div class="reply-item reply-bubble-left reply-original' + (isSelfComment ? ' reply-self' : '') + '">' +
-        '<div class="reply-avatar-col">' + commentAvatar + '</div>' +
-        '<div class="reply-bubble">' +
-            '<div class="reply-bubble-header">' +
-                '<span class="reply-name">' + escapeHtml(commentData.userName || 'Anonymous') + '</span>' +
-                '<span class="reply-date">' + commentDateStr + '</span>' +
+    var firstBubble = '';
+    if (commentText.trim()) {
+        var commentDate = commentData.timestamp ? new Date(commentData.timestamp) : new Date();
+        var commentDateStr = formatCommentDate(commentDate);
+        var commentAvatar = getProfilePictureHtml(commentData);
+        var isSelfComment = commentOwnerId === currentUserId;
+        firstBubble = '<div class="reply-item reply-bubble-left reply-original' + (isSelfComment ? ' reply-self' : '') + '">' +
+            '<div class="reply-avatar-col">' + commentAvatar + '</div>' +
+            '<div class="reply-bubble">' +
+                '<div class="reply-bubble-header">' +
+                    '<span class="reply-name">' + escapeHtml(commentData.userName || 'Me') + '</span>' +
+                    '<span class="reply-date">' + commentDateStr + '</span>' +
+                '</div>' +
+                '<div class="reply-text">' + escapeHtml(commentText) + '</div>' +
             '</div>' +
-            '<div class="reply-text">' + escapeHtml(commentText) + '</div>' +
-        '</div>' +
-    '</div>';
+        '</div>';
+    }
 
     if (replies.length > 0) {
         var replyBubbles = replies.map(function(reply) {
@@ -5632,7 +5635,7 @@ async function loadReplies(card, commentId, commentData) {
                     '<div class="reply-avatar-col">' + replyAvatar + '</div>' +
                     '<div class="reply-bubble">' +
                         '<div class="reply-bubble-header">' +
-                            '<span class="reply-name">' + escapeHtml(reply.userName || 'Anonymous') + '</span>' +
+                            '<span class="reply-name">' + escapeHtml(reply.userName || 'Me') + '</span>' +
                             '<span class="reply-date">' + replyDateStr + '</span>' +
                         '</div>' +
                         '<div class="reply-text">' + escapeHtml(reply.text || '') + '</div>' +
@@ -5642,7 +5645,7 @@ async function loadReplies(card, commentId, commentData) {
                 return '<div class="reply-item ' + bubbleClass + selfClass + '" data-reply-id="' + escapeHtml(reply.id || '') + '">' +
                     '<div class="reply-bubble">' +
                         '<div class="reply-bubble-header">' +
-                            '<span class="reply-name">' + escapeHtml(reply.userName || 'Anonymous') + '</span>' +
+                            '<span class="reply-name">' + escapeHtml(reply.userName || 'Me') + '</span>' +
                             '<span class="reply-date">' + replyDateStr + '</span>' +
                         '</div>' +
                         '<div class="reply-text">' + escapeHtml(reply.text || '') + '</div>' +
@@ -5758,7 +5761,7 @@ async function expandCommentCard(card, comment) {
                     cardId: rc.cardId,
                     cardName: rc.cardName,
                     cardImage: rc.cardImage || '',
-                    userName: rc.userName || 'Anonymous',
+                    userName: rc.userName || 'Me',
                     comment: rc.comment || '',
                     timestamp: rc.timestamp
                 });
@@ -5767,7 +5770,7 @@ async function expandCommentCard(card, comment) {
                     <div class="related-comment" data-comment-id="${rc.id}" data-comment='${commentDataJson.replace(/'/g, "&#39;")}' style="cursor: pointer;">
                         <div class="related-comment-header">
                             ${rcAvatar}
-                            <span class="related-comment-name">${escapeHtml(rc.userName || 'Anonymous')}</span>
+                            <span class="related-comment-name">${escapeHtml(rc.userName || 'Me')}</span>
                             ${replyBadge}
                             <span class="related-comment-date">${rcDateStr}</span>
                         </div>
@@ -5978,23 +5981,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 3000);
 
-    // Social features Easter egg: tap "Pimfahmaprod" 5 times to unlock (session only)
-    var _socialTapCount = 0;
-    var _socialTapTimer = null;
-    var brandEls = document.querySelectorAll('.landing-brand, .brand');
-    brandEls.forEach(function(el) {
-        el.style.cursor = 'pointer';
-        el.addEventListener('click', function() {
-            _socialTapCount++;
-            clearTimeout(_socialTapTimer);
-            _socialTapTimer = setTimeout(function() { _socialTapCount = 0; }, 2000);
-            if (_socialTapCount >= 5) {
-                _socialTapCount = 0;
-                document.body.classList.add('social-unlocked');
-                showToast('Social features unlocked ✦');
-            }
-        });
-    });
 });
 
 // Save Image Functions
@@ -7146,7 +7132,7 @@ waitForResources();
                 html += `
                     <div class="hot-comment-card">
                         <div class="hot-comment-header">
-                            <span class="hot-comment-user">${escapeHtml(comment.userName || 'Anonymous')}</span>
+                            <span class="hot-comment-user">${escapeHtml(comment.userName || 'Me')}</span>
                             <span class="hot-comment-replies">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M3 15a4 4 0 0 0 4 4h9a5 5 0 0 0 0-10H9a3 3 0 0 0 0 6h9"/>
