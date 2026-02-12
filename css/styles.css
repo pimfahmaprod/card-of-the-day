@@ -2606,6 +2606,569 @@ footer {
     color: var(--burgundy);
 }
 
+/* ==================== WALLPAPER BANNER ==================== */
+.wallpaper-banner {
+    display: block;
+    position: relative;
+    margin: 24px 0 0;
+    padding: 22px 24px;
+    border-radius: 16px;
+    background:
+        linear-gradient(135deg,
+            rgba(30, 25, 20, 0.95) 0%,
+            rgba(45, 38, 28, 0.9) 30%,
+            rgba(35, 30, 22, 0.95) 60%,
+            rgba(25, 22, 18, 0.95) 100%);
+    border: 1px solid rgba(195, 170, 120, 0.25);
+    text-decoration: none;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    animation: bannerFadeIn 0.8s ease 0.5s forwards;
+}
+
+@keyframes bannerFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.wallpaper-banner:hover {
+    border-color: rgba(195, 170, 120, 0.5);
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.3),
+        0 0 25px rgba(195, 170, 120, 0.1);
+}
+
+.wallpaper-banner:active {
+    transform: translateY(0) scale(0.99);
+}
+
+/* Animated border glow — rotating golden light around edges */
+.wallpaper-banner::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 17px;
+    background: conic-gradient(
+        from var(--banner-angle, 0deg),
+        transparent 0%,
+        rgba(195, 170, 120, 0.4) 10%,
+        transparent 20%,
+        transparent 50%,
+        rgba(195, 170, 120, 0.2) 60%,
+        transparent 70%
+    );
+    z-index: 0;
+    opacity: 0;
+    animation: bannerBorderReveal 1s ease 1.3s forwards, bannerBorderSpin 6s linear 1.3s infinite;
+    pointer-events: none;
+}
+
+.wallpaper-banner::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: 15px;
+    background:
+        linear-gradient(135deg,
+            rgba(30, 25, 20, 0.98) 0%,
+            rgba(45, 38, 28, 0.95) 30%,
+            rgba(35, 30, 22, 0.98) 60%,
+            rgba(25, 22, 18, 0.98) 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+@keyframes bannerBorderReveal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes bannerBorderSpin {
+    from { --banner-angle: 0deg; }
+    to { --banner-angle: 360deg; }
+}
+
+@property --banner-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+/* Shimmer sweep — light beam across the banner */
+.wallpaper-banner-glow {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        105deg,
+        transparent 30%,
+        rgba(225, 200, 140, 0.06) 45%,
+        rgba(225, 200, 140, 0.12) 50%,
+        rgba(225, 200, 140, 0.06) 55%,
+        transparent 70%
+    );
+    z-index: 1;
+    pointer-events: none;
+    animation: bannerShimmer 4s ease-in-out 2s infinite;
+}
+
+@keyframes bannerShimmer {
+    0% { left: -100%; }
+    40% { left: 150%; }
+    100% { left: 150%; }
+}
+
+/* Content */
+.wallpaper-banner-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.wallpaper-banner-stars {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    font-size: 0.7rem;
+    color: rgba(195, 170, 120, 0.4);
+    margin-bottom: 8px;
+    letter-spacing: 4px;
+}
+
+.wallpaper-banner-stars span:nth-child(1) {
+    animation: bannerStarTwinkle 3s ease-in-out infinite 0s;
+}
+.wallpaper-banner-stars span:nth-child(2) {
+    animation: bannerStarTwinkle 3s ease-in-out infinite 1s;
+}
+.wallpaper-banner-stars span:nth-child(3) {
+    animation: bannerStarTwinkle 3s ease-in-out infinite 2s;
+}
+
+@keyframes bannerStarTwinkle {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.3); color: rgba(235, 220, 170, 0.9); }
+}
+
+.wallpaper-banner-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: rgba(195, 170, 120, 0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.wallpaper-banner-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: rgba(235, 220, 185, 0.95);
+    letter-spacing: 1.5px;
+    line-height: 1.3;
+    margin-bottom: 6px;
+    text-shadow: 0 0 20px rgba(195, 170, 120, 0.15);
+}
+
+.wallpaper-banner-text-accent {
+    font-style: italic;
+    font-weight: 300;
+    font-size: 1.1rem;
+    color: rgba(195, 170, 120, 0.7);
+    margin: 0 4px;
+}
+
+.wallpaper-banner-sub {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 300;
+    color: rgba(195, 170, 120, 0.55);
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+}
+
+/* CTA button — pulsing gold pill */
+.wallpaper-banner-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 22px;
+    border-radius: 20px;
+    border: 1px solid rgba(195, 170, 120, 0.35);
+    background: linear-gradient(135deg, rgba(195, 170, 120, 0.1) 0%, rgba(195, 170, 120, 0.05) 100%);
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: rgba(225, 205, 160, 0.9);
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    animation: bannerCtaPulse 2.5s ease-in-out infinite;
+}
+
+.wallpaper-banner-cta svg {
+    transition: transform 0.3s ease;
+}
+
+.wallpaper-banner:hover .wallpaper-banner-cta {
+    background: linear-gradient(135deg, rgba(195, 170, 120, 0.2) 0%, rgba(195, 170, 120, 0.1) 100%);
+    border-color: rgba(195, 170, 120, 0.55);
+    color: rgba(240, 228, 195, 1);
+    box-shadow: 0 0 15px rgba(195, 170, 120, 0.15);
+}
+
+.wallpaper-banner:hover .wallpaper-banner-cta svg {
+    transform: translateX(3px);
+}
+
+@keyframes bannerCtaPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 rgba(195, 170, 120, 0);
+    }
+    50% {
+        box-shadow: 0 0 12px rgba(195, 170, 120, 0.12), 0 0 4px rgba(195, 170, 120, 0.08);
+    }
+}
+
+/* Decorative floating particles */
+.wallpaper-banner-decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: 16px;
+    z-index: 1;
+}
+
+.wallpaper-banner-orb {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(195, 170, 120, 0.6);
+    box-shadow: 0 0 6px rgba(195, 170, 120, 0.4);
+}
+
+.wallpaper-banner-orb-1 {
+    width: 3px;
+    height: 3px;
+    top: 20%;
+    left: 12%;
+    animation: bannerParticleFloat 5s ease-in-out infinite;
+}
+
+.wallpaper-banner-orb-2 {
+    width: 2px;
+    height: 2px;
+    top: 65%;
+    right: 15%;
+    animation: bannerParticleFloat 4s ease-in-out infinite 1.5s;
+}
+
+.wallpaper-banner-orb-3 {
+    width: 2.5px;
+    height: 2.5px;
+    top: 35%;
+    right: 8%;
+    animation: bannerParticleFloat 4.5s ease-in-out infinite 3s;
+}
+
+.wallpaper-banner-orb-4 {
+    width: 2px;
+    height: 2px;
+    top: 75%;
+    left: 25%;
+    animation: bannerParticleFloat 5.5s ease-in-out infinite 2s;
+}
+
+@keyframes bannerParticleFloat {
+    0%, 100% { opacity: 0; transform: translateY(0); }
+    20% { opacity: 0.7; }
+    50% { opacity: 0.4; transform: translateY(-18px); }
+    80% { opacity: 0.7; }
+}
+
+/* ===== StarryTale Calendar Banner ===== */
+.starrytale-banner {
+    display: block;
+    position: relative;
+    margin: 16px 0 0;
+    padding: 24px 24px 22px;
+    border-radius: 16px;
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(200, 180, 150, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 80%, rgba(140, 170, 210, 0.12) 0%, transparent 50%),
+        linear-gradient(160deg,
+            #c8b896 0%,
+            #d4c4a6 20%,
+            #c9bfa8 40%,
+            #b8c4d4 65%,
+            #9ab0cc 85%,
+            #8aa4c0 100%);
+    border: 1px solid rgba(180, 160, 130, 0.4);
+    text-decoration: none;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    animation: bannerFadeIn 0.8s ease 0.7s forwards;
+}
+
+.starrytale-banner:hover {
+    border-color: rgba(180, 160, 130, 0.65);
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.15),
+        0 0 25px rgba(180, 160, 130, 0.12);
+}
+
+.starrytale-banner:active {
+    transform: translateY(0) scale(0.99);
+}
+
+/* Oil-painting texture overlay */
+.starrytale-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background:
+        repeating-conic-gradient(rgba(160, 140, 110, 0.03) 0% 25%, transparent 0% 50%) 0 0 / 6px 6px,
+        radial-gradient(ellipse at 50% 0%, rgba(255, 245, 220, 0.2) 0%, transparent 55%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Shimmer sweep */
+.starrytale-shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        105deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.08) 45%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.08) 55%,
+        transparent 70%
+    );
+    z-index: 3;
+    pointer-events: none;
+    animation: starrytaleShimmer 5s ease-in-out 2.5s infinite;
+}
+
+@keyframes starrytaleShimmer {
+    0% { left: -100%; }
+    35% { left: 150%; }
+    100% { left: 150%; }
+}
+
+/* Soft cloud layers — drifting */
+.starrytale-clouds {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: 16px;
+    z-index: 1;
+}
+
+.starrytale-cloud {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(20px);
+}
+
+.starrytale-cloud-1 {
+    width: 120px;
+    height: 50px;
+    top: 10%;
+    right: -10%;
+    background: rgba(255, 250, 240, 0.18);
+    animation: cloudDrift 12s ease-in-out infinite;
+}
+
+.starrytale-cloud-2 {
+    width: 90px;
+    height: 40px;
+    bottom: 15%;
+    left: -5%;
+    background: rgba(180, 200, 230, 0.15);
+    animation: cloudDrift 10s ease-in-out infinite 3s reverse;
+}
+
+@keyframes cloudDrift {
+    0%, 100% { transform: translateX(0); opacity: 0.6; }
+    50% { transform: translateX(20px); opacity: 1; }
+}
+
+/* Constellation dots — small twinkling dots in an arc */
+.starrytale-constellation {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+.starrytale-constellation span {
+    display: block;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(80, 60, 30, 0.5);
+    box-shadow: 0 0 4px rgba(80, 60, 30, 0.3);
+}
+
+.starrytale-constellation span:nth-child(1) { animation: constellationPulse 4s ease-in-out infinite 0s; }
+.starrytale-constellation span:nth-child(2) { animation: constellationPulse 4s ease-in-out infinite 0.8s; transform: translateY(-3px); }
+.starrytale-constellation span:nth-child(3) { animation: constellationPulse 4s ease-in-out infinite 1.6s; transform: translateY(-5px); }
+.starrytale-constellation span:nth-child(4) { animation: constellationPulse 4s ease-in-out infinite 2.4s; transform: translateY(-3px); }
+.starrytale-constellation span:nth-child(5) { animation: constellationPulse 4s ease-in-out infinite 3.2s; }
+
+@keyframes constellationPulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.6); box-shadow: 0 0 8px rgba(80, 60, 30, 0.5); }
+}
+
+/* Content */
+.starrytale-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.starrytale-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    font-style: italic;
+    color: rgba(50, 35, 15, 0.85);
+    letter-spacing: 2px;
+    margin-bottom: 2px;
+    text-shadow: 0 1px 8px rgba(255, 245, 220, 0.4);
+}
+
+.starrytale-heading {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(55, 40, 20, 0.8);
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+}
+
+.starrytale-desc {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 300;
+    color: rgba(60, 50, 35, 0.65);
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+}
+
+/* CTA button — warm earth tone pill */
+.starrytale-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 24px;
+    border-radius: 20px;
+    border: 1px solid rgba(120, 90, 50, 0.3);
+    background: linear-gradient(135deg, rgba(120, 90, 50, 0.12) 0%, rgba(100, 80, 45, 0.06) 100%);
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: rgba(65, 45, 20, 0.85);
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    animation: starrytaleCtaPulse 3s ease-in-out infinite;
+}
+
+.starrytale-cta svg {
+    transition: transform 0.3s ease;
+}
+
+.starrytale-banner:hover .starrytale-cta {
+    background: linear-gradient(135deg, rgba(120, 90, 50, 0.22) 0%, rgba(100, 80, 45, 0.12) 100%);
+    border-color: rgba(120, 90, 50, 0.5);
+    color: rgba(50, 30, 10, 0.95);
+    box-shadow: 0 0 15px rgba(180, 160, 120, 0.2);
+}
+
+.starrytale-banner:hover .starrytale-cta svg {
+    transform: translateX(3px);
+}
+
+@keyframes starrytaleCtaPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 rgba(180, 160, 120, 0);
+    }
+    50% {
+        box-shadow: 0 0 14px rgba(180, 160, 120, 0.15), 0 0 5px rgba(180, 160, 120, 0.1);
+    }
+}
+
+/* Floating decorative stars */
+.starrytale-stars-decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: 16px;
+    z-index: 1;
+}
+
+.starrytale-star {
+    position: absolute;
+    font-size: 0.55rem;
+    color: rgba(90, 70, 40, 0.35);
+}
+
+.starrytale-star-1 {
+    top: 18%;
+    left: 8%;
+    animation: starryFloat 6s ease-in-out infinite;
+}
+
+.starrytale-star-2 {
+    top: 30%;
+    right: 10%;
+    animation: starryFloat 5s ease-in-out infinite 1.2s;
+}
+
+.starrytale-star-3 {
+    bottom: 22%;
+    left: 15%;
+    animation: starryFloat 5.5s ease-in-out infinite 2.4s;
+}
+
+.starrytale-star-4 {
+    bottom: 35%;
+    right: 18%;
+    animation: starryFloat 4.5s ease-in-out infinite 3.6s;
+}
+
+.starrytale-star-5 {
+    top: 55%;
+    left: 30%;
+    animation: starryFloat 7s ease-in-out infinite 1.8s;
+}
+
+@keyframes starryFloat {
+    0%, 100% { opacity: 0.15; transform: translateY(0) scale(0.8); }
+    30% { opacity: 0.6; }
+    50% { opacity: 0.4; transform: translateY(-10px) scale(1.2); }
+    70% { opacity: 0.6; }
+}
+
 /* Comment Section */
 .comment-section {
     margin-top: 20px;
