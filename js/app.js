@@ -1465,10 +1465,12 @@ function selectCard(cardId, cardElement) {
                 document.getElementById('centerCardInfoContinue').textContent = continueText || 'Tap to see your reading';
 
                 centerEl.classList.add('show-info');
+                spawnRevealParticles();
 
                 function onContinueTap() {
                     centerEl.removeEventListener('click', onContinueTap);
                     document.getElementById('overlay').removeEventListener('click', onContinueTap);
+                    clearRevealParticles();
                     proceedToResult(card);
                 }
                 centerEl.addEventListener('click', onContinueTap);
@@ -1476,6 +1478,31 @@ function selectCard(cardId, cardElement) {
             }, 600);
         }, 750);
     }, 400);
+}
+
+// Spawn ambient floating particles around revealed card
+function spawnRevealParticles() {
+    var container = document.getElementById('centerCardParticles');
+    if (!container) return;
+    container.innerHTML = '';
+    for (var i = 0; i < 15; i++) {
+        var p = document.createElement('div');
+        p.className = 'center-card-particle';
+        var size = 2 + Math.random() * 3;
+        var x = Math.random() * 100;
+        var y = 10 + Math.random() * 80;
+        var dur = 3 + Math.random() * 4;
+        var delay = Math.random() * 3;
+        var dy = -(15 + Math.random() * 25);
+        var dx = -10 + Math.random() * 20;
+        p.style.cssText = 'width:' + size + 'px;height:' + size + 'px;left:' + x + '%;top:' + y + '%;--p-dur:' + dur + 's;--p-delay:' + delay + 's;--p-dy:' + dy + 'px;--p-dx:' + dx + 'px;';
+        container.appendChild(p);
+    }
+}
+
+function clearRevealParticles() {
+    var container = document.getElementById('centerCardParticles');
+    if (container) container.innerHTML = '';
 }
 
 // Step 6: Card flies to header + show result panel (called after user taps)
@@ -1497,6 +1524,7 @@ function proceedToResult(card) {
     // Animate center card flying to top-left corner
     var centerCard = document.getElementById('centerCard');
     centerCard.classList.remove('show-info');
+    clearRevealParticles();
     centerCard.classList.add('fly-to-header');
 
     // Show result panel after short delay (card is still flying)

@@ -1791,7 +1791,8 @@ header {
     perspective: 1000px;
     transform: translate(-50%, -90%) scale(0);
     opacity: 0;
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, filter 1.5s ease;
+    filter: drop-shadow(0 0 0 transparent);
     pointer-events: none;
 }
 
@@ -1800,15 +1801,81 @@ header {
     opacity: 1;
 }
 
-/* Center card info (name + quote + tap to continue) */
+/* ===== Radial aura glow behind card ===== */
+.center-card-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 380px;
+    height: 600px;
+    transform: translate(-50%, -50%) scale(0.6);
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center,
+        rgba(140, 165, 220, 0.45) 0%,
+        rgba(120, 150, 210, 0.25) 30%,
+        rgba(100, 130, 200, 0.1) 55%,
+        transparent 75%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.center-card {
+    z-index: 2;
+}
+
+.center-card-container.show-info .center-card-aura {
+    animation: auraAppear 1.8s ease-out forwards, auraBreath 3s ease-in-out 1.8s infinite;
+}
+
+@keyframes auraAppear {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes auraBreath {
+    0%, 100% { opacity: 0.85; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* ===== Floating particles container ===== */
+.center-card-particles {
+    position: absolute;
+    top: -60px;
+    left: -40px;
+    right: -40px;
+    bottom: -120px;
+    pointer-events: none;
+    z-index: 0;
+    overflow: visible;
+}
+
+.center-card-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(192, 200, 240, 0.7);
+    box-shadow: 0 0 6px rgba(192, 200, 240, 0.5);
+    opacity: 0;
+    animation: revealParticleFloat var(--p-dur, 4s) ease-in-out var(--p-delay, 0s) infinite;
+}
+
+@keyframes revealParticleFloat {
+    0% { opacity: 0; transform: translateY(0) scale(0.5); }
+    15% { opacity: 0.8; }
+    50% { opacity: 0.4; transform: translateY(var(--p-dy, -30px)) translateX(var(--p-dx, 5px)) scale(1); }
+    85% { opacity: 0.6; }
+    100% { opacity: 0; transform: translateY(0) scale(0.5); }
+}
+
+/* ===== Center card info (name + quote + tap to continue) ===== */
 .center-card-info {
     position: absolute;
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
-    width: 300px;
-    padding-top: 18px;
+    width: 320px;
+    padding-top: 16px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.8s ease;
@@ -1823,54 +1890,127 @@ header {
     opacity: 1;
 }
 
+/* Top decorative stars */
+.center-card-info-stars {
+    font-size: 0.6rem;
+    letter-spacing: 8px;
+    color: rgba(154, 170, 212, 0.4);
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: revealInfoSlideUp 0.6s ease forwards 0.1s;
+}
+
+.center-card-container:not(.show-info) .center-card-info-stars {
+    animation: none;
+    opacity: 0;
+}
+
+/* Card name — Cinzel Decorative with shimmer */
 .center-card-info-name {
-    font-size: 1.15rem;
-    font-weight: 600;
-    color: #C0C8E0;
-    letter-spacing: 0.5px;
+    font-family: 'Cinzel Decorative', 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1.3;
     margin-bottom: 8px;
+    background: linear-gradient(
+        105deg,
+        #a0aed4 0%,
+        #d4daf0 25%,
+        #f0f4ff 45%,
+        #d4daf0 55%,
+        #a0aed4 75%,
+        #d4daf0 100%
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 12px rgba(154, 170, 212, 0.3)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+    animation: cardNameShimmer 4s ease-in-out infinite;
+    opacity: 0;
+    transform: translateY(10px);
 }
 
+.center-card-container.show-info .center-card-info-name {
+    animation: revealInfoSlideUp 0.7s ease forwards 0.2s, cardNameShimmer 4s ease-in-out 1s infinite;
+}
+
+/* Decorative divider: ── ☽ ── */
+.center-card-info-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: revealInfoSlideUp 0.6s ease forwards 0.35s;
+}
+
+.center-card-container:not(.show-info) .center-card-info-divider {
+    animation: none;
+    opacity: 0;
+}
+
+.center-card-info-divider span:first-child,
+.center-card-info-divider span:last-child {
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(154, 170, 212, 0.4), transparent);
+}
+
+.center-card-info-divider span:nth-child(2) {
+    font-size: 0.75rem;
+    color: rgba(154, 170, 212, 0.5);
+}
+
+/* Quote */
 .center-card-info-quote {
-    font-size: 0.88rem;
-    color: #9AAAD4;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.92rem;
+    color: rgba(192, 200, 224, 0.8);
     font-style: italic;
-    line-height: 1.5;
-    margin-bottom: 18px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(10px);
 }
 
+.center-card-container.show-info .center-card-info-quote {
+    animation: revealInfoSlideUp 0.7s ease forwards 0.5s;
+}
+
+/* Tap to continue — pulsing with chevrons */
 .center-card-info-continue {
-    font-size: 0.8rem;
-    color: rgba(192, 200, 224, 0.5);
-    letter-spacing: 1px;
-    animation: pulseContinue 2s ease-in-out infinite;
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 300;
+    color: rgba(192, 200, 224, 0.45);
+    letter-spacing: 1.5px;
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+.center-card-container.show-info .center-card-info-continue {
+    animation: revealInfoSlideUp 0.6s ease forwards 0.7s, pulseContinue 2.5s ease-in-out 1.3s infinite;
+}
+
+/* Slide-up reveal keyframe for staggered info items */
+@keyframes revealInfoSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulseContinue {
     0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
+    50% { opacity: 1; color: rgba(210, 218, 240, 0.7); }
 }
 
-.center-card-container.fly-to-header .center-card-info {
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.center-card-container.fly-to-header {
-    animation: flyToHeader 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes flyToHeader {
-    0% {
-        transform: translate(-50%, -90%) scale(1);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(-45vw, -90vh) scale(0.15);
-        opacity: 0;
-    }
-}
-
+/* ===== Card face — enhanced glow on flip ===== */
 .center-card {
     width: 100%;
     height: 100%;
@@ -1886,6 +2026,44 @@ header {
 .center-card .card-face {
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+/* Glow on the container (filter on preserve-3d breaks backface-visibility) */
+.center-card-container.show-info {
+    filter:
+        drop-shadow(0 0 20px rgba(154, 170, 212, 0.35))
+        drop-shadow(0 0 50px rgba(120, 145, 210, 0.2))
+        drop-shadow(0 0 80px rgba(100, 130, 200, 0.12));
+}
+
+/* ===== Fly to header ===== */
+.center-card-container.fly-to-header .center-card-info {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.center-card-container.fly-to-header .center-card-aura {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.center-card-container.fly-to-header {
+    filter: none;
+}
+
+.center-card-container.fly-to-header {
+    animation: flyToHeader 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes flyToHeader {
+    0% {
+        transform: translate(-50%, -90%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-45vw, -90vh) scale(0.15);
+        opacity: 0;
+    }
 }
 
 /* Overlay */
@@ -2075,15 +2253,35 @@ header {
 }
 
 .result-sticky-card-name {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.25rem;
+    font-family: 'Cinzel Decorative', 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
     font-weight: 700;
-    color: #d4daf0;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
     text-transform: uppercase;
     line-height: 1.3;
-    text-shadow: 0 0 16px rgba(154, 170, 212, 0.2);
-    transition: font-size 0.35s ease;
+    transition: font-size 0.35s ease, letter-spacing 0.35s ease;
+    /* Silver shimmer text effect */
+    background: linear-gradient(
+        105deg,
+        #b0bce0 0%,
+        #d4daf0 20%,
+        #f0f2ff 40%,
+        #d4daf0 50%,
+        #b0bce0 60%,
+        #d4daf0 80%,
+        #f0f2ff 100%
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: cardNameShimmer 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px rgba(154, 170, 212, 0.25)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes cardNameShimmer {
+    0% { background-position: 250% center; }
+    100% { background-position: -250% center; }
 }
 
 .result-sticky-card-quote {
