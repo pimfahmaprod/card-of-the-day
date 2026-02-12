@@ -1744,6 +1744,22 @@ header {
     transform: rotateY(180deg);
 }
 
+/* iOS Safari: backface-visibility fallback via opacity fade at midpoint */
+.card .card-front {
+    opacity: 0;
+    transition: opacity 0.12s ease 0.15s;
+}
+.card .card-back {
+    opacity: 1;
+    transition: opacity 0.12s ease 0.15s;
+}
+.card.flipped .card-front {
+    opacity: 1;
+}
+.card.flipped .card-back {
+    opacity: 0;
+}
+
 .card-face {
     position: absolute;
     width: 100%;
@@ -2322,10 +2338,24 @@ header {
     transform: rotateY(180deg);
 }
 
+/* iOS Safari: backface-visibility fallback via opacity fade at midpoint */
 .center-card .card-face {
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-    transition: box-shadow 1.5s ease;
+}
+.center-card .card-front {
+    opacity: 0;
+    transition: opacity 0.15s ease 0.2s, box-shadow 1.5s ease;
+}
+.center-card .card-back {
+    opacity: 1;
+    transition: opacity 0.15s ease 0.2s, box-shadow 1.5s ease;
+}
+.center-card.flipped .card-front {
+    opacity: 1;
+}
+.center-card.flipped .card-back {
+    opacity: 0;
 }
 
 /* Glow on card faces (box-shadow instead of filter to preserve 3D context on iOS Safari) */

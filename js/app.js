@@ -937,6 +937,12 @@ function startExperience() {
     spinningCardWrapper.style.animation = 'none';
     spinningCardWrapper.style.transform = 'rotateY(180deg)';
 
+    // Stop face visibility animations and force back face visible
+    var frontFace = spinningCard.querySelector('.spinning-card-front');
+    var backFace = spinningCard.querySelector('.spinning-card-back');
+    if (frontFace) { frontFace.style.animation = 'none'; frontFace.style.visibility = 'hidden'; }
+    if (backFace) { backFace.style.animation = 'none'; backFace.style.visibility = 'visible'; }
+
     // Step 2: Straighten the card (remove tilt)
     spinningCard.style.transition = 'transform 0.5s ease-out';
     spinningCard.style.transform = 'rotate(0deg)';
