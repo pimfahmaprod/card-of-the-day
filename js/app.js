@@ -26,6 +26,9 @@
  * - setLanguage(lang) - Changes UI language
  */
 
+// Disable right-click context menu
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
 let tarotData = null;
 let selectedCardElement = null;
 let isAnimating = false;
