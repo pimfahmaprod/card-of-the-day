@@ -592,8 +592,26 @@ html[lang="ja"] .landing-tagline {
     object-fit: cover;
 }
 
+.spinning-card-front {
+    animation: spinFrontVis 3s step-end infinite;
+}
+
 .spinning-card-back {
     transform: rotateY(180deg);
+    animation: spinBackVis 3s step-end infinite;
+}
+
+/* iOS Safari: backface-visibility breaks with child animations.
+   Use synced visibility animations as a robust fallback. */
+@keyframes spinFrontVis {
+    0%    { visibility: visible; }
+    25%   { visibility: hidden; }   /* 90deg – back starts facing */
+    75%   { visibility: visible; }  /* 270deg – front starts facing */
+}
+@keyframes spinBackVis {
+    0%    { visibility: hidden; }
+    25%   { visibility: visible; }
+    75%   { visibility: hidden; }
 }
 
 @keyframes spinOnY {

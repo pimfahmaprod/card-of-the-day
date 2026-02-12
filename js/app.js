@@ -1114,6 +1114,148 @@ function renderCards() {
 
     // Apply stacked layout initially (animation triggered later)
     applyStackedLayout();
+
+    // Setup drag-to-select (once per cardGrid element)
+    if (!cardGrid._dragSetup) {
+        setupCardDrag(cardGrid);
+        cardGrid._dragSetup = true;
+    }
+}
+
+// Drag upward to select a card — drag up ≥ half the card height to confirm
+function setupCardDrag(cardGrid) {
+    var dragCard = null;
+    var startY = 0;
+    var startX = 0;
+    var isDragging = false;
+    var dragDist = 0;
+    var preventNextClick = false;
+
+    function onDragStart(clientX, clientY, container) {
+        if (isAnimating) return;
+        if (!container.classList.contains('spread')) return;
+
+        dragCard = container;
+        startY = clientY;
+        startX = clientX;
+        isDragging = false;
+        dragDist = 0;
+        // Allow the dragged card to render above the grid boundary
+        cardGrid.style.overflow = 'visible';
+    }
+
+    function onDragMove(clientX, clientY, e) {
+        if (!dragCard) return;
+
+        dragDist = startY - clientY; // positive = up
+        var dx = Math.abs(clientX - startX);
+
+        // Start drag only if moving mostly upward past a small threshold
+        if (!isDragging && dragDist > 8 && dragDist > dx) {
+            isDragging = true;
+            dragCard.style.transition = 'none';
+            dragCard.style.zIndex = '200';
+        }
+
+        if (isDragging) {
+            if (e && e.cancelable) e.preventDefault();
+
+            var clampedDist = Math.max(0, dragDist);
+            var threshold = dragCard.offsetHeight;
+            var progress = Math.min(clampedDist / threshold, 1);
+
+            dragCard.style.transform = 'translateY(' + (-clampedDist) + 'px) scale(' + (1 + progress * 0.15) + ')';
+            dragCard.style.opacity = String(1 - progress * 0.3);
+
+            // Trigger selection immediately at 100% card height
+            if (clampedDist >= threshold) {
+                var card = dragCard;
+                var cardId = parseInt(card.dataset.cardId);
+
+                // Reset drag state
+                dragCard = null;
+                isDragging = false;
+                dragDist = 0;
+                startY = 0;
+                startX = 0;
+
+                preventNextClick = true;
+                setTimeout(function() { preventNextClick = false; }, 100);
+
+                card.style.opacity = '';
+                card.style.transition = '';
+                cardGrid.style.overflow = '';
+                selectCard(cardId, card);
+            }
+        }
+    }
+
+    function onDragEnd() {
+        if (!dragCard) return;
+
+        var card = dragCard;
+        var wasDragging = isDragging;
+
+        // Reset state
+        dragCard = null;
+        isDragging = false;
+        dragDist = 0;
+        startY = 0;
+        startX = 0;
+
+        if (!wasDragging) return;
+
+        // Block the click event that follows a drag on mouse
+        preventNextClick = true;
+        setTimeout(function() { preventNextClick = false; }, 100);
+
+        // Didn't reach threshold — snap back
+        card.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease';
+        card.style.transform = '';
+        card.style.opacity = '';
+        card.style.zIndex = '';
+        setTimeout(function() {
+            card.style.transition = '';
+            cardGrid.style.overflow = '';
+        }, 300);
+    }
+
+    // Touch events (delegated on cardGrid)
+    cardGrid.addEventListener('touchstart', function(e) {
+        var container = e.target.closest('.card-container');
+        if (container) onDragStart(e.touches[0].clientX, e.touches[0].clientY, container);
+    }, { passive: true });
+
+    cardGrid.addEventListener('touchmove', function(e) {
+        if (dragCard) onDragMove(e.touches[0].clientX, e.touches[0].clientY, e);
+    }, { passive: false });
+
+    cardGrid.addEventListener('touchend', onDragEnd);
+    cardGrid.addEventListener('touchcancel', onDragEnd);
+
+    // Mouse events
+    cardGrid.addEventListener('mousedown', function(e) {
+        var container = e.target.closest('.card-container');
+        if (container) {
+            e.preventDefault(); // prevent text selection during drag
+            onDragStart(e.clientX, e.clientY, container);
+        }
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (dragCard) onDragMove(e.clientX, e.clientY, e);
+    });
+
+    document.addEventListener('mouseup', onDragEnd);
+
+    // Block click after a mouse drag (capture phase fires before card's click handler)
+    cardGrid.addEventListener('click', function(e) {
+        if (preventNextClick) {
+            e.stopPropagation();
+            e.preventDefault();
+            preventNextClick = false;
+        }
+    }, true);
 }
 
 // Apply stacked layout (initial state) - uses grid card size for consistent sizing
