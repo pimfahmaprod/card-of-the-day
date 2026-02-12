@@ -2703,6 +2703,11 @@ function goToLandingPage() {
         landingPage.classList.remove('hidden');
         landingPage.style.pointerEvents = 'auto';
 
+        // Refresh draw counter (fresh from Firebase, skip cache)
+        if (window.cardCounter && window.cardCounter.refreshDrawCount) {
+            window.cardCounter.refreshDrawCount();
+        }
+
         // Restore UI buttons hidden during draw page
         const langSwitcher = document.querySelector('.lang-switcher');
         const muteBtn = document.querySelector('.mute-btn');

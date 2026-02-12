@@ -49,7 +49,7 @@ let isFirebaseInitialized = false;
 // ========================================
 // Local Cache System (reduces Firebase reads)
 // ========================================
-const CACHE_VERSION = 'v3'; // Increment to clear old caches
+const CACHE_VERSION = 'v4'; // Increment to clear old caches
 const CACHE_PREFIX = `tarot_cache_${CACHE_VERSION}_`;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes (default)
 const CACHE_DURATION_LONG = 30 * 60 * 1000; // 30 minutes (for rankings, hot comments)
@@ -76,7 +76,7 @@ const CACHE_DURATION_MEDIUM = 15 * 60 * 1000; // 15 minutes (for user-specific d
 
 // Cache durations per key type
 const CACHE_DURATIONS = {
-    globalDrawCount: CACHE_DURATION_LONG,
+    globalDrawCount: 60 * 1000, // 1 minute only — keep fresh
     totalPicks: CACHE_DURATION_LONG,
     cardRankings: CACHE_DURATION_LONG,
     hotComments: CACHE_DURATION_LONG,
@@ -241,6 +241,13 @@ async function handleCardPickCounter(cardId) {
 // Global Draw Counter (uses cardPicks/_total for Firebase rules compatibility)
 // ========================================
 async function incrementGlobalDrawCount() {
+    // Optimistic UI update: +1 immediately before Firebase responds
+    var countEl = document.getElementById('totalPickCount');
+    if (countEl) {
+        var current = parseInt(countEl.textContent.replace(/[^0-9]/g, ''), 10) || 0;
+        updateTotalCounterDisplayValue(current + 1);
+    }
+
     if (!isFirebaseInitialized || !database) return null;
     try {
         var ref = database.ref('cardPicks/_total');
@@ -275,6 +282,14 @@ async function getGlobalDrawCount() {
         console.warn('Failed to get global draw count:', error.message);
         return null;
     }
+}
+
+// Refresh draw count — skip cache, fetch fresh from Firebase
+async function refreshDrawCount() {
+    if (!isFirebaseInitialized || !database) return;
+    clearCache('globalDrawCount');
+    var total = await getGlobalDrawCount();
+    updateTotalCounterDisplayValue(total);
 }
 
 // Get total picks (legacy — sums per-card picks, used for analytics)
@@ -1061,6 +1076,7 @@ window.cardCounter = {
     getTotal: getTotalPicks,
     incrementGlobalDraw: incrementGlobalDrawCount,
     getGlobalDrawCount: getGlobalDrawCount,
+    refreshDrawCount: refreshDrawCount,
     updateDisplay: updateCounterDisplay,
     isEnabled: () => isFirebaseInitialized,
     // Comments & replies
