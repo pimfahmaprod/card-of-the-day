@@ -541,6 +541,7 @@ html[lang="ja"] .landing-tagline {
     height: 321px;
     perspective: 1500px;
     cursor: pointer;
+    -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
     margin-top: auto;
     margin-bottom: auto;
@@ -551,6 +552,7 @@ html[lang="ja"] .landing-tagline {
     position: relative;
     width: 100%;
     height: 100%;
+    -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
     transform-origin: center center;
     /* Spin around Y-axis (vertical) */
@@ -562,6 +564,7 @@ html[lang="ja"] .landing-tagline {
     position: relative;
     width: 100%;
     height: 100%;
+    -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
     transform-origin: center center;
     /* Tilt so diagonal (top-left to bottom-right) becomes vertical
@@ -574,6 +577,7 @@ html[lang="ja"] .landing-tagline {
     position: absolute;
     width: 100%;
     height: 100%;
+    -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     border-radius: 12px;
     overflow: hidden;
@@ -1713,6 +1717,7 @@ header {
     width: 100%;
     height: 100%;
     position: relative;
+    -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
     transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -1725,6 +1730,7 @@ header {
     position: absolute;
     width: 100%;
     height: 100%;
+    -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     border-radius: 8px;
     overflow: hidden;
@@ -1817,6 +1823,7 @@ header {
         linear-gradient(180deg, #030510 0%, #080e28 30%, #0c1440 50%, #080e28 70%, #030510 100%);
     animation: galaxyDrift 25s ease-in-out infinite;
     will-change: transform;
+    -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
 }
 
@@ -1842,6 +1849,7 @@ header {
     inset: 0;
     z-index: 2;
     will-change: background-position;
+    -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     background-image:
         radial-gradient(1.2px 1.2px at 8% 12%, #fff 50%, transparent 100%),
@@ -2047,6 +2055,7 @@ header {
 }
 
 .card-front {
+    -webkit-transform: rotateY(180deg);
     transform: rotateY(180deg);
     background: white;
 }
@@ -2063,8 +2072,7 @@ header {
     perspective: 1000px;
     transform: translate(-50%, -90%) scale(0);
     opacity: 0;
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, filter 1.5s ease;
-    filter: drop-shadow(0 0 0 transparent);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
     pointer-events: none;
 }
 
@@ -2287,6 +2295,7 @@ header {
     width: 100%;
     height: 100%;
     position: relative;
+    -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
     transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -2298,14 +2307,16 @@ header {
 .center-card .card-face {
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    transition: box-shadow 1.5s ease;
 }
 
-/* Glow on the container (filter on preserve-3d breaks backface-visibility) */
-.center-card-container.show-info {
-    filter:
-        drop-shadow(0 0 20px rgba(154, 170, 212, 0.35))
-        drop-shadow(0 0 50px rgba(120, 145, 210, 0.2))
-        drop-shadow(0 0 80px rgba(100, 130, 200, 0.12));
+/* Glow on card faces (box-shadow instead of filter to preserve 3D context on iOS Safari) */
+.center-card-container.show-info .center-card .card-face {
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(154, 170, 212, 0.35),
+        0 0 50px rgba(120, 145, 210, 0.2),
+        0 0 80px rgba(100, 130, 200, 0.12);
 }
 
 /* ===== Fly to header ===== */
@@ -2317,10 +2328,6 @@ header {
 .center-card-container.fly-to-header .center-card-aura {
     opacity: 0;
     transition: opacity 0.2s ease;
-}
-
-.center-card-container.fly-to-header {
-    filter: none;
 }
 
 .center-card-container.fly-to-header {
@@ -8675,6 +8682,7 @@ footer {
     width: 200px;
     height: 357px; /* 200 * 1.783 (tarot ratio) */
     perspective: 1500px;
+    -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
     animation: blessingCardZoomIn 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     transform: scale(0);
@@ -8725,6 +8733,7 @@ footer {
     position: relative;
     width: 100%;
     height: 100%;
+    -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
     transform-origin: center center;
     animation: blessingSpinOnY 3s linear infinite;
@@ -8735,6 +8744,7 @@ footer {
     position: relative;
     width: 100%;
     height: 100%;
+    -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
     transform-origin: center center;
     /* Tilt so diagonal becomes vertical - same as homepage */
@@ -8746,6 +8756,7 @@ footer {
     position: absolute;
     width: 100%;
     height: 100%;
+    -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     border-radius: 12px;
     overflow: hidden;

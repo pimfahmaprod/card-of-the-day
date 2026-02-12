@@ -736,20 +736,22 @@ let spinningCardInterval = null;
 // Change the front card image during rotation
 function startCardRotation() {
     const frontImg = document.getElementById('spinningCardFront');
+    const wrapper = document.querySelector('.spinning-card-wrapper');
 
-    // Wait 1.5s (when back is facing) then change image every 3s (full rotation)
-    // This ensures image changes when back is facing, not when front is visible
-    setTimeout(() => {
-        // First change at 1.5s (back facing)
-        currentSpinningCardIndex = (currentSpinningCardIndex + 1) % spinningCardImages.length;
-        frontImg.src = spinningCardImages[currentSpinningCardIndex];
-
-        // Then change every 3s (one full rotation, always when back is facing)
-        spinningCardInterval = setInterval(() => {
+    // Use animationiteration event to stay perfectly synced with CSS spin.
+    // Filter by animationName because child galaxy animations also bubble up.
+    // The event fires at 0deg (front facing). We wait 1.5s (180deg = back facing)
+    // to swap the image, so it's never visible during the change.
+    function onIteration(e) {
+        if (e.animationName !== 'spinOnY') return;
+        spinningCardInterval = setTimeout(function() {
             currentSpinningCardIndex = (currentSpinningCardIndex + 1) % spinningCardImages.length;
             frontImg.src = spinningCardImages[currentSpinningCardIndex];
-        }, 3000);
-    }, 1500);
+        }, 1500);
+    }
+    wrapper.addEventListener('animationiteration', onIteration);
+    // Store ref for cleanup
+    wrapper._spinIterationHandler = onIteration;
 }
 
 // Create floating sparkles around spinning card
@@ -919,9 +921,14 @@ function startExperience() {
 
     // cardWidth determined later when grid is visible
 
-    // Stop the rotation interval and sparkles
+    // Stop the rotation and sparkles
     if (spinningCardInterval) {
-        clearInterval(spinningCardInterval);
+        clearTimeout(spinningCardInterval);
+    }
+    var wrapper = document.querySelector('.spinning-card-wrapper');
+    if (wrapper && wrapper._spinIterationHandler) {
+        wrapper.removeEventListener('animationiteration', wrapper._spinIterationHandler);
+        wrapper._spinIterationHandler = null;
     }
     stopFloatingSparkles();
 
