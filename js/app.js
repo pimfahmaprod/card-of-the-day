@@ -2026,15 +2026,17 @@ function initCommentMinimizer() {
     // Reset state
     _commentMinimized = false;
     _panelLastScrollTop = 0;
-    commentSection.classList.remove('minimized');
+
+    // Minimize first to measure if content alone (without full form) needs scrolling
+    commentSection.classList.add('minimized');
 
     // Wait one frame for layout after text is set
     requestAnimationFrame(function() {
-        // Check if content is scrollable (interpretation longer than viewport)
-        var isScrollable = resultPanel.scrollHeight > resultPanel.clientHeight + 80;
+        // Measure with minimized button only (not full textarea)
+        var isScrollable = resultPanel.scrollHeight > resultPanel.clientHeight + 40;
 
         if (!isScrollable) {
-            // Content fits — show full comment form
+            // Content fits — show full comment form immediately
             commentSection.classList.remove('minimized');
             return;
         }
@@ -2305,12 +2307,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function submitComment() {
-    // If comment section is minimized, scroll panel to bottom instead of submitting
+    // If comment section is minimized, expand it and scroll to bottom
     var commentSection = document.querySelector('.comment-section');
     if (commentSection && commentSection.classList.contains('minimized')) {
+        _commentMinimized = false;
+        commentSection.classList.remove('minimized');
         var rPanel = document.getElementById('resultPanel');
         if (rPanel) {
-            rPanel.scrollTo({ top: rPanel.scrollHeight, behavior: 'smooth' });
+            setTimeout(function() {
+                rPanel.scrollTo({ top: rPanel.scrollHeight, behavior: 'smooth' });
+            }, 50);
         }
         return;
     }
