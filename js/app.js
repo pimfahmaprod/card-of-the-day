@@ -2045,21 +2045,33 @@ function initCommentMinimizer() {
 
         var bottomThreshold = 80;
         var scrollUpDelta = -30;
+        var _lastToggle = 0;
+        var GUARD_MS = 700; // block state changes during CSS transition
 
         resultPanel._commentScrollHandler = function() {
             var st = resultPanel.scrollTop;
+            var now = Date.now();
+
+            // Skip all checks during guard period (CSS transition causes scrollHeight changes)
+            if (now - _lastToggle < GUARD_MS) {
+                _panelLastScrollTop = st;
+                return;
+            }
+
             var atBottom = (st + resultPanel.clientHeight >= resultPanel.scrollHeight - bottomThreshold);
 
             if (_commentMinimized && atBottom) {
                 // Reached bottom: expand comment form
                 _commentMinimized = false;
                 commentSection.classList.remove('minimized');
+                _lastToggle = now;
             } else if (!_commentMinimized && !atBottom) {
                 // Scrolled away from bottom: re-minimize
                 var delta = st - _panelLastScrollTop;
                 if (delta < scrollUpDelta) {
                     _commentMinimized = true;
                     commentSection.classList.add('minimized');
+                    _lastToggle = now;
                 }
             }
 
