@@ -1981,15 +1981,20 @@ function initStickyCardObserver() {
     var resultPanel = document.getElementById('resultPanel');
     if (!stickyCard || !resultPanel) return;
 
-    var minimizeAt = 60;  // minimize when scrolled past card header
-    var restoreAt = 20;   // restore only when scrolled back above this (hysteresis)
+    // Use sentinel position relative to viewport instead of scrollTop
+    // This avoids flicker when sticky card size change shifts scrollTop
+    var sentinel = document.getElementById('resultCardSentinel');
 
     _stickyCardScrollHandler = function() {
+        if (!sentinel) return;
+        var stickyBottom = stickyCard.getBoundingClientRect().bottom;
+        var sentinelTop = sentinel.getBoundingClientRect().top;
         var isMinimized = stickyCard.classList.contains('minimized');
-        var scrollY = resultPanel.scrollTop;
-        if (!isMinimized && scrollY > minimizeAt) {
+
+        // Minimize when sentinel scrolls behind the sticky card
+        if (!isMinimized && sentinelTop < stickyBottom - 10) {
             stickyCard.classList.add('minimized');
-        } else if (isMinimized && scrollY < restoreAt) {
+        } else if (isMinimized && sentinelTop > stickyBottom + 30) {
             stickyCard.classList.remove('minimized');
         }
     };
