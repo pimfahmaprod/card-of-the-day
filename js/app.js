@@ -1981,21 +1981,24 @@ function initStickyCardObserver() {
     var resultPanel = document.getElementById('resultPanel');
     if (!stickyCard || !resultPanel) return;
 
-    // Use sentinel position relative to viewport instead of scrollTop
-    // This avoids flicker when sticky card size change shifts scrollTop
     var sentinel = document.getElementById('resultCardSentinel');
+    var _lastStickyToggle = 0;
 
     _stickyCardScrollHandler = function() {
         if (!sentinel) return;
+        var now = Date.now();
+        if (now - _lastStickyToggle < 400) return; // guard against Chrome URL bar resize
+
         var stickyBottom = stickyCard.getBoundingClientRect().bottom;
         var sentinelTop = sentinel.getBoundingClientRect().top;
         var isMinimized = stickyCard.classList.contains('minimized');
 
-        // Minimize when sentinel scrolls behind the sticky card
         if (!isMinimized && sentinelTop < stickyBottom - 10) {
             stickyCard.classList.add('minimized');
+            _lastStickyToggle = now;
         } else if (isMinimized && sentinelTop > stickyBottom + 30) {
             stickyCard.classList.remove('minimized');
+            _lastStickyToggle = now;
         }
     };
 
