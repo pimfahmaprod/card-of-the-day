@@ -2015,7 +2015,8 @@ function destroyStickyCardObserver() {
     }
 }
 
-// Minimizable comment section: collapse when panel has scrollable content
+// Minimizable comment section: starts minimized (sticky bottom button),
+// expands on click or if content fits screen. Once expanded, stays expanded.
 var _commentMinimized = false;
 var _panelLastScrollTop = 0;
 
@@ -2031,10 +2032,36 @@ function initCommentMinimizer() {
         resultPanel._commentScrollHandler = null;
     }
 
-    // Always show full comment form (never minimize)
     _commentMinimized = false;
     _panelLastScrollTop = 0;
     commentSection.classList.remove('minimized');
+
+    // Wait for panel to render, then decide if we need to minimize
+    setTimeout(function() {
+        var isScrollable = resultPanel.scrollHeight > resultPanel.clientHeight + 100;
+        if (isScrollable) {
+            commentSection.classList.add('minimized');
+            _commentMinimized = true;
+
+            // Auto-expand when scrolled to bottom
+            resultPanel._commentScrollHandler = function() {
+                if (!_commentMinimized) return;
+                var st = resultPanel.scrollTop;
+                var atBottom = (st + resultPanel.clientHeight >= resultPanel.scrollHeight - 80);
+                if (atBottom) {
+                    _commentMinimized = false;
+                    commentSection.classList.remove('minimized');
+                    resultPanel.removeEventListener('scroll', resultPanel._commentScrollHandler);
+                    resultPanel._commentScrollHandler = null;
+                    // Scroll to bottom after form expands
+                    setTimeout(function() {
+                        resultPanel.scrollTo({ top: resultPanel.scrollHeight, behavior: 'smooth' });
+                    }, 50);
+                }
+            };
+            resultPanel.addEventListener('scroll', resultPanel._commentScrollHandler, { passive: true });
+        }
+    }, 350);
 }
 
 // Auto-save draw to Firebase for FB-connected users (empty comment)
@@ -2313,6 +2340,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function submitComment() {
+    // If minimized, expand and scroll to bottom — then stop (don't submit)
+    var commentSection = document.querySelector('.comment-section');
+    if (commentSection && commentSection.classList.contains('minimized')) {
+        _commentMinimized = false;
+        commentSection.classList.remove('minimized');
+        var rPanel = document.getElementById('resultPanel');
+        if (rPanel) {
+            setTimeout(function() {
+                rPanel.scrollTo({ top: rPanel.scrollHeight, behavior: 'smooth' });
+            }, 50);
+        }
+        return;
+    }
 
     const commentInput = document.getElementById('commentText');
     const submitBtn = document.getElementById('commentSubmitBtn');
