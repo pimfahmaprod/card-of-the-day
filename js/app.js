@@ -2852,7 +2852,7 @@ function goToLandingPage() {
         // Reset spinning card wrapper - back to spinning animation
         spinningCardWrapper.style.transition = '';
         spinningCardWrapper.style.transform = '';
-        spinningCardWrapper.style.animation = 'spinOnY 4s linear infinite';
+        spinningCardWrapper.style.animation = 'spinOnY 3s linear infinite';
 
         // Reset spinning card tilt
         spinningCard.style.transition = '';
