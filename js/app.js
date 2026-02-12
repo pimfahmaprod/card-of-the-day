@@ -1244,38 +1244,49 @@ function animateToGrid() {
     const DELAY_PER_CARD = 12;  // ms between each card flying out
     const FLY_DURATION = 400;   // ms for each card's flight
 
+    // Pre-calculate the center position (where stacked cards are)
+    const gridRect = grid.getBoundingClientRect();
+    const centerX = gridRect.width / 2 - layout.cardW / 2;
+    const centerY = gridRect.height / 2 - layout.cardH / 2;
+
+    // First: set all cards to final size at center, using transform for flight
     containers.forEach((container, gridIndex) => {
-        // Top of deck (highest z-index = last container) flies first to position 0 (top-left)
-        // Bottom of deck (z-index 0 = first container) flies last to position 77 (bottom-right)
+        const posIndex = totalCards - 1 - gridIndex;
+        const target = layout.positions[posIndex];
+        // Place at final position instantly (no transition yet)
+        container.style.position = 'absolute';
+        container.style.width = `${layout.cardW}px`;
+        container.style.height = `${layout.cardH}px`;
+        container.style.left = `${target.x}px`;
+        container.style.top = `${target.y}px`;
+        container.style.marginLeft = '';
+        container.style.marginBottom = '';
+        // Offset back to center via transform (card appears at center)
+        const dx = centerX - target.x;
+        const dy = centerY - target.y;
+        const rotation = parseFloat(container.style.transform.match(/rotate\(([-\d.]+)deg\)/)?.[1] || 0);
+        container.style.transform = `translate(${dx}px, ${dy}px) rotate(${rotation}deg)`;
+        container.style.transition = 'none';
+    });
+
+    // Force reflow once
+    void grid.offsetHeight;
+
+    // Then: animate each card from center to final position via transform
+    containers.forEach((container, gridIndex) => {
         const posIndex = totalCards - 1 - gridIndex;
         const delay = posIndex * DELAY_PER_CARD;
-        const target = layout.positions[posIndex];
 
         setTimeout(() => {
             container.classList.remove('stacked');
             container.classList.add('spread');
-
-            // Step 1: Enable transitions (cards had transition: none from stacked state)
-            container.style.transition = `left ${FLY_DURATION}ms cubic-bezier(0.22, 1, 0.36, 1), top ${FLY_DURATION}ms cubic-bezier(0.22, 1, 0.36, 1), width ${FLY_DURATION}ms ease, height ${FLY_DURATION}ms ease, transform ${FLY_DURATION}ms ease`;
-            // Force reflow so browser registers the transition before position changes
-            void container.offsetHeight;
-
-            // Step 2: Set target — browser will now animate from center to grid position
-            // Use z-index above the stack (max stack z = totalCards-1) so cards peel off the top visually
-            // posIndex also orders grid cards correctly (right/bottom overlaps left/top)
-            container.style.position = 'absolute';
-            container.style.width = `${layout.cardW}px`;
-            container.style.height = `${layout.cardH}px`;
-            container.style.left = `${target.x}px`;
-            container.style.top = `${target.y}px`;
+            container.style.transition = `transform ${FLY_DURATION}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+            container.style.transform = 'translate(0, 0) rotate(0deg)';
             container.style.zIndex = totalCards + posIndex;
-            container.style.marginLeft = '';
-            container.style.marginBottom = '';
-            container.style.transform = 'rotate(0deg)';
         }, delay);
     });
 
-    // After all cards have landed, remove stacked class, set final z-indices, add floating
+    // After all cards have landed, set final state and add floating
     const totalAnimTime = (totalCards - 1) * DELAY_PER_CARD + FLY_DURATION + 50;
     setTimeout(() => {
         grid.classList.remove('stacked');
@@ -1283,6 +1294,7 @@ function animateToGrid() {
             const posIndex = totalCards - 1 - gridIndex;
             container.style.zIndex = posIndex;
             container.style.transition = '';
+            container.style.transform = '';
             container.style.setProperty('--float-delay', `${(gridIndex % 10) * 0.3}s`);
             requestAnimationFrame(() => { container.classList.add('floating'); });
         });

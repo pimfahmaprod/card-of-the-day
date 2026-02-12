@@ -511,6 +511,7 @@ html[lang="ja"] .landing-tagline {
 .card-container.spread.floating {
     animation: cardFloat 3s ease-in-out infinite;
     animation-delay: var(--float-delay, 0s);
+    will-change: transform;
 }
 
 /* Animation for spinning card hint fade */
@@ -1632,6 +1633,7 @@ header {
     transition: transform 0.3s ease, opacity 0.3s ease;
     transform-origin: center center;
     flex-shrink: 0;
+    contain: layout style paint;
 }
 
 .card-container.spread:hover {
@@ -1814,6 +1816,15 @@ header {
         radial-gradient(ellipse at 15% 75%, rgba(40, 90, 160, 0.4) 0%, transparent 45%),
         linear-gradient(180deg, #030510 0%, #080e28 30%, #0c1440 50%, #080e28 70%, #030510 100%);
     animation: galaxyDrift 25s ease-in-out infinite;
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* Grid cards: smaller nebula layer for performance */
+.card-container .galaxy-bg {
+    inset: -20%;
+    width: 140%;
+    height: 140%;
 }
 
 @keyframes galaxyDrift {
@@ -1830,6 +1841,8 @@ header {
     position: absolute;
     inset: 0;
     z-index: 2;
+    will-change: background-position;
+    backface-visibility: hidden;
     background-image:
         radial-gradient(1.2px 1.2px at 8% 12%, #fff 50%, transparent 100%),
         radial-gradient(1px 1px at 20% 35%, rgba(200,215,255,0.9) 50%, transparent 100%),
