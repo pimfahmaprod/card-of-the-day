@@ -903,6 +903,22 @@ function startExperience() {
         return;
     }
 
+    // Increment global pick counter immediately
+    if (window.cardCounter && window.cardCounter.increment) {
+        window.cardCounter.increment('landing', 'landing_tap', getUserId()).then(function() {
+            if (window.cardCounter.getTotal) {
+                window.cardCounter.getTotal().then(function(total) {
+                    var el = document.getElementById('totalPickCount');
+                    var ctr = document.getElementById('totalCounter');
+                    if (el && total) {
+                        el.textContent = total.toLocaleString('th-TH');
+                        if (ctr) ctr.classList.add('show');
+                    }
+                });
+            }
+        });
+    }
+
     // Play music on first user interaction (guaranteed to work)
     tryPlayMusic();
 
@@ -1887,11 +1903,6 @@ async function savePendingDrawAfterLogin() {
     var userName = getSavedUserName() || 'Anonymous';
     var commentText = draw.comment || '';
 
-    // Track card pick
-    if (window.cardCounter.increment) {
-        window.cardCounter.increment(draw.cardId, draw.cardName, userId);
-    }
-
     var result = await window.cardCounter.submitComment(
         draw.cardId, draw.cardName, draw.cardImage,
         userId, userName, commentText, getCurrentProfilePicture()
@@ -2091,7 +2102,7 @@ function initCommentMinimizer() {
 async function autoSaveDrawOnReveal(card) {
     if (!card) return;
 
-    // Only auto-save if logged in with Facebook
+    // Only auto-save comment if logged in with Facebook
     var isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
     if (!isLoggedIn || !window.cardCounter || !window.cardCounter.submitComment) {
         // Non-FB user: store pending draw data for later + save to localStorage
@@ -2104,13 +2115,7 @@ async function autoSaveDrawOnReveal(card) {
         return;
     }
 
-    var userId = getUserId();
     var userName = getSavedUserName() || 'Anonymous';
-
-    // Track card pick in Firebase
-    if (window.cardCounter.increment) {
-        window.cardCounter.increment(card.id, card.name, userId);
-    }
 
     var result = await window.cardCounter.submitComment(
         card.id,
@@ -2458,10 +2463,6 @@ async function submitComment() {
                 _pollState.myCommentIds.push(result.id);
             }
             checkMyCardTab();
-
-            if (window.cardCounter.increment) {
-                window.cardCounter.increment(currentCardData.id, currentCardData.name, userId);
-            }
             saveDrawToLocal(currentCardData, commentText);
             var fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
             if (fbUserId && window.cardCounter.saveUserDraw) {
