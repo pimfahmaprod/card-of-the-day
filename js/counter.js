@@ -238,16 +238,17 @@ async function handleCardPickCounter(cardId) {
 }
 
 // ========================================
-// Global Draw Counter (single atomic counter at /globalDrawCount)
+// Global Draw Counter (uses cardPicks/_total for Firebase rules compatibility)
 // ========================================
 async function incrementGlobalDrawCount() {
     if (!isFirebaseInitialized || !database) return null;
     try {
-        const ref = database.ref('globalDrawCount');
-        const result = await ref.transaction(function(current) {
+        var ref = database.ref('cardPicks/_total');
+        var result = await ref.transaction(function(current) {
             return (current || 0) + 1;
         });
         clearCache('globalDrawCount');
+        clearCache('totalPicks');
         if (result.committed) {
             var newVal = result.snapshot.val();
             updateTotalCounterDisplayValue(newVal);
@@ -267,7 +268,7 @@ async function getGlobalDrawCount() {
     if (cached !== null) return cached;
 
     try {
-        var snapshot = await database.ref('globalDrawCount').once('value');
+        var snapshot = await database.ref('cardPicks/_total').once('value');
         var total = snapshot.val() || 0;
         setCache('globalDrawCount', total);
         return total;
@@ -292,8 +293,9 @@ async function getTotalPicks() {
         if (!data) return 0;
 
         let total = 0;
-        Object.values(data).forEach(count => {
-            total += count || 0;
+        Object.entries(data).forEach(function(entry) {
+            if (entry[0] === '_total') return; // skip global counter
+            total += entry[1] || 0;
         });
 
         setCache('totalPicks', total);
@@ -311,17 +313,33 @@ function updateTotalCounterDisplayValue(total) {
 
     if (!totalCountElement || !totalCounterContainer) return;
 
-    if (total !== null && total > 0) {
+    if (total !== null) {
         totalCountElement.textContent = total.toLocaleString('th-TH');
         totalCounterContainer.classList.add('show');
     }
 }
 
-// Load global draw count on page load
+// Load global draw count on page load; seed from legacy sum if _total doesn't exist yet
 async function loadTotalPicks() {
     if (!isFirebaseInitialized || !database) return;
 
-    const total = await getGlobalDrawCount();
+    var total = await getGlobalDrawCount();
+
+    // Seed _total from legacy per-card sum if it doesn't exist yet
+    if (total === 0) {
+        var legacyTotal = await getTotalPicks();
+        if (legacyTotal && legacyTotal > 0) {
+            try {
+                await database.ref('cardPicks/_total').set(legacyTotal);
+                clearCache('globalDrawCount');
+                total = legacyTotal;
+            } catch (e) {
+                // Couldn't seed, use legacy total for display
+                total = legacyTotal;
+            }
+        }
+    }
+
     updateTotalCounterDisplayValue(total);
 }
 
