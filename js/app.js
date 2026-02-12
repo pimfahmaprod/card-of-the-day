@@ -2230,6 +2230,59 @@ function resetCommentForm() {
     })();
 })();
 
+// Result panel shooting stars — spawns into result-panel and minimized sticky card
+(function() {
+    function spawnResultPanelStar() {
+        var panel = document.getElementById('resultPanel');
+        if (!panel || !panel.classList.contains('active')) return;
+        var el = document.createElement('div');
+        el.className = 'shooting-star';
+        el.style.position = 'fixed';
+        el.style.zIndex = '1';
+        el.style.left = (20 + Math.random() * 80) + '%';
+        el.style.top = (Math.random() * 60) + '%';
+        var angle = 136 + Math.random() * 16;
+        var len = 50 + Math.random() * 70;
+        var dist = 80 + Math.random() * 120;
+        var dur = (0.4 + Math.random() * 0.4).toFixed(2);
+        el.style.setProperty('--shoot-angle', angle.toFixed(0) + 'deg');
+        el.style.setProperty('--shoot-len', len.toFixed(0) + 'px');
+        el.style.setProperty('--shoot-dist', dist.toFixed(0) + 'px');
+        el.style.setProperty('--shoot-dur', dur + 's');
+        panel.appendChild(el);
+        el.addEventListener('animationend', function() { el.remove(); }, { once: true });
+    }
+    function spawnStickyCardStar() {
+        var sticky = document.getElementById('resultStickyCard');
+        if (!sticky || !sticky.classList.contains('minimized')) return;
+        var el = document.createElement('div');
+        el.className = 'result-header-shooting-star';
+        var angle = 136 + Math.random() * 16;
+        var len = 25 + Math.random() * 35;
+        var dist = 50 + Math.random() * 70;
+        var dur = (0.35 + Math.random() * 0.25).toFixed(2);
+        el.style.left = (10 + Math.random() * 80) + '%';
+        el.style.top = (Math.random() * 80) + '%';
+        el.style.width = len + 'px';
+        el.style.setProperty('--hss-angle', angle.toFixed(0) + 'deg');
+        el.style.setProperty('--hss-dist', dist.toFixed(0) + 'px');
+        el.style.setProperty('--hss-dur', dur + 's');
+        sticky.appendChild(el);
+        el.addEventListener('animationend', function() { el.remove(); }, { once: true });
+    }
+    (function scheduleResultStars() {
+        var delay = 1200 + Math.random() * 2000;
+        setTimeout(function() {
+            var burst = Math.random() < 0.3 ? 2 : 1;
+            for (var i = 0; i < burst; i++) {
+                setTimeout(spawnResultPanelStar, i * (100 + Math.random() * 200));
+                setTimeout(spawnStickyCardStar, i * (80 + Math.random() * 150));
+            }
+            scheduleResultStars();
+        }, delay);
+    })();
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     const commentInput = document.getElementById('commentText');
 

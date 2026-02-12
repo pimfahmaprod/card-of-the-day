@@ -1882,15 +1882,63 @@ header {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(13, 19, 51, 0.82);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: linear-gradient(180deg, #060A1F 0%, #0a0e27 30%, #0d1333 60%, #080c25 100%);
     z-index: 1002;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.4s ease, visibility 0s 0.4s;
+}
+
+/* Starfield dots on result panel */
+.result-panel::before {
+    content: '';
+    position: fixed;
+    width: 1px;
+    height: 1px;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 0;
+    box-shadow:
+        18px 40px 0 0 rgba(255,255,255,0.5),
+        55px 95px 0 0 rgba(255,255,255,0.2),
+        90px 170px 0 0 rgba(255,255,255,0.4),
+        130px 250px 0 0.5px rgba(200,216,240,0.35),
+        165px 320px 0 0 rgba(255,255,255,0.3),
+        200px 400px 0 0 rgba(255,255,255,0.5),
+        230px 470px 0 0 rgba(255,255,255,0.2),
+        260px 70px 0 0.5px rgba(200,216,240,0.4),
+        295px 140px 0 0 rgba(255,255,255,0.35),
+        320px 220px 0 0 rgba(255,255,255,0.3),
+        350px 300px 0 0 rgba(255,255,255,0.5),
+        380px 380px 0 0 rgba(255,255,255,0.2),
+        405px 450px 0 0.5px rgba(200,216,240,0.35),
+        35px 520px 0 0 rgba(255,255,255,0.3),
+        75px 590px 0 0.5px rgba(200,216,240,0.4),
+        115px 660px 0 0 rgba(255,255,255,0.2),
+        160px 730px 0 0 rgba(255,255,255,0.45),
+        210px 130px 0 0 rgba(255,255,255,0.3),
+        245px 570px 0 0 rgba(255,255,255,0.35),
+        290px 650px 0 0 rgba(255,255,255,0.2),
+        330px 720px 0 0.5px rgba(200,216,240,0.35),
+        370px 160px 0 0 rgba(255,255,255,0.4),
+        410px 240px 0 0 rgba(255,255,255,0.3),
+        60px 360px 0 0 rgba(255,255,255,0.35),
+        140px 440px 0 0 rgba(255,255,255,0.2),
+        235px 510px 0 0.5px rgba(200,216,240,0.3),
+        315px 80px 0 0 rgba(255,255,255,0.45),
+        430px 310px 0 0 rgba(255,255,255,0.35),
+        455px 540px 0 0 rgba(255,255,255,0.2),
+        480px 110px 0 0 rgba(255,255,255,0.4),
+        28px 800px 0 0 rgba(255,255,255,0.3),
+        100px 850px 0 0.5px rgba(200,216,240,0.35),
+        180px 900px 0 0 rgba(255,255,255,0.25),
+        270px 820px 0 0 rgba(255,255,255,0.4),
+        355px 870px 0 0 rgba(255,255,255,0.2),
+        425px 840px 0 0.5px rgba(200,216,240,0.3);
+    animation: headerStarsTwinkle 4s ease-in-out infinite alternate;
 }
 
 .result-panel.active {
@@ -1931,6 +1979,8 @@ header {
     margin-right: auto;
     padding-left: 24px;
     padding-right: 24px;
+    position: relative;
+    z-index: 1;
 }
 
 .result-panel .comment-section {
@@ -1939,6 +1989,8 @@ header {
     margin-right: auto;
     padding-left: 24px;
     padding-right: 24px;
+    position: relative;
+    z-index: 1;
 }
 
 /* Sticky card at top of result panel — row layout: card left, info right */
@@ -1952,9 +2004,8 @@ header {
     justify-content: flex-start;
     padding: 24px 22px 20px;
     gap: 18px;
-    background: rgba(13, 19, 51, 0.80);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: transparent;
+    overflow: hidden;
     transition: padding 0.4s cubic-bezier(0.4, 0, 0.2, 1),
                 gap 0.4s cubic-bezier(0.4, 0, 0.2, 1),
                 border-bottom-color 0.4s ease,
@@ -1971,6 +2022,8 @@ header {
                 border-radius 0.3s ease,
                 box-shadow 0.4s ease;
     flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 }
 
 /* Info container — always visible (card name + quote beside card) */
@@ -1982,6 +2035,8 @@ header {
     min-width: 0;
     flex: 1;
     overflow: hidden;
+    position: relative;
+    z-index: 1;
     opacity: 1;
     transition: opacity 0.35s ease, gap 0.3s ease;
 }
@@ -2011,13 +2066,71 @@ header {
     transition: font-size 0.35s ease, -webkit-line-clamp 0s;
 }
 
-/* Minimized state — compact header bar */
+/* Minimized state — compact header bar with starry background */
 .result-sticky-card.minimized {
     padding: 10px 20px;
     gap: 14px;
     border-bottom: 1px solid rgba(160, 180, 220, 0.12);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
-    background: rgba(13, 19, 51, 0.95);
+    background: linear-gradient(180deg, #060A1F 0%, #0a0e27 100%);
+}
+
+/* Stars inside minimized sticky card */
+.result-sticky-card.minimized::before {
+    content: '';
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 0;
+    box-shadow:
+        15px 8px 0 0 rgba(255,255,255,0.6),
+        48px 5px 0 0 rgba(255,255,255,0.25),
+        82px 18px 0 0 rgba(255,255,255,0.5),
+        120px 10px 0 0.5px rgba(200,216,240,0.4),
+        155px 22px 0 0 rgba(255,255,255,0.3),
+        190px 6px 0 0 rgba(255,255,255,0.6),
+        218px 16px 0 0 rgba(255,255,255,0.25),
+        250px 3px 0 0.5px rgba(200,216,240,0.5),
+        285px 20px 0 0 rgba(255,255,255,0.4),
+        310px 9px 0 0 rgba(255,255,255,0.3),
+        340px 15px 0 0 rgba(255,255,255,0.6),
+        370px 4px 0 0 rgba(255,255,255,0.25),
+        395px 19px 0 0.5px rgba(200,216,240,0.4),
+        30px 30px 0 0 rgba(255,255,255,0.3),
+        70px 35px 0 0.5px rgba(200,216,240,0.5),
+        110px 42px 0 0 rgba(255,255,255,0.25),
+        150px 38px 0 0 rgba(255,255,255,0.5),
+        200px 45px 0 0 rgba(255,255,255,0.3),
+        240px 32px 0 0 rgba(255,255,255,0.4),
+        280px 48px 0 0 rgba(255,255,255,0.25),
+        320px 40px 0 0.5px rgba(200,216,240,0.4),
+        360px 33px 0 0 rgba(255,255,255,0.5),
+        400px 50px 0 0 rgba(255,255,255,0.3),
+        55px 55px 0 0 rgba(255,255,255,0.4),
+        135px 58px 0 0 rgba(255,255,255,0.25),
+        225px 52px 0 0.5px rgba(200,216,240,0.35),
+        305px 56px 0 0 rgba(255,255,255,0.5),
+        420px 12px 0 0 rgba(255,255,255,0.4),
+        445px 38px 0 0 rgba(255,255,255,0.25),
+        470px 7px 0 0 rgba(255,255,255,0.5);
+    animation: headerStarsTwinkle 4s ease-in-out infinite alternate;
+}
+
+/* Shooting stars in minimized sticky card */
+.result-header-shooting-star {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(200,216,240,0.5) 50%, rgba(255,255,255,0.9) 100%);
+    border-radius: 0.5px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform, opacity;
+    animation: headerShootingStar var(--hss-dur, 0.6s) ease-in forwards;
+    animation-delay: var(--hss-delay, 0s);
 }
 
 .result-sticky-card.minimized .result-sticky-card-img {
@@ -2062,7 +2175,7 @@ header {
     border-radius: 16px;
     padding: 20px 22px 24px;
     margin-top: 12px;
-    margin-bottom: 70px; /* space for fixed bottom button */
+    margin-bottom: 24px;
 }
 
 /* Section header with star icon */
@@ -2463,7 +2576,7 @@ footer {
 /* Comment Section */
 .comment-section {
     margin-top: 20px;
-    padding-bottom: 40px;
+    padding-bottom: 16px;
     text-align: center;
 }
 
@@ -4115,7 +4228,10 @@ footer {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 16px;
+    flex: 1;
+    min-height: 0;
 }
 
 .social-loading-spinner {
