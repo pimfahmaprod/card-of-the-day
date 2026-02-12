@@ -2840,11 +2840,13 @@ function goToLandingPage() {
         spinningCardContainer.style.animation = '';
         spinningCardContainer.style.filter = '';
 
-        // Reset card faces shadow
+        // Reset card faces — visibility & animation were forced during transition
         const cardFaces = spinningCardContainer.querySelectorAll('.spinning-card-face');
         cardFaces.forEach(face => {
             face.style.transition = '';
             face.style.boxShadow = '';
+            face.style.visibility = '';
+            face.style.animation = '';
         });
 
         // Reset spinning card wrapper - back to spinning animation
