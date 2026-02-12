@@ -2959,6 +2959,13 @@ function switchCommentsTab(tabName) {
         } else {
             feedCommentsList.classList.remove('feed-mode');
         }
+        // Hide replies in mycard tab when not logged in
+        var isFbLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
+        if (tabName === 'mycard' && !isFbLoggedIn) {
+            feedCommentsList.classList.add('mycard-mode');
+        } else {
+            feedCommentsList.classList.remove('mycard-mode');
+        }
     }
 
     // Load content for the selected tab
@@ -3512,7 +3519,10 @@ function openCommentsPanel(skipLoadComments = false) {
             var mycardTab = commentsTabs.querySelector('[data-tab="mycard"]');
             if (mycardTab) mycardTab.classList.add('active');
         }
-        if (commentsList) commentsList.classList.add('feed-mode');
+        if (commentsList) {
+            commentsList.classList.add('feed-mode');
+            commentsList.classList.add('mycard-mode');
+        }
         loadMyCardComments();
     } else {
         // Logged in: default to "feed" tab

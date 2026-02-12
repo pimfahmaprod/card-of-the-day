@@ -4393,6 +4393,11 @@ footer {
     margin-left: 0;
 }
 
+/* Hide replies section in mycard tab when not logged in */
+.comments-list.mycard-mode .feed-card-replies-section {
+    display: none;
+}
+
 /* Tarot Mystic Loader */
 .tarot-loader {
     position: relative;
