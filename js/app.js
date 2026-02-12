@@ -2023,65 +2023,10 @@ function initCommentMinimizer() {
         resultPanel._commentScrollHandler = null;
     }
 
-    // Reset state
+    // Always show full comment form (never minimize)
     _commentMinimized = false;
     _panelLastScrollTop = 0;
-
-    // Minimize first to measure if content alone (without full form) needs scrolling
-    commentSection.classList.add('minimized');
-
-    // Wait one frame for layout after text is set
-    requestAnimationFrame(function() {
-        // Measure with minimized button only (not full textarea)
-        var isScrollable = resultPanel.scrollHeight > resultPanel.clientHeight + 40;
-
-        if (!isScrollable) {
-            // Content fits — show full comment form immediately
-            commentSection.classList.remove('minimized');
-            return;
-        }
-
-        // Long content: start minimized (sticky at bottom)
-        commentSection.classList.add('minimized');
-        _commentMinimized = true;
-
-        var bottomThreshold = 80;
-        var scrollUpDelta = -30;
-        var _lastToggle = 0;
-        var GUARD_MS = 700; // block state changes during CSS transition
-
-        resultPanel._commentScrollHandler = function() {
-            var st = resultPanel.scrollTop;
-            var now = Date.now();
-
-            // Skip all checks during guard period (CSS transition causes scrollHeight changes)
-            if (now - _lastToggle < GUARD_MS) {
-                _panelLastScrollTop = st;
-                return;
-            }
-
-            var atBottom = (st + resultPanel.clientHeight >= resultPanel.scrollHeight - bottomThreshold);
-
-            if (_commentMinimized && atBottom) {
-                // Reached bottom: expand comment form
-                _commentMinimized = false;
-                commentSection.classList.remove('minimized');
-                _lastToggle = now;
-            } else if (!_commentMinimized && !atBottom) {
-                // Scrolled away from bottom: re-minimize
-                var delta = st - _panelLastScrollTop;
-                if (delta < scrollUpDelta) {
-                    _commentMinimized = true;
-                    commentSection.classList.add('minimized');
-                    _lastToggle = now;
-                }
-            }
-
-            _panelLastScrollTop = st;
-        };
-
-        resultPanel.addEventListener('scroll', resultPanel._commentScrollHandler, { passive: true });
-    });
+    commentSection.classList.remove('minimized');
 }
 
 // Auto-save draw to Firebase for FB-connected users (empty comment)
@@ -2307,19 +2252,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function submitComment() {
-    // If comment section is minimized, expand it and scroll to bottom
-    var commentSection = document.querySelector('.comment-section');
-    if (commentSection && commentSection.classList.contains('minimized')) {
-        _commentMinimized = false;
-        commentSection.classList.remove('minimized');
-        var rPanel = document.getElementById('resultPanel');
-        if (rPanel) {
-            setTimeout(function() {
-                rPanel.scrollTo({ top: rPanel.scrollHeight, behavior: 'smooth' });
-            }, 50);
-        }
-        return;
-    }
 
     const commentInput = document.getElementById('commentText');
     const submitBtn = document.getElementById('commentSubmitBtn');
