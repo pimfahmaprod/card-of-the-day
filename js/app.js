@@ -1557,14 +1557,6 @@ function proceedToResult(card) {
     initCommentForm();
     initCommentMinimizer();
 
-    // Bump landing counter +1 immediately
-    var countEl = document.getElementById('totalPickCount');
-    if (countEl) {
-        var current = parseInt(countEl.textContent.replace(/,/g, ''), 10) || 0;
-        countEl.textContent = (current + 1).toLocaleString('th-TH');
-        document.getElementById('totalCounter').classList.add('show');
-    }
-
     // Auto-save draw to Firebase (FB users: empty comment; non-FB: store pending)
     _currentDrawCommentId = null;
     _pendingDraw = null;
@@ -4273,15 +4265,8 @@ function buildMyCardEmptyCta() {
                 '<text x="30" y="44" text-anchor="middle" font-size="10" fill="currentColor">?</text>' +
             '</svg>' +
         '</div>' +
-        '<div class="comments-empty-text">' + t('cta.notAccepted') + '</div>' +
-        '<p class="cta-subtitle">' + t('cta.drawToReceive') + '</p>' +
-        '<button class="cta-draw-btn" onclick="goToDrawFromComments()">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                '<rect x="3" y="4" width="7" height="10" rx="1" transform="rotate(-10 6.5 9)"/>' +
-                '<rect x="14" y="4" width="7" height="10" rx="1" transform="rotate(10 17.5 9)"/>' +
-            '</svg>' +
-            '<span>' + t('cta.goDrawCard') + '</span>' +
-        '</button>' +
+        '<div class="comments-empty-text">' + t('comments.noComments') + '</div>' +
+        '<p class="cta-subtitle">' + t('comments.goComment') + '</p>' +
     '</div>';
 }
 
@@ -6003,8 +5988,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 3000);
 
-    // Social features always enabled
-    document.body.classList.add('social-unlocked');
+    // Social features Easter egg: tap "Pimfahmaprod" 5 times to unlock (session only)
+    var _socialTapCount = 0;
+    var _socialTapTimer = null;
+    var brandEls = document.querySelectorAll('.landing-brand, .brand');
+    brandEls.forEach(function(el) {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function() {
+            _socialTapCount++;
+            clearTimeout(_socialTapTimer);
+            _socialTapTimer = setTimeout(function() { _socialTapCount = 0; }, 2000);
+            if (_socialTapCount >= 5) {
+                _socialTapCount = 0;
+                document.body.classList.add('social-unlocked');
+                showToast('Social features unlocked ✦');
+            }
+        });
+    });
 });
 
 // Save Image Functions

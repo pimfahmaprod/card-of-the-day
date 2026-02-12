@@ -8639,6 +8639,14 @@ footer {
     }
 }
 
-/* ==================== SOCIAL FEATURES ==================== */
-/* Social features are now always visible (no Easter egg required) */
+/* ==================== SOCIAL FEATURES HIDDEN BY DEFAULT ==================== */
+/* Unlocked via Easter egg: tap "Pimfahmaprod" brand text 5 times */
+body:not(.social-unlocked) #profileSwitcher,
+body:not(.social-unlocked) .footer-social,
+body:not(.social-unlocked) .blessing-login-cta,
+body:not(.social-unlocked) .result-page .share-section,
+body:not(.social-unlocked) .friends-cta,
+body:not(.social-unlocked) .social-loading-cta,
+body:not(.social-unlocked) #commentsBtn {
+    display: none !important;
 }
