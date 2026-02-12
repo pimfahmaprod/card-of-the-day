@@ -2657,6 +2657,36 @@ footer {
     100% { transform: scale(1); }
 }
 
+/* Mobile: simplify accept button for Android rendering */
+@media (max-width: 768px) {
+    .comment-submit-btn {
+        padding: 14px 20px;
+        letter-spacing: 0.5px;
+        font-size: 0.95rem;
+        animation: none;
+        box-shadow:
+            0 0 15px rgba(154, 170, 212, 0.12),
+            0 3px 10px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(154, 170, 212, 0.12);
+    }
+    .accept-btn-glow {
+        filter: none;
+        opacity: 0.3;
+    }
+    .accept-btn-sparkles {
+        display: none;
+    }
+    .comment-submit-btn::before {
+        animation: none;
+        display: none;
+    }
+    .accept-btn-icon {
+        width: 20px;
+        height: 20px;
+        animation: acceptIconSpin 20s linear infinite;
+    }
+}
+
 /* Comments Button (Bottom Left) */
 /* Social Button - Floating CTA */
 .comments-btn {
@@ -6939,7 +6969,7 @@ footer {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    margin: auto 0 0;
+    margin: auto;
     padding: 20px 0;
 }
 
@@ -7156,17 +7186,25 @@ footer {
 
 /* Comment overlay - main text element */
 .blessing-comment-overlay {
-    position: absolute;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
     text-align: center;
     z-index: 20;
-    animation: commentOverlayFadeIn 1.2s ease 1s forwards;
+    animation: blessingTextFadeIn 1.2s ease 1s forwards;
     opacity: 0;
     width: 90vw;
     max-width: 90vw;
     padding: 0 20px;
+    margin-top: 15px;
+}
+
+@keyframes blessingTextFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes commentOverlayFadeIn {
@@ -7286,8 +7324,8 @@ footer {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
-    margin-top: 40px;
+    gap: 12px;
+    margin-top: 20px;
     opacity: 0;
     animation: socialItemFadeIn 0.6s ease 0.8s forwards;
 }
@@ -7395,49 +7433,187 @@ footer {
     }
 }
 
-/* LINE contact section */
+/* LINE CTA section — prominent horoscope banner */
 .blessing-line-section {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    margin-top: 18px;
+    margin-top: 22px;
     opacity: 0;
     animation: socialItemFadeIn 0.6s ease forwards;
     animation-delay: var(--delay);
+    width: 100%;
 }
 
-.blessing-line-label {
-    font-size: 0.75rem;
-    color: rgba(168, 184, 216, 0.45);
-    letter-spacing: 1px;
-}
-
-.blessing-line-link {
+.blessing-line-cta {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 18px;
-    border-radius: 20px;
-    border: 1px solid rgba(0, 185, 0, 0.25);
-    color: #00B900;
+    gap: 14px;
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 185, 0, 0.3);
+    background: linear-gradient(135deg, rgba(0, 60, 0, 0.5) 0%, rgba(0, 40, 0, 0.6) 50%, rgba(0, 55, 0, 0.45) 100%);
+    color: #e8f5e8;
     text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 0 20px rgba(0, 185, 0, 0.1),
+        0 4px 15px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(0, 185, 0, 0.1);
+    animation: socialItemFadeIn 0.6s ease forwards, lineCtaPulse 3.5s ease-in-out 2s infinite;
+    animation-delay: var(--delay);
+}
+
+/* Glow border sweep */
+.blessing-line-cta-glow {
+    position: absolute;
+    inset: -1px;
+    border-radius: 17px;
+    background: linear-gradient(135deg, rgba(0,185,0,0.4), transparent 40%, transparent 60%, rgba(0,210,0,0.3));
+    background-size: 200% 200%;
+    animation: lineGlowSweep 4s ease-in-out infinite;
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Shimmer */
+.blessing-line-cta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 210, 0, 0.08), rgba(0, 255, 0, 0.12), rgba(0, 210, 0, 0.08), transparent);
+    animation: lineCtaShimmer 5s ease-in-out 2.5s infinite;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* FREE badge */
+.blessing-line-cta-badge {
+    position: absolute;
+    top: -1px;
+    right: 16px;
+    background: linear-gradient(135deg, #00C800, #00A000);
+    color: #fff;
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 3px 10px 4px;
+    border-radius: 0 0 8px 8px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(0, 185, 0, 0.3);
+    z-index: 2;
+    animation: badgeBounce 2s ease-in-out 3s infinite;
+}
+
+/* Text content */
+.blessing-line-cta-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+    z-index: 1;
+}
+
+.blessing-line-cta-title {
+    font-family: 'Prompt', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #b8f0b8;
+    letter-spacing: 0.5px;
+    line-height: 1.3;
+}
+
+.blessing-line-cta-sub {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: rgba(0, 210, 0, 0.7);
+    letter-spacing: 0.3px;
+}
+
+/* LINE icon + arrow */
+.blessing-line-cta-icon {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.blessing-line-cta-icon svg:first-child {
+    width: 28px;
+    height: 28px;
+    fill: #00C800;
+    filter: drop-shadow(0 0 4px rgba(0, 185, 0, 0.3));
     transition: all 0.3s ease;
 }
 
-.blessing-line-link:hover {
-    color: #00D900;
-    border-color: rgba(0, 185, 0, 0.5);
-    background: rgba(0, 185, 0, 0.08);
-    transform: scale(1.05);
+.blessing-line-cta-arrow {
+    width: 16px;
+    height: 16px;
+    color: rgba(0, 210, 0, 0.5);
+    animation: lineArrowNudge 2s ease-in-out infinite;
 }
 
-.blessing-line-link svg {
-    width: 18px;
-    height: 18px;
-    fill: currentColor;
+/* Hover */
+.blessing-line-cta:hover {
+    border-color: rgba(0, 210, 0, 0.6);
+    background: linear-gradient(135deg, rgba(0, 75, 0, 0.6) 0%, rgba(0, 55, 0, 0.7) 50%, rgba(0, 70, 0, 0.55) 100%);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow:
+        0 0 30px rgba(0, 185, 0, 0.2),
+        0 8px 25px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(0, 210, 0, 0.15);
+}
+.blessing-line-cta:hover .blessing-line-cta-glow { opacity: 0.8; }
+.blessing-line-cta:hover .blessing-line-cta-title { color: #d0ffd0; }
+.blessing-line-cta:hover .blessing-line-cta-icon svg:first-child {
+    fill: #00E000;
+    filter: drop-shadow(0 0 8px rgba(0, 210, 0, 0.5));
+}
+.blessing-line-cta:hover .blessing-line-cta-arrow { color: rgba(0, 230, 0, 0.8); }
+
+/* Active */
+.blessing-line-cta:active {
+    transform: translateY(0) scale(0.98);
+    transition: all 0.1s ease;
+}
+
+/* Keyframes */
+@keyframes lineCtaPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(0,185,0,0.1), 0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(0,185,0,0.1); }
+    50% { box-shadow: 0 0 28px rgba(0,185,0,0.18), 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(0,185,0,0.15); }
+}
+
+@keyframes lineGlowSweep {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+@keyframes lineCtaShimmer {
+    0%, 100% { left: -50%; opacity: 0; }
+    40% { opacity: 1; }
+    60% { opacity: 1; }
+    100% { left: 120%; opacity: 0; }
+}
+
+@keyframes badgeBounce {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-3px); }
+    60% { transform: translateY(-1px); }
+}
+
+@keyframes lineArrowNudge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(4px); }
 }
 
 /* Restart button - bottom right */
@@ -7493,27 +7669,28 @@ footer {
     }
 
     .blessing-comment-overlay {
-        bottom: -25px;
         width: 95vw;
         max-width: 95vw;
+        margin-top: 10px;
     }
 
     .blessing-name {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+        margin-bottom: 6px;
     }
 
     .blessing-comment {
-        font-size: 1rem;
+        font-size: 0.95rem;
         max-width: none;
     }
 
     .blessing-login-cta {
-        margin-top: 18px;
-        padding: 14px;
+        margin-top: 14px;
+        padding: 12px;
     }
 
     .blessing-save-share-section {
-        margin-top: 25px;
+        margin-top: 18px;
     }
 
     .blessing-restart-btn {
@@ -7545,21 +7722,42 @@ footer {
     }
 
     .blessing-content {
-        padding: 10px 0;
+        padding: 5px 0;
     }
 
     .blessing-card-container {
-        width: 110px;
-        height: 196px;
+        width: 100px;
+        height: 178px;
+    }
+
+    .blessing-comment-overlay {
+        margin-top: 8px;
+    }
+
+    .blessing-name {
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+
+    .blessing-comment {
+        font-size: 0.85rem;
     }
 
     .blessing-login-cta {
-        margin-top: 12px;
-        padding: 10px;
+        margin-top: 10px;
+        padding: 8px;
     }
 
     .blessing-save-share-section {
-        margin-top: 20px;
+        margin-top: 12px;
+    }
+
+    .blessing-social-section {
+        margin-top: 10px;
+    }
+
+    .blessing-line-section {
+        margin-top: 10px;
     }
 }
 
@@ -7588,14 +7786,21 @@ footer {
         height: 357px;
     }
 
-    /* Comment overlay: constrained to left column */
+    /* Comment overlay: absolute within card area for grid layout */
     .blessing-comment-overlay {
+        position: absolute;
+        bottom: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 0;
         width: 340px;
         max-width: 340px;
+        animation-name: commentOverlayFadeIn;
     }
 
     .blessing-name {
         font-size: 1.4rem;
+        margin-bottom: 12px;
     }
 
     .blessing-comment {
@@ -7694,8 +7899,8 @@ footer {
         padding: 8px 20px 8px 14px;
     }
 
-    .blessing-line-link {
-        font-size: 0.9rem;
+    .blessing-line-cta-title {
+        font-size: 1.05rem;
     }
 }
 
@@ -7833,4 +8038,16 @@ footer {
         padding: 6px 10px;
         font-size: 0.75rem;
     }
+}
+
+/* ==================== SOCIAL FEATURES HIDDEN BY DEFAULT ==================== */
+/* Unlocked via Easter egg: tap "Pimfahmaprod" brand text 5 times */
+body:not(.social-unlocked) #profileSwitcher,
+body:not(.social-unlocked) .footer-social,
+body:not(.social-unlocked) .blessing-login-cta,
+body:not(.social-unlocked) .share-section,
+body:not(.social-unlocked) .friends-cta,
+body:not(.social-unlocked) .social-loading-cta,
+body:not(.social-unlocked) #commentsBtn {
+    display: none !important;
 }

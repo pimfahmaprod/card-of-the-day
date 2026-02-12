@@ -91,6 +91,9 @@ const translations = {
         },
         blessing: {
             wantMore: "อยากรู้เพิ่มเติม",
+            horoscopeCheck: "ตรวจลัคนาราศี",
+            addLine: "แอดไลน์ @Pimfah",
+            freeBadge: "ฟรี",
             restart: "เริ่มใหม่",
             seeWhatFriendsDraw: "ดูว่าเพื่อนจับไพ่อะไร",
             loginToSee: "ล็อกอินเพื่อดูไพ่ของเพื่อนและบันทึกประวัติ"
@@ -250,6 +253,9 @@ const translations = {
         },
         blessing: {
             wantMore: "Want to know more?",
+            horoscopeCheck: "Check Your Horoscope",
+            addLine: "Add LINE @Pimfah",
+            freeBadge: "FREE",
             restart: "Start Over",
             seeWhatFriendsDraw: "See what your friends draw",
             loginToSee: "Login to see your friends' cards and save your history"
@@ -409,6 +415,9 @@ const translations = {
         },
         blessing: {
             wantMore: "想了解更多？",
+            horoscopeCheck: "查看星座运势",
+            addLine: "加LINE @Pimfah",
+            freeBadge: "免费",
             restart: "重新开始",
             seeWhatFriendsDraw: "看看朋友抽到了什么牌",
             loginToSee: "登录查看朋友的牌并保存历史记录"
@@ -568,6 +577,9 @@ const translations = {
         },
         blessing: {
             wantMore: "想了解更多？",
+            horoscopeCheck: "查看星座運勢",
+            addLine: "加LINE @Pimfah",
+            freeBadge: "免費",
             restart: "重新開始",
             seeWhatFriendsDraw: "看看朋友抽到了什麼牌",
             loginToSee: "登入查看朋友的牌並儲存歷史記錄"
@@ -727,6 +739,9 @@ const translations = {
         },
         blessing: {
             wantMore: "더 알고 싶으세요?",
+            horoscopeCheck: "별자리 운세 확인",
+            addLine: "LINE @Pimfah 추가",
+            freeBadge: "무료",
             restart: "다시 시작",
             seeWhatFriendsDraw: "친구들이 어떤 카드를 뽑았는지 확인하세요",
             loginToSee: "로그인하여 친구의 카드를 보고 기록을 저장하세요"
@@ -886,6 +901,9 @@ const translations = {
         },
         blessing: {
             wantMore: "もっと知りたい？",
+            horoscopeCheck: "星座占いをチェック",
+            addLine: "LINE @Pimfah を追加",
+            freeBadge: "無料",
             restart: "やり直す",
             seeWhatFriendsDraw: "友達が何のカードを引いたか見てみよう",
             loginToSee: "ログインして友達のカードを見たり履歴を保存しよう"
@@ -1045,6 +1063,9 @@ const translations = {
         },
         blessing: {
             wantMore: "En savoir plus",
+            horoscopeCheck: "Vérifiez votre horoscope",
+            addLine: "Ajoutez LINE @Pimfah",
+            freeBadge: "GRATUIT",
             restart: "Recommencer",
             seeWhatFriendsDraw: "Voyez ce que vos amis ont tiré",
             loginToSee: "Connectez-vous pour voir les cartes de vos amis et sauvegarder votre historique"

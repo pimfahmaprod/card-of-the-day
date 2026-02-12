@@ -2192,19 +2192,16 @@ function showBlessingScreen(userName, comment) {
     // Set card image
     blessingCard.src = `images/tarot/${currentCardData.image}`;
 
+    // Always show comment overlay with user's text
+    if (commentOverlay) commentOverlay.style.display = '';
+    blessingName.textContent = userName === 'Anonymous' ? '' : `— ${userName} —`;
+    blessingComment.textContent = `"${comment}"`;
+
     if (isLoggedIn) {
-        // Logged in: show comment overlay, hide CTA
-        if (commentOverlay) commentOverlay.style.display = '';
         if (blessingLoginCta) blessingLoginCta.style.display = 'none';
-        blessingName.textContent = userName === 'Anonymous' ? '' : `— ${userName} —`;
-        blessingComment.textContent = `"${comment}"`;
     } else if (wasPreviouslyConnected()) {
-        // Previously connected but FB SDK not ready yet — hide both, wait for callback
-        if (commentOverlay) commentOverlay.style.display = 'none';
         if (blessingLoginCta) blessingLoginCta.style.display = 'none';
     } else {
-        // Not logged in: hide comment overlay, show login CTA
-        if (commentOverlay) commentOverlay.style.display = 'none';
         if (blessingLoginCta) blessingLoginCta.style.display = '';
     }
 
@@ -5601,6 +5598,24 @@ document.addEventListener('DOMContentLoaded', () => {
             initNotificationPolling();
         }
     }, 3000);
+
+    // Social features Easter egg: tap "Pimfahmaprod" 5 times to unlock (session only)
+    var _socialTapCount = 0;
+    var _socialTapTimer = null;
+    var brandEls = document.querySelectorAll('.landing-brand, .brand');
+    brandEls.forEach(function(el) {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function() {
+            _socialTapCount++;
+            clearTimeout(_socialTapTimer);
+            _socialTapTimer = setTimeout(function() { _socialTapCount = 0; }, 2000);
+            if (_socialTapCount >= 5) {
+                _socialTapCount = 0;
+                document.body.classList.add('social-unlocked');
+                showToast('Social features unlocked ✦');
+            }
+        });
+    });
 });
 
 // Save Image Functions
