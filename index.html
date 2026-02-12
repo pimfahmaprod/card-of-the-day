@@ -35,7 +35,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Prompt:wght@200;300;400;500&family=Dancing+Script:wght@400;500;600;700&family=Kanit:wght@200;300&family=Outfit:wght@300;400&family=Gowun+Dodum&family=Zen+Kaku+Gothic+New:wght@400;500&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=250213g">
+    <link rel="stylesheet" href="css/styles.css?v=250213o">
 </head>
 <body>
     <!-- Starfield Background -->
@@ -139,8 +139,17 @@
                     <div class="spinning-card-face spinning-card-front">
                         <img id="spinningCardFront" src="images/tarot/THE LOVERS.png" alt="Tarot Card Front">
                     </div>
-                    <div class="spinning-card-face spinning-card-back">
-                        <img src="images/card_back_blue.png" alt="Card Back">
+                    <div class="spinning-card-face spinning-card-back card-back-galaxy">
+                        <div class="galaxy-bg"></div>
+                        <div class="galaxy-stars"></div>
+                        <div class="galaxy-stars galaxy-stars-2"></div>
+                        <div class="galaxy-shimmer"></div>
+                        <div class="galaxy-orbit"></div>
+                        <div class="galaxy-aurora"></div>
+                        <div class="galaxy-shooting-star galaxy-ss-1"></div>
+                        <div class="galaxy-shooting-star galaxy-ss-2"></div>
+                        <div class="galaxy-shooting-star galaxy-ss-3"></div>
+                        <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                     </div>
                 </div>
             </div>
@@ -203,8 +212,17 @@
         <!-- Radial glow behind card -->
         <div class="center-card-aura" id="centerCardAura"></div>
         <div class="center-card" id="centerCardInner">
-            <div class="card-face card-back">
-                <img src="images/card_back_blue.png" alt="Card Back">
+            <div class="card-face card-back card-back-galaxy">
+                <div class="galaxy-bg"></div>
+                <div class="galaxy-stars"></div>
+                <div class="galaxy-stars galaxy-stars-2"></div>
+                <div class="galaxy-shimmer"></div>
+                <div class="galaxy-orbit"></div>
+                <div class="galaxy-aurora"></div>
+                <div class="galaxy-shooting-star galaxy-ss-1"></div>
+                <div class="galaxy-shooting-star galaxy-ss-2"></div>
+                <div class="galaxy-shooting-star galaxy-ss-3"></div>
+                <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
             </div>
             <div class="card-face card-front">
                 <img id="centerCardImage" alt="Card">
@@ -364,8 +382,17 @@
                         <div class="blessing-card-face blessing-card-front">
                             <img id="blessingCard" alt="Your Card">
                         </div>
-                        <div class="blessing-card-face blessing-card-back">
-                            <img src="images/card_back_blue.png" alt="Card Back">
+                        <div class="blessing-card-face blessing-card-back card-back-galaxy">
+                            <div class="galaxy-bg"></div>
+                            <div class="galaxy-stars"></div>
+                            <div class="galaxy-stars galaxy-stars-2"></div>
+                            <div class="galaxy-shimmer"></div>
+                            <div class="galaxy-orbit"></div>
+                            <div class="galaxy-aurora"></div>
+                            <div class="galaxy-shooting-star galaxy-ss-1"></div>
+                            <div class="galaxy-shooting-star galaxy-ss-2"></div>
+                            <div class="galaxy-shooting-star galaxy-ss-3"></div>
+                            <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                         </div>
                     </div>
                 </div>
@@ -722,7 +749,7 @@
     <!-- Scripts (auto cache-bust via deploy timestamp) -->
     <script>
     (function(){
-        var v = '250213d';
+        var v = '250213o';
         var scripts = [
             'js/translations.js',
             'js/card-interpretations.js',

@@ -1771,7 +1771,266 @@ header {
 }
 
 .card-back {
-    background: #141B45;
+    background: #0a0e27;
+}
+
+/* ===== Galaxy Animated Card Back ===== */
+.card-back-galaxy {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #050818;
+}
+
+.card-back-galaxy > img.card-back-seal {
+    position: relative;
+    width: auto;
+    height: auto;
+    max-width: 55%;
+    max-height: 55%;
+    object-fit: contain;
+    z-index: 5;
+    filter: drop-shadow(0 0 15px rgba(154, 170, 212, 0.5));
+    animation: sealPulse 3s ease-in-out infinite;
+}
+
+@keyframes sealPulse {
+    0%, 100% { filter: drop-shadow(0 0 15px rgba(154, 170, 212, 0.5)) drop-shadow(0 0 4px rgba(180, 200, 240, 0.3)); }
+    50% { filter: drop-shadow(0 0 28px rgba(154, 170, 212, 0.7)) drop-shadow(0 0 10px rgba(200, 220, 255, 0.5)); }
+}
+
+/* Nebula background — slow drifting color clouds */
+.galaxy-bg {
+    position: absolute;
+    inset: -60%;
+    width: 220%;
+    height: 220%;
+    z-index: 1;
+    background:
+        radial-gradient(ellipse at 25% 15%, rgba(50, 70, 150, 0.7) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 85%, rgba(30, 50, 120, 0.6) 0%, transparent 45%),
+        radial-gradient(ellipse at 65% 35%, rgba(90, 60, 160, 0.3) 0%, transparent 40%),
+        radial-gradient(ellipse at 15% 75%, rgba(40, 90, 160, 0.4) 0%, transparent 45%),
+        linear-gradient(180deg, #030510 0%, #080e28 30%, #0c1440 50%, #080e28 70%, #030510 100%);
+    animation: galaxyDrift 25s ease-in-out infinite;
+}
+
+@keyframes galaxyDrift {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(6%, -4%) rotate(1.5deg); }
+    50% { transform: translate(-4%, 6%) rotate(-1deg); }
+    75% { transform: translate(-6%, -3%) rotate(0.5deg); }
+}
+
+/* ===== Moving star fields — continuous scroll for "flying through space" ===== */
+
+/* Layer 1: Distant small stars — slow drift upward */
+.galaxy-stars {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background-image:
+        radial-gradient(1.2px 1.2px at 8% 12%, #fff 50%, transparent 100%),
+        radial-gradient(1px 1px at 20% 35%, rgba(200,215,255,0.9) 50%, transparent 100%),
+        radial-gradient(1px 1px at 38% 8%, #fff 50%, transparent 100%),
+        radial-gradient(1.3px 1.3px at 55% 52%, rgba(180,200,255,0.8) 50%, transparent 100%),
+        radial-gradient(1px 1px at 72% 20%, #fff 50%, transparent 100%),
+        radial-gradient(1px 1px at 88% 65%, rgba(200,220,255,0.9) 50%, transparent 100%),
+        radial-gradient(1.2px 1.2px at 15% 78%, #fff 50%, transparent 100%),
+        radial-gradient(1px 1px at 45% 88%, rgba(220,230,255,0.8) 50%, transparent 100%),
+        radial-gradient(1px 1px at 65% 42%, #fff 50%, transparent 100%),
+        radial-gradient(1.1px 1.1px at 82% 92%, rgba(200,210,255,0.9) 50%, transparent 100%),
+        radial-gradient(1px 1px at 30% 60%, rgba(230,240,255,0.7) 50%, transparent 100%),
+        radial-gradient(1px 1px at 95% 30%, #fff 50%, transparent 100%);
+    background-size: 100% 200%;
+    animation: starsScrollSlow 12s linear infinite;
+}
+
+/* Layer 2: Mid stars — faster scroll, bigger */
+.galaxy-stars-2 {
+    background-image:
+        radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 100%),
+        radial-gradient(2px 2px at 28% 50%, rgba(180,200,255,1) 50%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 50% 15%, #fff 50%, transparent 100%),
+        radial-gradient(1.8px 1.8px at 70% 70%, rgba(200,220,255,1) 50%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 90% 40%, #fff 50%, transparent 100%),
+        radial-gradient(2px 2px at 35% 82%, rgba(220,230,255,1) 50%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 60% 30%, rgba(200,215,255,0.9) 50%, transparent 100%),
+        radial-gradient(1.8px 1.8px at 80% 85%, #fff 50%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 5% 55%, rgba(210,225,255,1) 50%, transparent 100%),
+        radial-gradient(2px 2px at 48% 68%, #fff 50%, transparent 100%);
+    background-size: 100% 200%;
+    animation: starsScrollMid 8s linear infinite;
+}
+
+@keyframes starsScrollSlow {
+    from { background-position: 0 0; }
+    to { background-position: 0 -200%; }
+}
+
+@keyframes starsScrollMid {
+    from { background-position: 0 0; }
+    to { background-position: 0 -200%; }
+}
+
+/* Shimmer sweep — light beam crossing */
+.galaxy-shimmer {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: linear-gradient(
+        115deg,
+        transparent 30%,
+        rgba(140, 165, 220, 0.08) 45%,
+        rgba(180, 200, 240, 0.14) 50%,
+        rgba(140, 165, 220, 0.08) 55%,
+        transparent 70%
+    );
+    animation: galaxyCardShimmer 5s ease-in-out 1s infinite;
+}
+
+@keyframes galaxyCardShimmer {
+    0% { transform: translateX(-150%); }
+    30% { transform: translateX(150%); }
+    100% { transform: translateX(150%); }
+}
+
+/* ===== Orbit ring — rotating ellipse around the seal ===== */
+.galaxy-orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 62%;
+    height: 62%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px solid transparent;
+    z-index: 4;
+    animation: orbitSpin 10s linear infinite;
+}
+
+.galaxy-orbit::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        rgba(154, 170, 212, 0.6) 15%,
+        transparent 30%,
+        transparent 50%,
+        rgba(120, 150, 210, 0.35) 65%,
+        transparent 80%
+    ) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+/* Small orbiting dot */
+.galaxy-orbit::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(210, 230, 255, 1);
+    box-shadow: 0 0 10px rgba(180, 200, 255, 0.8), 0 0 20px rgba(140, 170, 230, 0.5);
+}
+
+@keyframes orbitSpin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ===== Aurora wave — nebula color band ===== */
+.galaxy-aurora {
+    position: absolute;
+    bottom: 5%;
+    left: -20%;
+    width: 140%;
+    height: 40%;
+    z-index: 3;
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(40, 80, 160, 0.15) 20%,
+        rgba(60, 100, 180, 0.22) 40%,
+        rgba(80, 60, 160, 0.15) 60%,
+        rgba(40, 100, 170, 0.1) 80%,
+        transparent 100%
+    );
+    filter: blur(6px);
+    animation: auroraWave 8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes auroraWave {
+    0%, 100% { transform: translateX(-8%) skewX(-3deg); opacity: 0.5; }
+    33% { transform: translateX(10%) skewX(3deg); opacity: 1; }
+    66% { transform: translateX(-5%) skewX(-1deg); opacity: 0.7; }
+}
+
+/* ===== Shooting stars — top-right to bottom-left diagonal ===== */
+.galaxy-shooting-star {
+    position: absolute;
+    width: 1.5px;
+    z-index: 3;
+    border-radius: 1px;
+    background: linear-gradient(180deg, transparent 0%, rgba(180, 200, 240, 0.4) 30%, rgba(240, 245, 255, 0.95) 100%);
+    pointer-events: none;
+    opacity: 0;
+}
+
+.galaxy-ss-1 {
+    height: 50px;
+    top: -15%;
+    left: 75%;
+    animation: shootingStar1 4.5s ease-in 0.5s infinite;
+}
+
+.galaxy-ss-2 {
+    height: 35px;
+    top: -10%;
+    left: 40%;
+    animation: shootingStar2 5.5s ease-in 2.5s infinite;
+}
+
+.galaxy-ss-3 {
+    height: 40px;
+    top: -12%;
+    left: 55%;
+    animation: shootingStar3 6s ease-in 4.5s infinite;
+}
+
+@keyframes shootingStar1 {
+    0% { opacity: 0; transform: rotate(25deg) translateY(0); }
+    3% { opacity: 1; }
+    10% { opacity: 0.9; transform: rotate(25deg) translateY(180px); }
+    14% { opacity: 0; transform: rotate(25deg) translateY(250px); }
+    100% { opacity: 0; }
+}
+
+@keyframes shootingStar2 {
+    0% { opacity: 0; transform: rotate(15deg) translateY(0); }
+    3% { opacity: 1; }
+    10% { opacity: 0.9; transform: rotate(15deg) translateY(150px); }
+    14% { opacity: 0; transform: rotate(15deg) translateY(200px); }
+    100% { opacity: 0; }
+}
+
+@keyframes shootingStar3 {
+    0% { opacity: 0; transform: rotate(20deg) translateY(0); }
+    3% { opacity: 1; }
+    10% { opacity: 0.9; transform: rotate(20deg) translateY(170px); }
+    14% { opacity: 0; transform: rotate(20deg) translateY(230px); }
+    100% { opacity: 0; }
 }
 
 .card-front {
@@ -1906,9 +2165,9 @@ header {
     opacity: 0;
 }
 
-/* Card name — Cinzel Decorative with shimmer */
+/* Card name — Prompt bold with shimmer */
 .center-card-info-name {
-    font-family: 'Cinzel Decorative', 'Cormorant Garamond', serif;
+    font-family: 'Prompt', sans-serif;
     font-size: 1.2rem;
     font-weight: 700;
     letter-spacing: 2px;
@@ -2253,7 +2512,7 @@ header {
 }
 
 .result-sticky-card-name {
-    font-family: 'Cinzel Decorative', 'Cormorant Garamond', serif;
+    font-family: 'Prompt', sans-serif;
     font-size: 1.15rem;
     font-weight: 700;
     letter-spacing: 2px;

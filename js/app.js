@@ -959,7 +959,7 @@ function startExperience() {
         if (profileSwitcher) profileSwitcher.style.display = 'none';
     }, 400);
 
-    // Step 3: Shrink the card and move to stack center
+    // Step 3: Shrink the card and move to stack center — become the top card of the stack
     setTimeout(() => {
         // Calculate scale to match grid card size (grid is now visible)
         const layout = calculateCardLayout();
@@ -975,47 +975,45 @@ function startExperience() {
         const spinningRect = spinningCardContainer.getBoundingClientRect();
         const gridRect = cardGrid.getBoundingClientRect();
 
-        // Calculate center of both elements
         const spinningCenterY = spinningRect.top + spinningRect.height / 2;
         const gridCenterY = gridRect.top + gridRect.height / 2;
-
-        // Calculate how much to move
         const moveY = gridCenterY - spinningCenterY;
 
-        // Apply shrink transition and transform with translate
-        spinningCardContainer.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        // Apply shrink transition — card shrinks into the stack position
+        spinningCardContainer.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         requestAnimationFrame(() => {
             spinningCardContainer.style.transform = `translateY(${moveY}px) scale(${scale})`;
         });
 
-        // Also reduce shadow on the card face
+        // Also reduce shadow to match stacked card
         const cardFaces = spinningCardContainer.querySelectorAll('.spinning-card-face');
         cardFaces.forEach(face => {
-            face.style.transition = 'box-shadow 0.6s ease';
+            face.style.transition = 'box-shadow 0.5s ease';
             face.style.boxShadow = '0 2px 8px rgba(160, 180, 220, 0.15)';
         });
-    }, 500);
 
-    // Step 4: After shrink completes, hide spinning card instantly and spread the stack
+        // At the end of shrink, make stacked cards visible behind spinning card
+        setTimeout(() => {
+            const containers = document.querySelectorAll('.card-container');
+            containers.forEach(c => { c.style.opacity = '1'; });
+        }, 400);
+    }, 450);
+
+    // Step 4: Spinning card is now aligned with stack — hide it and spread immediately
     setTimeout(() => {
-        // Hide spinning card instantly with NO transition - it should just disappear
-        // The stack is already visible behind at the same position
         spinningCardContainer.style.transition = 'none';
         spinningCardContainer.style.opacity = '0';
         spinningCardContainer.style.visibility = 'hidden';
 
-        // Small delay before spreading to make it feel like the top card is part of the stack
-        setTimeout(() => {
-            animateToGrid();
-        }, 50);
+        // Spread immediately — the stack was already visible, so cards fly out from the same spot
+        animateToGrid();
 
         // Hide landing page
         setTimeout(() => {
             landingPage.classList.add('hidden');
-            // Hide comments button on card spread
             updateCommentsBtnVisibility();
         }, 300);
-    }, 1100);
+    }, 1000);
 }
 
 // Load tarot data
@@ -1073,8 +1071,9 @@ function renderCards() {
     cardGrid.innerHTML = shuffledCards.map((card, index) => `
         <div class="card-container" data-card-id="${card.id}">
             <div class="card">
-                <div class="card-face card-back">
-                    <img src="images/card_back_blue.png" alt="Card Back">
+                <div class="card-face card-back card-back-galaxy">
+                    <div class="galaxy-bg"></div>
+                    <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                 </div>
                 <div class="card-face card-front">
                     <img src="images/tarot/${card.image}" alt="${card.name}">
