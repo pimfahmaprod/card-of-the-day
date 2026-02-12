@@ -646,27 +646,12 @@ async function waitForResources() {
 
     // Load data and essential images simultaneously
     await Promise.all([
-        // Load tarot data + daily readings
+        // Load tarot data
         (async () => {
             if (!tarotData) {
                 try {
-                    const [valentineRes, dailyRes] = await Promise.all([
-                        fetch('valentine_tarot.json'),
-                        fetch('tarot_cards.json')
-                    ]);
-                    tarotData = await valentineRes.json();
-                    const dailyData = await dailyRes.json();
-                    // Merge card_of_the_day into interpretation (match by normalized name)
-                    const dailyLookup = {};
-                    for (const c of dailyData.tarot_cards) {
-                        dailyLookup[c.card_name.replace(/\s+/g, ' ').trim()] = c.readings.card_of_the_day;
-                    }
-                    for (const card of tarotData.cards) {
-                        const key = card.name.replace(/\s+/g, ' ').trim();
-                        if (dailyLookup[key]) {
-                            card.interpretation = dailyLookup[key];
-                        }
-                    }
+                    const res = await fetch('tarot_cards.json');
+                    tarotData = await res.json();
                 } catch (error) {
                     console.error('Error loading tarot data:', error);
                 }
@@ -1036,23 +1021,8 @@ function startExperience() {
 // Load tarot data
 async function loadTarotData() {
     try {
-        const [valentineRes, dailyRes] = await Promise.all([
-            fetch('valentine_tarot.json'),
-            fetch('tarot_cards.json')
-        ]);
-        tarotData = await valentineRes.json();
-        const dailyData = await dailyRes.json();
-        // Merge card_of_the_day into interpretation
-        const dailyLookup = {};
-        for (const c of dailyData.tarot_cards) {
-            dailyLookup[c.card_name.replace(/\s+/g, ' ').trim()] = c.readings.card_of_the_day;
-        }
-        for (const card of tarotData.cards) {
-            const key = card.name.replace(/\s+/g, ' ').trim();
-            if (dailyLookup[key]) {
-                card.interpretation = dailyLookup[key];
-            }
-        }
+        const res = await fetch('tarot_cards.json');
+        tarotData = await res.json();
         renderCards();
     } catch (error) {
         console.error('Error loading tarot data:', error);
@@ -2366,9 +2336,10 @@ async function submitComment() {
         restartAcceptBtnEffects();
         var rPanel = document.getElementById('resultPanel');
         if (rPanel) {
+            // Wait for expand transition to finish (0.4s), then scroll to bottom
             setTimeout(function() {
                 rPanel.scrollTo({ top: rPanel.scrollHeight, behavior: 'smooth' });
-            }, 50);
+            }, 450);
         }
         return;
     }
@@ -4256,7 +4227,7 @@ function buildLoginRequiredCta(messageKey, subtitleKey) {
 
 // Build empty CTA for My Card tab (no draws yet)
 function buildMyCardEmptyCta() {
-    return '<div class="comments-empty comments-empty-cta">' +
+    return '<div class="comments-empty comments-empty-cta draw-cta">' +
         '<div class="cta-sparkles">' +
             '<span class="sparkle s1">✦</span>' +
             '<span class="sparkle s2">✧</span>' +
@@ -4270,9 +4241,26 @@ function buildMyCardEmptyCta() {
                 '<text x="30" y="44" text-anchor="middle" font-size="10" fill="currentColor">?</text>' +
             '</svg>' +
         '</div>' +
-        '<div class="comments-empty-text">' + t('comments.noComments') + '</div>' +
-        '<p class="cta-subtitle">' + t('comments.goComment') + '</p>' +
+        '<div class="comments-empty-text">' + t('cta.noDrawsYet') + '</div>' +
+        '<p class="cta-subtitle">' + t('cta.goDrawSub') + '</p>' +
+        '<button class="go-draw-btn" onclick="goDrawCard()">' +
+            '<svg class="go-draw-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+                '<circle cx="12" cy="12" r="4" fill="rgba(154,170,212,0.15)" stroke="rgba(220,225,240,0.7)"/>' +
+                '<path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke-linecap="round"/>' +
+                '<path d="M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke-linecap="round" opacity="0.5"/>' +
+            '</svg>' +
+            '<span>' + t('cta.goDrawCard') + '</span>' +
+        '</button>' +
     '</div>';
+}
+
+// Handle "Go draw card" button click
+function goDrawCard() {
+    closeCommentsPanel();
+    // Small delay to let panel close, then trigger card drawing
+    setTimeout(function() {
+        startExperience();
+    }, 400);
 }
 
 // Build CTA for when user is not logged in (friends tab)

@@ -153,6 +153,8 @@ const translations = {
             notAccepted: "ยังไม่ได้น้อมรับคำทำนาย",
             drawToReceive: "จับไพ่เพื่อรับคำทำนายจากแม่หมอพิมพ์ฟ้า",
             goDrawCard: "ไปจับไพ่กันเลย!",
+            noDrawsYet: "ยังไม่ได้จับไพ่ในวันนี้",
+            goDrawSub: "มาดูกันว่าดวงวันนี้จะเป็นอย่างไร",
             acceptFirst: "น้อมรับคำทำนายคนแรก",
             beFirstComment: "ยังไม่มีความคิดเห็น<br>เป็นคนแรกที่แสดงความคิดเห็นกันเถอะ!"
         },
@@ -319,6 +321,8 @@ const translations = {
             notAccepted: "You haven't accepted the prophecy yet",
             drawToReceive: "Draw a card to receive your fortune",
             goDrawCard: "Let's draw a card!",
+            noDrawsYet: "You haven't drawn a card today",
+            goDrawSub: "Let's see what fortune awaits you",
             acceptFirst: "Be the first to accept",
             beFirstComment: "No comments yet<br>Be the first to comment!"
         },
@@ -485,6 +489,8 @@ const translations = {
             notAccepted: "你还没有接受预言",
             drawToReceive: "抽一张牌来获取你的运势",
             goDrawCard: "去抽牌吧！",
+            noDrawsYet: "今天还没有抽牌",
+            goDrawSub: "来看看今天的运势如何",
             acceptFirst: "成为第一个接受的人",
             beFirstComment: "暂无评论<br>来成为第一个评论的人吧！"
         },
@@ -651,6 +657,8 @@ const translations = {
             notAccepted: "你還沒有接受預言",
             drawToReceive: "抽一張牌來獲取你的運勢",
             goDrawCard: "去抽牌吧！",
+            noDrawsYet: "今天還沒有抽牌",
+            goDrawSub: "來看看今天的運勢如何",
             acceptFirst: "成為第一個接受的人",
             beFirstComment: "暫無評論<br>來成為第一個評論的人吧！"
         },
@@ -817,6 +825,8 @@ const translations = {
             notAccepted: "아직 예언을 받지 않았어요",
             drawToReceive: "카드를 뽑아 운세를 받아보세요",
             goDrawCard: "카드 뽑으러 가기!",
+            noDrawsYet: "오늘 아직 카드를 뽑지 않았어요",
+            goDrawSub: "오늘의 운세를 확인해 보세요",
             acceptFirst: "첫 번째로 받기",
             beFirstComment: "아직 댓글이 없어요<br>첫 번째 댓글을 남겨보세요!"
         },
@@ -983,6 +993,8 @@ const translations = {
             notAccepted: "まだ予言を受け入れていません",
             drawToReceive: "カードを引いて運勢を見てください",
             goDrawCard: "カードを引きに行こう！",
+            noDrawsYet: "今日はまだカードを引いていません",
+            goDrawSub: "今日の運勢を見てみましょう",
             acceptFirst: "最初に受け入れる",
             beFirstComment: "コメントはまだありません<br>最初のコメントを書いてみましょう！"
         },
@@ -1149,6 +1161,8 @@ const translations = {
             notAccepted: "Prophétie pas encore acceptée",
             drawToReceive: "Tirez une carte pour recevoir la prédiction de la voyante Pimfah",
             goDrawCard: "Allons tirer une carte !",
+            noDrawsYet: "Vous n'avez pas encore tiré de carte aujourd'hui",
+            goDrawSub: "Voyons ce que le destin vous réserve",
             acceptFirst: "Soyez le premier à accepter",
             beFirstComment: "Pas encore de commentaires<br>Soyez le premier à commenter !"
         },
