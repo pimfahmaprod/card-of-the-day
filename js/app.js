@@ -718,16 +718,16 @@ function loadRemainingImagesInBackground() {
 
 // Card images for spinning display
 const spinningCardImages = [
-    'images/tarot/THE LOVERS.png',
-    'images/tarot/THE STAR.png',
-    'images/tarot/THE SUN.png',
-    'images/tarot/THE MOON.png',
-    'images/tarot/THE EMPRESS.png',
-    'images/tarot/THE EMPEROR.png',
-    'images/tarot/WHEEL OF FORTUNE.png',
-    'images/tarot/THE MAGICIAN.png',
-    'images/tarot/THE HIGH PRIESTRESS.png',
-    'images/tarot/STRENGTH.png'
+    'images/tarot/THE LOVERS.webp',
+    'images/tarot/THE STAR.webp',
+    'images/tarot/THE SUN.webp',
+    'images/tarot/THE MOON.webp',
+    'images/tarot/THE EMPRESS.webp',
+    'images/tarot/THE EMPEROR.webp',
+    'images/tarot/WHEEL OF FORTUNE.webp',
+    'images/tarot/THE MAGICIAN.webp',
+    'images/tarot/THE HIGH PRIESTRESS.webp',
+    'images/tarot/STRENGTH.webp'
 ];
 
 let currentSpinningCardIndex = 0;
@@ -1099,7 +1099,7 @@ function renderCards() {
                     <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                 </div>
                 <div class="card-face card-front">
-                    <img src="images/tarot/${card.image}" alt="${card.name}">
+                    <img data-src="images/tarot/${card.image}" alt="${card.name}">
                 </div>
             </div>
         </div>
@@ -3522,20 +3522,20 @@ function createActivityCard(activity) {
         case 'draw':
             dotIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="4" width="14" height="17" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg>';
             actionText = t('activity.drewCard');
-            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>' +
+            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.webp') + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>' +
                 '<div class="activity-card-info"><span class="activity-card-name">' + escapeHtml(d.cardName) + '</span>' +
                 (d.comment ? '<span class="activity-card-comment">"' + escapeHtml(d.comment) + '"</span>' : '') + '</div></div>';
             break;
         case 'comment':
             dotIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
             actionText = t('activity.commented') + ' <strong>' + escapeHtml(d.cardName) + '</strong>';
-            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>' +
+            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.webp') + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>' +
                 '<div class="activity-card-info"><span class="activity-card-comment">"' + escapeHtml(d.comment || '') + '"</span></div></div>';
             break;
         case 'replied':
             dotIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>';
             actionText = t('activity.repliedTo') + ' <strong>' + escapeHtml(d.userName || 'Me') + '</strong>';
-            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.png') + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>' +
+            detailHtml = '<div class="activity-card-detail"><div class="activity-card-image"><img src="images/tarot/' + escapeHtml(d.cardImage || d.cardName + '.webp') + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>' +
                 '<div class="activity-card-info"><span class="activity-card-name">' + escapeHtml(d.cardName || '') + '</span>' +
                 '<span class="activity-card-comment">"' + escapeHtml(d.comment || '') + '"</span></div></div>';
             break;
