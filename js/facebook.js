@@ -346,25 +346,40 @@ function isFacebookConnected() {
 }
 
 // Sync draw history from Firebase on login
+// - New account (no Firebase draws): upload localStorage draws to Firebase
+// - Returning account (has Firebase draws): clear localStorage, use Firebase data
 async function syncDrawHistoryOnLogin(fbUserId) {
     if (!window.cardCounter || !window.cardCounter.fetchUserDraws) return;
 
     try {
         const firebaseDraws = await window.cardCounter.fetchUserDraws(fbUserId);
-        if (firebaseDraws.length === 0) return;
-
-        // Get existing local draws
         const localDraws = JSON.parse(localStorage.getItem('tarot_draw_history') || '[]');
 
-        // Merge: Firebase as source of truth, append unique local draws
-        const firebaseTimestamps = new Set(firebaseDraws.map(function(d) { return d.timestamp; }));
-        const uniqueLocalDraws = localDraws.filter(function(d) { return !firebaseTimestamps.has(d.timestamp); });
+        if (firebaseDraws.length === 0 && localDraws.length > 0) {
+            // New account: migrate localStorage draws to Firebase
+            if (window.cardCounter.saveUserDraw) {
+                for (var i = 0; i < localDraws.length; i++) {
+                    var draw = localDraws[i];
+                    await window.cardCounter.saveUserDraw(fbUserId, {
+                        cardId: draw.cardId,
+                        cardName: draw.cardName,
+                        cardImage: draw.cardImage,
+                        comment: draw.comment || ''
+                    });
+                }
+            }
+            // Keep localStorage as-is (already has the data)
+        } else if (firebaseDraws.length > 0) {
+            // Returning account: use Firebase data, clear localStorage
+            localStorage.setItem('tarot_draw_history', JSON.stringify(
+                firebaseDraws.sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); }).slice(0, 50)
+            ));
+        }
 
-        const merged = firebaseDraws.concat(uniqueLocalDraws)
-            .sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); })
-            .slice(0, 50);
-
-        localStorage.setItem('tarot_draw_history', JSON.stringify(merged));
+        // Update tab visibility now that we're logged in
+        if (typeof updateTabVisibility === 'function') {
+            updateTabVisibility(true);
+        }
     } catch (e) {
         console.warn('Failed to sync draw history:', e.message);
     }

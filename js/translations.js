@@ -40,7 +40,9 @@ const translations = {
             tagline: "วันนี้ไพ่มีอะไรจะบอกคุณ",
             loading: "กำลังโหลด...",
             instruction: "จับไพ่ทาโรต์ 1 ใบเพื่อดูดวงประจำวัน",
-            clickToDraw: "แตะไพ่เพื่อเริ่มดูดวง"
+            clickToDraw: "แตะไพ่เพื่อเริ่มดูดวง",
+            totalDrawsPrefix: "ทำนายแล้ว",
+            totalDrawsSuffix: "ครั้ง"
         },
         main: {
             title: "เลือกไพ่ 1 ใบเพื่อรับข้อความประจำวัน",
@@ -204,7 +206,9 @@ const translations = {
             tagline: "The universe has a message for you",
             loading: "Loading...",
             instruction: "Draw a tarot card to reveal today's message",
-            clickToDraw: "Tap card to draw"
+            clickToDraw: "Tap card to draw",
+            totalDrawsPrefix: "",
+            totalDrawsSuffix: "readings so far"
         },
         main: {
             title: "Pick a card to reveal today's message",
@@ -368,7 +372,9 @@ const translations = {
             tagline: "今天的牌 有话对你说",
             loading: "加载中...",
             instruction: "抽一张塔罗牌，揭示今日讯息",
-            clickToDraw: "点击抽牌"
+            clickToDraw: "点击抽牌",
+            totalDrawsPrefix: "已占卜",
+            totalDrawsSuffix: "次"
         },
         main: {
             title: "选一张牌揭示今日讯息",
@@ -532,7 +538,9 @@ const translations = {
             tagline: "今天的牌 有話對你說",
             loading: "載入中...",
             instruction: "抽一張塔羅牌，揭示今日訊息",
-            clickToDraw: "點擊抽牌"
+            clickToDraw: "點擊抽牌",
+            totalDrawsPrefix: "已占卜",
+            totalDrawsSuffix: "次"
         },
         main: {
             title: "選一張牌揭示今日訊息",
@@ -696,7 +704,9 @@ const translations = {
             tagline: "오늘의 카드가 당신에게 전하는 이야기",
             loading: "로딩 중...",
             instruction: "타로 카드를 뽑아 오늘의 메시지를 확인하세요",
-            clickToDraw: "카드를 탭하여 뽑기"
+            clickToDraw: "카드를 탭하여 뽑기",
+            totalDrawsPrefix: "",
+            totalDrawsSuffix: "회 리딩 완료"
         },
         main: {
             title: "카드를 선택하여 오늘의 메시지를 확인하세요",
@@ -860,7 +870,9 @@ const translations = {
             tagline: "今日のカードがあなたに届けるメッセージ",
             loading: "読み込み中...",
             instruction: "タロットカードを引いて今日のメッセージを受け取りましょう",
-            clickToDraw: "カードをタップして引く"
+            clickToDraw: "カードをタップして引く",
+            totalDrawsPrefix: "",
+            totalDrawsSuffix: "回の鑑定済み"
         },
         main: {
             title: "カードを選んで今日のメッセージを受け取る",
@@ -1024,7 +1036,9 @@ const translations = {
             tagline: "L'univers a un message pour vous",
             loading: "Chargement...",
             instruction: "Tirez une carte de tarot pour découvrir le message du jour",
-            clickToDraw: "Touchez la carte pour tirer"
+            clickToDraw: "Touchez la carte pour tirer",
+            totalDrawsPrefix: "",
+            totalDrawsSuffix: "tirages effectués"
         },
         main: {
             title: "Choisissez une carte pour le message du jour",

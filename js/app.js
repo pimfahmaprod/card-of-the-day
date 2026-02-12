@@ -115,7 +115,7 @@ function applyTranslations() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         const translated = t(key);
-        if (translated && translated !== key) {
+        if (translated !== undefined && translated !== null && translated !== key) {
             el.textContent = translated;
         }
     });
@@ -1846,6 +1846,11 @@ function buildSocialLoadingCta() {
 
 // Called from facebook.js when FB login status is confirmed
 function onFacebookStatusReady() {
+    var isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
+
+    // Update tab visibility based on login state
+    updateTabVisibility(isLoggedIn);
+
     // Refresh the current comments tab if it was showing a loading placeholder
     var commentsList = document.getElementById('commentsList');
     if (commentsList && commentsList.querySelector('.social-loading-cta')) {
@@ -1856,7 +1861,6 @@ function onFacebookStatusReady() {
     if (blessingScreen && blessingScreen.classList.contains('active')) {
         var blessingLoginCta = document.getElementById('blessingLoginCta');
         var commentOverlay = document.querySelector('.blessing-comment-overlay');
-        var isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
         if (isLoggedIn) {
             if (commentOverlay) commentOverlay.style.display = '';
             if (blessingLoginCta) blessingLoginCta.style.display = 'none';
@@ -1943,14 +1947,21 @@ function getProfilePictureHtml(item) {
 // ========================================
 function saveDrawToLocal(card, comment) {
     try {
-        const draws = JSON.parse(localStorage.getItem('tarot_draw_history') || '[]');
-        draws.unshift({
-            cardId: card.id,
-            cardName: card.name,
-            cardImage: card.image,
-            comment: comment || '',
-            timestamp: Date.now()
-        });
+        var draws = JSON.parse(localStorage.getItem('tarot_draw_history') || '[]');
+        // If the most recent draw is the same card (from autoSave), update its comment
+        var cardId = card.id || card.cardId;
+        var cardName = card.name || card.cardName;
+        if (draws.length > 0 && (draws[0].cardId === cardId || draws[0].cardName === cardName) && comment) {
+            draws[0].comment = comment;
+        } else {
+            draws.unshift({
+                cardId: cardId,
+                cardName: cardName,
+                cardImage: card.image || card.cardImage,
+                comment: comment || '',
+                timestamp: Date.now()
+            });
+        }
         if (draws.length > 50) draws.length = 50;
         localStorage.setItem('tarot_draw_history', JSON.stringify(draws));
     } catch (e) {
@@ -2020,6 +2031,17 @@ function destroyStickyCardObserver() {
 var _commentMinimized = false;
 var _panelLastScrollTop = 0;
 
+// Force-restart CSS animations on the accept button after un-minimizing
+function restartAcceptBtnEffects() {
+    var btn = document.querySelector('.comment-submit-btn');
+    if (!btn) return;
+    // Remove and re-add the node to restart all CSS animations
+    void btn.offsetWidth; // force reflow
+    btn.style.animation = 'none';
+    void btn.offsetWidth;
+    btn.style.animation = '';
+}
+
 function initCommentMinimizer() {
     var resultPanel = document.getElementById('resultPanel');
     var commentSection = resultPanel ? resultPanel.querySelector('.comment-section') : null;
@@ -2051,6 +2073,7 @@ function initCommentMinimizer() {
                 if (atBottom) {
                     _commentMinimized = false;
                     commentSection.classList.remove('minimized');
+                    restartAcceptBtnEffects();
                     resultPanel.removeEventListener('scroll', resultPanel._commentScrollHandler);
                     resultPanel._commentScrollHandler = null;
                     // Scroll to bottom after form expands
@@ -2071,12 +2094,13 @@ async function autoSaveDrawOnReveal(card) {
     // Only auto-save if logged in with Facebook
     var isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
     if (!isLoggedIn || !window.cardCounter || !window.cardCounter.submitComment) {
-        // Non-FB user: store pending draw data for later
+        // Non-FB user: store pending draw data for later + save to localStorage
         _pendingDraw = {
             cardId: card.id,
             cardName: card.name,
             cardImage: card.image
         };
+        saveDrawToLocal(card, '');
         return;
     }
 
@@ -2345,6 +2369,7 @@ async function submitComment() {
     if (commentSection && commentSection.classList.contains('minimized')) {
         _commentMinimized = false;
         commentSection.classList.remove('minimized');
+        restartAcceptBtnEffects();
         var rPanel = document.getElementById('resultPanel');
         if (rPanel) {
             setTimeout(function() {
@@ -2409,6 +2434,8 @@ async function submitComment() {
             cardImage: currentCardData.image,
             comment: commentText
         };
+        // Update localStorage draw with comment text
+        saveDrawToLocal(currentCardData, commentText);
 
         playSoundEffect('accept');
         triggerBlessingBurst(submitBtn);
@@ -3461,13 +3488,10 @@ function openCommentsPanel(skipLoadComments = false) {
     // Skip loading if we're switching to a specific tab (like cardview)
     if (skipLoadComments) return;
 
-    // Reset tab to "feed" (social feed)
-    currentCommentsTab = 'feed';
-    if (commentsTabs) {
-        commentsTabs.querySelectorAll('.comments-tab').forEach(t => t.classList.remove('active'));
-        const feedTab = commentsTabs.querySelector('[data-tab="feed"]');
-        if (feedTab) feedTab.classList.add('active');
-    }
+    var isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
+
+    // Update tab visibility based on login state
+    updateTabVisibility(isLoggedIn);
 
     // Reset all state (matching switchCommentsTab)
     commentsLastKey = null;
@@ -3483,12 +3507,52 @@ function openCommentsPanel(skipLoadComments = false) {
         window.cardCounter.unsubscribeFromNewComments();
     }
 
-    // Set feed-mode for full-width layout
     var commentsList = document.getElementById('commentsList');
-    if (commentsList) commentsList.classList.add('feed-mode');
 
-    // Load social feed
-    loadFeed(true);
+    if (!isLoggedIn && !wasPreviouslyConnected()) {
+        // Not logged in: default to "mycard" tab (show local draw history)
+        currentCommentsTab = 'mycard';
+        if (commentsTabs) {
+            commentsTabs.querySelectorAll('.comments-tab').forEach(t => t.classList.remove('active'));
+            var mycardTab = commentsTabs.querySelector('[data-tab="mycard"]');
+            if (mycardTab) mycardTab.classList.add('active');
+        }
+        if (commentsList) commentsList.classList.add('feed-mode');
+        loadMyCardComments();
+    } else {
+        // Logged in: default to "feed" tab
+        currentCommentsTab = 'feed';
+        if (commentsTabs) {
+            commentsTabs.querySelectorAll('.comments-tab').forEach(t => t.classList.remove('active'));
+            var feedTab = commentsTabs.querySelector('[data-tab="feed"]');
+            if (feedTab) feedTab.classList.add('active');
+        }
+        if (commentsList) commentsList.classList.add('feed-mode');
+        loadFeed(true);
+    }
+}
+
+// Show/hide tabs based on login state
+function updateTabVisibility(isLoggedIn) {
+    var commentsTabs = document.getElementById('commentsTabs');
+    if (!commentsTabs) return;
+
+    var socialTabs = ['feed', 'friends', 'me', 'activity'];
+    var allTabs = commentsTabs.querySelectorAll('.comments-tab');
+
+    allTabs.forEach(function(tab) {
+        var tabName = tab.dataset.tab;
+        if (!tabName) return;
+        if (tabName === 'mycard') {
+            // My Card tab is always visible
+            tab.style.display = '';
+        } else if (tabName === 'cardview') {
+            // cardview tab has its own visibility logic
+        } else if (socialTabs.indexOf(tabName) !== -1) {
+            // Social tabs: hide when not logged in
+            tab.style.display = (isLoggedIn || wasPreviouslyConnected()) ? '' : 'none';
+        }
+    });
 }
 
 // Check if user has any comments and show/hide the "Me" tab
@@ -3906,9 +3970,37 @@ async function loadMyCardComments() {
     const commentsList = document.getElementById('commentsList');
     const loadingEl = getOrCreateLoadingEl();
 
-    // Require Facebook login
-    if (typeof isFacebookConnected !== 'function' || !isFacebookConnected()) {
-        commentsList.innerHTML = wasPreviouslyConnected() ? buildSocialLoadingCta() : buildLoginRequiredCta('login.saveDraws', 'login.saveDrawsSub');
+    var isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
+
+    // Not logged in: show localStorage draw history
+    if (!isLoggedIn) {
+        if (wasPreviouslyConnected()) {
+            commentsList.innerHTML = buildSocialLoadingCta();
+            isLoadingComments = false;
+            return;
+        }
+        var localDraws = getLocalDrawHistory();
+        commentsList.innerHTML = '';
+        if (localDraws.length === 0) {
+            commentsList.innerHTML = buildMyCardEmptyCta();
+            isLoadingComments = false;
+            return;
+        }
+        var savedName = getSavedUserName() || 'Anonymous';
+        localDraws.forEach(function(draw, idx) {
+            var fakeComment = {
+                id: 'local_' + idx,
+                cardId: draw.cardId,
+                cardName: draw.cardName,
+                cardImage: draw.cardImage,
+                comment: draw.comment || '',
+                timestamp: draw.timestamp,
+                userName: savedName,
+                profilePicture: null
+            };
+            var card = createFeedCard(fakeComment);
+            commentsList.appendChild(card);
+        });
         isLoadingComments = false;
         return;
     }
@@ -3934,25 +4026,7 @@ async function loadMyCardComments() {
     loadingEl.style.display = 'none';
 
     if (myComments.length === 0) {
-        commentsList.innerHTML = `
-            <div class="comments-empty comments-empty-cta">
-                <div class="cta-sparkles">
-                    <span class="sparkle s1">✦</span>
-                    <span class="sparkle s2">✧</span>
-                    <span class="sparkle s3">✦</span>
-                </div>
-                <div class="cta-card-icon">
-                    <svg viewBox="0 0 60 80" fill="none">
-                        <rect x="5" y="5" width="50" height="70" rx="4" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <path d="M30 25 L35 35 L45 37 L38 44 L40 55 L30 50 L20 55 L22 44 L15 37 L25 35 Z" fill="currentColor" opacity="0.3"/>
-                        <circle cx="30" cy="40" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                        <text x="30" y="44" text-anchor="middle" font-size="10" fill="currentColor">?</text>
-                    </svg>
-                </div>
-                <div class="comments-empty-text">${t('comments.noComments')}</div>
-                <p class="cta-subtitle">${t('comments.goComment')}</p>
-            </div>
-        `;
+        commentsList.innerHTML = buildMyCardEmptyCta();
         isLoadingComments = false;
         return;
     }
@@ -4172,6 +4246,27 @@ function buildLoginRequiredCta(messageKey, subtitleKey) {
             '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>' +
             t('login.loginBtn') +
         '</button>' +
+    '</div>';
+}
+
+// Build empty CTA for My Card tab (no draws yet)
+function buildMyCardEmptyCta() {
+    return '<div class="comments-empty comments-empty-cta">' +
+        '<div class="cta-sparkles">' +
+            '<span class="sparkle s1">✦</span>' +
+            '<span class="sparkle s2">✧</span>' +
+            '<span class="sparkle s3">✦</span>' +
+        '</div>' +
+        '<div class="cta-card-icon">' +
+            '<svg viewBox="0 0 60 80" fill="none">' +
+                '<rect x="5" y="5" width="50" height="70" rx="4" stroke="currentColor" stroke-width="2" fill="none"/>' +
+                '<path d="M30 25 L35 35 L45 37 L38 44 L40 55 L30 50 L20 55 L22 44 L15 37 L25 35 Z" fill="currentColor" opacity="0.3"/>' +
+                '<circle cx="30" cy="40" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/>' +
+                '<text x="30" y="44" text-anchor="middle" font-size="10" fill="currentColor">?</text>' +
+            '</svg>' +
+        '</div>' +
+        '<div class="comments-empty-text">' + t('comments.noComments') + '</div>' +
+        '<p class="cta-subtitle">' + t('comments.goComment') + '</p>' +
     '</div>';
 }
 
