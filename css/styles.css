@@ -8045,7 +8045,7 @@ footer {
 body:not(.social-unlocked) #profileSwitcher,
 body:not(.social-unlocked) .footer-social,
 body:not(.social-unlocked) .blessing-login-cta,
-body:not(.social-unlocked) .share-section,
+body:not(.social-unlocked) .result-page .share-section,
 body:not(.social-unlocked) .friends-cta,
 body:not(.social-unlocked) .social-loading-cta,
 body:not(.social-unlocked) #commentsBtn {
