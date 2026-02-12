@@ -2030,47 +2030,36 @@ function initCommentMinimizer() {
 
     // Wait one frame for layout after text is set
     requestAnimationFrame(function() {
-        // Measure content-only scrollability (without comment form in flow)
-        commentSection.classList.add('minimized');
-        var contentOnly = resultPanel.scrollHeight;
-        commentSection.classList.remove('minimized');
-        var isScrollable = contentOnly > resultPanel.clientHeight + 50;
+        // Check if content is scrollable (interpretation longer than viewport)
+        var isScrollable = resultPanel.scrollHeight > resultPanel.clientHeight + 80;
 
         if (!isScrollable) {
+            // Content fits — show full comment form
             commentSection.classList.remove('minimized');
             return;
         }
 
-        // Long content: start minimized (fixed at bottom)
+        // Long content: start minimized (sticky at bottom)
         commentSection.classList.add('minimized');
         _commentMinimized = true;
 
-        var bottomThreshold = 60;
-        var scrollUpDelta = -20;
-        var _expandedAt = 0; // timestamp when expanded, to prevent immediate re-minimize
+        var bottomThreshold = 80;
+        var scrollUpDelta = -30;
 
         resultPanel._commentScrollHandler = function() {
             var st = resultPanel.scrollTop;
-            var now = Date.now();
+            var atBottom = (st + resultPanel.clientHeight >= resultPanel.scrollHeight - bottomThreshold);
 
-            if (_commentMinimized) {
-                // While minimized (fixed): check if scrolled to bottom of content
-                var atBottom = (st + resultPanel.clientHeight >= resultPanel.scrollHeight - bottomThreshold);
-                if (atBottom) {
-                    _commentMinimized = false;
-                    commentSection.classList.remove('minimized');
-                    _expandedAt = now;
-                }
-            } else {
-                // While expanded (in flow): re-minimize if user scrolls up significantly
-                // Guard: don't re-minimize within 500ms of expanding (scroll height changes)
-                if (now - _expandedAt > 500) {
-                    var delta = st - _panelLastScrollTop;
-                    var atBottom2 = (st + resultPanel.clientHeight >= resultPanel.scrollHeight - bottomThreshold);
-                    if (!atBottom2 && delta < scrollUpDelta) {
-                        _commentMinimized = true;
-                        commentSection.classList.add('minimized');
-                    }
+            if (_commentMinimized && atBottom) {
+                // Reached bottom: expand comment form
+                _commentMinimized = false;
+                commentSection.classList.remove('minimized');
+            } else if (!_commentMinimized && !atBottom) {
+                // Scrolled away from bottom: re-minimize
+                var delta = st - _panelLastScrollTop;
+                if (delta < scrollUpDelta) {
+                    _commentMinimized = true;
+                    commentSection.classList.add('minimized');
                 }
             }
 

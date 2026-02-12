@@ -2501,16 +2501,13 @@ footer {
     transition: max-height 0.4s ease, opacity 0.3s ease 0.1s, margin 0.35s ease;
 }
 
-/* Minimized: fixed bar at bottom of screen */
+/* Minimized: sticky bar at bottom of scroll container */
 .comment-section.minimized {
-    position: fixed;
+    position: sticky;
     bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1003;
+    z-index: 11;
     margin-top: 0;
     padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
-    max-width: none;
     background: rgba(13, 19, 51, 0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
