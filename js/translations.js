@@ -37,7 +37,7 @@ const translations = {
     th: {
         landing: {
             heading: "Card of the Day",
-            tagline: "ไพ่วันนี้ มีอะไรจะบอกคุณ",
+            tagline: "วันนี้ไพ่มีอะไรจะบอกคุณ",
             loading: "กำลังโหลด...",
             instruction: "จับไพ่ทาโรต์ 1 ใบเพื่อดูดวงประจำวัน",
             clickToDraw: "แตะไพ่เพื่อเริ่มดูดวง"
