@@ -337,6 +337,8 @@ function updateTotalCounterDisplayValue(total) {
 async function loadTotalPicks() {
     if (!isFirebaseInitialized || !database) return;
 
+    // Always fetch fresh on page load — skip cache
+    clearCache('globalDrawCount');
     var total = await getGlobalDrawCount();
     updateTotalCounterDisplayValue(total);
 }
