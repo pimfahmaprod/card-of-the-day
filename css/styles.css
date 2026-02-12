@@ -1349,7 +1349,7 @@ html[lang="ja"] .landing-tagline {
 }
 /* Horizontal bar: rotate chevrons for left/right direction */
 .reply-notif-bar .notif-circle-expand-btn svg {
-    transform: rotate(-90deg);
+    transform: rotate(90deg);
 }
 .reply-notif-bar .notif-circle-collapse-btn svg {
     transform: rotate(90deg);
