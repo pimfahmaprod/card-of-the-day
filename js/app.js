@@ -2841,18 +2841,27 @@ function goToLandingPage() {
         spinningCardContainer.style.filter = '';
 
         // Reset card faces — visibility & animation were forced during transition
-        const cardFaces = spinningCardContainer.querySelectorAll('.spinning-card-face');
-        cardFaces.forEach(face => {
+        var frontFace = spinningCard.querySelector('.spinning-card-front');
+        var backFace = spinningCard.querySelector('.spinning-card-back');
+        var allFaces = spinningCardContainer.querySelectorAll('.spinning-card-face');
+        allFaces.forEach(function(face) {
             face.style.transition = '';
             face.style.boxShadow = '';
             face.style.visibility = '';
-            face.style.animation = '';
+            face.style.animation = 'none';
         });
 
-        // Reset spinning card wrapper - back to spinning animation
+        // Reset spinning card wrapper
         spinningCardWrapper.style.transition = '';
         spinningCardWrapper.style.transform = '';
+        spinningCardWrapper.style.animation = 'none';
+
+        // Force reflow so browser registers 'none', then start all animations in sync
+        spinningCardWrapper.offsetHeight;
+
         spinningCardWrapper.style.animation = 'spinOnY 3s linear infinite';
+        if (frontFace) frontFace.style.animation = 'spinFrontVis 3s step-end infinite';
+        if (backFace) backFace.style.animation = 'spinBackVis 3s step-end infinite';
 
         // Reset spinning card tilt
         spinningCard.style.transition = '';
