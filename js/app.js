@@ -87,6 +87,16 @@ function getCardInterpretation(card) {
     return card.interpretation;
 }
 
+// Set interpretation text as paragraphs (split on blank lines)
+function setInterpretationHTML(el, text) {
+    var paragraphs = text.split(/\n\s*\n/);
+    el.innerHTML = paragraphs.map(function(p) {
+        // Escape HTML and preserve single line breaks
+        var safe = p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return '<p>' + safe + '</p>';
+    }).join('');
+}
+
 // Get translation by key path (e.g., "landing.instruction")
 function t(key) {
     const keys = key.split('.');
@@ -174,7 +184,7 @@ function refreshDynamicContent() {
             resultQuote.textContent = getCardQuote(currentCardData);
         }
         if (resultInterpretation) {
-            resultInterpretation.textContent = getCardInterpretation(currentCardData);
+            setInterpretationHTML(resultInterpretation, getCardInterpretation(currentCardData));
         }
 
         // Re-check card comments to update button text
@@ -1527,7 +1537,7 @@ function proceedToResult(card) {
 
     document.getElementById('resultCardName').textContent = getCardName(card.name);
     document.getElementById('resultQuote').textContent = getCardQuote(card);
-    document.getElementById('resultInterpretation').textContent = getCardInterpretation(card);
+    setInterpretationHTML(document.getElementById('resultInterpretation'), getCardInterpretation(card));
 
     // Start sticky card expanded (hero state) — minimizes on scroll
     document.getElementById('resultStickyCard').classList.remove('minimized');
@@ -6200,7 +6210,7 @@ function drawLineIcon(ctx, x, y, size, color) {
 function drawVerticalLayout(ctx, cardImg, width, height) {
     // "Card of the Day" title at top
     ctx.fillStyle = 'rgba(160, 180, 220, 0.6)';
-    ctx.font = '28px "Cormorant Garamond", serif';
+    ctx.font = '28px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'center';
     ctx.fillText('Card of the Day', width / 2, 80);
 
@@ -6226,7 +6236,7 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
     // Card name - right after card
     const nameY = cardBottomY + 80;
     ctx.fillStyle = '#C0C8E0';
-    ctx.font = 'bold 64px "Cormorant Garamond", serif';
+    ctx.font = 'bold 64px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'center';
     ctx.fillText(getCardName(currentCardData.name), width / 2, nameY);
 
@@ -6239,7 +6249,7 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
     ctx.stroke();
 
     // Quote
-    ctx.font = 'italic 36px "Cormorant Garamond", serif';
+    ctx.font = 'italic 36px "Cormorant Garamond", "Prompt", serif';
     ctx.fillStyle = 'rgba(160, 180, 220, 0.85)';
     const quote = `"${getCardQuote(currentCardData)}"`;
     wrapText(ctx, quote, width / 2, nameY + 90, width - 160, 48);
@@ -6322,7 +6332,7 @@ function drawSquareLayout(ctx, cardImg, width, height) {
 
     // Title small
     ctx.fillStyle = 'rgba(160, 180, 220, 0.6)';
-    ctx.font = '22px "Cormorant Garamond", serif';
+    ctx.font = '22px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'left';
     ctx.fillText('Card of the Day', textX, 140);
 
@@ -6330,11 +6340,11 @@ function drawSquareLayout(ctx, cardImg, width, height) {
     ctx.fillStyle = '#C0C8E0';
     let nameFontSize = 48;
     const cardName = getCardName(currentCardData.name);
-    ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", serif`;
+    ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", "Prompt", serif`;
     let nameWidth = ctx.measureText(cardName).width;
     while (nameWidth > textWidth && nameFontSize > 26) {
         nameFontSize -= 2;
-        ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", serif`;
+        ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", "Prompt", serif`;
         nameWidth = ctx.measureText(cardName).width;
     }
     ctx.fillText(cardName, textX, 195);
@@ -6348,7 +6358,7 @@ function drawSquareLayout(ctx, cardImg, width, height) {
     ctx.stroke();
 
     // Quote
-    ctx.font = 'italic 22px "Cormorant Garamond", serif';
+    ctx.font = 'italic 22px "Cormorant Garamond", "Prompt", serif';
     ctx.fillStyle = 'rgba(160, 180, 220, 0.85)';
     const quoteText = `"${getCardQuote(currentCardData)}"`;
     wrapTextLeft(ctx, quoteText, textX, 265, textWidth, 30);
@@ -6408,7 +6418,7 @@ function drawWideLayout(ctx, cardImg, width, height) {
 
     // Title small
     ctx.fillStyle = 'rgba(160, 180, 220, 0.6)';
-    ctx.font = '20px "Cormorant Garamond", serif';
+    ctx.font = '20px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'left';
     ctx.fillText('Card of the Day', textX, 80);
 
@@ -6416,11 +6426,11 @@ function drawWideLayout(ctx, cardImg, width, height) {
     ctx.fillStyle = '#C0C8E0';
     let nameFontSize = 42;
     const cardName = getCardName(currentCardData.name);
-    ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", serif`;
+    ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", "Prompt", serif`;
     let nameWidth = ctx.measureText(cardName).width;
     while (nameWidth > textWidth && nameFontSize > 24) {
         nameFontSize -= 2;
-        ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", serif`;
+        ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", "Prompt", serif`;
         nameWidth = ctx.measureText(cardName).width;
     }
     ctx.fillText(cardName, textX, 125);
@@ -6434,7 +6444,7 @@ function drawWideLayout(ctx, cardImg, width, height) {
     ctx.stroke();
 
     // Quote
-    ctx.font = 'italic 20px "Cormorant Garamond", serif';
+    ctx.font = 'italic 20px "Cormorant Garamond", "Prompt", serif';
     ctx.fillStyle = 'rgba(160, 180, 220, 0.9)';
     const quoteText = `"${getCardQuote(currentCardData)}"`;
     wrapTextLeft(ctx, quoteText, textX, 180, textWidth, 26);

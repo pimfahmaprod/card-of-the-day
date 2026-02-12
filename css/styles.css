@@ -124,7 +124,7 @@ body {
 }
 
 .landing-heading {
-    font-family: 'Caveat', cursive;
+    font-family: 'Caveat', 'Prompt', cursive;
     font-size: 2.5rem;
     font-weight: 500;
     color: var(--burgundy);
@@ -253,7 +253,7 @@ html[lang="ja"] .landing-tagline {
     top: 85%;
     transform: translateX(-50%) rotate(-8deg);
     white-space: nowrap;
-    font-family: 'Caveat', cursive;
+    font-family: 'Caveat', 'Prompt', cursive;
     font-size: 1em;
     font-weight: 400;
     color: #E8E8F0;
@@ -898,7 +898,7 @@ html[lang="ja"] .landing-tagline {
 .landing-brand {
     position: absolute;
     bottom: 30px;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1.3rem;
     letter-spacing: 3px;
     color: var(--burgundy);
@@ -2242,7 +2242,7 @@ header {
 
 /* Quote */
 .center-card-info-quote {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 0.92rem;
     color: rgba(192, 200, 224, 0.8);
     font-style: italic;
@@ -2557,7 +2557,7 @@ header {
 }
 
 .result-sticky-card-quote {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-style: italic;
     font-size: 0.88rem;
     color: rgba(192, 200, 224, 0.7);
@@ -2708,6 +2708,13 @@ header {
     text-align: left;
     white-space: pre-line;
     padding-bottom: 4px;
+}
+
+.result-interpretation p {
+    margin: 0 0 0.8em 0;
+}
+.result-interpretation p:last-child {
+    margin-bottom: 0;
 }
 
 /* Pick Counter */
@@ -3057,7 +3064,7 @@ footer {
     text-align: center;
     padding: 8px 20px;
     color: var(--burgundy);
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     flex-shrink: 0;
 }
 
@@ -3226,7 +3233,7 @@ footer {
 }
 
 .wallpaper-banner-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 0.7rem;
     font-weight: 400;
     color: rgba(195, 170, 120, 0.6);
@@ -3236,7 +3243,7 @@ footer {
 }
 
 .wallpaper-banner-heading {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1.35rem;
     font-weight: 600;
     color: rgba(235, 220, 185, 0.95);
@@ -3515,7 +3522,7 @@ footer {
 }
 
 .starrytale-brand {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1.65rem;
     font-weight: 600;
     font-style: italic;
@@ -4556,7 +4563,7 @@ footer {
 }
 
 .comments-panel-user {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1.4rem;
     color: var(--burgundy);
     font-weight: 600;
@@ -5581,7 +5588,7 @@ footer {
 
 /* Comments section titles */
 .comments-section-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--burgundy);
@@ -5790,7 +5797,7 @@ footer {
 }
 
 .comment-card-name {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--burgundy);
@@ -5835,7 +5842,7 @@ footer {
     position: absolute;
     left: 0;
     top: -5px;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1.5rem;
     color: rgba(140, 160, 200, 0.3);
 }
@@ -5907,7 +5914,7 @@ footer {
 }
 
 .comment-card-full-label {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1rem;
     font-weight: 600;
     color: var(--burgundy);
@@ -6066,7 +6073,7 @@ footer {
 }
 
 .related-comment-name {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--burgundy);
@@ -6347,7 +6354,7 @@ footer {
 }
 
 .reply-name {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--burgundy);
@@ -6909,7 +6916,7 @@ footer {
 }
 
 .feed-card-quote {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-style: italic;
     font-size: 0.95rem;
     color: rgba(192, 200, 224, 0.85);
@@ -7222,7 +7229,7 @@ footer {
 }
 
 .activity-card-name {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 0.88rem;
     font-weight: 600;
     font-style: italic;
@@ -7337,7 +7344,7 @@ footer {
 
 .cardview-card-name {
     margin-top: 12px;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1.3rem;
     font-weight: 600;
     color: var(--burgundy);
@@ -7385,7 +7392,7 @@ footer {
 }
 
 .section-count {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--burgundy);
@@ -7675,7 +7682,7 @@ footer {
 }
 
 .analytics-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 2.2rem;
     font-weight: 600;
     color: var(--gold);
@@ -7703,7 +7710,7 @@ footer {
 }
 
 .section-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1.4rem;
     font-weight: 600;
     color: white;
@@ -7865,7 +7872,7 @@ footer {
 }
 
 .top-card-name {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1rem;
     font-weight: 600;
     color: white;
@@ -8193,7 +8200,7 @@ footer {
 }
 
 .hot-comment-user {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--gold);
@@ -8257,7 +8264,7 @@ footer {
 }
 
 .analytics-brand {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1.2rem;
     color: var(--gold);
     letter-spacing: 3px;
@@ -9004,7 +9011,7 @@ footer {
 }
 
 .blessing-branding-text {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Cormorant Garamond', 'Prompt', serif;
     font-size: 1.1rem;
     font-weight: 400;
     color: rgba(168, 184, 216, 0.5);
