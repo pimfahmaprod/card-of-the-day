@@ -1533,7 +1533,7 @@ window.addEventListener('resize', () => {
 });
 
 // Share Functions
-const siteUrl = 'https://pimfahmaprod.github.io/card-of-the-day/';
+const siteUrl = 'https://jubpai.com/';
 
 function getShareText() {
     const cardName = document.getElementById('resultCardName').textContent;
@@ -1570,7 +1570,8 @@ function shareToFacebook() {
         showToast(t('share.copiedForMessenger'));
         setTimeout(() => {
             // Try Messenger deep link first (works on mobile), fallback to web
-            const messengerUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(siteUrl)}&redirect_uri=${encodeURIComponent(siteUrl)}`;
+            const fbAppId = typeof FACEBOOK_APP_ID !== 'undefined' ? FACEBOOK_APP_ID : '940915038262874';
+            const messengerUrl = `https://www.facebook.com/dialog/send?app_id=${fbAppId}&link=${encodeURIComponent(siteUrl)}&redirect_uri=${encodeURIComponent(siteUrl)}`;
             window.open(messengerUrl, '_blank', 'width=600,height=400');
         }, 500);
     });
