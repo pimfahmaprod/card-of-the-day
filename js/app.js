@@ -366,6 +366,66 @@ function playSoundEffect(soundName) {
     }
 }
 
+// Blessing burst effect — expanding rings + particles from the accept button
+function triggerBlessingBurst(btn) {
+    if (!btn) return;
+    var rect = btn.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+
+    // Create overlay container
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:99999;overflow:hidden;';
+    document.body.appendChild(overlay);
+
+    // Expanding light rings
+    for (var r = 0; r < 3; r++) {
+        var ring = document.createElement('div');
+        ring.style.cssText =
+            'position:absolute;border-radius:50%;border:2px solid rgba(180,195,235,' + (0.6 - r * 0.15) + ');' +
+            'left:' + cx + 'px;top:' + cy + 'px;width:0;height:0;' +
+            'transform:translate(-50%,-50%);' +
+            'box-shadow:0 0 15px rgba(154,170,212,' + (0.3 - r * 0.08) + '),inset 0 0 15px rgba(154,170,212,' + (0.15 - r * 0.04) + ');' +
+            'animation:blessingRingExpand ' + (0.8 + r * 0.2) + 's ' + (r * 0.12) + 's cubic-bezier(0.25,0.46,0.45,0.94) forwards;';
+        overlay.appendChild(ring);
+    }
+
+    // Particles
+    var colors = ['rgba(180,195,235,0.9)', 'rgba(154,170,212,0.8)', 'rgba(200,215,245,0.9)', 'rgba(220,225,245,0.7)', 'rgba(140,160,210,0.8)'];
+    for (var p = 0; p < 18; p++) {
+        var particle = document.createElement('div');
+        var angle = (p / 18) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+        var dist = 60 + Math.random() * 80;
+        var dx = Math.cos(angle) * dist;
+        var dy = Math.sin(angle) * dist;
+        var size = 2 + Math.random() * 4;
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.cssText =
+            'position:absolute;border-radius:50%;' +
+            'width:' + size + 'px;height:' + size + 'px;' +
+            'left:' + cx + 'px;top:' + cy + 'px;' +
+            'background:' + color + ';' +
+            'box-shadow:0 0 ' + (size * 2) + 'px ' + color + ';' +
+            'transform:translate(-50%,-50%);' +
+            'animation:blessingParticle ' + (0.6 + Math.random() * 0.4) + 's ' + (Math.random() * 0.15) + 's cubic-bezier(0.25,0.46,0.45,0.94) forwards;' +
+            '--dx:' + dx + 'px;--dy:' + dy + 'px;';
+        overlay.appendChild(particle);
+    }
+
+    // Inject keyframes if not yet present
+    if (!document.getElementById('blessingBurstKeyframes')) {
+        var style = document.createElement('style');
+        style.id = 'blessingBurstKeyframes';
+        style.textContent =
+            '@keyframes blessingRingExpand{0%{width:0;height:0;opacity:1}100%{width:280px;height:280px;opacity:0}}' +
+            '@keyframes blessingParticle{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(0.2)}}';
+        document.head.appendChild(style);
+    }
+
+    // Cleanup
+    setTimeout(function() { overlay.remove(); }, 1500);
+}
+
 // Play audio with amplification using Web Audio API
 function playWithGainBoost(audioElement, gainValue) {
     try {
@@ -2042,6 +2102,7 @@ async function submitComment() {
             submitBtn.classList.add('success');
             submitText.textContent = t('toast.submitSuccess');
             playSoundEffect('accept');
+            triggerBlessingBurst(submitBtn);
 
             setTimeout(() => {
                 showBlessingScreen(userName, commentText);
@@ -2061,6 +2122,7 @@ async function submitComment() {
         };
 
         playSoundEffect('accept');
+        triggerBlessingBurst(submitBtn);
         submitBtn.classList.add('success');
         submitText.textContent = t('toast.submitSuccess');
 
@@ -2096,6 +2158,7 @@ async function submitComment() {
             submitBtn.classList.add('success');
             submitText.textContent = t('toast.submitSuccess');
             playSoundEffect('accept');
+            triggerBlessingBurst(submitBtn);
 
             setTimeout(() => {
                 showBlessingScreen(userName, commentText);
@@ -5515,7 +5578,8 @@ function testNotifBubbles() {
         btn.textContent = 'Test Bubbles';
         btn.style.cssText = 'position:fixed;bottom:60px;right:20px;z-index:99999;padding:6px 12px;font-size:11px;border-radius:8px;border:1px solid rgba(154,170,212,0.3);background:rgba(13,19,51,0.9);color:rgba(154,170,212,0.8);cursor:pointer;';
         btn.addEventListener('click', testNotifBubbles);
-        document.body.appendChild(btn);
+        var landing = document.getElementById('landingPage');
+        if (landing) landing.appendChild(btn);
     });
 })();
 
