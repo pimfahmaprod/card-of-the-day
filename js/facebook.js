@@ -40,20 +40,12 @@ function handleStatusChange(response) {
         fetchUserProfileFB();
     } else {
         fbUser = null;
-        // If was previously FB-connected but session expired, keep local data
-        if (!localStorage.getItem(FB_CONNECTED_KEY)) {
-            updateFacebookButton(false);
-        } else {
-            // Try to restore from localStorage
-            const savedName = localStorage.getItem('tarot_user_name');
-            const savedPic = localStorage.getItem(FB_PICTURE_KEY);
-            if (savedName && savedPic) {
-                updateFacebookButton(true, savedName, savedPic);
-            } else {
-                clearFacebookData();
-                updateFacebookButton(false);
-            }
+        // Session expired or not connected — clear everything and show as logged out
+        if (localStorage.getItem(FB_CONNECTED_KEY)) {
+            clearFacebookData();
+            if (typeof clearNotificationState === 'function') clearNotificationState();
         }
+        updateFacebookButton(false);
     }
     // Notify app.js that FB status is now known — refresh loading placeholders
     if (typeof onFacebookStatusReady === 'function') {
@@ -222,6 +214,9 @@ function logoutFromFacebook() {
     fbUser = null;
     clearFacebookData();
     updateFacebookButton(false);
+
+    // Clear notification bubbles and stop polling
+    if (typeof clearNotificationState === 'function') clearNotificationState();
 
     // Then try to end FB session if SDK is available
     try {

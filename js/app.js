@@ -4426,6 +4426,32 @@ function stopPolling() {
     }
 }
 
+// Clear all notification state and UI (called on logout)
+function clearNotificationState() {
+    stopPolling();
+    _pollState = {
+        friendUserIds: [],
+        myCommentIds: [],
+        friendsLastCheckedTs: 0,
+        repliesLastCheckedTs: 0,
+        unseenFriendDraws: 0,
+        unseenReplies: 0,
+        friendDrawsData: [],
+        repliesData: [],
+        initialized: false,
+        lastPollTime: 0
+    };
+
+    // Clear notification circle stacks
+    var stack = document.getElementById('notifCircleStack');
+    if (stack) { stack.innerHTML = ''; stack.classList.remove('scrollable', 'collapsed'); delete stack.dataset.expanded; }
+    var bar = document.getElementById('replyNotifBar');
+    if (bar) { bar.innerHTML = ''; bar.classList.remove('scrollable', 'collapsed'); delete bar.dataset.expanded; }
+
+    // Clear badges
+    updateNotificationBadges();
+}
+
 function handleVisibilityChange() {
     if (document.hidden) {
         _pollingPaused = true;
