@@ -156,6 +156,11 @@ function applyTranslations() {
 function setLanguage(lang) {
     if (!translations[lang]) return;
 
+    gtag('event', 'language_change', {
+        event_category: 'settings',
+        language: lang
+    });
+
     currentLang = lang;
     localStorage.setItem('tarot-lang', lang);
 
@@ -571,7 +576,10 @@ function toggleMute(e) {
     isMuted = !isMuted;
     audio.muted = isMuted;
 
-    console.log('Mute toggled:', isMuted);
+    gtag('event', 'music_toggle', {
+        event_category: 'settings',
+        music_state: isMuted ? 'muted' : 'unmuted'
+    });
 
     if (muteIconEl && unmuteIconEl) {
         if (isMuted) {
@@ -903,6 +911,8 @@ function startExperience() {
     if (!isPageReady) {
         return;
     }
+
+    gtag('event', 'start_experience', { event_category: 'navigation' });
 
     // Increment global draw counter in Firebase (updates display automatically)
     if (window.cardCounter && window.cardCounter.incrementGlobalDraw) {
@@ -1548,6 +1558,12 @@ function selectCard(cardId, cardElement) {
         return;
     }
 
+    gtag('event', 'select_card', {
+        event_category: 'engagement',
+        card_name: card.name,
+        card_id: cardId
+    });
+
     selectedCardElement = cardElement;
 
     // Play card flip sound effect when picking a card
@@ -1689,6 +1705,11 @@ function clearRevealParticles() {
 function proceedToResult(card) {
     currentCardData = card;
 
+    gtag('event', 'view_result', {
+        event_category: 'engagement',
+        card_name: card.name
+    });
+
     // Populate sticky card image, name and quote
     document.getElementById('resultStickyCardImg').src = `images/tarot/${card.image}`;
     document.getElementById('resultStickyCardName').textContent = getCardName(card.name);
@@ -1753,6 +1774,8 @@ function proceedToResult(card) {
 function closeResult() {
     if (isAnimating) return;
     isAnimating = true;
+
+    gtag('event', 'close_result', { event_category: 'navigation' });
 
     const cardGrid = document.getElementById('cardGrid');
 
@@ -1864,6 +1887,11 @@ function showToast(message) {
 // Try Web Share API first (best for mobile)
 function tryWebShare() {
     if (navigator.share) {
+        gtag('event', 'share', {
+            event_category: 'sharing',
+            method: 'native_share',
+            card_name: currentCardData ? currentCardData.name : ''
+        });
         navigator.share({
             title: t('share.title'),
             text: getShareText(),
@@ -1875,6 +1903,11 @@ function tryWebShare() {
 }
 
 function shareToFacebook() {
+    gtag('event', 'share', {
+        event_category: 'sharing',
+        method: 'messenger',
+        card_name: currentCardData ? currentCardData.name : ''
+    });
     // Share to Facebook Messenger
     const text = getShareText() + '\n\n' + siteUrl;
     navigator.clipboard.writeText(text).then(() => {
@@ -1889,12 +1922,22 @@ function shareToFacebook() {
 }
 
 function shareToLine() {
+    gtag('event', 'share', {
+        event_category: 'sharing',
+        method: 'line',
+        card_name: currentCardData ? currentCardData.name : ''
+    });
     // LINE already opens chat/messaging
     const text = encodeURIComponent(getShareText() + '\n' + siteUrl);
     window.open(`https://line.me/R/share?text=${text}`, '_blank', 'width=600,height=400');
 }
 
 function copyLink() {
+    gtag('event', 'share', {
+        event_category: 'sharing',
+        method: 'copy_link',
+        card_name: currentCardData ? currentCardData.name : ''
+    });
     const text = getShareText() + '\n\n' + siteUrl;
     navigator.clipboard.writeText(text).then(() => {
         showToast(t('share.copiedText'));
@@ -2329,6 +2372,11 @@ let cardViewData = null;
 async function viewCardComments() {
     if (!currentCardData) return;
 
+    gtag('event', 'view_comments', {
+        event_category: 'engagement',
+        card_name: currentCardData.name
+    });
+
     // Store card data for the cardview tab
     cardViewData = { ...currentCardData };
 
@@ -2565,6 +2613,11 @@ async function submitComment() {
         return;
     }
 
+    gtag('event', 'submit_comment', {
+        event_category: 'engagement',
+        card_name: currentCardData.name
+    });
+
     // Disable button and show loading
     submitBtn.disabled = true;
     submitText.textContent = t('comment.sending');
@@ -2672,6 +2725,11 @@ function showBlessingScreen(userName, comment) {
 
     if (!blessingScreen || !currentCardData) return;
 
+    gtag('event', 'view_blessing', {
+        event_category: 'funnel',
+        card_name: currentCardData.name
+    });
+
     const isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
 
     // Set card image
@@ -2769,6 +2827,8 @@ function stopBlessingSparkles() {
 }
 
 function closeBlessingAndRestart() {
+    gtag('event', 'draw_again', { event_category: 'navigation' });
+
     const blessingScreen = document.getElementById('blessingScreen');
 
     // Stop sparkles
@@ -6213,6 +6273,12 @@ function saveImage(platform) {
         showToast(t('image.selectFirst'));
         return;
     }
+
+    gtag('event', 'save_image', {
+        event_category: 'engagement',
+        image_format: platform,
+        card_name: currentCardData.name
+    });
 
     const sizes = {
         'ig-story': { width: 1080, height: 1920 },
