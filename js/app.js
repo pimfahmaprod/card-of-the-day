@@ -192,6 +192,7 @@ function refreshDynamicContent() {
 
         // Re-check card comments to update button text
         checkCardComments(currentCardData.id);
+
     }
 
     // Refresh comments section dividers if on mycard tab
