@@ -1189,7 +1189,7 @@ function syncMobileHint() {
     }
 }
 
-// Wait for all resources to load
+// Wait for essential resources then show page immediately
 async function waitForResources() {
     // Initialize reading mode (restore from localStorage)
     initReadingMode();
@@ -1203,7 +1203,7 @@ async function waitForResources() {
         createFloatingSparkles();
     }
 
-    // ── Phase 1: Load tarot data + essential images ──
+    // ── Phase 1: Load tarot data + essential images only ──
     updatePreloadProgress(0, 100, 'loading card data…');
 
     const essentialImages = [
@@ -1227,14 +1227,22 @@ async function waitForResources() {
 
     // Render cards (they use card back image which is already loaded)
     renderCards();
-    updatePreloadProgress(5, 100, 'loading card images…');
+    updatePreloadProgress(100, 100, 'ready ✦');
 
-    // ── Phase 2: Preload ALL tarot card images with progress ──
+    // Mark page as ready & dismiss overlay
+    markPageReady();
+    setTimeout(dismissPreloadOverlay, 300);
+
+    // ── Phase 2: Lazy-load remaining images in background ──
+    _lazyLoadRemainingImages();
+}
+
+// Background image preloader — does not block page interaction
+function _lazyLoadRemainingImages() {
     var allImages = [];
 
     // Remaining spinning card images
-    var remainingSpinning = spinningCardImages.slice(3);
-    allImages = allImages.concat(remainingSpinning);
+    allImages = allImages.concat(spinningCardImages.slice(3));
 
     // All 78 tarot card front images
     if (tarotData && tarotData.cards) {
@@ -1243,38 +1251,29 @@ async function waitForResources() {
         });
     }
 
-    // Deduplicate
+    // Deduplicate against already-loaded
     var seen = {};
+    spinningCardImages.slice(0, 3).forEach(function(s) { seen[s] = true; });
+    seen['images/card_back_blue.png'] = true;
     allImages = allImages.filter(function(src) {
         if (seen[src]) return false;
         seen[src] = true;
         return true;
     });
 
-    var totalImages = allImages.length;
-    var loaded = 0;
+    var idx = 0;
+    var concurrent = 4;
 
-    // Load in parallel batches of 8 for speed
-    var batchSize = 8;
-    for (var i = 0; i < totalImages; i += batchSize) {
-        var batch = allImages.slice(i, i + batchSize);
-        await Promise.all(batch.map(function(src) {
-            return preloadImage(src).then(function() {
-                loaded++;
-                var pct = 5 + Math.round((loaded / totalImages) * 95);
-                var shortName = src.split('/').pop().replace('.webp', '').replace('.png', '');
-                updatePreloadProgress(pct, 100, shortName);
-            });
-        }));
+    function loadNext() {
+        if (idx >= allImages.length) return;
+        var src = allImages[idx++];
+        preloadImage(src).then(loadNext).catch(loadNext);
     }
 
-    updatePreloadProgress(100, 100, 'ready ✦');
-
-    // Mark page as ready
-    markPageReady();
-
-    // Dismiss overlay after a brief pause
-    setTimeout(dismissPreloadOverlay, 400);
+    // Start a few parallel streams — low priority, won't compete with user interactions
+    for (var i = 0; i < concurrent && i < allImages.length; i++) {
+        loadNext();
+    }
 }
 
 // (All images are now preloaded in waitForResources)

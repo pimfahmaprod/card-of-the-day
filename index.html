@@ -1019,7 +1019,6 @@
         var scripts = [
             'js/translations.js',
             'js/card-interpretations.js',
-            'js/card-category-translations.js',
             'js/app.js',
             'js/facebook.js',
             'js/counter.js'
@@ -1027,6 +1026,11 @@
         scripts.forEach(function(src){
             document.write('<script src="'+src+'?v='+v+'"><\/script>');
         });
+        // Defer heavy translation file (1.1MB) — loaded after page is interactive
+        var def = document.createElement('script');
+        def.src = 'js/card-category-translations.js?v='+v;
+        def.defer = true;
+        document.head.appendChild(def);
     })();
     </script>
 </body>
