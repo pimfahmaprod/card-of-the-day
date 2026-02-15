@@ -2271,6 +2271,10 @@ function showRevealOverlay() {
     overlay.classList.remove('closing');
     overlay.classList.add('active');
 
+    // Clear 78-card grid now (hidden behind overlay) to free GPU for flip animation
+    var cardGrid = document.getElementById('cardGrid');
+    if (cardGrid) cardGrid.innerHTML = '';
+
     // Auto-reveal first card after overlay appears
     setTimeout(function() {
         if (revealQueue.length > 0) {
@@ -2878,10 +2882,6 @@ function proceedToMultiResult() {
         var resultPanel = document.getElementById('resultPanel');
         resultPanel.scrollTop = 0;
         resultPanel.classList.add('active');
-
-        // Clear 78 cards from DOM to free GPU/memory for result page
-        var cardGrid = document.getElementById('cardGrid');
-        if (cardGrid) cardGrid.innerHTML = '';
     }, 200);
 
     isAnimating = false;
@@ -2957,18 +2957,6 @@ function proceedToResult(card, skipFlyAnimation) {
             document.getElementById('overlay').classList.remove('active');
         }, 500);
     }
-
-    // Fade out the selected card in the grid
-    if (selectedCardElement) {
-        selectedCardElement.style.transition = 'opacity 0.5s ease';
-        selectedCardElement.style.opacity = '0';
-    }
-
-    // Clear 78 cards from DOM after transition to free GPU/memory
-    setTimeout(function() {
-        var cardGrid = document.getElementById('cardGrid');
-        if (cardGrid) cardGrid.innerHTML = '';
-    }, 600);
 
     isAnimating = false;
 
