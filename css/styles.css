@@ -5873,7 +5873,7 @@ footer {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin: 24px auto 20px;
+    margin: 0px auto 20px;
     padding: 12px 28px;
     background: rgba(154, 170, 212, 0.08);
     border: 1px solid rgba(154, 170, 212, 0.25);
@@ -9848,45 +9848,33 @@ footer {
     pointer-events: none;
 }
 
-/* ── Reopen button on sticky card ── */
+/* ── Reopen button (fixed corner) ── */
 .reveal-reopen-btn {
-    position: absolute;
-    top: 12px;
+    position: fixed;
+    top: 14px;
     right: 14px;
-    z-index: 11;
-    width: 34px;
-    height: 34px;
-    border: 1px solid rgba(154, 170, 212, 0.2);
+    z-index: 1003;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(154, 170, 212, 0.25);
     border-radius: 50%;
-    background: rgba(154, 170, 212, 0.08);
-    color: rgba(192, 204, 228, 0.6);
+    background: rgba(10, 14, 39, 0.55);
+    color: rgba(192, 204, 228, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .reveal-reopen-btn:hover,
 .reveal-reopen-btn:active {
-    background: rgba(154, 170, 212, 0.18);
-    color: rgba(220, 225, 240, 0.9);
-    border-color: rgba(154, 170, 212, 0.4);
-    box-shadow: 0 0 12px rgba(154, 170, 212, 0.2);
-}
-
-.result-sticky-card.minimized .reveal-reopen-btn {
-    top: 6px;
-    right: 10px;
-    width: 28px;
-    height: 28px;
-}
-
-.result-sticky-card.minimized .reveal-reopen-btn svg {
-    width: 14px;
-    height: 14px;
+    background: rgba(10, 14, 39, 0.75);
+    color: rgba(220, 225, 240, 0.95);
+    border-color: rgba(154, 170, 212, 0.45);
+    box-shadow: 0 0 14px rgba(154, 170, 212, 0.25);
 }
 
 .reveal-overlay-bg {

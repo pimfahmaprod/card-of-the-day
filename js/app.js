@@ -2587,8 +2587,7 @@ function dismissRevealOverlay() {
 // ── Re-open reveal overlay from result page ──
 
 function _addRevealReopenBtn() {
-    var sticky = document.getElementById('resultStickyCard');
-    if (!sticky || sticky.querySelector('.reveal-reopen-btn')) return;
+    if (document.querySelector('.reveal-reopen-btn')) return;
     var btn = document.createElement('button');
     btn.className = 'reveal-reopen-btn';
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="2" y="3" width="8" height="12" rx="1.5"/><rect x="14" y="3" width="8" height="12" rx="1.5"/><path d="M6 19l6-3 6 3"/></svg>';
@@ -2596,7 +2595,7 @@ function _addRevealReopenBtn() {
         e.stopPropagation();
         reopenRevealOverlay();
     });
-    sticky.appendChild(btn);
+    document.body.appendChild(btn);
 }
 
 function _removeRevealReopenBtn() {
