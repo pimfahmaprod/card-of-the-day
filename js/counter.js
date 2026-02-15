@@ -366,7 +366,14 @@ function trackButtonClick() { return null; }
 function trackSaveImage() { return null; }
 function trackShare() { return null; }
 function trackRetry() { return null; }
-function trackSocialClick() { return null; }
+function trackSocialClick(label) {
+    if (typeof gtag === 'function') {
+        gtag('event', 'click_banner', {
+            event_category: 'engagement',
+            event_label: label
+        });
+    }
+}
 
 // ========================================
 // Comments Functions
@@ -1108,5 +1115,7 @@ window.cardCounter = {
     fetchRepliesToMyComments: fetchRepliesToMyComments,
     // Lightweight polling
     fetchNewCommentsSince: fetchNewCommentsSince,
-    fetchNewRepliesForComments: fetchNewRepliesForComments
+    fetchNewRepliesForComments: fetchNewRepliesForComments,
+    // Analytics
+    trackSocialClick: trackSocialClick
 };
