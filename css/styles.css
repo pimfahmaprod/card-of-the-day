@@ -3111,7 +3111,9 @@ header {
     background:
         radial-gradient(ellipse at 25% 15%, rgba(50,70,150,0.5) 0%, transparent 50%),
         radial-gradient(ellipse at 75% 85%, rgba(30,50,120,0.4) 0%, transparent 45%),
-        linear-gradient(180deg, #030510 0%, #0c1440 50%, #030510 100%);
+        radial-gradient(ellipse at 80% 15%, rgba(40,55,130,0.4) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 85%, rgba(35,60,140,0.35) 0%, transparent 50%),
+        linear-gradient(180deg, #060a1a 0%, #0c1440 50%, #060a1a 100%);
 }
 .card-container .galaxy-stars,
 .card-container .galaxy-stars-2,
