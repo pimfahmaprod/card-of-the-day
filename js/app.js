@@ -46,12 +46,18 @@ const READING_MODES = [
     { id: 'single', headingKey: 'landing.heading', clickKey: 'landing.clickToDraw' },
     { id: 'three-card', headingKey: 'landing.heading3', clickKey: 'landing.clickToDraw3' },
     { id: 'four-card', headingKey: 'landing.heading4', clickKey: 'landing.clickToDraw4' },
-    { id: 'ten-card', headingKey: 'landing.heading10', clickKey: 'landing.clickToDraw10' },
-    { id: 'twelve-card', headingKey: 'landing.heading12', clickKey: 'landing.clickToDraw12' }
+    { id: 'ten-card', headingKey: 'landing.heading10', clickKey: 'landing.clickToDraw10', disabled: true },
+    { id: 'twelve-card', headingKey: 'landing.heading12', clickKey: 'landing.clickToDraw12', disabled: true }
 ];
+
+function isCurrentModeDisabled() {
+    return !!(READING_MODES[currentModeIndex] && READING_MODES[currentModeIndex].disabled);
+}
+
 let currentModeIndex = 0;
 let currentReadingMode = 'single';
 let currentReadingCategory = null; // 'love', 'work', or 'finance'
+var _modeAnimTimer = null; // cancel overlapping mode switch animations
 
 // Multi-card selection state
 var multiCardSelections = [];   // [{card, positionKey}]
@@ -368,7 +374,7 @@ function initReadingMode() {
     var savedMode = localStorage.getItem('tarot-reading-mode');
     if (savedMode) {
         var idx = READING_MODES.findIndex(function(m) { return m.id === savedMode; });
-        if (idx !== -1) {
+        if (idx !== -1 && !READING_MODES[idx].disabled) {
             currentModeIndex = idx;
             currentReadingMode = savedMode;
         }
@@ -397,6 +403,7 @@ function initReadingMode() {
             e.stopPropagation();
             var targetIndex = parseInt(dot.getAttribute('data-mode-index'), 10);
             if (targetIndex === currentModeIndex) return;
+            if (READING_MODES[targetIndex].disabled) return;
             var direction = targetIndex > currentModeIndex ? 1 : -1;
             currentModeIndex = targetIndex;
             currentReadingMode = READING_MODES[targetIndex].id;
@@ -557,22 +564,29 @@ function applyModeVisuals(animate, direction) {
     var isSingle = currentReadingMode === 'single';
 
     if (animate) {
+        // Cancel any pending mode switch animation
+        if (_modeAnimTimer) { clearTimeout(_modeAnimTimer); _modeAnimTimer = null; }
+
         // Stop sparkles for non-single modes
         if (!isSingle) stopFloatingSparkles();
+
+        // Capture target mode so the timer uses the correct value
+        var targetMode = currentReadingMode;
 
         // Fade out all currently visible containers
         Object.keys(containerMap).forEach(function(mode) {
             var c = containerMap[mode];
-            if (c && mode !== currentReadingMode && c.style.display !== 'none') {
+            if (c && mode !== targetMode && c.style.display !== 'none') {
                 c.style.opacity = '0';
             }
         });
 
-        setTimeout(function() {
+        _modeAnimTimer = setTimeout(function() {
+            _modeAnimTimer = null;
             // Hide all non-active containers
             Object.keys(containerMap).forEach(function(mode) {
                 var c = containerMap[mode];
-                if (c && mode !== currentReadingMode) {
+                if (c && mode !== targetMode) {
                     c.style.display = 'none';
                 }
             });
@@ -583,7 +597,7 @@ function applyModeVisuals(animate, direction) {
                 activeContainer.style.display = isSingle ? '' : 'flex';
 
                 // Reset floating animations for three-card
-                if (currentReadingMode === 'three-card') {
+                if (targetMode === 'three-card') {
                     resetThreeCardAnimations(activeContainer);
                 }
 
@@ -627,16 +641,36 @@ function applyModeVisuals(animate, direction) {
     }
 
     // Update dot indicators
+    var disabled = isCurrentModeDisabled();
     document.querySelectorAll('.mode-dot').forEach(function(dot, i) {
         dot.classList.toggle('active', i === currentModeIndex);
+        dot.classList.toggle('disabled', !!READING_MODES[i].disabled);
     });
 
-    // Toggle peek-flips for multi-card modes
+    // Toggle coming-soon state
     var landingPage = document.getElementById('landingPage');
     if (landingPage) {
+        landingPage.classList.toggle('mode-disabled', disabled);
+
+        // Update hint text for disabled modes
+        if (disabled && activeContainer) {
+            var hint = activeContainer.querySelector('.card-click-hint');
+            if (hint) {
+                var lt = translations[currentLang] && translations[currentLang].landing;
+                hint.textContent = (lt && lt.comingSoon) || 'Coming Soon';
+                hint.classList.remove('ready-state', 'loading-state');
+                hint.classList.add('coming-soon-state');
+            }
+        } else if (activeContainer) {
+            var hint2 = activeContainer.querySelector('.card-click-hint');
+            if (hint2) {
+                hint2.classList.remove('coming-soon-state');
+            }
+        }
+
         var isMulti = currentReadingMode !== 'single';
         landingPage.classList.remove('cosmic-theme');
-        if (isMulti) {
+        if (isMulti && !disabled) {
             startPeekFlips();
         } else {
             stopPeekFlips();
@@ -968,6 +1002,38 @@ function preloadImage(src) {
     });
 }
 
+// ── Preload overlay ──
+function createPreloadOverlay() {
+    var overlay = document.createElement('div');
+    overlay.className = 'preload-overlay';
+    overlay.id = 'preloadOverlay';
+    overlay.innerHTML =
+        '<div class="preload-progress-wrap">' +
+            '<div class="preload-label" id="preloadLabel">preparing…</div>' +
+            '<div class="preload-bar-track"><div class="preload-bar-fill" id="preloadFill"></div></div>' +
+            '<div class="preload-percent" id="preloadPercent">0 %</div>' +
+        '</div>';
+    document.body.appendChild(overlay);
+    return overlay;
+}
+
+function updatePreloadProgress(loaded, total, label) {
+    var pct = Math.round((loaded / total) * 100);
+    var fill = document.getElementById('preloadFill');
+    var percent = document.getElementById('preloadPercent');
+    var lbl = document.getElementById('preloadLabel');
+    if (fill) fill.style.width = pct + '%';
+    if (percent) percent.textContent = pct + ' %';
+    if (lbl && label) lbl.textContent = label;
+}
+
+function dismissPreloadOverlay() {
+    var overlay = document.getElementById('preloadOverlay');
+    if (!overlay) return;
+    overlay.classList.add('done');
+    setTimeout(function() { overlay.remove(); }, 700);
+}
+
 // Mark page as ready and enable card clicking with epic reveal
 function markPageReady() {
     isPageReady = true;
@@ -1003,19 +1069,20 @@ function markPageReady() {
             singleHint.classList.add('ready-state');
         }
 
-        // Update hints for multi-card modes
-        var multiHintMap = {
-            'threeCardContainer': 'landing.clickToDraw3',
-            'fourCardContainer': 'landing.clickToDraw4',
-            'tenCardContainer': 'landing.clickToDraw10',
-            'twelveCardContainer': 'landing.clickToDraw12'
-        };
-        Object.keys(multiHintMap).forEach(function(containerId) {
-            var container = document.getElementById(containerId);
+        // Update hints for multi-card modes (skip disabled modes)
+        var multiHintMap = [
+            { containerId: 'threeCardContainer', key: 'landing.clickToDraw3', modeIndex: 1 },
+            { containerId: 'fourCardContainer', key: 'landing.clickToDraw4', modeIndex: 2 },
+            { containerId: 'tenCardContainer', key: 'landing.clickToDraw10', modeIndex: 3 },
+            { containerId: 'twelveCardContainer', key: 'landing.clickToDraw12', modeIndex: 4 }
+        ];
+        multiHintMap.forEach(function(entry) {
+            if (READING_MODES[entry.modeIndex] && READING_MODES[entry.modeIndex].disabled) return;
+            var container = document.getElementById(entry.containerId);
             var hint = container ? container.querySelector('.card-click-hint') : null;
             if (hint) {
-                hint.textContent = t(multiHintMap[containerId]);
-                hint.setAttribute('data-i18n', multiHintMap[containerId]);
+                hint.textContent = t(entry.key);
+                hint.setAttribute('data-i18n', entry.key);
                 hint.classList.remove('loading-state');
                 hint.classList.add('ready-state');
             }
@@ -1035,21 +1102,24 @@ async function waitForResources() {
     // Initialize reading mode (restore from localStorage)
     initReadingMode();
 
+    // Show preload overlay immediately
+    createPreloadOverlay();
+
     // Start the card rotation animation immediately (only for single mode)
     if (currentReadingMode === 'single') {
         startCardRotation();
         createFloatingSparkles();
     }
 
-    // Load tarot data and essential images in parallel
+    // ── Phase 1: Load tarot data + essential images ──
+    updatePreloadProgress(0, 100, 'loading card data…');
+
     const essentialImages = [
         'images/card_back_blue.png',
-        ...spinningCardImages.slice(0, 3) // Only first 3 spinning images
+        ...spinningCardImages.slice(0, 3)
     ];
 
-    // Load data and essential images simultaneously
     await Promise.all([
-        // Load tarot data
         (async () => {
             if (!tarotData) {
                 try {
@@ -1060,54 +1130,62 @@ async function waitForResources() {
                 }
             }
         })(),
-        // Preload essential images only
         ...essentialImages.map(src => preloadImage(src))
     ]);
 
     // Render cards (they use card back image which is already loaded)
     renderCards();
+    updatePreloadProgress(5, 100, 'loading card images…');
 
-    // Mark page as ready immediately - don't wait for all images
-    markPageReady();
+    // ── Phase 2: Preload ALL tarot card images with progress ──
+    var allImages = [];
 
-    // Load remaining images in background (non-blocking)
-    loadRemainingImagesInBackground();
-}
-
-// Load remaining images in background after page is interactive
-function loadRemainingImagesInBackground() {
     // Remaining spinning card images
-    const remainingSpinning = spinningCardImages.slice(3);
+    var remainingSpinning = spinningCardImages.slice(3);
+    allImages = allImages.concat(remainingSpinning);
 
-    // All tarot card front images
-    const tarotImages = (tarotData && tarotData.cards)
-        ? tarotData.cards.map(card => `images/tarot/${card.image}`)
-        : [];
-
-    // Load in small batches to not block the main thread
-    const allImages = [...remainingSpinning, ...tarotImages];
-    let index = 0;
-    const batchSize = 5;
-
-    function loadBatch() {
-        const batch = allImages.slice(index, index + batchSize);
-        if (batch.length === 0) return;
-
-        batch.forEach(src => {
-            const img = new Image();
-            img.src = src;
+    // All 78 tarot card front images
+    if (tarotData && tarotData.cards) {
+        tarotData.cards.forEach(function(card) {
+            allImages.push('images/tarot/' + card.image);
         });
-
-        index += batchSize;
-        // Load next batch after a short delay
-        if (index < allImages.length) {
-            setTimeout(loadBatch, 100);
-        }
     }
 
-    // Start loading after a small delay to let the page settle
-    setTimeout(loadBatch, 500);
+    // Deduplicate
+    var seen = {};
+    allImages = allImages.filter(function(src) {
+        if (seen[src]) return false;
+        seen[src] = true;
+        return true;
+    });
+
+    var totalImages = allImages.length;
+    var loaded = 0;
+
+    // Load in parallel batches of 8 for speed
+    var batchSize = 8;
+    for (var i = 0; i < totalImages; i += batchSize) {
+        var batch = allImages.slice(i, i + batchSize);
+        await Promise.all(batch.map(function(src) {
+            return preloadImage(src).then(function() {
+                loaded++;
+                var pct = 5 + Math.round((loaded / totalImages) * 95);
+                var shortName = src.split('/').pop().replace('.webp', '').replace('.png', '');
+                updatePreloadProgress(pct, 100, shortName);
+            });
+        }));
+    }
+
+    updatePreloadProgress(100, 100, 'ready ✦');
+
+    // Mark page as ready
+    markPageReady();
+
+    // Dismiss overlay after a brief pause
+    setTimeout(dismissPreloadOverlay, 400);
 }
+
+// (All images are now preloaded in waitForResources)
 
 // Card images for spinning display
 const spinningCardImages = [
@@ -1290,8 +1368,42 @@ function createCardBurst() {
 // Category Selection Overlay
 // ========================================
 
+var _categoryThemes = {
+    love:    { primary:'#ff6b8a', primaryRgb:'255,107,138', light:'#ffb0c4', lightRgb:'255,176,196', glow:'#ff4081', glowRgb:'255,64,129', sparkleEnd:'#ffb0c4' },
+    work:    { primary:'#64b5ff', primaryRgb:'100,181,255', light:'#a0c8ff', lightRgb:'160,200,255', glow:'#448aff', glowRgb:'68,138,255', sparkleEnd:'#a0c8ff' },
+    finance: { primary:'#ffd54f', primaryRgb:'255,213,79',  light:'#ffe088', lightRgb:'255,224,136', glow:'#ffab00', glowRgb:'255,171,0',   sparkleEnd:'#ffe088' }
+};
+
+function setCategoryTheme(category) {
+    var t = _categoryThemes[category];
+    if (!t) return;
+    var root = document.documentElement.style;
+    root.setProperty('--cat-primary', t.primary);
+    root.setProperty('--cat-primary-rgb', t.primaryRgb);
+    root.setProperty('--cat-light', t.light);
+    root.setProperty('--cat-light-rgb', t.lightRgb);
+    root.setProperty('--cat-glow', t.glow);
+    root.setProperty('--cat-glow-rgb', t.glowRgb);
+    root.setProperty('--cat-sparkle-end', t.sparkleEnd);
+}
+
+function clearCategoryTheme() {
+    var root = document.documentElement.style;
+    ['--cat-primary','--cat-primary-rgb','--cat-light','--cat-light-rgb','--cat-glow','--cat-glow-rgb','--cat-sparkle-end'].forEach(function(p) {
+        root.removeProperty(p);
+    });
+}
+
+function playCategoryFlash(category) {
+    var flash = document.createElement('div');
+    flash.className = 'category-flash';
+    document.body.appendChild(flash);
+    setTimeout(function() { flash.remove(); }, 1500);
+}
+
 function handleLandingCardClick() {
     if (!isPageReady) return;
+    if (isCurrentModeDisabled()) return;
     showCategoryOverlay();
 }
 
@@ -1334,6 +1446,9 @@ function selectCategory(category) {
         reading_mode: currentReadingMode
     });
 
+    // Apply category color theme
+    setCategoryTheme(category);
+
     // Visual feedback: highlight selected card
     var overlay = document.getElementById('categoryOverlay');
     overlay.querySelectorAll('.category-card').forEach(function(c) {
@@ -1342,12 +1457,15 @@ function selectCategory(category) {
     var selectedCard = overlay.querySelector('.category-card[data-category="' + category + '"]');
     if (selectedCard) selectedCard.classList.add('selected');
 
-    // Brief pause for visual feedback, then close and start experience
+    // Category confirmation flash
+    playCategoryFlash(category);
+
+    // Brief pause for flash + visual feedback, then close and start experience
     setTimeout(function() {
         closeCategoryOverlay(function() {
             startExperience();
         });
-    }, 200);
+    }, 350);
 }
 
 // Initialize category card click handlers
@@ -1374,15 +1492,21 @@ function selectCategory(category) {
 function initMultiCardMode() {
     multiCardSelections = [];
     _multiDisabledCards = [];
+    var grid = document.querySelector('.card-grid');
     if (currentReadingMode === 'three-card') {
         multiCardTarget = 3;
         multiCardPositions = ['past', 'present', 'future'];
+        if (grid) grid.classList.add('multi-select-mode');
+        showMultiPickIndicator();
     } else if (currentReadingMode === 'four-card') {
         multiCardTarget = 4;
         multiCardPositions = ['past', 'present', 'future', 'outcome'];
+        if (grid) grid.classList.add('multi-select-mode');
+        showMultiPickIndicator();
     } else {
         multiCardTarget = 0;
         multiCardPositions = [];
+        if (grid) grid.classList.remove('multi-select-mode');
     }
 }
 
@@ -1392,6 +1516,8 @@ function startExperience() {
     if (!isPageReady) {
         return;
     }
+    // Block disabled modes
+    if (isCurrentModeDisabled()) return;
 
     gtag('event', 'start_experience', { event_category: 'navigation' });
 
@@ -2060,46 +2186,379 @@ function applyGridLayout() {
 }
 
 // Create sparkle particles for card selection
+var _categoryParticles = {
+    love:    ['♥', '♡', '❤'],
+    work:    ['★', '✦', '⚡'],
+    finance: ['✦', '◆', '$']
+};
+
 function createSparkles(element) {
     const rect = element.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
+    const symbols = _categoryParticles[currentReadingCategory];
+    const count = symbols ? 10 : 12;
 
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < count; i++) {
         const sparkle = document.createElement('div');
-        sparkle.className = 'sparkle';
+        sparkle.className = symbols ? 'sparkle sparkle-icon' : 'sparkle';
 
-        // Random angle for each sparkle
-        const angle = (i / 12) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
-        const distance = 60 + Math.random() * 40;
+        if (symbols) {
+            sparkle.textContent = symbols[i % symbols.length];
+        }
+
+        const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+        const distance = 50 + Math.random() * 45;
         const x = Math.cos(angle) * distance;
         const y = Math.sin(angle) * distance;
+        const spin = Math.round((Math.random() - 0.5) * 180);
 
         sparkle.style.left = `${centerX}px`;
         sparkle.style.top = `${centerY}px`;
         sparkle.style.setProperty('--sparkle-x', `${x}px`);
         sparkle.style.setProperty('--sparkle-y', `${y}px`);
+        sparkle.style.setProperty('--sparkle-spin', `${spin}deg`);
         sparkle.style.animationDelay = `${Math.random() * 0.2}s`;
-        sparkle.style.width = `${6 + Math.random() * 6}px`;
-        sparkle.style.height = sparkle.style.width;
+
+        if (!symbols) {
+            sparkle.style.width = `${6 + Math.random() * 6}px`;
+            sparkle.style.height = sparkle.style.width;
+        } else {
+            sparkle.style.fontSize = `${10 + Math.random() * 8}px`;
+        }
 
         document.body.appendChild(sparkle);
-
-        // Remove sparkle after animation
-        setTimeout(() => sparkle.remove(), 1000);
+        setTimeout(() => sparkle.remove(), 1100);
     }
+}
+
+// ========================================
+// Reveal Overlay
+// ========================================
+var revealOverlayActive = false;
+var revealQueue = [];
+var revealIndex = 0;
+var revealSkipping = false;
+var revealCardData = null;
+var _revealTapHandler = null;
+var _revealSkipHandler = null;
+
+function showRevealOverlay() {
+    var overlay = document.getElementById('revealOverlay');
+    var fanWrapper = document.getElementById('revealFanWrapper');
+    var skipBtn = document.getElementById('revealSkipBtn');
+    var prompt = document.getElementById('revealPrompt');
+
+    // Build fan HTML based on reading mode
+    fanWrapper.innerHTML = buildRevealFan();
+
+    // Determine total cards
+    var totalCards = (currentReadingMode === 'single') ? 1 : multiCardTarget;
+
+    // Show/hide skip button
+    skipBtn.style.display = (totalCards > 1) ? 'block' : 'none';
+    var t = translations[currentLang] && translations[currentLang].reveal;
+    skipBtn.textContent = (t && t.skip) || 'Skip ›';
+
+    // Set prompt text
+    prompt.textContent = (t && t.tapToReveal) || 'Tap to reveal';
+    prompt.style.opacity = '';
+
+    // Reset card info display
+    var cardInfo = document.getElementById('revealCardInfo');
+    cardInfo.classList.remove('visible', 'switching');
+    document.getElementById('revealCardInfoName').textContent = '';
+    document.getElementById('revealCardInfoQuote').textContent = '';
+
+    // Initialize reveal state
+    revealQueue = Array.from(fanWrapper.querySelectorAll('.three-card-item, .multi-card-item'));
+    revealIndex = 0;
+    revealSkipping = false;
+    revealOverlayActive = true;
+
+    // Show overlay
+    overlay.classList.remove('closing');
+    overlay.classList.add('active');
+
+    // Auto-reveal first card after overlay appears
+    setTimeout(function() {
+        if (revealQueue.length > 0) {
+            revealCard(0);
+            revealIndex = 1;
+            // Highlight next card if there is one
+            if (revealIndex < revealQueue.length) {
+                revealQueue[revealIndex].classList.add('reveal-next');
+            } else {
+                showRevealContinuePrompt();
+            }
+        }
+    }, 600);
+
+    // Clean up old handlers if any
+    if (_revealTapHandler) overlay.removeEventListener('click', _revealTapHandler);
+    if (_revealSkipHandler) skipBtn.removeEventListener('click', _revealSkipHandler);
+
+    // Attach handlers
+    _revealTapHandler = function(e) { handleRevealTap(e); };
+    _revealSkipHandler = function(e) { handleRevealSkip(e); };
+    overlay.addEventListener('click', _revealTapHandler);
+    skipBtn.addEventListener('click', _revealSkipHandler);
+}
+
+function buildRevealFan() {
+    if (currentReadingMode === 'single') {
+        return buildSingleCardReveal();
+    } else if (currentReadingMode === 'three-card') {
+        return buildThreeCardReveal();
+    } else if (currentReadingMode === 'four-card') {
+        return buildFourCardReveal();
+    }
+    // Fallback for future modes
+    return buildSingleCardReveal();
+}
+
+function buildCardBackHTML() {
+    return '<div class="card-back-galaxy">' +
+        '<div class="galaxy-bg"></div>' +
+        '<div class="galaxy-stars"></div>' +
+        '<div class="galaxy-shimmer"></div>' +
+        '<img class="card-back-seal" src="images/seal_transparent.png" alt="">' +
+        '</div>';
+}
+
+function buildSingleCardReveal() {
+    var card = revealCardData;
+    return '<div class="reveal-single-fan">' +
+        '<div class="three-card-item">' +
+            '<div class="three-card-flipper">' +
+                '<div class="three-card-face three-card-back">' + buildCardBackHTML() + '</div>' +
+                '<div class="three-card-face three-card-front">' +
+                    '<img class="three-card-front-img" src="images/tarot/' + card.image + '" alt="' + card.name + '">' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+    '</div>';
+}
+
+function buildThreeCardReveal() {
+    var posClasses = ['three-card-left', 'three-card-center', 'three-card-right'];
+    var posKeys = ['past', 'present', 'future'];
+    var html = '<div class="three-card-fan">';
+    for (var i = 0; i < multiCardSelections.length; i++) {
+        var sel = multiCardSelections[i];
+        var posLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[posKeys[i]]) || posKeys[i];
+        html += '<div class="three-card-item ' + posClasses[i] + '">' +
+            '<div class="three-card-flipper">' +
+                '<div class="three-card-face three-card-back">' + buildCardBackHTML() + '</div>' +
+                '<div class="three-card-face three-card-front">' +
+                    '<img class="three-card-front-img" src="images/tarot/' + sel.card.image + '" alt="' + sel.card.name + '">' +
+                '</div>' +
+            '</div>' +
+            '<span class="card-position-label">' + posLabel + '</span>' +
+        '</div>';
+    }
+    html += '</div>';
+    return html;
+}
+
+function buildFourCardReveal() {
+    var posClasses = ['fc-1', 'fc-2', 'fc-3', 'fc-4'];
+    var posKeys = ['past', 'present', 'future', 'outcome'];
+    var html = '<div class="multi-card-fan four-card-fan">';
+    for (var i = 0; i < multiCardSelections.length; i++) {
+        var sel = multiCardSelections[i];
+        var posLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[posKeys[i]]) || posKeys[i];
+        html += '<div class="multi-card-item ' + posClasses[i] + '">' +
+            '<div class="multi-card-flipper">' +
+                '<div class="multi-card-face multi-card-back">' + buildCardBackHTML() + '</div>' +
+                '<div class="multi-card-face multi-card-front">' +
+                    '<img class="multi-card-front-img" src="images/tarot/' + sel.card.image + '" alt="' + sel.card.name + '">' +
+                '</div>' +
+            '</div>' +
+            '<span class="card-position-label">' + posLabel + '</span>' +
+        '</div>';
+    }
+    html += '</div>';
+    return html;
+}
+
+function handleRevealTap(e) {
+    // Ignore clicks on the skip button
+    if (e.target.closest('.reveal-skip-btn')) return;
+    if (revealSkipping) return;
+
+    if (revealIndex < revealQueue.length) {
+        // Reveal next card
+        revealCard(revealIndex);
+        revealIndex++;
+
+        // Update highlight
+        revealQueue.forEach(function(c) { c.classList.remove('reveal-next'); });
+        if (revealIndex < revealQueue.length) {
+            revealQueue[revealIndex].classList.add('reveal-next');
+        }
+
+        // Check if all revealed
+        if (revealIndex >= revealQueue.length) {
+            showRevealContinuePrompt();
+        }
+    } else {
+        // All revealed, proceed to result
+        dismissRevealOverlay();
+    }
+}
+
+function revealCard(index) {
+    var cardEl = revealQueue[index];
+    cardEl.classList.add('peek-flip');
+    cardEl.classList.remove('reveal-next');
+    playSoundEffect('cardReveal');
+
+    // Show card info (name + category quote)
+    if (!revealSkipping) {
+        var cardData = getRevealCardData(index);
+        if (cardData) {
+            showRevealCardInfo(cardData);
+        }
+    }
+}
+
+function getRevealCardData(index) {
+    if (currentReadingMode === 'single') {
+        return revealCardData;
+    }
+    if (multiCardSelections && multiCardSelections[index]) {
+        return multiCardSelections[index].card;
+    }
+    return null;
+}
+
+function showRevealCardInfo(cardData) {
+    var infoEl = document.getElementById('revealCardInfo');
+    var nameEl = document.getElementById('revealCardInfoName');
+    var quoteEl = document.getElementById('revealCardInfoQuote');
+
+    // Get card name
+    var name = getCardName(cardData.name);
+
+    // Get category-specific quote if category is set, otherwise general quote
+    var quote = '';
+    if (currentReadingCategory) {
+        quote = getCardCategoryField(cardData, currentReadingCategory + 'Quote');
+    }
+    if (!quote) {
+        quote = getCardQuote(cardData);
+    }
+
+    // If info is already visible, do a switching animation
+    if (infoEl.classList.contains('visible')) {
+        infoEl.classList.add('switching');
+        setTimeout(function() {
+            nameEl.textContent = name;
+            quoteEl.textContent = quote;
+            infoEl.classList.remove('switching');
+            // Re-trigger animations by removing and re-adding visible
+            infoEl.classList.remove('visible');
+            void infoEl.offsetWidth; // force reflow
+            infoEl.classList.add('visible');
+        }, 250);
+    } else {
+        nameEl.textContent = name;
+        quoteEl.textContent = quote;
+        infoEl.classList.add('visible');
+    }
+}
+
+function handleRevealSkip(e) {
+    e.stopPropagation();
+    if (revealSkipping) return;
+    revealSkipping = true;
+
+    // Hide skip button and card info immediately
+    document.getElementById('revealSkipBtn').style.display = 'none';
+    var infoEl = document.getElementById('revealCardInfo');
+    infoEl.classList.remove('visible');
+    infoEl.classList.add('switching');
+
+    // Auto-flip remaining cards
+    var startIdx = revealIndex;
+    var remaining = revealQueue.length - startIdx;
+    for (var i = 0; i < remaining; i++) {
+        (function(idx, delay) {
+            setTimeout(function() {
+                revealCard(idx);
+                if (idx >= revealQueue.length - 1) {
+                    // Show last card's info after skip completes
+                    var lastCardData = getRevealCardData(idx);
+                    if (lastCardData) {
+                        infoEl.classList.remove('switching');
+                        showRevealCardInfo(lastCardData);
+                    }
+                    showRevealContinuePrompt();
+                    revealSkipping = false;
+                }
+            }, delay);
+        })(startIdx + i, i * 200);
+    }
+    revealIndex = revealQueue.length;
+
+    // Remove highlight
+    revealQueue.forEach(function(c) { c.classList.remove('reveal-next'); });
+}
+
+function showRevealContinuePrompt() {
+    var prompt = document.getElementById('revealPrompt');
+    var t = translations[currentLang] && translations[currentLang].reveal;
+    prompt.textContent = (t && t.tapToContinue) || 'Tap to see your reading';
+    document.getElementById('revealSkipBtn').style.display = 'none';
+}
+
+function dismissRevealOverlay() {
+    var overlay = document.getElementById('revealOverlay');
+    overlay.classList.add('closing');
+    revealOverlayActive = false;
+
+    // Remove listeners
+    if (_revealTapHandler) overlay.removeEventListener('click', _revealTapHandler);
+    if (_revealSkipHandler) document.getElementById('revealSkipBtn').removeEventListener('click', _revealSkipHandler);
+    _revealTapHandler = null;
+    _revealSkipHandler = null;
+
+    // Hide card info
+    var cardInfo = document.getElementById('revealCardInfo');
+    cardInfo.classList.remove('visible');
+    cardInfo.classList.add('switching');
+
+    setTimeout(function() {
+        overlay.classList.remove('active', 'closing');
+        document.getElementById('revealFanWrapper').innerHTML = '';
+        cardInfo.classList.remove('switching');
+        document.getElementById('revealCardInfoName').textContent = '';
+        document.getElementById('revealCardInfoQuote').textContent = '';
+
+        // Proceed to result
+        if (currentReadingMode === 'single') {
+            proceedToResult(revealCardData, true);
+        } else {
+            proceedToMultiResult();
+        }
+    }, 500);
 }
 
 // Select card
 function selectCard(cardId, cardElement) {
     if (isAnimating) return;
-    isAnimating = true;
 
     const card = tarotData.cards.find(c => c.id === cardId);
-    if (!card) {
-        isAnimating = false;
+    if (!card) return;
+
+    // Multi-card mode: quick-select without center card animation
+    if (multiCardTarget > 0) {
+        selectCardMulti(card, cardElement);
         return;
     }
+
+    isAnimating = true;
 
     gtag('event', 'select_card', {
         event_category: 'engagement',
@@ -2111,12 +2570,6 @@ function selectCard(cardId, cardElement) {
 
     // Play card flip sound effect when picking a card
     playSoundEffect('cardFlip');
-
-    // Set center card image
-    document.getElementById('centerCardImage').src = `images/tarot/${card.image}`;
-
-    // Reset center card flip state
-    document.getElementById('centerCardInner').classList.remove('flipped');
 
     // Step 1: Add selecting class for golden glow
     cardElement.classList.add('selecting');
@@ -2139,113 +2592,19 @@ function selectCard(cardId, cardElement) {
         }
     });
 
-    // Step 2: Fly selected card to center
+    // Step 2: Show reveal overlay after a short delay
     setTimeout(function() {
-        // Show overlay
-        document.getElementById('overlay').classList.add('active');
-
-        // Get grid card position (after lift transform)
-        var rect = cardElement.getBoundingClientRect();
-        var centerEl = document.getElementById('centerCard');
-
-        // Get center card's CSS dimensions (responsive: 280/240/200)
-        var centerStyle = getComputedStyle(centerEl);
-        var centerW = parseFloat(centerStyle.width);
-        var centerH = parseFloat(centerStyle.height);
-
-        // Reference point: center card is fixed at top:50% left:50%
-        var refX = window.innerWidth / 2;
-        var refY = window.innerHeight / 2;
-
-        // Grid card center
-        var rectCx = rect.left + rect.width / 2;
-        var rectCy = rect.top + rect.height / 2;
-
-        // Scale to match grid card size
-        var startScale = rect.width / centerW;
-
-        // Compute translate so visual center lands on grid card center
-        // With translate(tx,ty) scale(s) and transform-origin:center,
-        // visual center = (refX + centerW/2 + tx, refY + centerH/2 + ty)
-        var startTx = rectCx - refX - centerW / 2;
-        var startTy = rectCy - refY - centerH / 2;
-
-        // Position center card at grid card location (no transition)
-        centerEl.classList.add('active');
-        centerEl.style.transition = 'none';
-        centerEl.style.transform = 'translate(' + startTx + 'px, ' + startTy + 'px) scale(' + startScale + ')';
-        centerEl.style.opacity = '1';
-        centerEl.offsetHeight; // force reflow
-
-        // Hide original grid card
-        cardElement.style.transition = 'opacity 0.2s ease';
+        // Fade out selected card in grid
+        cardElement.style.transition = 'opacity 0.3s ease';
         cardElement.style.opacity = '0';
 
-        // Animate to center position
-        centerEl.style.transition = 'transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
-        centerEl.style.transform = 'translate(-50%, -90%) scale(1)';
+        // Store card data for reveal overlay
+        revealCardData = card;
 
-        // Step 3: After arriving at center, flip
+        // Show reveal overlay
         setTimeout(function() {
-            // Clean up inline styles — .active class handles final state
-            centerEl.style.transition = 'none';
-            centerEl.style.transform = '';
-            centerEl.style.opacity = '';
-            centerEl.offsetHeight;
-            centerEl.style.transition = '';
-
-            // Flip the card
-            document.getElementById('centerCardInner').classList.add('flipped');
-            playSoundEffect('cardReveal');
-
-            // Step 4: Show card name + quote after flip, wait for user tap
-            setTimeout(function() {
-                document.getElementById('centerCardInfoName').textContent = getCardName(card.name);
-
-                // Multi-card mode: show position label instead of quote
-                if (multiCardTarget > 0) {
-                    var pickIndex = multiCardSelections.length; // 0-based
-                    var posKey = multiCardPositions[pickIndex];
-                    var posLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[posKey]) || posKey;
-                    document.getElementById('centerCardInfoQuote').textContent = '✦ ' + posLabel + ' ✦';
-                    var counterText = (pickIndex + 1) + ' / ' + multiCardTarget;
-                    document.getElementById('centerCardInfoContinue').textContent = counterText;
-                } else {
-                    document.getElementById('centerCardInfoQuote').textContent = '"' + getCardQuote(card) + '"';
-                    var continueText = translations[currentLang] && translations[currentLang].result && translations[currentLang].result.tapToContinue;
-                    document.getElementById('centerCardInfoContinue').textContent = continueText || 'Tap to see your reading';
-                }
-
-                centerEl.classList.add('show-info');
-                spawnRevealParticles();
-
-                function onContinueTap() {
-                    centerEl.removeEventListener('click', onContinueTap);
-                    document.getElementById('overlay').removeEventListener('click', onContinueTap);
-                    clearRevealParticles();
-
-                    if (multiCardTarget > 0) {
-                        // Store this selection
-                        var pickIdx = multiCardSelections.length;
-                        var pKey = multiCardPositions[pickIdx];
-                        multiCardSelections.push({ card: card, positionKey: pKey });
-                        _multiDisabledCards.push(cardElement);
-
-                        if (multiCardSelections.length < multiCardTarget) {
-                            // Not last card — return to grid for next pick
-                            returnToGridForNextPick();
-                        } else {
-                            // Last card — proceed to multi result
-                            proceedToMultiResult();
-                        }
-                    } else {
-                        proceedToResult(card);
-                    }
-                }
-                centerEl.addEventListener('click', onContinueTap);
-                document.getElementById('overlay').addEventListener('click', onContinueTap);
-            }, 600);
-        }, 750);
+            showRevealOverlay();
+        }, 300);
     }, 400);
 }
 
@@ -2272,6 +2631,116 @@ function spawnRevealParticles() {
 function clearRevealParticles() {
     var container = document.getElementById('centerCardParticles');
     if (container) container.innerHTML = '';
+}
+
+// Multi-card quick-select: toggle select/unselect with aura effect
+// Multi-pick progress indicator
+function showMultiPickIndicator() {
+    var existing = document.getElementById('multiPickIndicator');
+    if (existing) existing.remove();
+
+    var el = document.createElement('div');
+    el.id = 'multiPickIndicator';
+    el.className = 'multi-pick-indicator';
+
+    // Build dots
+    for (var i = 0; i < multiCardTarget; i++) {
+        var dot = document.createElement('span');
+        dot.className = 'mpi-dot';
+        el.appendChild(dot);
+    }
+
+    document.getElementById('mainPage').appendChild(el);
+    // Trigger entrance animation
+    requestAnimationFrame(function() { el.classList.add('visible'); });
+}
+
+function updateMultiPickIndicator() {
+    var el = document.getElementById('multiPickIndicator');
+    if (!el) return;
+    var dots = el.querySelectorAll('.mpi-dot');
+    for (var i = 0; i < dots.length; i++) {
+        if (i < multiCardSelections.length) {
+            dots[i].classList.add('filled');
+        } else {
+            dots[i].classList.remove('filled');
+        }
+    }
+}
+
+function hideMultiPickIndicator() {
+    var el = document.getElementById('multiPickIndicator');
+    if (!el) return;
+    el.classList.add('hiding');
+    setTimeout(function() { if (el.parentNode) el.remove(); }, 400);
+}
+
+function selectCardMulti(card, cardElement) {
+    // Check if already selected — toggle off
+    var existingIdx = -1;
+    for (var i = 0; i < multiCardSelections.length; i++) {
+        if (multiCardSelections[i].card.id === card.id) {
+            existingIdx = i;
+            break;
+        }
+    }
+
+    if (existingIdx >= 0) {
+        // Unselect
+        playSoundEffect('cardFlip');
+        multiCardSelections.splice(existingIdx, 1);
+        var disIdx = _multiDisabledCards.indexOf(cardElement);
+        if (disIdx >= 0) _multiDisabledCards.splice(disIdx, 1);
+
+        cardElement.classList.remove('multi-picked');
+        cardElement.style.transform = '';
+
+        // Re-assign positionKeys in order
+        for (var r = 0; r < multiCardSelections.length; r++) {
+            multiCardSelections[r].positionKey = multiCardPositions[r];
+        }
+        updateMultiPickIndicator();
+        return;
+    }
+
+    // Already at max — ignore
+    if (multiCardSelections.length >= multiCardTarget) return;
+
+    // Select
+    playSoundEffect('cardFlip');
+
+    gtag('event', 'select_card', {
+        event_category: 'engagement',
+        card_name: card.name,
+        card_id: card.id
+    });
+
+    var pickIdx = multiCardSelections.length;
+    var pKey = multiCardPositions[pickIdx];
+    multiCardSelections.push({ card: card, positionKey: pKey });
+    _multiDisabledCards.push(cardElement);
+
+    // Visual: lift up + aura
+    cardElement.classList.add('multi-picked');
+    cardElement.style.transform = 'translateY(-30%)';
+    createSparkles(cardElement);
+
+    updateMultiPickIndicator();
+
+    // All cards selected → proceed after a short delay
+    if (multiCardSelections.length >= multiCardTarget) {
+        isAnimating = true;
+        hideMultiPickIndicator();
+        document.querySelectorAll('.card-container').forEach(function(c) {
+            if (!c.classList.contains('multi-picked')) {
+                c.classList.add('disabled');
+            }
+        });
+
+        setTimeout(function() {
+            showRevealOverlay();
+        }, 800);
+    }
 }
 
 // Return to grid after picking a multi-card (not the last one)
@@ -2325,27 +2794,52 @@ function proceedToMultiResult() {
     var fade = document.getElementById('interpretationFade');
     if (fade) fade.style.display = 'none';
 
-    // Build multi-result HTML
-    var html = '';
-
-    // Card thumbnails row
-    html += '<div class="multi-result-row">';
+    // Populate sticky card with multi-card thumbnails row
+    var stickyCard = document.getElementById('resultStickyCard');
+    var stickyHtml = '';
     for (var i = 0; i < multiCardSelections.length; i++) {
         var sel = multiCardSelections[i];
         var posLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[sel.positionKey]) || sel.positionKey;
-        html += '<div class="multi-result-card-item">';
-        html += '<img class="multi-result-card-img" src="images/tarot/' + sel.card.image + '" alt="' + sel.card.name + '">';
-        html += '<div class="multi-result-card-label">' + posLabel + '</div>';
-        html += '</div>';
+        stickyHtml += '<div class="multi-result-card-item' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">';
+        stickyHtml += '<img class="multi-result-card-img" src="images/tarot/' + sel.card.image + '" alt="' + sel.card.name + '">';
+        stickyHtml += '<div class="multi-result-card-label">' + posLabel + '</div>';
+        stickyHtml += '</div>';
     }
-    html += '</div>';
+    stickyCard.innerHTML = stickyHtml;
+    stickyCard.classList.add('multi-sticky');
+    stickyCard.classList.remove('minimized');
+    stickyCard.style.display = '';
+
+    // Center first card initially
+    var firstItem = stickyCard.querySelector('.multi-result-card-item');
+    if (firstItem) {
+        setTimeout(function() {
+            centerStickyItem(stickyCard, firstItem);
+        }, 50);
+    }
+
+    // Click sticky card item → scroll to that section + center in header
+    stickyCard.querySelectorAll('.multi-result-card-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            var idx = parseInt(item.dataset.index);
+            var section = document.querySelector('.multi-result-section[data-card-index="' + idx + '"]');
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            // Center clicked card in sticky header (manual scrollLeft to avoid conflicting with section scroll)
+            centerStickyItem(stickyCard, item);
+        });
+    });
+
+    // Build multi-result HTML
+    var html = '';
 
     // Per-card interpretation sections
     for (var j = 0; j < multiCardSelections.length; j++) {
         var s = multiCardSelections[j];
         var pLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[s.positionKey]) || s.positionKey;
         var prophecyTitle = (translations[currentLang] && translations[currentLang].result && translations[currentLang].result.prophecyTitle) || 'คำทำนาย';
-        html += '<div class="multi-result-section">';
+        html += '<div class="multi-result-section" data-card-index="' + j + '">';
         html += '<div class="multi-result-position">✦ ' + pLabel + '</div>';
         html += '<div class="multi-result-card-name">' + getCardName(s.card.name) + '</div>';
         html += '<div class="multi-result-quote">"' + getCardQuote(s.card) + '"</div>';
@@ -2370,40 +2864,30 @@ function proceedToMultiResult() {
     container.innerHTML = html;
     container.style.display = 'block';
 
-    // Populate sticky card with first card
     var firstCard = multiCardSelections[0].card;
-    document.getElementById('resultStickyCardImg').src = 'images/tarot/' + firstCard.image;
-    document.getElementById('resultStickyCardName').textContent = getCardName(firstCard.name);
-    document.getElementById('resultStickyCardQuote').textContent = getCardQuote(firstCard);
-    document.getElementById('resultStickyCard').classList.remove('minimized');
 
-    // Fade out the last selected card in the grid
-    if (selectedCardElement) {
-        selectedCardElement.style.transition = 'opacity 0.5s ease';
-        selectedCardElement.style.opacity = '0';
+    // Clean up center card + overlay (if active from single-reveal flow)
+    var centerCard = document.getElementById('centerCard');
+    if (centerCard.classList.contains('active')) {
+        centerCard.classList.remove('show-info');
+        clearRevealParticles();
+        centerCard.classList.add('fly-to-header');
+        setTimeout(function() {
+            centerCard.classList.remove('active');
+            centerCard.classList.remove('fly-to-header');
+            centerCard.style.transition = '';
+            centerCard.style.transform = '';
+            centerCard.style.opacity = '';
+            document.getElementById('overlay').classList.remove('active');
+        }, 500);
     }
 
-    // Clean up center card + overlay
-    var centerCard = document.getElementById('centerCard');
-    centerCard.classList.remove('show-info');
-    clearRevealParticles();
-    centerCard.classList.add('fly-to-header');
-
+    // Show result panel
     setTimeout(function() {
         var resultPanel = document.getElementById('resultPanel');
         resultPanel.scrollTop = 0;
         resultPanel.classList.add('active');
     }, 200);
-
-    setTimeout(function() {
-        var el = document.getElementById('centerCard');
-        el.classList.remove('active');
-        el.classList.remove('fly-to-header');
-        el.style.transition = '';
-        el.style.transform = '';
-        el.style.opacity = '';
-        document.getElementById('overlay').classList.remove('active');
-    }, 500);
 
     isAnimating = false;
     initStickyCardObserver();
@@ -2419,7 +2903,7 @@ function proceedToMultiResult() {
 }
 
 // Step 6: Card flies to header + show result panel (called after user taps)
-function proceedToResult(card) {
+function proceedToResult(card, skipFlyAnimation) {
     currentCardData = card;
 
     gtag('event', 'view_result', {
@@ -2439,29 +2923,45 @@ function proceedToResult(card) {
     // Start sticky card expanded (hero state) — minimizes on scroll
     document.getElementById('resultStickyCard').classList.remove('minimized');
 
-    // Animate center card flying to top-left corner
-    var centerCard = document.getElementById('centerCard');
-    centerCard.classList.remove('show-info');
-    clearRevealParticles();
-    centerCard.classList.add('fly-to-header');
-
-    // Show result panel after short delay (card is still flying)
-    setTimeout(() => {
-        const resultPanel = document.getElementById('resultPanel');
-        resultPanel.scrollTop = 0;
-        resultPanel.classList.add('active');
-    }, 200);
-
-    // Clean up center card + overlay after fly animation
-    setTimeout(() => {
-        var el = document.getElementById('centerCard');
-        el.classList.remove('active');
-        el.classList.remove('fly-to-header');
-        el.style.transition = '';
-        el.style.transform = '';
-        el.style.opacity = '';
+    if (skipFlyAnimation) {
+        // Coming from reveal overlay — skip center card animation, just show result
+        var centerCard = document.getElementById('centerCard');
+        centerCard.classList.remove('active', 'show-info', 'fly-to-header');
+        centerCard.style.transition = '';
+        centerCard.style.transform = '';
+        centerCard.style.opacity = '';
         document.getElementById('overlay').classList.remove('active');
-    }, 500);
+
+        setTimeout(function() {
+            var resultPanel = document.getElementById('resultPanel');
+            resultPanel.scrollTop = 0;
+            resultPanel.classList.add('active');
+        }, 100);
+    } else {
+        // Original flow: animate center card flying to top-left corner
+        var centerCard = document.getElementById('centerCard');
+        centerCard.classList.remove('show-info');
+        clearRevealParticles();
+        centerCard.classList.add('fly-to-header');
+
+        // Show result panel after short delay (card is still flying)
+        setTimeout(() => {
+            const resultPanel = document.getElementById('resultPanel');
+            resultPanel.scrollTop = 0;
+            resultPanel.classList.add('active');
+        }, 200);
+
+        // Clean up center card + overlay after fly animation
+        setTimeout(() => {
+            var el = document.getElementById('centerCard');
+            el.classList.remove('active');
+            el.classList.remove('fly-to-header');
+            el.style.transition = '';
+            el.style.transform = '';
+            el.style.opacity = '';
+            document.getElementById('overlay').classList.remove('active');
+        }, 500);
+    }
 
     // Fade out the selected card in the grid
     if (selectedCardElement) {
@@ -2525,6 +3025,10 @@ function closeResult() {
     multiCardTarget = 0;
     multiCardPositions = [];
     _multiDisabledCards = [];
+    var _grid = document.querySelector('.card-grid');
+    if (_grid) _grid.classList.remove('multi-select-mode');
+    clearCategoryTheme();
+    hideMultiPickIndicator();
 
     // Restore single-card result elements (may have been hidden by multi-result)
     document.getElementById('resultCardName').style.display = '';
@@ -2920,19 +3424,41 @@ function getProfilePictureHtml(item) {
 function saveDrawToLocal(card, comment) {
     try {
         var draws = JSON.parse(localStorage.getItem('tarot_draw_history') || '[]');
-        // If the most recent draw is the same card (from autoSave), update its comment
         var cardId = card.id || card.cardId;
         var cardName = card.name || card.cardName;
-        if (draws.length > 0 && (draws[0].cardId === cardId || draws[0].cardName === cardName) && comment) {
+
+        // Build multi-card array if in multi-card mode
+        var multiCards = null;
+        if (multiCardSelections && multiCardSelections.length > 1) {
+            multiCards = multiCardSelections.map(function(sel) {
+                return {
+                    cardId: sel.card.id,
+                    cardName: sel.card.name,
+                    cardImage: sel.card.image,
+                    positionKey: sel.positionKey
+                };
+            });
+        }
+
+        // If most recent draw is same card (autoSave update), update comment only
+        if (draws.length > 0 && draws[0].cardId === cardId && comment) {
             draws[0].comment = comment;
         } else {
-            draws.unshift({
+            var entry = {
                 cardId: cardId,
                 cardName: cardName,
                 cardImage: card.image || card.cardImage,
                 comment: comment || '',
                 timestamp: Date.now()
-            });
+            };
+            if (multiCards) {
+                entry.multiCards = multiCards;
+                entry.readingMode = currentReadingMode || 'single';
+            }
+            if (currentReadingCategory) {
+                entry.readingCategory = currentReadingCategory;
+            }
+            draws.unshift(entry);
         }
         if (draws.length > 50) draws.length = 50;
         localStorage.setItem('tarot_draw_history', JSON.stringify(draws));
@@ -2954,6 +3480,16 @@ function initCommentForm() {
     // Name input has been removed; nothing to initialize
 }
 
+// Center a sticky header item horizontally without affecting vertical scroll
+function centerStickyItem(container, item) {
+    var containerRect = container.getBoundingClientRect();
+    var itemRect = item.getBoundingClientRect();
+    var itemCenter = itemRect.left + itemRect.width / 2;
+    var containerCenter = containerRect.left + containerRect.width / 2;
+    var scrollDelta = itemCenter - containerCenter;
+    container.scrollBy({ left: scrollDelta, behavior: 'smooth' });
+}
+
 // Sticky card observer: minimize card when scrolled past
 var _stickyCardScrollHandler = null;
 
@@ -2966,11 +3502,23 @@ function initStickyCardObserver() {
 
     var sentinel = document.getElementById('resultCardSentinel');
     var _lastStickyToggle = 0;
+    var _lastActiveIdx = 0;
+    var _scrollTicking = false;
 
-    _stickyCardScrollHandler = function() {
+    // Cache DOM queries once — avoid querySelectorAll on every scroll
+    var _cachedSections = null;
+    var _cachedItems = null;
+    var _isMultiSticky = stickyCard.classList.contains('multi-sticky');
+
+    function _cacheStickyDom() {
+        _cachedSections = resultPanel.querySelectorAll('.multi-result-section');
+        _cachedItems = stickyCard.querySelectorAll('.multi-result-card-item');
+    }
+    if (_isMultiSticky) _cacheStickyDom();
+
+    function _doStickyUpdate() {
+        _scrollTicking = false;
         if (!sentinel) return;
-        var now = Date.now();
-        if (now - _lastStickyToggle < 400) return; // guard against Chrome URL bar resize
 
         var stickyBottom = stickyCard.getBoundingClientRect().bottom;
         var sentinelTop = sentinel.getBoundingClientRect().top;
@@ -2978,11 +3526,39 @@ function initStickyCardObserver() {
 
         if (!isMinimized && sentinelTop < stickyBottom - 10) {
             stickyCard.classList.add('minimized');
-            _lastStickyToggle = now;
         } else if (isMinimized && sentinelTop > stickyBottom + 30) {
             stickyCard.classList.remove('minimized');
-            _lastStickyToggle = now;
         }
+
+        // Multi-card: track which section is in view
+        if (!_isMultiSticky || !_cachedSections || !_cachedSections.length) return;
+
+        var stickyH = stickyCard.offsetHeight; // cheaper than getBoundingClientRect
+        var bestIdx = 0;
+        var bestDist = Infinity;
+        for (var si = 0; si < _cachedSections.length; si++) {
+            var rect = _cachedSections[si].getBoundingClientRect();
+            var dist = Math.abs(rect.top - stickyH - 20);
+            if (dist < bestDist) { bestDist = dist; bestIdx = si; }
+        }
+
+        if (bestIdx !== _lastActiveIdx) {
+            _lastActiveIdx = bestIdx;
+            if (_cachedItems) {
+                _cachedItems.forEach(function(it, ii) {
+                    it.classList.toggle('active', ii === bestIdx);
+                });
+                if (_cachedItems[bestIdx]) {
+                    centerStickyItem(stickyCard, _cachedItems[bestIdx]);
+                }
+            }
+        }
+    }
+
+    _stickyCardScrollHandler = function() {
+        if (_scrollTicking) return;
+        _scrollTicking = true;
+        requestAnimationFrame(_doStickyUpdate);
     };
 
     resultPanel.addEventListener('scroll', _stickyCardScrollHandler, { passive: true });
@@ -3063,10 +3639,22 @@ function initCommentMinimizer() {
 async function autoSaveDrawOnReveal(card) {
     if (!card) return;
 
+    // Build multi-card metadata
+    var multiCards = null;
+    if (multiCardSelections && multiCardSelections.length > 1) {
+        multiCards = multiCardSelections.map(function(sel) {
+            return {
+                cardId: sel.card.id,
+                cardName: sel.card.name,
+                cardImage: sel.card.image,
+                positionKey: sel.positionKey
+            };
+        });
+    }
+
     // Only auto-save comment if logged in with Facebook
     var isLoggedIn = typeof isFacebookConnected === 'function' && isFacebookConnected();
     if (!isLoggedIn || !window.cardCounter || !window.cardCounter.submitComment) {
-        // Non-FB user: store pending draw data for later + save to localStorage
         _pendingDraw = {
             cardId: card.id,
             cardName: card.name,
@@ -3091,21 +3679,27 @@ async function autoSaveDrawOnReveal(card) {
     if (result.success && result.id) {
         _currentDrawCommentId = result.id;
 
-        // Track for reply polling
         if (_pollState.initialized && _pollState.myCommentIds.indexOf(result.id) === -1) {
             _pollState.myCommentIds.push(result.id);
         }
         checkMyCardTab();
 
-        // Save draw history to Firebase
         var fbUserId = typeof getFbUserId === 'function' ? getFbUserId() : null;
         if (fbUserId && window.cardCounter.saveUserDraw) {
-            window.cardCounter.saveUserDraw(fbUserId, {
+            var drawData = {
                 cardId: card.id,
                 cardName: card.name,
                 cardImage: card.image,
                 comment: ''
-            });
+            };
+            if (multiCards) {
+                drawData.multiCards = multiCards;
+                drawData.readingMode = currentReadingMode;
+            }
+            if (currentReadingCategory) {
+                drawData.readingCategory = currentReadingCategory;
+            }
+            window.cardCounter.saveUserDraw(fbUserId, drawData);
         }
         saveDrawToLocal(card, '');
     }
@@ -3314,24 +3908,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Track interpretation scroll depth
-    const resultPanel = document.getElementById('resultPanel');
-    if (resultPanel) {
-        let maxScrollTracked = 0;
-        resultPanel.addEventListener('scroll', () => {
-            const scrollTop = resultPanel.scrollTop;
-            const scrollHeight = resultPanel.scrollHeight - resultPanel.clientHeight;
-        });
-        // Reset max scroll when panel closes (detected by class change)
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.attributeName === 'class' && !resultPanel.classList.contains('active')) {
-                    maxScrollTracked = 0;
-                }
-            });
-        });
-        observer.observe(resultPanel, { attributes: true });
-    }
+    // (scroll depth tracking removed for performance)
 });
 
 async function submitComment() {
@@ -3609,6 +4186,20 @@ function goToLandingPage() {
     multiCardTarget = 0;
     multiCardPositions = [];
     _multiDisabledCards = [];
+    var _grid = document.querySelector('.card-grid');
+    if (_grid) _grid.classList.remove('multi-select-mode');
+    clearCategoryTheme();
+    hideMultiPickIndicator();
+
+    // Restore sticky card to single-card layout
+    var _sticky = document.getElementById('resultStickyCard');
+    _sticky.classList.remove('multi-sticky', 'minimized');
+    _sticky.style.display = '';
+    _sticky.innerHTML = '<img class="result-sticky-card-img" id="resultStickyCardImg" alt="Card">'
+        + '<div class="result-sticky-card-info">'
+        + '<span class="result-sticky-card-name" id="resultStickyCardName"></span>'
+        + '<span class="result-sticky-card-quote" id="resultStickyCardQuote"></span>'
+        + '</div>';
 
     // Restore single-card result elements
     document.getElementById('resultCardName').style.display = '';
@@ -4181,19 +4772,85 @@ function createFeedCard(comment) {
     }
 
     var avatarHtml = getProfilePictureHtml(comment);
-    var imageHtml = cardImagePath
-        ? '<div class="feed-card-image"><img src="images/tarot/' + escapeHtml(cardImagePath) + '" alt="' + escapeHtml(comment.cardName || 'Tarot') + '" onerror="this.parentElement.style.display=\'none\'"></div>'
-        : '';
+    var isMulti = comment.multiCards && comment.multiCards.length > 1;
 
-    // Look up card interpretation
-    var interpretationText = '';
-    var quoteText = '';
-    if (tarotData && tarotData.cards) {
-        var tarotCard = tarotData.cards.find(function(c) { return c.id === comment.cardId || c.name === comment.cardName; });
-        if (tarotCard) {
-            interpretationText = getCardInterpretation(tarotCard);
-            quoteText = getCardQuote(tarotCard);
+    // Build image/expanded HTML based on single vs multi-card
+    var imageHtml = '';
+    var expandedInfoHtml = '';
+    var metaHtml = '';
+
+    // Category badge
+    var catBadge = '';
+    if (comment.readingCategory) {
+        var catLabels = { love: '♥', work: '★', finance: '◆' };
+        var catIcon = catLabels[comment.readingCategory] || '';
+        var catName = (translations[currentLang] && translations[currentLang].category && translations[currentLang].category[comment.readingCategory]) || comment.readingCategory;
+        catBadge = '<span class="feed-cat-badge feed-cat-' + comment.readingCategory + '">' + catIcon + ' ' + escapeHtml(catName) + '</span>';
+    }
+
+    if (isMulti) {
+        // Multi-card draw
+        var numCards = comment.multiCards.length;
+        metaHtml = t('feed.drewCard') + ' <strong>' + numCards + ' cards</strong>' + catBadge + '<span class="feed-card-date">' + dateStr + '</span>';
+
+        // Mini card fan
+        imageHtml = '<div class="feed-multi-cards">';
+        for (var mi = 0; mi < comment.multiCards.length; mi++) {
+            var mc = comment.multiCards[mi];
+            var posLabel = '';
+            if (mc.positionKey && translations[currentLang] && translations[currentLang].landing) {
+                posLabel = translations[currentLang].landing[mc.positionKey] || mc.positionKey;
+            }
+            imageHtml += '<div class="feed-multi-card-item">' +
+                '<img src="images/tarot/' + escapeHtml(mc.cardImage || mc.cardName + '.png') + '" alt="' + escapeHtml(mc.cardName) + '" onerror="this.style.display=\'none\'">' +
+                '<span class="feed-multi-card-name">' + escapeHtml(getCardName(mc.cardName) || mc.cardName) + '</span>' +
+                (posLabel ? '<span class="feed-multi-card-pos">' + escapeHtml(posLabel) + '</span>' : '') +
+            '</div>';
         }
+        imageHtml += '</div>';
+
+        // Per-card interpretations
+        expandedInfoHtml = '<div class="feed-card-info feed-multi-info">';
+        for (var mj = 0; mj < comment.multiCards.length; mj++) {
+            var mCard = comment.multiCards[mj];
+            var mTarot = tarotData && tarotData.cards ? tarotData.cards.find(function(c) { return c.id === mCard.cardId || c.name === mCard.cardName; }) : null;
+            var mPos = '';
+            if (mCard.positionKey && translations[currentLang] && translations[currentLang].landing) {
+                mPos = translations[currentLang].landing[mCard.positionKey] || mCard.positionKey;
+            }
+            if (mTarot) {
+                var mQuote = getCardQuote(mTarot);
+                var mInterp = getCardInterpretation(mTarot);
+                expandedInfoHtml += '<div class="feed-multi-interp">';
+                expandedInfoHtml += '<div class="feed-multi-interp-pos">✦ ' + escapeHtml(mPos) + '</div>';
+                expandedInfoHtml += '<div class="feed-multi-interp-name">' + escapeHtml(getCardName(mCard.cardName) || mCard.cardName) + '</div>';
+                if (mQuote) expandedInfoHtml += '<div class="feed-card-quote">"' + escapeHtml(mQuote) + '"</div>';
+                if (mInterp) expandedInfoHtml += '<div class="feed-card-interpretation">' + escapeHtml(mInterp) + '</div>';
+                expandedInfoHtml += '</div>';
+            }
+        }
+        expandedInfoHtml += '</div>';
+    } else {
+        // Single card draw
+        metaHtml = t('feed.drewCard') + ' <strong>' + escapeHtml(comment.cardName || '') + '</strong>' + catBadge + '<span class="feed-card-date">' + dateStr + '</span>';
+
+        imageHtml = cardImagePath
+            ? '<div class="feed-card-image"><img src="images/tarot/' + escapeHtml(cardImagePath) + '" alt="' + escapeHtml(comment.cardName || 'Tarot') + '" onerror="this.parentElement.style.display=\'none\'"></div>'
+            : '';
+
+        var interpretationText = '';
+        var quoteText = '';
+        if (tarotData && tarotData.cards) {
+            var tarotCard = tarotData.cards.find(function(c) { return c.id === comment.cardId || c.name === comment.cardName; });
+            if (tarotCard) {
+                interpretationText = getCardInterpretation(tarotCard);
+                quoteText = getCardQuote(tarotCard);
+            }
+        }
+        expandedInfoHtml = '<div class="feed-card-info">' +
+            (quoteText ? '<div class="feed-card-quote">"' + escapeHtml(quoteText) + '"</div>' : '') +
+            (interpretationText ? '<div class="feed-card-interpretation">' + escapeHtml(interpretationText) + '</div>' : '') +
+        '</div>';
     }
 
     card.innerHTML =
@@ -4206,7 +4863,7 @@ function createFeedCard(comment) {
             '</div>' +
             '<div class="feed-card-author">' +
                 '<span class="feed-card-name">' + escapeHtml(comment.userName || 'Me') + '</span>' +
-                '<span class="feed-card-meta">' + t('feed.drewCard') + ' <strong>' + escapeHtml(comment.cardName || '') + '</strong><span class="feed-card-date">' + dateStr + '</span></span>' +
+                '<span class="feed-card-meta">' + metaHtml + '</span>' +
             '</div>' +
         '</div>' +
         '<svg class="feed-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
@@ -4215,10 +4872,7 @@ function createFeedCard(comment) {
         '</div>' +
         '<div class="feed-card-expanded">' +
             imageHtml +
-            '<div class="feed-card-info">' +
-                (quoteText ? '<div class="feed-card-quote">"' + escapeHtml(quoteText) + '"</div>' : '') +
-                (interpretationText ? '<div class="feed-card-interpretation">' + escapeHtml(interpretationText) + '</div>' : '') +
-            '</div>' +
+            expandedInfoHtml +
         '</div>' +
         '<div class="feed-card-replies-section">' +
             '<div class="replies-list"></div>' +
@@ -5062,7 +5716,10 @@ async function loadMyCardComments() {
                 comment: draw.comment || '',
                 timestamp: draw.timestamp,
                 userName: savedName,
-                profilePicture: null
+                profilePicture: null,
+                multiCards: draw.multiCards || null,
+                readingMode: draw.readingMode || null,
+                readingCategory: draw.readingCategory || null
             };
             var card = createFeedCard(fakeComment);
             commentsList.appendChild(card);
@@ -7079,7 +7736,41 @@ document.addEventListener('DOMContentLoaded', () => {
 // Save Image Functions
 let currentCardData = null;
 
+function shareOrDownload(canvas, filename) {
+    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile && navigator.canShare) {
+        canvas.toBlob(function(blob) {
+            if (!blob) { fallbackDownload(); return; }
+            var file = new File([blob], filename, { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file] }).then(function() {
+                    showToast(t('image.saved'));
+                }).catch(function() {
+                    // User cancelled share — not an error
+                });
+            } else {
+                fallbackDownload();
+            }
+        }, 'image/png');
+    } else {
+        fallbackDownload();
+    }
+    function fallbackDownload() {
+        var link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast(t('image.saved'));
+    }
+}
+
 function saveImage(platform) {
+    // Multi-card mode
+    if (multiCardSelections && multiCardSelections.length > 1) {
+        saveMultiImage(platform);
+        return;
+    }
+
     if (!currentCardData) {
         showToast(t('image.selectFirst'));
         return;
@@ -7111,29 +7802,650 @@ function saveImage(platform) {
     // Load card image
     const cardImg = new Image();
     cardImg.crossOrigin = 'anonymous';
+    var fname = `card-of-the-day-${currentCardData.name.toLowerCase().replace(/\s+/g, '-')}-${platform}.png`;
     cardImg.onload = () => {
         drawShareImage(ctx, cardImg, size, platform);
-
-        // Download
-        const link = document.createElement('a');
-        link.download = `card-of-the-day-${currentCardData.name.toLowerCase().replace(/\s+/g, '-')}-${platform}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-
-        showToast(t('image.saved'));
+        shareOrDownload(canvas, fname);
     };
     cardImg.onerror = () => {
-        // Draw without card image
         drawShareImage(ctx, null, size, platform);
-
-        const link = document.createElement('a');
-        link.download = `card-of-the-day-${currentCardData.name.toLowerCase().replace(/\s+/g, '-')}-${platform}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-
-        showToast(t('image.saved'));
+        shareOrDownload(canvas, fname);
     };
     cardImg.src = `images/tarot/${currentCardData.image}`;
+}
+
+// Multi-card save image
+function saveMultiImage(platform) {
+    gtag('event', 'save_image', {
+        event_category: 'engagement',
+        image_format: platform,
+        card_name: 'multi_' + multiCardSelections.length
+    });
+
+    const sizes = {
+        'ig-story': { width: 1080, height: 1920 },
+        'square': { width: 1080, height: 1080 },
+        'facebook': { width: 1200, height: 630 },
+        'wide': { width: 1200, height: 630 }
+    };
+
+    const size = sizes[platform];
+    if (!size) return;
+
+    showToast(t('image.creating'));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = size.width;
+    canvas.height = size.height;
+    const ctx = canvas.getContext('2d');
+
+    // Load all card images in parallel
+    var cardImages = [];
+    var loaded = 0;
+    var total = multiCardSelections.length;
+
+    for (var i = 0; i < total; i++) {
+        (function(idx) {
+            var img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+                cardImages[idx] = img;
+                loaded++;
+                if (loaded >= total) finishMultiDraw();
+            };
+            img.onerror = function() {
+                cardImages[idx] = null;
+                loaded++;
+                if (loaded >= total) finishMultiDraw();
+            };
+            img.src = 'images/tarot/' + multiCardSelections[idx].card.image;
+        })(i);
+    }
+
+    function finishMultiDraw() {
+        drawMultiShareImage(ctx, cardImages, size, platform);
+        var fname = 'card-of-the-day-' + (currentReadingCategory || 'reading') + '-' + platform + '.png';
+        shareOrDownload(canvas, fname);
+    }
+}
+
+// ========================================
+// Multi-Card Save Image Drawing
+// ========================================
+
+function getMultiCategoryColors() {
+    var cat = currentReadingCategory;
+    var theme = cat ? _categoryThemes[cat] : null;
+    if (theme) {
+        return {
+            accent: theme.primary,
+            accentLight: theme.light,
+            accentGlow: theme.glow,
+            accentRgb: theme.primaryRgb,
+            lightRgb: theme.lightRgb
+        };
+    }
+    // Default (no category / single): blue-silver
+    return {
+        accent: '#9AAAD4',
+        accentLight: '#C0C8E0',
+        accentGlow: '#7B8EC2',
+        accentRgb: '154,170,212',
+        lightRgb: '192,200,224'
+    };
+}
+
+function getCategoryLabel() {
+    if (!currentReadingCategory) return '';
+    var t = translations[currentLang] && translations[currentLang].category;
+    if (t && t[currentReadingCategory]) return t[currentReadingCategory];
+    return currentReadingCategory;
+}
+
+function getReadingModeTitle() {
+    var keyMap = {
+        'single': 'heading',
+        'three-card': 'heading3',
+        'four-card': 'heading4',
+        'ten-card': 'heading10',
+        'twelve-card': 'heading12'
+    };
+    var key = keyMap[currentReadingMode] || 'heading';
+    var t = translations[currentLang] && translations[currentLang].landing;
+    return (t && t[key]) || 'Card of the Day';
+}
+
+function getMultiCardQuote(card) {
+    var quote = '';
+    if (currentReadingCategory) {
+        quote = getCardCategoryField(card, currentReadingCategory + 'Quote');
+    }
+    if (!quote) {
+        quote = getCardQuote(card);
+    }
+    return quote;
+}
+
+function getPositionLabel(index) {
+    var posKey = multiCardPositions[index];
+    if (!posKey) return '';
+    var t = translations[currentLang] && translations[currentLang].landing;
+    return (t && t[posKey]) || posKey;
+}
+
+function drawMultiShareImage(ctx, cardImages, size, platform) {
+    var width = size.width;
+    var height = size.height;
+    var isVertical = height > width;
+    var isWide = width > height;
+    var colors = getMultiCategoryColors();
+
+    // Background gradient with category tint
+    var gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#080C24');
+    gradient.addColorStop(0.5, '#0B1030');
+    gradient.addColorStop(1, '#0d1333');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Subtle category-colored radial glow at center-top
+    var glow = ctx.createRadialGradient(width / 2, 0, 0, width / 2, 0, Math.max(width, height) * 0.6);
+    glow.addColorStop(0, 'rgba(' + colors.accentRgb + ', 0.08)');
+    glow.addColorStop(1, 'rgba(' + colors.accentRgb + ', 0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, width, height);
+
+    // Decorative border with category color
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.25)';
+    ctx.lineWidth = isWide ? 6 : 8;
+    var borderPadding = isWide ? 20 : 30;
+    ctx.strokeRect(borderPadding, borderPadding, width - borderPadding * 2, height - borderPadding * 2);
+
+    // Inner decorative line
+    ctx.strokeStyle = 'rgba(' + colors.lightRgb + ', 0.15)';
+    ctx.lineWidth = 2;
+    var innerPadding = borderPadding + 15;
+    ctx.strokeRect(innerPadding, innerPadding, width - innerPadding * 2, height - innerPadding * 2);
+
+    if (isVertical) {
+        drawMultiVerticalLayout(ctx, cardImages, width, height, colors);
+    } else if (isWide) {
+        drawMultiWideLayout(ctx, cardImages, width, height, colors);
+    } else {
+        drawMultiSquareLayout(ctx, cardImages, width, height, colors);
+    }
+}
+
+function drawMultiVerticalLayout(ctx, cardImages, width, height, colors) {
+    var cardCount = multiCardSelections.length;
+    var catLabel = getCategoryLabel();
+
+    // --- Title + Category at very top, centered across full width ---
+    var padT = 65;
+    var curY = padT;
+
+    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.6)';
+    ctx.font = '28px "Cormorant Garamond", "Prompt", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(getReadingModeTitle(), width / 2, curY);
+
+    if (catLabel) {
+        ctx.fillStyle = colors.accent;
+        ctx.font = 'bold 32px "Prompt", sans-serif';
+        ctx.fillText(catLabel, width / 2, curY + 45);
+        curY += 60;
+    } else {
+        curY += 18;
+    }
+
+    // Decorative line under title
+    curY += 10;
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.3)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(width / 2 - 140, curY);
+    ctx.lineTo(width / 2 + 140, curY);
+    ctx.stroke();
+    curY += 25;
+
+    // --- Two-column area: cards left, text right ---
+    var footerH = 100;
+    var padL = 60;
+    var padR = 55;
+    var columnGap = 30;
+    var leftW = width * 0.40;
+    var rightX = padL + leftW + columnGap;
+    var rightW = width - rightX - padR;
+    var contentTop = curY;
+    var availH = height - contentTop - footerH - 10;
+
+    // Calculate card size to fit stacked vertically in left column
+    var cardGap = 22;
+    var maxCardW = leftW;
+    var cardW = 0;
+    var cardH = 0;
+    if (cardImages[0]) {
+        var ratio = cardImages[0].width / cardImages[0].height;
+        cardH = (availH - cardGap * (cardCount - 1)) / cardCount;
+        cardW = cardH * ratio;
+        if (cardW > maxCardW) {
+            cardW = maxCardW;
+            cardH = cardW / ratio;
+        }
+    }
+
+    // Vertically center card stack in available area
+    var totalStackH = cardH * cardCount + cardGap * (cardCount - 1);
+    var stackStartY = contentTop + (availH - totalStackH) / 2;
+    var cardX = padL + (leftW - cardW) / 2;
+
+    // Draw cards + per-card text aligned to each card
+    var textCenterX = rightX + rightW / 2;
+    var infoSlotH = cardH + cardGap; // each text slot matches one card row
+
+    for (var i = 0; i < cardCount; i++) {
+        var img = cardImages[i];
+        var cy = stackStartY + i * (cardH + cardGap);
+
+        // Card image
+        if (img) {
+            ctx.shadowColor = 'rgba(' + colors.accentRgb + ', 0.12)';
+            ctx.shadowBlur = 20;
+            ctx.shadowOffsetY = 8;
+            ctx.drawImage(img, cardX, cy, cardW, cardH);
+            ctx.shadowColor = 'transparent';
+
+            ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.2)';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(cardX, cy, cardW, cardH);
+        }
+
+        // Text on right side, vertically centered to this card
+        var sel = multiCardSelections[i];
+        var card = sel.card;
+        var posLabel = getPositionLabel(i);
+        var cardName = getCardName(card.name);
+        var quote = getMultiCardQuote(card);
+
+        // Center text block within card height region
+        var textBlockTop = cy + cardH * 0.1;
+
+        // Position label
+        ctx.fillStyle = colors.accent;
+        ctx.font = 'bold 22px "Prompt", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('✦ ' + posLabel, textCenterX, textBlockTop + 10);
+
+        // Card name (dynamic sizing)
+        ctx.fillStyle = '#C0C8E0';
+        var nameSize = 36;
+        ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
+        while (ctx.measureText(cardName).width > rightW - 10 && nameSize > 20) {
+            nameSize -= 2;
+            ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
+        }
+        ctx.fillText(cardName, textCenterX, textBlockTop + 52);
+
+        // Small decorative line
+        ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(textCenterX - 50, textBlockTop + 65);
+        ctx.lineTo(textCenterX + 50, textBlockTop + 65);
+        ctx.stroke();
+
+        // Quote
+        ctx.font = 'italic 23px "Cormorant Garamond", "Prompt", serif';
+        ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.7)';
+        var quoteText = '"' + quote + '"';
+        var maxQuoteY = cy + cardH - 10;
+        wrapText(ctx, quoteText, textCenterX, textBlockTop + 92, rightW - 10, 32, maxQuoteY);
+    }
+
+    // Footer (centered at bottom)
+    var iconSize = 24;
+    var footerColor = 'rgba(' + colors.lightRgb + ', 0.45)';
+    var footerY = height - 90;
+
+    var leftIconsWidth = iconSize * 1.4 * 3 + iconSize;
+    var gap = 80;
+    var totalFooterW = leftIconsWidth + gap + iconSize;
+    var footerStartX = (width - totalFooterW) / 2;
+
+    drawSocialIcons(ctx, footerStartX, footerY, iconSize, footerColor);
+    ctx.textAlign = 'center';
+    ctx.font = '18px "Prompt", sans-serif';
+    ctx.fillStyle = footerColor;
+    ctx.fillText('Pimfahmaprod', footerStartX + leftIconsWidth / 2, footerY + iconSize + 24);
+
+    var lineIconX = footerStartX + leftIconsWidth + gap;
+    drawLineIcon(ctx, lineIconX, footerY, iconSize, footerColor);
+    ctx.textAlign = 'center';
+    ctx.font = '18px "Prompt", sans-serif';
+    ctx.fillStyle = footerColor;
+    ctx.fillText('Line: @Pimfah', lineIconX + iconSize / 2, footerY + iconSize + 24);
+}
+
+function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
+    var cardCount = multiCardSelections.length;
+    var catLabel = getCategoryLabel();
+    var safePad = 60;
+
+    // Title + category at top
+    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.6)';
+    ctx.font = '22px "Cormorant Garamond", "Prompt", serif';
+    ctx.textAlign = 'center';
+    var titleStr = getReadingModeTitle();
+    if (catLabel) titleStr += '  ·  ' + catLabel;
+    ctx.fillText(titleStr, width / 2, safePad + 10);
+
+    // Category accent line
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.35)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(width / 2 - 140, safePad + 25);
+    ctx.lineTo(width / 2 + 140, safePad + 25);
+    ctx.stroke();
+
+    // --- 2x2 Grid layout (or 2+1 for 3 cards) ---
+    var gridTop = safePad + 45;
+    var footerH = 55;
+    var colGap = 30;
+    var rowGap = 14;
+    var availH = height - gridTop - footerH - 10;
+    var availW = width - safePad * 2;
+
+    // Each cell: card image + position label + card name + quote
+    // 2 columns always
+    var colW = (availW - colGap) / 2;
+    var rows = (cardCount <= 2) ? 1 : 2;
+    var textH = 80; // space for position + name + quote below card
+    var cellH = (availH - rowGap * (rows - 1)) / rows;
+    var maxCardH = cellH - textH;
+    var cardW = 0;
+    var cardH = 0;
+
+    if (cardImages[0]) {
+        var ratio = cardImages[0].width / cardImages[0].height;
+        cardH = maxCardH;
+        cardW = cardH * ratio;
+        if (cardW > colW - 10) {
+            cardW = colW - 10;
+            cardH = cardW / ratio;
+        }
+    }
+
+    // Build grid positions
+    //   3 cards: [0,1] top row, [2] bottom row centered
+    //   4 cards: [0,1] top row, [2,3] bottom row
+    var positions = [];
+    var leftCX = safePad + colW / 2;
+    var rightCX = safePad + colW + colGap + colW / 2;
+
+    if (cardCount === 3) {
+        positions.push({ cx: leftCX, cy: gridTop });
+        positions.push({ cx: rightCX, cy: gridTop });
+        positions.push({ cx: width / 2, cy: gridTop + cellH + rowGap });
+    } else {
+        positions.push({ cx: leftCX, cy: gridTop });
+        positions.push({ cx: rightCX, cy: gridTop });
+        positions.push({ cx: leftCX, cy: gridTop + cellH + rowGap });
+        positions.push({ cx: rightCX, cy: gridTop + cellH + rowGap });
+    }
+
+    // Draw each card cell
+    for (var i = 0; i < cardCount; i++) {
+        var pos = positions[i];
+        var img = cardImages[i];
+        var sel = multiCardSelections[i];
+        var posLabel = getPositionLabel(i);
+        var cardName = getCardName(sel.card.name);
+        var quote = getMultiCardQuote(sel.card);
+        var drawX = pos.cx - cardW / 2;
+        var drawY = pos.cy;
+
+        // Card image
+        if (img) {
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 18;
+            ctx.shadowOffsetY = 6;
+            ctx.drawImage(img, drawX, drawY, cardW, cardH);
+            ctx.shadowColor = 'transparent';
+
+            ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.2)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(drawX, drawY, cardW, cardH);
+        }
+
+        // Text below card
+        var belowY = drawY + cardH + 14;
+        var maxTextW = colW - 10;
+        ctx.textAlign = 'center';
+
+        // Position label
+        ctx.fillStyle = colors.accent;
+        ctx.font = 'bold 14px "Prompt", sans-serif';
+        ctx.fillText(posLabel, pos.cx, belowY);
+
+        // Card name (dynamic sizing)
+        ctx.fillStyle = '#C0C8E0';
+        var nameSize = 22;
+        ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
+        while (ctx.measureText(cardName).width > maxTextW && nameSize > 14) {
+            nameSize -= 2;
+            ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
+        }
+        ctx.fillText(cardName, pos.cx, belowY + 22);
+
+        // Quote (clamped to cell boundary)
+        ctx.font = 'italic 14px "Cormorant Garamond", "Prompt", serif';
+        ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.6)';
+        var quoteText = '"' + quote + '"';
+        var maxQuoteY = drawY + cellH - 5;
+        wrapText(ctx, quoteText, pos.cx, belowY + 42, maxTextW, 19, maxQuoteY);
+    }
+
+    // Footer
+    var iconSize = 16;
+    var footerColor = 'rgba(' + colors.lightRgb + ', 0.45)';
+    var footerY = height - footerH;
+
+    var leftIconsWidth = iconSize * 1.4 * 3 + iconSize;
+    var gap = 50;
+    var totalFooterW = leftIconsWidth + gap + iconSize;
+    var footerStartX = (width - totalFooterW) / 2;
+
+    drawSocialIcons(ctx, footerStartX, footerY, iconSize, footerColor);
+    ctx.textAlign = 'center';
+    ctx.font = '13px "Prompt", sans-serif';
+    ctx.fillStyle = footerColor;
+    ctx.fillText('Pimfahmaprod', footerStartX + leftIconsWidth / 2, footerY + iconSize + 18);
+
+    var lineIconX = footerStartX + leftIconsWidth + gap;
+    drawLineIcon(ctx, lineIconX, footerY, iconSize, footerColor);
+    ctx.textAlign = 'center';
+    ctx.font = '13px "Prompt", sans-serif';
+    ctx.fillStyle = footerColor;
+    ctx.fillText('Line: @Pimfah', lineIconX + iconSize / 2, footerY + iconSize + 18);
+}
+
+function drawMultiWideLayout(ctx, cardImages, width, height, colors) {
+    var cardCount = multiCardSelections.length;
+    var catLabel = getCategoryLabel();
+
+    // --- Layout: Left = cards in 2x2 grid, Right = text list ---
+    var padL = 45;
+    var padR = 50;
+    var padT = 48;
+    var footerH = 45;
+    var columnGap = 35;
+    var gridAreaW = width * 0.48;
+    var textX = gridAreaW + columnGap;
+    var textW = width - textX - padR;
+    var availH = height - padT - footerH - 10;
+
+    // --- Left side: Cards in 2x2 grid ---
+    var gridColGap = 12;
+    var gridRowGap = 10;
+    var labelH = 30;
+    var gridCols = 2;
+    var gridRows = (cardCount <= 2) ? 1 : 2;
+    var gridColW = (gridAreaW - padL - gridColGap) / gridCols;
+    var maxCardH = (availH - gridRowGap * (gridRows - 1) - labelH * gridRows) / gridRows;
+    var cardW = 0;
+    var cardH = 0;
+
+    if (cardImages[0]) {
+        var ratio = cardImages[0].width / cardImages[0].height;
+        cardH = maxCardH;
+        cardW = cardH * ratio;
+        if (cardW > gridColW - 4) {
+            cardW = gridColW - 4;
+            cardH = cardW / ratio;
+        }
+    }
+
+    // Build grid positions (cards on left side)
+    var positions = [];
+    var gridLeftCX = padL + gridColW / 2;
+    var gridRightCX = padL + gridColW + gridColGap + gridColW / 2;
+    var gridTopY = padT + (availH - (cardH + labelH) * gridRows - gridRowGap * (gridRows - 1)) / 2;
+    if (gridTopY < padT) gridTopY = padT;
+
+    if (cardCount === 3) {
+        positions.push({ cx: gridLeftCX, cy: gridTopY });
+        positions.push({ cx: gridRightCX, cy: gridTopY });
+        var row1Y3 = gridTopY + cardH + labelH + gridRowGap;
+        positions.push({ cx: padL + (gridAreaW - padL) / 2, cy: row1Y3 });
+    } else {
+        var row1Y4 = gridTopY + cardH + labelH + gridRowGap;
+        positions.push({ cx: gridLeftCX, cy: gridTopY });
+        positions.push({ cx: gridRightCX, cy: gridTopY });
+        positions.push({ cx: gridLeftCX, cy: row1Y4 });
+        positions.push({ cx: gridRightCX, cy: row1Y4 });
+    }
+
+    // Draw cards with position label + name below
+    for (var i = 0; i < cardCount; i++) {
+        var pos = positions[i];
+        var img = cardImages[i];
+        var sel = multiCardSelections[i];
+        var posLabel = getPositionLabel(i);
+        var cardName = getCardName(sel.card.name);
+        var drawX = pos.cx - cardW / 2;
+        var drawY = pos.cy;
+
+        if (img) {
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 12;
+            ctx.shadowOffsetY = 5;
+            ctx.drawImage(img, drawX, drawY, cardW, cardH);
+            ctx.shadowColor = 'transparent';
+
+            ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.2)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(drawX, drawY, cardW, cardH);
+        }
+
+        var belowY = drawY + cardH + 12;
+        ctx.textAlign = 'center';
+
+        ctx.fillStyle = colors.accent;
+        ctx.font = 'bold 10px "Prompt", sans-serif';
+        ctx.fillText(posLabel, pos.cx, belowY);
+
+        ctx.fillStyle = '#C0C8E0';
+        var ns = 13;
+        ctx.font = 'bold ' + ns + 'px "Cormorant Garamond", "Prompt", serif';
+        var maxNW = gridColW - 8;
+        while (ctx.measureText(cardName).width > maxNW && ns > 9) {
+            ns -= 1;
+            ctx.font = 'bold ' + ns + 'px "Cormorant Garamond", "Prompt", serif';
+        }
+        ctx.fillText(cardName, pos.cx, belowY + 15);
+    }
+
+    // --- Right side: Title + text list ---
+    var curY = padT + 5;
+
+    // Title
+    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.6)';
+    ctx.font = '18px "Cormorant Garamond", "Prompt", serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(getReadingModeTitle(), textX, curY + 12);
+
+    // Category label
+    if (catLabel) {
+        ctx.fillStyle = colors.accent;
+        ctx.font = 'bold 20px "Prompt", sans-serif';
+        ctx.fillText(catLabel, textX, curY + 38);
+        curY += 48;
+    } else {
+        curY += 22;
+    }
+
+    // Decorative line
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(textX, curY + 5);
+    ctx.lineTo(textX + 120, curY + 5);
+    ctx.stroke();
+    curY += 20;
+
+    // Card info list
+    var listAvailH = height - curY - footerH - 10;
+    var sectionH = listAvailH / cardCount;
+
+    for (var j = 0; j < cardCount; j++) {
+        var selJ = multiCardSelections[j];
+        var cardJ = selJ.card;
+        var posLabelJ = getPositionLabel(j);
+        var cardNameJ = getCardName(cardJ.name);
+        var quoteJ = getMultiCardQuote(cardJ);
+        var secY = curY + j * sectionH;
+
+        // Position label
+        ctx.fillStyle = colors.accent;
+        ctx.font = 'bold 13px "Prompt", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('✦ ' + posLabelJ, textX, secY + 8);
+
+        // Card name (dynamic sizing)
+        ctx.fillStyle = '#C0C8E0';
+        var nameSize = 22;
+        ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
+        while (ctx.measureText(cardNameJ).width > textW && nameSize > 14) {
+            nameSize -= 2;
+            ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
+        }
+        ctx.fillText(cardNameJ, textX, secY + 32);
+
+        // Quote
+        ctx.font = 'italic 14px "Cormorant Garamond", "Prompt", serif';
+        ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.6)';
+        var quoteTextJ = '"' + quoteJ + '"';
+        wrapTextLeft(ctx, quoteTextJ, textX, secY + 52, textW, 19, secY + sectionH - 8);
+    }
+
+    // Footer (right-aligned under text column)
+    var iconSize = 13;
+    var footerColor = 'rgba(' + colors.lightRgb + ', 0.4)';
+    var footerY = height - footerH;
+
+    drawSocialIcons(ctx, textX, footerY, iconSize, footerColor);
+    var leftIconsWidth = iconSize * 1.4 * 3 + iconSize;
+    ctx.textAlign = 'center';
+    ctx.font = '11px "Prompt", sans-serif';
+    ctx.fillStyle = footerColor;
+    ctx.fillText('Pimfahmaprod', textX + leftIconsWidth / 2, footerY + iconSize + 14);
+
+    var lineIconX = textX + leftIconsWidth + 30;
+    drawLineIcon(ctx, lineIconX, footerY, iconSize, footerColor);
+    ctx.textAlign = 'center';
+    ctx.font = '11px "Prompt", sans-serif';
+    ctx.fillStyle = footerColor;
+    ctx.fillText('Line: @Pimfah', lineIconX + iconSize / 2, footerY + iconSize + 14);
 }
 
 function drawShareImage(ctx, cardImg, size, platform) {

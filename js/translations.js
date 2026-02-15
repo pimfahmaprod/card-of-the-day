@@ -41,14 +41,16 @@ const translations = {
             loading: "กำลังโหลด...",
             instruction: "จับไพ่ทาโรต์ 1 ใบเพื่อดูดวงประจำวัน",
             clickToDraw: "แตะไพ่เพื่อเริ่มดูดวง",
-            heading3: "จับไพ่ 3 ใบ",
+            heading3: "Past · Present · Future",
             clickToDraw3: "แตะไพ่เพื่อเริ่มจับ 3 ใบ",
-            heading4: "จับไพ่ 4 ใบ",
+            heading4: "Past · Present · Future · Outcome",
             clickToDraw4: "แตะไพ่เพื่อเริ่มจับ 4 ใบ",
             heading10: "จับไพ่ 10 ใบ",
             clickToDraw10: "แตะไพ่เพื่อเริ่มจับ 10 ใบ",
             heading12: "จับไพ่ 12 ใบ",
             clickToDraw12: "แตะไพ่เพื่อเริ่มจับ 12 ใบ",
+            comingSoon: "เร็วๆ นี้",
+            comingSoonDesc: "อยู่ระหว่างพัฒนา",
             totalDrawsPrefix: "ทำนายแล้ว",
             totalDrawsSuffix: "ครั้ง",
             past: "อดีต",
@@ -223,6 +225,11 @@ const translations = {
             finance: "การเงิน",
             financeDesc: "รายได้ ทรัพย์สิน โชคลาภ",
             back: "กลับ"
+        },
+        reveal: {
+            tapToReveal: "แตะเพื่อเปิดไพ่",
+            tapToContinue: "แตะเพื่อดูคำทำนาย",
+            skip: "ข้าม ›"
         }
     },
     en: {
@@ -232,14 +239,16 @@ const translations = {
             loading: "Loading...",
             instruction: "Draw a tarot card to reveal today's message",
             clickToDraw: "Tap card to draw",
-            heading3: "3-Card Draw",
+            heading3: "Past · Present · Future",
             clickToDraw3: "Tap to draw 3 cards",
-            heading4: "4-Card Draw",
+            heading4: "Past · Present · Future · Outcome",
             clickToDraw4: "Tap to draw 4 cards",
             heading10: "10-Card Draw",
             clickToDraw10: "Tap to draw 10 cards",
             heading12: "12-Card Draw",
             clickToDraw12: "Tap to draw 12 cards",
+            comingSoon: "Coming Soon",
+            comingSoonDesc: "Under development",
             totalDrawsPrefix: "",
             totalDrawsSuffix: "readings so far",
             past: "Past",
@@ -414,6 +423,11 @@ const translations = {
             finance: "Finance",
             financeDesc: "Wealth, fortune & prosperity",
             back: "Back"
+        },
+        reveal: {
+            tapToReveal: "Tap to reveal",
+            tapToContinue: "Tap to see your reading",
+            skip: "Skip ›"
         }
     },
     "zh-CN": {
@@ -423,14 +437,16 @@ const translations = {
             loading: "加载中...",
             instruction: "抽一张塔罗牌，揭示今日讯息",
             clickToDraw: "点击抽牌",
-            heading3: "三牌占卜",
+            heading3: "Past · Present · Future",
             clickToDraw3: "点击抽取3张牌",
-            heading4: "四牌占卜",
+            heading4: "Past · Present · Future · Outcome",
             clickToDraw4: "点击抽取4张牌",
             heading10: "十牌占卜",
             clickToDraw10: "点击抽取10张牌",
             heading12: "十二牌占卜",
             clickToDraw12: "点击抽取12张牌",
+            comingSoon: "即将推出",
+            comingSoonDesc: "开发中",
             totalDrawsPrefix: "已占卜",
             totalDrawsSuffix: "次",
             past: "过去",
@@ -605,6 +621,11 @@ const translations = {
             finance: "财运",
             financeDesc: "收入、财富、好运降临",
             back: "返回"
+        },
+        reveal: {
+            tapToReveal: "点击翻牌",
+            tapToContinue: "点击查看解读",
+            skip: "跳过 ›"
         }
     },
     "zh-TW": {
@@ -614,14 +635,16 @@ const translations = {
             loading: "載入中...",
             instruction: "抽一張塔羅牌，揭示今日訊息",
             clickToDraw: "點擊抽牌",
-            heading3: "三牌占卜",
+            heading3: "Past · Present · Future",
             clickToDraw3: "點擊抽取3張牌",
-            heading4: "四牌占卜",
+            heading4: "Past · Present · Future · Outcome",
             clickToDraw4: "點擊抽取4張牌",
             heading10: "十牌占卜",
             clickToDraw10: "點擊抽取10張牌",
             heading12: "十二牌占卜",
             clickToDraw12: "點擊抽取12張牌",
+            comingSoon: "即將推出",
+            comingSoonDesc: "開發中",
             totalDrawsPrefix: "已占卜",
             totalDrawsSuffix: "次",
             past: "過去",
@@ -796,6 +819,11 @@ const translations = {
             finance: "財運",
             financeDesc: "收入、財富、好運降臨",
             back: "返回"
+        },
+        reveal: {
+            tapToReveal: "點擊翻牌",
+            tapToContinue: "點擊查看解讀",
+            skip: "跳過 ›"
         }
     },
     ko: {
@@ -805,14 +833,16 @@ const translations = {
             loading: "로딩 중...",
             instruction: "타로 카드를 뽑아 오늘의 메시지를 확인하세요",
             clickToDraw: "카드를 탭하여 뽑기",
-            heading3: "3카드 드로우",
+            heading3: "Past · Present · Future",
             clickToDraw3: "탭하여 3장 뽑기",
-            heading4: "4카드 드로우",
+            heading4: "Past · Present · Future · Outcome",
             clickToDraw4: "탭하여 4장 뽑기",
             heading10: "10카드 드로우",
             clickToDraw10: "탭하여 10장 뽑기",
             heading12: "12카드 드로우",
             clickToDraw12: "탭하여 12장 뽑기",
+            comingSoon: "곧 출시",
+            comingSoonDesc: "개발 중",
             totalDrawsPrefix: "",
             totalDrawsSuffix: "회 리딩 완료",
             past: "과거",
@@ -987,6 +1017,11 @@ const translations = {
             finance: "재물",
             financeDesc: "수입, 재산, 행운의 기회",
             back: "뒤로"
+        },
+        reveal: {
+            tapToReveal: "탭하여 카드 공개",
+            tapToContinue: "탭하여 해석 보기",
+            skip: "건너뛰기 ›"
         }
     },
     ja: {
@@ -996,14 +1031,16 @@ const translations = {
             loading: "読み込み中...",
             instruction: "タロットカードを引いて今日のメッセージを受け取りましょう",
             clickToDraw: "カードをタップして引く",
-            heading3: "3カードドロー",
+            heading3: "Past · Present · Future",
             clickToDraw3: "タップして3枚引く",
-            heading4: "4カードドロー",
+            heading4: "Past · Present · Future · Outcome",
             clickToDraw4: "タップして4枚引く",
             heading10: "10カードドロー",
             clickToDraw10: "タップして10枚引く",
             heading12: "12カードドロー",
             clickToDraw12: "タップして12枚引く",
+            comingSoon: "近日公開",
+            comingSoonDesc: "開発中",
             totalDrawsPrefix: "",
             totalDrawsSuffix: "回の鑑定済み",
             past: "過去",
@@ -1178,6 +1215,11 @@ const translations = {
             finance: "金運",
             financeDesc: "収入、財産、幸運の到来",
             back: "戻る"
+        },
+        reveal: {
+            tapToReveal: "タップしてカードを開く",
+            tapToContinue: "タップして占い結果を見る",
+            skip: "スキップ ›"
         }
     },
     fr: {
@@ -1187,14 +1229,16 @@ const translations = {
             loading: "Chargement...",
             instruction: "Tirez une carte de tarot pour découvrir le message du jour",
             clickToDraw: "Touchez la carte pour tirer",
-            heading3: "Tirage 3 Cartes",
+            heading3: "Past · Present · Future",
             clickToDraw3: "Touchez pour tirer 3 cartes",
-            heading4: "Tirage 4 Cartes",
+            heading4: "Past · Present · Future · Outcome",
             clickToDraw4: "Touchez pour tirer 4 cartes",
             heading10: "Tirage 10 Cartes",
             clickToDraw10: "Touchez pour tirer 10 cartes",
             heading12: "Tirage 12 Cartes",
             clickToDraw12: "Touchez pour tirer 12 cartes",
+            comingSoon: "Bientôt",
+            comingSoonDesc: "En développement",
             totalDrawsPrefix: "",
             totalDrawsSuffix: "tirages effectués",
             past: "Passé",
@@ -1369,6 +1413,11 @@ const translations = {
             finance: "Finances",
             financeDesc: "Richesse, fortune & prospérité",
             back: "Retour"
+        },
+        reveal: {
+            tapToReveal: "Appuyez pour révéler",
+            tapToContinue: "Appuyez pour voir la lecture",
+            skip: "Passer ›"
         }
     }
 };
