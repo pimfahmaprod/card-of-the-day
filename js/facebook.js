@@ -36,6 +36,7 @@ window.fbAsyncInit = function() {
 // Handle login status changes
 function handleStatusChange(response) {
     if (response.status === 'connected') {
+        if (typeof gtag === 'function') gtag('event', 'login_success', { event_category: 'auth', method: 'facebook' });
         fbUser = response.authResponse;
         fetchUserProfileFB();
     } else {
@@ -193,6 +194,7 @@ function editDisplayName() {
 
 // Logout from profile dropdown
 function logoutFromProfile() {
+    if (typeof gtag === 'function') gtag('event', 'logout', { event_category: 'auth' });
     const profileSwitcher = document.getElementById('profileSwitcher');
     if (profileSwitcher) profileSwitcher.classList.remove('open');
     logoutFromFacebook();
@@ -200,6 +202,7 @@ function logoutFromProfile() {
 
 // Login with Facebook
 function loginWithFacebook() {
+    if (typeof gtag === 'function') gtag('event', 'login_attempt', { event_category: 'auth', method: 'facebook' });
     FB.login(function(response) {
         handleStatusChange(response);
     }, {

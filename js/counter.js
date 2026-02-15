@@ -359,13 +359,8 @@ if (document.readyState === 'loading') {
 }
 
 // ========================================
-// Analytics tracking removed to optimize Firebase costs
-// All tracking functions are no-ops
+// Analytics — GA event tracking
 // ========================================
-function trackButtonClick() { return null; }
-function trackSaveImage() { return null; }
-function trackShare() { return null; }
-function trackRetry() { return null; }
 function trackSocialClick(label) {
     if (typeof gtag === 'function') {
         gtag('event', 'click_banner', {

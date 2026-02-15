@@ -1582,6 +1582,7 @@ function selectCategory(category) {
     var backBtn = document.getElementById('categoryBackBtn');
     if (backBtn) {
         backBtn.addEventListener('click', function() {
+            gtag('event', 'close_category_overlay', { event_category: 'navigation' });
             closeCategoryOverlay();
         });
     }
@@ -2774,6 +2775,8 @@ function reopenRevealOverlay() {
     if (!overlay.classList.contains('stashed')) return;
     var fanWrapper = document.getElementById('revealFanWrapper');
     if (!fanWrapper.innerHTML.trim()) return; // no content to show
+
+    gtag('event', 'reopen_reveal', { event_category: 'engagement' });
 
     overlay.classList.remove('stashed');
     overlay.classList.add('active');
@@ -4772,6 +4775,8 @@ function initCommentsPanel() {
             const tabName = tab.dataset.tab;
             if (tabName === currentCommentsTab) return;
 
+            gtag('event', 'switch_comments_tab', { event_category: 'navigation', tab_name: tabName });
+
             // Update active tab
             commentsTabs.querySelectorAll('.comments-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
@@ -5228,6 +5233,8 @@ function createFeedCard(comment) {
         replySubmitBtn.disabled = true;
         replyInput.disabled = true;
 
+        gtag('event', 'submit_reply', { event_category: 'engagement' });
+
         var userId = getUserId();
         var userName = getSavedUserName() || 'Me';
 
@@ -5441,6 +5448,7 @@ function toggleCommentsTheme() {
     if (!panel) return;
     var isLight = panel.classList.toggle('light-theme');
     localStorage.setItem('tarot_comments_theme', isLight ? 'light' : 'dark');
+    gtag('event', 'toggle_theme', { event_category: 'settings', theme: isLight ? 'light' : 'dark' });
 }
 
 function applyCommentsTheme() {
@@ -7518,6 +7526,8 @@ function setupReplyFeature(card, comment) {
         replySubmitBtn.disabled = true;
         replyInput.disabled = true;
 
+        gtag('event', 'submit_reply', { event_category: 'engagement' });
+
         const userId = getUserId();
         const userName = getSavedUserName() || 'Me';
 
@@ -8081,6 +8091,7 @@ function showSavePreview(canvas, filename) {
     // Download — fresh user gesture
     var dlBtn = popup.querySelector('.save-preview-download');
     dlBtn.addEventListener('click', function() {
+        gtag('event', 'download_image', { event_category: 'engagement' });
         var link = document.createElement('a');
         link.download = filename;
         link.href = dataUrl;
@@ -8093,6 +8104,7 @@ function showSavePreview(canvas, filename) {
     if (canShare) {
         var shareBtn = popup.querySelector('.save-preview-share');
         shareBtn.addEventListener('click', function() {
+            gtag('event', 'share_image', { event_category: 'engagement' });
             fetch(dataUrl).then(function(res) { return res.blob(); }).then(function(blob) {
                 var file = new File([blob], filename, { type: 'image/png' });
                 if (navigator.canShare({ files: [file] })) {
