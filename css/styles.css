@@ -5867,6 +5867,108 @@ footer {
     opacity: 0;
 }
 
+/* Quick Save Button on Result Page */
+.result-save-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 24px auto 20px;
+    padding: 12px 28px;
+    background: rgba(154, 170, 212, 0.08);
+    border: 1px solid rgba(154, 170, 212, 0.25);
+    border-radius: 50px;
+    color: #C0C8E0;
+    font-family: 'Prompt', sans-serif;
+    font-size: 15px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.result-save-btn:hover {
+    background: rgba(154, 170, 212, 0.15);
+    border-color: rgba(154, 170, 212, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(154, 170, 212, 0.15);
+}
+
+.result-save-btn:active {
+    transform: translateY(0);
+}
+
+.result-save-btn svg {
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.result-save-btn-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(154, 170, 212, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Category-themed save button */
+.category-love .result-save-btn {
+    background: rgba(255, 107, 138, 0.08);
+    border-color: rgba(255, 107, 138, 0.25);
+    color: #ffb0c4;
+}
+.category-love .result-save-btn:hover {
+    background: rgba(255, 107, 138, 0.15);
+    border-color: rgba(255, 107, 138, 0.4);
+    box-shadow: 0 4px 20px rgba(255, 107, 138, 0.15);
+}
+.category-love .result-save-btn-glow {
+    background: radial-gradient(ellipse at center, rgba(255, 107, 138, 0.12) 0%, transparent 70%);
+}
+
+.category-work .result-save-btn {
+    background: rgba(100, 181, 255, 0.08);
+    border-color: rgba(100, 181, 255, 0.25);
+    color: #a0c8ff;
+}
+.category-work .result-save-btn:hover {
+    background: rgba(100, 181, 255, 0.15);
+    border-color: rgba(100, 181, 255, 0.4);
+    box-shadow: 0 4px 20px rgba(100, 181, 255, 0.15);
+}
+.category-work .result-save-btn-glow {
+    background: radial-gradient(ellipse at center, rgba(100, 181, 255, 0.12) 0%, transparent 70%);
+}
+
+.category-finance .result-save-btn {
+    background: rgba(255, 213, 79, 0.08);
+    border-color: rgba(255, 213, 79, 0.25);
+    color: #ffe088;
+}
+.category-finance .result-save-btn:hover {
+    background: rgba(255, 213, 79, 0.15);
+    border-color: rgba(255, 213, 79, 0.4);
+    box-shadow: 0 4px 20px rgba(255, 213, 79, 0.15);
+}
+.category-finance .result-save-btn-glow {
+    background: radial-gradient(ellipse at center, rgba(255, 213, 79, 0.12) 0%, transparent 70%);
+}
+
+.category-health .result-save-btn {
+    background: rgba(129, 199, 132, 0.08);
+    border-color: rgba(129, 199, 132, 0.25);
+    color: #a5d6a7;
+}
+.category-health .result-save-btn:hover {
+    background: rgba(129, 199, 132, 0.15);
+    border-color: rgba(129, 199, 132, 0.4);
+    box-shadow: 0 4px 20px rgba(129, 199, 132, 0.15);
+}
+.category-health .result-save-btn-glow {
+    background: radial-gradient(ellipse at center, rgba(129, 199, 132, 0.12) 0%, transparent 70%);
+}
+
 .comment-buttons-row {
     display: flex;
     justify-content: center;
@@ -9661,6 +9763,84 @@ footer {
     transition: opacity 0.4s ease;
 }
 
+/* ── Minimized state: shrink to top portion, result panel visible below ── */
+.reveal-overlay.minimized {
+    bottom: auto;
+    height: 45vh;
+    justify-content: flex-start;
+    overflow: hidden;
+    transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-overlay.minimized .reveal-overlay-bg {
+    opacity: 0.9;
+    mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
+    transition: opacity 0.5s ease;
+}
+
+.reveal-overlay.minimized .reveal-fan-wrapper {
+    transform: scale(0.38);
+    transform-origin: top center;
+    margin-top: 24px;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                margin-top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+}
+
+.reveal-overlay.minimized .reveal-card-info,
+.reveal-overlay.minimized .reveal-prompt,
+.reveal-overlay.minimized .reveal-skip-btn {
+    opacity: 0 !important;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.reveal-overlay.minimized.closing {
+    height: 0;
+    opacity: 0;
+    transition: height 0.4s cubic-bezier(0.4, 0, 1, 1), opacity 0.3s ease;
+}
+
+/* ── Scroll-down hint indicator ── */
+.reveal-scroll-hint {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    cursor: pointer;
+}
+
+.reveal-scroll-hint.visible {
+    opacity: 1;
+}
+
+.reveal-scroll-hint-line {
+    width: 1px;
+    height: 30px;
+    background: linear-gradient(to bottom, transparent, rgba(192, 204, 228, 0.35));
+}
+
+.reveal-scroll-hint svg {
+    width: 26px;
+    height: 26px;
+    color: rgba(192, 204, 228, 0.7);
+    animation: revealScrollBounce 1.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 6px rgba(154, 170, 212, 0.3));
+}
+
+@keyframes revealScrollBounce {
+    0%, 100% { transform: translateY(0); opacity: 0.7; }
+    50% { transform: translateY(6px); opacity: 1; }
+}
+
 .reveal-overlay-bg {
     position: absolute;
     inset: 0;
@@ -9675,6 +9855,7 @@ footer {
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Stop float/drift animations inside the reveal overlay — cards stay still */

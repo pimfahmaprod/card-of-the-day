@@ -2510,7 +2510,6 @@ function showRevealContinuePrompt() {
 
 function dismissRevealOverlay() {
     var overlay = document.getElementById('revealOverlay');
-    overlay.classList.add('closing');
     revealOverlayActive = false;
 
     // Remove listeners
@@ -2519,25 +2518,68 @@ function dismissRevealOverlay() {
     _revealTapHandler = null;
     _revealSkipHandler = null;
 
-    // Hide card info
+    // Hide card info, prompt, skip button
     var cardInfo = document.getElementById('revealCardInfo');
     cardInfo.classList.remove('visible');
     cardInfo.classList.add('switching');
+    document.getElementById('revealPrompt').style.opacity = '0';
 
+    // Step 1: Minimize overlay to top bar
+    overlay.classList.add('minimized');
+
+    // Step 2: Prepare result panel behind the overlay
     setTimeout(function() {
-        overlay.classList.remove('active', 'closing');
-        document.getElementById('revealFanWrapper').innerHTML = '';
-        cardInfo.classList.remove('switching');
-        document.getElementById('revealCardInfoName').textContent = '';
-        document.getElementById('revealCardInfoQuote').textContent = '';
-
-        // Proceed to result
         if (currentReadingMode === 'single') {
             proceedToResult(revealCardData, true);
         } else {
             proceedToMultiResult();
         }
+    }, 300);
+
+    // Step 3: Add scroll-down indicator
+    var scrollHint = document.createElement('div');
+    scrollHint.className = 'reveal-scroll-hint';
+    scrollHint.innerHTML = '<div class="reveal-scroll-hint-line"></div>' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+    overlay.appendChild(scrollHint);
+    setTimeout(function() { scrollHint.classList.add('visible'); }, 500);
+
+    // Step 4: Dismiss fully — slide up and remove overlay
+    var _dismissed = false;
+    function fullyDismiss() {
+        if (_dismissed) return;
+        _dismissed = true;
+        clearTimeout(_autoDismiss);
+        scrollHint.removeEventListener('click', fullyDismiss);
+        resultPanel.removeEventListener('scroll', _scrollDismiss);
+
+        overlay.classList.add('closing');
+        setTimeout(function() {
+            overlay.classList.remove('active', 'minimized', 'closing');
+            overlay.style.transform = '';
+            document.getElementById('revealFanWrapper').innerHTML = '';
+            cardInfo.classList.remove('switching');
+            document.getElementById('revealCardInfoName').textContent = '';
+            document.getElementById('revealCardInfoQuote').textContent = '';
+            document.getElementById('revealPrompt').style.opacity = '';
+            if (scrollHint.parentNode) scrollHint.remove();
+        }, 400);
+    }
+
+    // Tap scroll-hint chevron to dismiss
+    scrollHint.addEventListener('click', fullyDismiss);
+
+    // Scroll result panel to dismiss
+    var resultPanel = document.getElementById('resultPanel');
+    function _scrollDismiss() {
+        if (resultPanel.scrollTop > 30) fullyDismiss();
+    }
+    setTimeout(function() {
+        resultPanel.addEventListener('scroll', _scrollDismiss, { passive: true });
     }, 500);
+
+    // Auto-dismiss after 3.5 seconds
+    var _autoDismiss = setTimeout(fullyDismiss, 3500);
 }
 
 // Select card
@@ -4178,6 +4220,14 @@ function goToLandingPage() {
     if (_grid) _grid.classList.remove('multi-select-mode');
     clearCategoryTheme();
     hideMultiPickIndicator();
+
+    // Clean up reveal overlay if still minimized
+    var _revealOv = document.getElementById('revealOverlay');
+    _revealOv.classList.remove('active', 'minimized', 'closing');
+    _revealOv.style.transform = '';
+    document.getElementById('revealFanWrapper').innerHTML = '';
+    var _scrollHint = _revealOv.querySelector('.reveal-scroll-hint');
+    if (_scrollHint) _scrollHint.remove();
 
     // Restore sticky card to single-card layout
     var _sticky = document.getElementById('resultStickyCard');
@@ -8074,7 +8124,7 @@ function drawMultiVerticalLayout(ctx, cardImages, width, height, colors) {
     curY += 25;
 
     // --- Two-column area: cards left, text right ---
-    var footerH = 100;
+    var footerH = 140; // Space for footer + jubpai.com promo
     var padL = 60;
     var padR = 55;
     var columnGap = 30;
@@ -8167,28 +8217,15 @@ function drawMultiVerticalLayout(ctx, cardImages, width, height, colors) {
         wrapText(ctx, quoteText, textCenterX, textBlockTop + 92, rightW - 10, 32, maxQuoteY);
     }
 
-    // Footer (centered at bottom)
-    var iconSize = 24;
-    var footerColor = 'rgba(' + colors.lightRgb + ', 0.45)';
-    var footerY = height - 90;
-
-    var leftIconsWidth = iconSize * 1.4 * 3 + iconSize;
-    var gap = 80;
-    var totalFooterW = leftIconsWidth + gap + iconSize;
-    var footerStartX = (width - totalFooterW) / 2;
-
-    drawSocialIcons(ctx, footerStartX, footerY, iconSize, footerColor);
-    ctx.textAlign = 'center';
-    ctx.font = '18px "Prompt", sans-serif';
-    ctx.fillStyle = footerColor;
-    ctx.fillText('Pimfahmaprod', footerStartX + leftIconsWidth / 2, footerY + iconSize + 24);
-
-    var lineIconX = footerStartX + leftIconsWidth + gap;
-    drawLineIcon(ctx, lineIconX, footerY, iconSize, footerColor);
-    ctx.textAlign = 'center';
-    ctx.font = '18px "Prompt", sans-serif';
-    ctx.fillStyle = footerColor;
-    ctx.fillText('Line: @Pimfah', lineIconX + iconSize / 2, footerY + iconSize + 24);
+    // Footer with promo (centered at bottom)
+    drawFooterWithPromo(ctx, {
+        iconSize: 20,
+        centerX: width / 2,
+        footerY: height - 130,
+        width: width,
+        color: 'rgba(' + colors.lightRgb + ', 0.45)',
+        accentColor: colors.accent || '#C8A96E'
+    });
 }
 
 function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
@@ -8214,7 +8251,7 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
 
     // --- 2x2 Grid layout (or 2+1 for 3 cards) ---
     var gridTop = safePad + 45;
-    var footerH = 55;
+    var footerH = 90; // Space for footer + jubpai.com promo
     var colGap = 30;
     var rowGap = 14;
     var availH = height - gridTop - footerH - 10;
@@ -8310,207 +8347,127 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
         wrapText(ctx, quoteText, pos.cx, belowY + 42, maxTextW, 19, maxQuoteY);
     }
 
-    // Footer
-    var iconSize = 16;
-    var footerColor = 'rgba(' + colors.lightRgb + ', 0.45)';
-    var footerY = height - footerH;
-
-    var leftIconsWidth = iconSize * 1.4 * 3 + iconSize;
-    var gap = 50;
-    var totalFooterW = leftIconsWidth + gap + iconSize;
-    var footerStartX = (width - totalFooterW) / 2;
-
-    drawSocialIcons(ctx, footerStartX, footerY, iconSize, footerColor);
-    ctx.textAlign = 'center';
-    ctx.font = '13px "Prompt", sans-serif';
-    ctx.fillStyle = footerColor;
-    ctx.fillText('Pimfahmaprod', footerStartX + leftIconsWidth / 2, footerY + iconSize + 18);
-
-    var lineIconX = footerStartX + leftIconsWidth + gap;
-    drawLineIcon(ctx, lineIconX, footerY, iconSize, footerColor);
-    ctx.textAlign = 'center';
-    ctx.font = '13px "Prompt", sans-serif';
-    ctx.fillStyle = footerColor;
-    ctx.fillText('Line: @Pimfah', lineIconX + iconSize / 2, footerY + iconSize + 18);
+    // Footer with promo
+    drawFooterWithPromo(ctx, {
+        iconSize: 14,
+        centerX: width / 2,
+        footerY: height - 85,
+        width: width,
+        color: 'rgba(' + colors.lightRgb + ', 0.45)',
+        accentColor: colors.accent || '#C8A96E',
+        compact: true
+    });
 }
 
 function drawMultiWideLayout(ctx, cardImages, width, height, colors) {
     var cardCount = multiCardSelections.length;
     var catLabel = getCategoryLabel();
 
-    // --- Layout: Left = cards in 2x2 grid, Right = text list ---
-    var padL = 45;
+    // --- Layout: Cards in horizontal row, text below, footer at bottom ---
+    var padL = 50;
     var padR = 50;
     var padT = 48;
-    var footerH = 45;
-    var columnGap = 35;
-    var gridAreaW = width * 0.48;
-    var textX = gridAreaW + columnGap;
-    var textW = width - textX - padR;
-    var availH = height - padT - footerH - 10;
+    var footerH = 70;
+    var cardGap = 20;
+    var textH = 55; // space for position + name below cards
 
-    // --- Left side: Cards in 2x2 grid ---
-    var gridColGap = 12;
-    var gridRowGap = 10;
-    var labelH = 30;
-    var gridCols = 2;
-    var gridRows = (cardCount <= 2) ? 1 : 2;
-    var gridColW = (gridAreaW - padL - gridColGap) / gridCols;
-    var maxCardH = (availH - gridRowGap * (gridRows - 1) - labelH * gridRows) / gridRows;
-    var cardW = 0;
-    var cardH = 0;
-
-    if (cardImages[0]) {
-        var ratio = cardImages[0].width / cardImages[0].height;
-        cardH = maxCardH;
-        cardW = cardH * ratio;
-        if (cardW > gridColW - 4) {
-            cardW = gridColW - 4;
-            cardH = cardW / ratio;
-        }
-    }
-
-    // Build grid positions (cards on left side)
-    var positions = [];
-    var gridLeftCX = padL + gridColW / 2;
-    var gridRightCX = padL + gridColW + gridColGap + gridColW / 2;
-    var gridTopY = padT + (availH - (cardH + labelH) * gridRows - gridRowGap * (gridRows - 1)) / 2;
-    if (gridTopY < padT) gridTopY = padT;
-
-    if (cardCount === 3) {
-        positions.push({ cx: gridLeftCX, cy: gridTopY });
-        positions.push({ cx: gridRightCX, cy: gridTopY });
-        var row1Y3 = gridTopY + cardH + labelH + gridRowGap;
-        positions.push({ cx: padL + (gridAreaW - padL) / 2, cy: row1Y3 });
-    } else {
-        var row1Y4 = gridTopY + cardH + labelH + gridRowGap;
-        positions.push({ cx: gridLeftCX, cy: gridTopY });
-        positions.push({ cx: gridRightCX, cy: gridTopY });
-        positions.push({ cx: gridLeftCX, cy: row1Y4 });
-        positions.push({ cx: gridRightCX, cy: row1Y4 });
-    }
-
-    // Draw cards with position label + name below
-    for (var i = 0; i < cardCount; i++) {
-        var pos = positions[i];
-        var img = cardImages[i];
-        var sel = multiCardSelections[i];
-        var posLabel = getPositionLabel(i);
-        var cardName = getCardName(sel.card.name);
-        var drawX = pos.cx - cardW / 2;
-        var drawY = pos.cy;
-
-        if (img) {
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-            ctx.shadowBlur = 12;
-            ctx.shadowOffsetY = 5;
-            ctx.drawImage(img, drawX, drawY, cardW, cardH);
-            ctx.shadowColor = 'transparent';
-
-            ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.2)';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(drawX, drawY, cardW, cardH);
-        }
-
-        var belowY = drawY + cardH + 12;
-        ctx.textAlign = 'center';
-
-        ctx.fillStyle = colors.accent;
-        ctx.font = 'bold 10px "Prompt", sans-serif';
-        ctx.fillText(posLabel, pos.cx, belowY);
-
-        ctx.fillStyle = '#C0C8E0';
-        var ns = 13;
-        ctx.font = 'bold ' + ns + 'px "Cormorant Garamond", "Prompt", serif';
-        var maxNW = gridColW - 8;
-        while (ctx.measureText(cardName).width > maxNW && ns > 9) {
-            ns -= 1;
-            ctx.font = 'bold ' + ns + 'px "Cormorant Garamond", "Prompt", serif';
-        }
-        ctx.fillText(cardName, pos.cx, belowY + 15);
-    }
-
-    // --- Right side: Title + text list ---
-    var curY = padT + 5;
-
-    // Title
+    // --- Title + Category centered at top ---
+    var titleStr = getReadingModeTitle();
     ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.6)';
     ctx.font = '18px "Cormorant Garamond", "Prompt", serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(getReadingModeTitle(), textX, curY + 12);
+    ctx.textAlign = 'center';
+    ctx.fillText(titleStr, width / 2, padT + 5);
 
-    // Category label
+    var headerH = 18;
     if (catLabel) {
         ctx.fillStyle = colors.accent;
         ctx.font = 'bold 20px "Prompt", sans-serif';
-        ctx.fillText(catLabel, textX, curY + 38);
-        curY += 48;
-    } else {
-        curY += 22;
+        ctx.fillText(catLabel, width / 2, padT + 30);
+        headerH = 45;
     }
 
     // Decorative line
     ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.3)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(textX, curY + 5);
-    ctx.lineTo(textX + 120, curY + 5);
+    ctx.moveTo(width / 2 - 80, padT + headerH + 8);
+    ctx.lineTo(width / 2 + 80, padT + headerH + 8);
     ctx.stroke();
-    curY += 20;
 
-    // Card info list
-    var listAvailH = height - curY - footerH - 10;
-    var sectionH = listAvailH / cardCount;
+    var cardTop = padT + headerH + 22;
+    var availCardH = height - cardTop - textH - footerH - 10;
+    var availCardW = width - padL - padR;
 
-    for (var j = 0; j < cardCount; j++) {
-        var selJ = multiCardSelections[j];
-        var cardJ = selJ.card;
-        var posLabelJ = getPositionLabel(j);
-        var cardNameJ = getCardName(cardJ.name);
-        var quoteJ = getMultiCardQuote(cardJ);
-        var secY = curY + j * sectionH;
-
-        // Position label
-        ctx.fillStyle = colors.accent;
-        ctx.font = 'bold 13px "Prompt", sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText('✦ ' + posLabelJ, textX, secY + 8);
-
-        // Card name (dynamic sizing)
-        ctx.fillStyle = '#C0C8E0';
-        var nameSize = 22;
-        ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
-        while (ctx.measureText(cardNameJ).width > textW && nameSize > 14) {
-            nameSize -= 2;
-            ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
+    // Calculate card dimensions (all cards in one row)
+    var cardW = 0;
+    var cardH = 0;
+    if (cardImages[0]) {
+        var ratio = cardImages[0].width / cardImages[0].height;
+        cardH = availCardH;
+        var maxPerCardW = (availCardW - cardGap * (cardCount - 1)) / cardCount;
+        cardW = cardH * ratio;
+        if (cardW > maxPerCardW) {
+            cardW = maxPerCardW;
+            cardH = cardW / ratio;
         }
-        ctx.fillText(cardNameJ, textX, secY + 32);
-
-        // Quote
-        ctx.font = 'italic 14px "Cormorant Garamond", "Prompt", serif';
-        ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.6)';
-        var quoteTextJ = '"' + quoteJ + '"';
-        wrapTextLeft(ctx, quoteTextJ, textX, secY + 52, textW, 19, secY + sectionH - 8);
     }
 
-    // Footer (right-aligned under text column)
-    var iconSize = 13;
-    var footerColor = 'rgba(' + colors.lightRgb + ', 0.4)';
-    var footerY = height - footerH;
+    // Center the entire row of cards
+    var totalCardsW = cardW * cardCount + cardGap * (cardCount - 1);
+    var startX = (width - totalCardsW) / 2;
+    var cardY = cardTop + (availCardH - cardH) / 2;
 
-    drawSocialIcons(ctx, textX, footerY, iconSize, footerColor);
-    var leftIconsWidth = iconSize * 1.4 * 3 + iconSize;
-    ctx.textAlign = 'center';
-    ctx.font = '11px "Prompt", sans-serif';
-    ctx.fillStyle = footerColor;
-    ctx.fillText('Pimfahmaprod', textX + leftIconsWidth / 2, footerY + iconSize + 14);
+    // Draw cards in a row
+    for (var i = 0; i < cardCount; i++) {
+        var img = cardImages[i];
+        var sel = multiCardSelections[i];
+        var posLabel = getPositionLabel(i);
+        var cardName = getCardName(sel.card.name);
+        var cx = startX + i * (cardW + cardGap);
+        var cardCenterX = cx + cardW / 2;
 
-    var lineIconX = textX + leftIconsWidth + 30;
-    drawLineIcon(ctx, lineIconX, footerY, iconSize, footerColor);
-    ctx.textAlign = 'center';
-    ctx.font = '11px "Prompt", sans-serif';
-    ctx.fillStyle = footerColor;
-    ctx.fillText('Line: @Pimfah', lineIconX + iconSize / 2, footerY + iconSize + 14);
+        // Card image with shadow
+        if (img) {
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetY = 6;
+            ctx.drawImage(img, cx, cardY, cardW, cardH);
+            ctx.shadowColor = 'transparent';
+
+            ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.2)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(cx, cardY, cardW, cardH);
+        }
+
+        // Position label below card
+        var belowY = cardY + cardH + 14;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = colors.accent;
+        ctx.font = 'bold 12px "Prompt", sans-serif';
+        ctx.fillText(posLabel, cardCenterX, belowY);
+
+        // Card name (dynamic sizing, no quotes)
+        ctx.fillStyle = '#C0C8E0';
+        var ns = 16;
+        ctx.font = 'bold ' + ns + 'px "Cormorant Garamond", "Prompt", serif';
+        var maxNW = cardW + 10;
+        while (ctx.measureText(cardName).width > maxNW && ns > 10) {
+            ns -= 1;
+            ctx.font = 'bold ' + ns + 'px "Cormorant Garamond", "Prompt", serif';
+        }
+        ctx.fillText(cardName, cardCenterX, belowY + 18);
+    }
+
+    // Footer with promo (centered, within border)
+    drawFooterWithPromo(ctx, {
+        iconSize: 10,
+        centerX: width / 2,
+        footerY: height - 90,
+        width: width,
+        color: 'rgba(' + colors.lightRgb + ', 0.4)',
+        accentColor: colors.accent || '#C8A96E',
+        compact: true
+    });
 }
 
 function drawShareImage(ctx, cardImg, size, platform) {
@@ -8631,6 +8588,67 @@ function drawLineIcon(ctx, x, y, size, color) {
     ctx.fillText('L', x + size/2, y + size * 0.68);
 }
 
+// Unified footer with social icons + jubpai.com promo
+// opts: { iconSize, centerX, footerY, width, color, accentColor, compact }
+function drawFooterWithPromo(ctx, opts) {
+    var iconSize = opts.iconSize || 14;
+    var footerY = opts.footerY;
+    var color = opts.color || 'rgba(160, 180, 220, 0.55)';
+    var accentColor = opts.accentColor || '#C8A96E';
+    var compact = opts.compact || false;
+    var centerX = opts.centerX;
+
+    // --- Row 1: Social icons + text ---
+    var leftIconsWidth = iconSize * 1.4 * 3 + iconSize;
+    var gap = compact ? 25 : 40;
+    var rightIconWidth = iconSize;
+    var totalIconsWidth = leftIconsWidth + gap + rightIconWidth + (compact ? 80 : 110);
+    var startX = centerX - totalIconsWidth / 2;
+
+    drawSocialIcons(ctx, startX, footerY, iconSize, color);
+    ctx.textAlign = 'center';
+    var labelSize = compact ? 10 : 12;
+    ctx.font = labelSize + 'px "Prompt", sans-serif';
+    ctx.fillStyle = color;
+    ctx.fillText('Pimfahmaprod', startX + leftIconsWidth / 2, footerY + iconSize + (compact ? 12 : 16));
+
+    var lineIconX = startX + leftIconsWidth + gap;
+    drawLineIcon(ctx, lineIconX, footerY, iconSize, color);
+    ctx.textAlign = 'center';
+    ctx.font = labelSize + 'px "Prompt", sans-serif';
+    ctx.fillStyle = color;
+    ctx.fillText('Line: @Pimfah', lineIconX + iconSize / 2, footerY + iconSize + (compact ? 12 : 16));
+
+    // --- Row 2: jubpai.com promo ---
+    var promoY = footerY + iconSize + (compact ? 28 : 36);
+    var promoSize = compact ? 13 : 15;
+
+    // Glow effect behind text
+    ctx.save();
+    ctx.shadowColor = accentColor;
+    ctx.shadowBlur = 12;
+    ctx.textAlign = 'center';
+    ctx.font = 'bold ' + promoSize + 'px "Cormorant Garamond", "Prompt", serif';
+    ctx.fillStyle = accentColor;
+    ctx.fillText('✧  jubpai.com  ✧', centerX, promoY);
+    ctx.restore();
+
+    // Draw again without shadow for crisp text
+    ctx.textAlign = 'center';
+    ctx.font = 'bold ' + promoSize + 'px "Cormorant Garamond", "Prompt", serif';
+    ctx.fillStyle = accentColor;
+    ctx.fillText('✧  jubpai.com  ✧', centerX, promoY);
+
+    // Subtext
+    var subSize = compact ? 9 : 11;
+    ctx.font = subSize + 'px "Prompt", sans-serif';
+    ctx.fillStyle = 'rgba(200, 169, 110, 0.6)';
+    ctx.fillText('จับไพ่รายวัน ฟรี!', centerX, promoY + (compact ? 14 : 17));
+
+    // Return total height used
+    return promoY + (compact ? 14 : 17) - footerY + 4;
+}
+
 function drawVerticalLayout(ctx, cardImg, width, height) {
     // "Card of the Day" title at top
     ctx.fillStyle = 'rgba(160, 180, 220, 0.6)';
@@ -8696,35 +8714,18 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
     // Interpretation text - full text with bounds (preserve paragraph breaks)
     ctx.font = '26px "Prompt", sans-serif';
     ctx.fillStyle = '#C0C8E0';
-    const maxInterpretY = height - 180; // Leave space for footer
+    const maxInterpretY = height - 210; // Leave space for footer + promo
     wrapTextWithParagraphsCenter(ctx, getCardInterpretation(currentCardData), width / 2, interpretY + 110, width - 160, 38, maxInterpretY);
 
-    // Footer - 2 columns layout with divider
-    const iconSize = 26;
-    const footerColor = 'rgba(160, 180, 220, 0.6)';
-    const footerY = height - 120;
-
-    // Calculate widths for centering
-    const leftIconsWidth = iconSize * 1.4 * 3 + iconSize; // 4 icons
-    const rightIconWidth = iconSize;
-    const gap = 100; // Gap between two columns
-    const totalWidth = leftIconsWidth + gap + rightIconWidth;
-    const startX = (width - totalWidth) / 2;
-
-    // Left column: 4 social icons + Pimfahmaprod
-    drawSocialIcons(ctx, startX, footerY, iconSize, footerColor);
-    ctx.textAlign = 'center';
-    ctx.font = '20px "Prompt", sans-serif';
-    ctx.fillStyle = footerColor;
-    ctx.fillText('Pimfahmaprod', startX + leftIconsWidth / 2, footerY + iconSize + 28);
-
-    // Right column: LINE icon + Line: @Pimfah
-    const lineIconX = startX + leftIconsWidth + gap;
-    drawLineIcon(ctx, lineIconX, footerY, iconSize, footerColor);
-    ctx.textAlign = 'center';
-    ctx.font = '20px "Prompt", sans-serif';
-    ctx.fillStyle = footerColor;
-    ctx.fillText('Line: @Pimfah', lineIconX + iconSize / 2, footerY + iconSize + 28);
+    // Footer with promo
+    drawFooterWithPromo(ctx, {
+        iconSize: 22,
+        centerX: width / 2,
+        footerY: height - 150,
+        width: width,
+        color: 'rgba(160, 180, 220, 0.6)',
+        accentColor: '#C8A96E'
+    });
 }
 
 function drawSquareLayout(ctx, cardImg, width, height) {
@@ -8790,30 +8791,20 @@ function drawSquareLayout(ctx, cardImg, width, height) {
     // Interpretation - full text with bounds (preserve paragraph breaks)
     ctx.font = '17px "Prompt", sans-serif';
     ctx.fillStyle = '#C0C8E0';
-    const maxInterpretY = height - safePadding - 100; // Leave space for footer within safe area
+    const maxInterpretY = height - safePadding - 130; // Leave space for footer + promo
     wrapTextWithParagraphs(ctx, getCardInterpretation(currentCardData), textX, 360, textWidth, 25, maxInterpretY);
 
-    // Footer - 2 columns layout with divider
-    const iconSize = 18;
-    const footerColor = 'rgba(160, 180, 220, 0.55)';
-    const footerY = height - safePadding - 40;
-    const gap = 50;
-
-    // Left column: 4 social icons + Pimfahmaprod
-    drawSocialIcons(ctx, textX, footerY, iconSize, footerColor);
-    const leftIconsWidth = iconSize * 1.4 * 3 + iconSize;
-    ctx.textAlign = 'center';
-    ctx.font = '14px "Prompt", sans-serif';
-    ctx.fillStyle = footerColor;
-    ctx.fillText('Pimfahmaprod', textX + leftIconsWidth / 2, footerY + iconSize + 20);
-
-    // Right column: LINE icon + Line: @Pimfah
-    const lineIconX = textX + leftIconsWidth + gap;
-    drawLineIcon(ctx, lineIconX, footerY, iconSize, footerColor);
-    ctx.textAlign = 'center';
-    ctx.font = '14px "Prompt", sans-serif';
-    ctx.fillStyle = footerColor;
-    ctx.fillText('Line: @Pimfah', lineIconX + iconSize / 2, footerY + iconSize + 20);
+    // Footer with promo (centered in the text column area)
+    var textCenterX = textX + textWidth / 2;
+    drawFooterWithPromo(ctx, {
+        iconSize: 15,
+        centerX: textCenterX,
+        footerY: height - safePadding - 65,
+        width: textWidth,
+        color: 'rgba(160, 180, 220, 0.55)',
+        accentColor: '#C8A96E',
+        compact: true
+    });
 }
 
 function drawWideLayout(ctx, cardImg, width, height) {
@@ -8876,30 +8867,20 @@ function drawWideLayout(ctx, cardImg, width, height) {
     // Interpretation - full text with bounds (preserve paragraph breaks)
     ctx.font = '16px "Prompt", sans-serif';
     ctx.fillStyle = '#C0C8E0';
-    const maxInterpretY = height - 90; // Leave space for footer
+    const maxInterpretY = height - 120; // Leave space for footer + promo within border
     wrapTextWithParagraphs(ctx, getCardInterpretation(currentCardData), textX, 260, textWidth, 22, maxInterpretY);
 
-    // Footer - 2 columns layout with divider
-    const iconSize = 14;
-    const footerColor = 'rgba(160, 180, 220, 0.55)';
-    const footerY = height - 62;
-    const gap = 40;
-
-    // Left column: 4 social icons + Pimfahmaprod
-    drawSocialIcons(ctx, textX, footerY, iconSize, footerColor);
-    const leftIconsWidth = iconSize * 1.4 * 3 + iconSize;
-    ctx.textAlign = 'center';
-    ctx.font = '12px "Prompt", sans-serif';
-    ctx.fillStyle = footerColor;
-    ctx.fillText('Pimfahmaprod', textX + leftIconsWidth / 2, footerY + iconSize + 16);
-
-    // Right column: LINE icon + Line: @Pimfah
-    const lineIconX = textX + leftIconsWidth + gap;
-    drawLineIcon(ctx, lineIconX, footerY, iconSize, footerColor);
-    ctx.textAlign = 'center';
-    ctx.font = '12px "Prompt", sans-serif';
-    ctx.fillStyle = footerColor;
-    ctx.fillText('Line: @Pimfah', lineIconX + iconSize / 2, footerY + iconSize + 16);
+    // Footer with promo (centered in text column area, within inner border)
+    var textCenterX = textX + textWidth / 2;
+    drawFooterWithPromo(ctx, {
+        iconSize: 11,
+        centerX: textCenterX,
+        footerY: height - 95,
+        width: textWidth,
+        color: 'rgba(160, 180, 220, 0.55)',
+        accentColor: '#C8A96E',
+        compact: true
+    });
 }
 
 function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxY = Infinity) {
