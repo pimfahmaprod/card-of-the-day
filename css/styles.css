@@ -443,7 +443,7 @@ body {
     width: 208px;
     height: 371px;
     border-radius: 10px;
-    perspective: 800px;
+    perspective: 600px;
 }
 
 /* 3D flip wrapper */
@@ -460,13 +460,18 @@ body {
     transform: rotateY(180deg);
 }
 
-/* Hide realism pseudo-elements during flip to prevent rendering glitch */
+/* During peek-flip: strip realism effects to match multi-card behavior */
+.three-card-item.peek-flip .three-card-face {
+    border: none;
+    outline: none;
+}
 .three-card-item.peek-flip .three-card-face::before,
 .three-card-item.peek-flip .three-card-face::after {
     display: none;
 }
 
-/* iOS Safari: backface-visibility fallback via opacity cross-fade at flip midpoint */
+/* iOS Safari: backface-visibility fallback via opacity cross-fade at flip midpoint
+   (matches multi-card behavior exactly) */
 .three-card-front {
     opacity: 0;
     transition: opacity 0.2s ease 0.28s;
@@ -5865,7 +5870,7 @@ footer {
 
 .interpretation-fade-overlay::before {
     content: '';
-    position: absolute;
+    positยion: absolute;
     bottom: 0;
     left: 0;
     right: 0;
