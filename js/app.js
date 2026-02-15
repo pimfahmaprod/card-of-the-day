@@ -438,6 +438,29 @@ function switchMode(direction) {
 // ========================================
 // Peek-Flip Gimmick (three-card landing)
 // ========================================
+
+// Only show positive-meaning cards on the landing page peek-flip
+var POSITIVE_CARD_NAMES = [
+    // Major Arcana — positive
+    'THE MAGICIAN', 'THE EMPRESS', 'THE LOVERS', 'THE CHARIOT',
+    'STRENGTH', 'WHEEL OF FORTUNE', 'TEMPERANCE', 'THE STAR',
+    'THE SUN', 'THE WORLD',
+    // Court cards
+    'PAGE OF WANDS', 'KNIGHT OF WANDS', 'QUEEN OF WANDS', 'KING OF WANDS',
+    'PAGE OF CUPS', 'KNIGHT OF CUPS', 'QUEEN OF CUPS', 'KING OF CUPS',
+    'PAGE OF PENTACLES', 'KNIGHT OF PENTACLES', 'QUEEN OF PENTACLES', 'KING OF PENTACLES',
+    // Wands — positive
+    'ACE OF WANDS', 'THREE OF WANDS', 'FOUR OF WANDS', 'SIX OF WANDS', 'EIGHT OF WANDS',
+    // Cups — positive
+    'ACE OF CUPS', 'TWO OF CUPS', 'THREE OF CUPS', 'SIX OF CUPS', 'NINE OF CUPS', 'TEN OF CUPS',
+    // Swords — positive
+    'ACE OF SWORDS',
+    // Pentacles — positive
+    'ACE OF PENTACLES', 'THREE OF PENTACLES', 'SIX OF PENTACLES',
+    'EIGHT OF PENTACLES', 'NINE OF PENTACLES', 'TEN OF PENTACLES'
+];
+var _positiveCardsCache = null;
+
 var peekFlipTimer = null;
 var peekFlipTimeouts = [];
 var peekFlipActive = false;
@@ -459,8 +482,15 @@ function stopPeekFlips() {
     peekFlipTimer = null;
     peekFlipTimeouts.forEach(function(t) { clearTimeout(t); });
     peekFlipTimeouts = [];
-    document.querySelectorAll('.three-card-item.peek-flip, .multi-card-item.peek-flip').forEach(function(el) {
+    // Reset multi-card (4/10/12) peek-flip
+    document.querySelectorAll('.multi-card-item.peek-flip').forEach(function(el) {
         el.classList.remove('peek-flip');
+    });
+    // Reset three-card scaleX flip
+    document.querySelectorAll('.three-card-item.flipped').forEach(function(el) {
+        el.classList.remove('flipped');
+        var flipper = el.querySelector('.three-card-flipper');
+        if (flipper) flipper.style.transform = '';
     });
 }
 
@@ -479,6 +509,14 @@ function doRandomPeekFlip() {
     if (!peekFlipActive) return;
     if (!tarotData || !tarotData.cards || !tarotData.cards.length) return;
 
+    // Build positive-cards cache on first use
+    if (!_positiveCardsCache) {
+        _positiveCardsCache = tarotData.cards.filter(function(c) {
+            return POSITIVE_CARD_NAMES.indexOf(c.name) !== -1;
+        });
+    }
+    var pool = _positiveCardsCache.length ? _positiveCardsCache : tarotData.cards;
+
     var items = getActiveCardItems();
     // Exclude last flipped card so same card never flips twice in a row
     var available = [];
@@ -488,24 +526,53 @@ function doRandomPeekFlip() {
     if (available.length === 0) return;
 
     var item = available[Math.floor(Math.random() * available.length)];
-    var randomCard = tarotData.cards[Math.floor(Math.random() * tarotData.cards.length)];
+    var randomCard = pool[Math.floor(Math.random() * pool.length)];
     lastPeekFlipItem = item;
 
     // Set front image
     var frontImg = item.querySelector('.three-card-front-img, .multi-card-front-img');
     if (frontImg) frontImg.src = 'images/tarot/' + randomCard.image;
 
-    // Flip to show front
-    item.classList.add('peek-flip');
+    var isThreeCard = item.classList.contains('three-card-item');
 
-    // After 2-3s, start flipping back AND immediately flip next card
-    var showDuration = 2000 + Math.random() * 1000;
-    var t1 = setTimeout(function() {
-        if (!peekFlipActive) return;
-        item.classList.remove('peek-flip');
-        doRandomPeekFlip();
-    }, showDuration);
-    peekFlipTimeouts.push(t1);
+    if (isThreeCard) {
+        // ScaleX flip for three-card (avoids 3D backface-visibility bugs)
+        var flipper = item.querySelector('.three-card-flipper');
+        flipper.style.transform = 'scaleX(0)';
+
+        var t1 = setTimeout(function() {
+            if (!peekFlipActive) return;
+            item.classList.add('flipped');
+            flipper.style.transform = 'scaleX(1)';
+
+            var showDuration = 2000 + Math.random() * 1000;
+            var t2 = setTimeout(function() {
+                if (!peekFlipActive) return;
+                flipper.style.transform = 'scaleX(0)';
+
+                var t3 = setTimeout(function() {
+                    if (!peekFlipActive) return;
+                    item.classList.remove('flipped');
+                    flipper.style.transform = 'scaleX(1)';
+                    doRandomPeekFlip();
+                }, 400);
+                peekFlipTimeouts.push(t3);
+            }, showDuration);
+            peekFlipTimeouts.push(t2);
+        }, 400);
+        peekFlipTimeouts.push(t1);
+    } else {
+        // Multi-card: keep existing 3D peek-flip
+        item.classList.add('peek-flip');
+
+        var showDuration = 2000 + Math.random() * 1000;
+        var t1 = setTimeout(function() {
+            if (!peekFlipActive) return;
+            item.classList.remove('peek-flip');
+            doRandomPeekFlip();
+        }, showDuration);
+        peekFlipTimeouts.push(t1);
+    }
 }
 
 function resetThreeCardAnimations(container) {
@@ -2439,9 +2506,21 @@ function handleRevealTap(e) {
 
 function revealCard(index) {
     var cardEl = revealQueue[index];
-    cardEl.classList.add('peek-flip');
     cardEl.classList.remove('reveal-next');
     playSoundEffect('cardReveal');
+
+    if (cardEl.classList.contains('three-card-item')) {
+        // ScaleX flip for three-card
+        var flipper = cardEl.querySelector('.three-card-flipper');
+        flipper.style.transform = 'scaleX(0)';
+        setTimeout(function() {
+            cardEl.classList.add('flipped');
+            flipper.style.transform = 'scaleX(1)';
+        }, 400);
+    } else {
+        // 3D flip for multi-card
+        cardEl.classList.add('peek-flip');
+    }
 
     // Show card info (name + category quote)
     if (!revealSkipping) {

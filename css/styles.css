@@ -443,55 +443,35 @@ body {
     width: 208px;
     height: 371px;
     border-radius: 10px;
-    perspective: 600px;
 }
 
-/* 3D flip wrapper */
+/* ScaleX flip wrapper (no 3D transforms — avoids backface-visibility bugs) */
 .three-card-flipper {
     width: 100%;
     height: 100%;
     position: relative;
-    -webkit-transform-style: preserve-3d;
-    transform-style: preserve-3d;
-    transition: transform 0.9s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transition: transform 0.4s ease;
 }
 
-.three-card-item.peek-flip .three-card-flipper {
-    transform: rotateY(180deg);
-}
-
-/* During peek-flip: strip realism effects to match multi-card behavior */
-.three-card-item.peek-flip .three-card-face {
-    border: none;
-    outline: none;
-}
-.three-card-item.peek-flip .three-card-face::before,
-.three-card-item.peek-flip .three-card-face::after {
-    display: none;
-}
-
-/* iOS Safari: backface-visibility fallback via opacity cross-fade at flip midpoint
-   (matches multi-card behavior exactly) */
+/* Face visibility — back shown by default, front hidden */
 .three-card-front {
     opacity: 0;
-    transition: opacity 0.2s ease 0.28s;
 }
 .three-card-back {
     opacity: 1;
-    transition: opacity 0.2s ease 0.28s;
 }
-.three-card-item.peek-flip .three-card-front {
+
+/* Flipped state (set by JS after scaleX midpoint) */
+.three-card-item.flipped .three-card-front {
     opacity: 1;
 }
-.three-card-item.peek-flip .three-card-back {
+.three-card-item.flipped .three-card-back {
     opacity: 0;
 }
 
 .three-card-face {
     position: absolute;
     inset: 0;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
     border-radius: 10px;
     overflow: hidden;
     box-shadow:
@@ -500,7 +480,6 @@ body {
 }
 
 .three-card-front {
-    transform: rotateY(180deg);
     background: #fff;
     box-shadow:
         0 15px 35px rgba(0, 0, 0, 0.4),
