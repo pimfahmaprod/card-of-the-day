@@ -451,6 +451,8 @@ body {
     height: 100%;
     position: relative;
     transition: transform 0.4s ease;
+    -webkit-backface-visibility: hidden;
+    will-change: transform;
 }
 
 /* Face visibility — back shown by default, front hidden */
