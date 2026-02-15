@@ -460,6 +460,12 @@ body {
     transform: rotateY(180deg);
 }
 
+/* Hide realism pseudo-elements during flip to prevent rendering glitch */
+.three-card-item.peek-flip .three-card-face::before,
+.three-card-item.peek-flip .three-card-face::after {
+    display: none;
+}
+
 /* iOS Safari: backface-visibility fallback via opacity cross-fade at flip midpoint */
 .three-card-front {
     opacity: 0;
