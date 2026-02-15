@@ -44,7 +44,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Prompt:wght@200;300;400;500&family=Dancing+Script:wght@400;500;600;700&family=Kanit:wght@200;300&family=Outfit:wght@300;400&family=Gowun+Dodum&family=Zen+Kaku+Gothic+New:wght@400;500&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=250213v">
+    <link rel="stylesheet" href="css/styles.css?v=250215a">
 </head>
 <body>
     <!-- Starfield Background -->
@@ -128,8 +128,18 @@
 
     <!-- Landing Page -->
     <div class="landing-page" id="landingPage">
+        <button class="mode-arrow mode-arrow-left" id="modePrev" aria-label="Previous mode">&#8249;</button>
+        <button class="mode-arrow mode-arrow-right" id="modeNext" aria-label="Next mode">&#8250;</button>
         <div class="landing-header">
-            <h1 class="landing-heading" data-i18n="landing.heading">Card of the Day</h1>
+            <div class="mode-selector" id="modeSelector">
+                <div class="mode-title-wrapper">
+                    <h1 class="landing-heading mode-title active" data-mode="single">Card of the Day</h1>
+                    <h1 class="landing-heading mode-title" data-mode="three-card">3-Card Draw</h1>
+                    <h1 class="landing-heading mode-title" data-mode="four-card">4-Card Draw</h1>
+                    <h1 class="landing-heading mode-title" data-mode="ten-card">Celtic Cross</h1>
+                    <h1 class="landing-heading mode-title" data-mode="twelve-card">Year Reading</h1>
+                </div>
+            </div>
             <p class="landing-tagline" data-i18n="landing.tagline">วันนี้ไพ่มีอะไรจะบอกคุณ</p>
             <div class="landing-sparkles">
                 <span class="landing-spark s1">✦</span>
@@ -140,6 +150,13 @@
                 <span class="landing-counter-prefix" data-i18n="landing.totalDrawsPrefix">ทำนายแล้ว</span>
                 <span class="landing-counter-num" id="totalPickCount">0</span>
                 <span class="landing-counter-label" data-i18n="landing.totalDrawsSuffix">ครั้ง</span>
+            </div>
+            <div class="mode-dots" id="modeDots">
+                <button class="mode-dot active" data-mode-index="0"><span class="mode-dot-cards"><i></i></span><span class="mode-dot-num">1</span></button>
+                <button class="mode-dot" data-mode-index="1"><span class="mode-dot-cards c3"><i></i><i></i><i></i></span><span class="mode-dot-num">3</span></button>
+                <button class="mode-dot" data-mode-index="2"><span class="mode-dot-cards c4"><i></i><i></i><i></i><i></i></span><span class="mode-dot-num">4</span></button>
+                <button class="mode-dot" data-mode-index="3"><span class="mode-dot-cards c10"><i></i><i></i><i></i><i></i><i></i></span><span class="mode-dot-num">10</span></button>
+                <button class="mode-dot" data-mode-index="4"><span class="mode-dot-cards c12"><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="mode-dot-num">12</span></button>
             </div>
         </div>
         <div class="spinning-card-container" id="spinningCardContainer">
@@ -161,6 +178,121 @@
                         <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                     </div>
                 </div>
+            </div>
+            <span class="card-click-hint loading-state" data-i18n="landing.loading">กำลังโหลด...</span>
+        </div>
+        <div class="three-card-container" id="threeCardContainer" style="display: none;">
+            <div class="three-card-fan">
+                <div class="three-card-item three-card-left">
+                    <div class="three-card-flipper">
+                        <div class="three-card-face three-card-back">
+                            <div class="card-back-galaxy">
+                                <div class="galaxy-bg"></div>
+                                <div class="galaxy-stars"></div>
+                                <div class="galaxy-stars galaxy-stars-2"></div>
+                                <div class="galaxy-shimmer"></div>
+                                <div class="galaxy-orbit"></div>
+                                <div class="galaxy-aurora"></div>
+                                <div class="galaxy-shooting-star galaxy-ss-1"></div>
+                                <div class="galaxy-shooting-star galaxy-ss-2"></div>
+                                <div class="galaxy-shooting-star galaxy-ss-3"></div>
+                                <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
+                            </div>
+                        </div>
+                        <div class="three-card-face three-card-front">
+                            <img class="three-card-front-img" src="" alt="">
+                        </div>
+                    </div>
+                    <span class="card-position-label" data-i18n="landing.past">Past</span>
+                </div>
+                <div class="three-card-item three-card-center">
+                    <div class="three-card-flipper">
+                        <div class="three-card-face three-card-back">
+                            <div class="card-back-galaxy">
+                                <div class="galaxy-bg"></div>
+                                <div class="galaxy-stars"></div>
+                                <div class="galaxy-stars galaxy-stars-2"></div>
+                                <div class="galaxy-shimmer"></div>
+                                <div class="galaxy-orbit"></div>
+                                <div class="galaxy-aurora"></div>
+                                <div class="galaxy-shooting-star galaxy-ss-1"></div>
+                                <div class="galaxy-shooting-star galaxy-ss-2"></div>
+                                <div class="galaxy-shooting-star galaxy-ss-3"></div>
+                                <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
+                            </div>
+                        </div>
+                        <div class="three-card-face three-card-front">
+                            <img class="three-card-front-img" src="" alt="">
+                        </div>
+                    </div>
+                    <span class="card-position-label" data-i18n="landing.present">Present</span>
+                </div>
+                <div class="three-card-item three-card-right">
+                    <div class="three-card-flipper">
+                        <div class="three-card-face three-card-back">
+                            <div class="card-back-galaxy">
+                                <div class="galaxy-bg"></div>
+                                <div class="galaxy-stars"></div>
+                                <div class="galaxy-stars galaxy-stars-2"></div>
+                                <div class="galaxy-shimmer"></div>
+                                <div class="galaxy-orbit"></div>
+                                <div class="galaxy-aurora"></div>
+                                <div class="galaxy-shooting-star galaxy-ss-1"></div>
+                                <div class="galaxy-shooting-star galaxy-ss-2"></div>
+                                <div class="galaxy-shooting-star galaxy-ss-3"></div>
+                                <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
+                            </div>
+                        </div>
+                        <div class="three-card-face three-card-front">
+                            <img class="three-card-front-img" src="" alt="">
+                        </div>
+                    </div>
+                    <span class="card-position-label" data-i18n="landing.future">Future</span>
+                </div>
+            </div>
+            <span class="card-click-hint loading-state" data-i18n="landing.loading">กำลังโหลด...</span>
+        </div>
+        <!-- 4-Card Container -->
+        <div class="multi-card-container" id="fourCardContainer" style="display: none;">
+            <div class="multi-card-fan four-card-fan">
+                <div class="multi-card-item fc-1"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-stars galaxy-stars-2"></div><div class="galaxy-shimmer"></div><div class="galaxy-orbit"></div><div class="galaxy-aurora"></div><div class="galaxy-shooting-star galaxy-ss-1"></div><div class="galaxy-shooting-star galaxy-ss-2"></div><div class="galaxy-shooting-star galaxy-ss-3"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div><span class="card-position-label" data-i18n="landing.past">Past</span></div>
+                <div class="multi-card-item fc-2"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-stars galaxy-stars-2"></div><div class="galaxy-shimmer"></div><div class="galaxy-orbit"></div><div class="galaxy-aurora"></div><div class="galaxy-shooting-star galaxy-ss-1"></div><div class="galaxy-shooting-star galaxy-ss-2"></div><div class="galaxy-shooting-star galaxy-ss-3"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div><span class="card-position-label" data-i18n="landing.present">Present</span></div>
+                <div class="multi-card-item fc-3"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-stars galaxy-stars-2"></div><div class="galaxy-shimmer"></div><div class="galaxy-orbit"></div><div class="galaxy-aurora"></div><div class="galaxy-shooting-star galaxy-ss-1"></div><div class="galaxy-shooting-star galaxy-ss-2"></div><div class="galaxy-shooting-star galaxy-ss-3"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div><span class="card-position-label" data-i18n="landing.future">Future</span></div>
+                <div class="multi-card-item fc-4"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-stars galaxy-stars-2"></div><div class="galaxy-shimmer"></div><div class="galaxy-orbit"></div><div class="galaxy-aurora"></div><div class="galaxy-shooting-star galaxy-ss-1"></div><div class="galaxy-shooting-star galaxy-ss-2"></div><div class="galaxy-shooting-star galaxy-ss-3"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div><span class="card-position-label" data-i18n="landing.outcome">Outcome</span></div>
+            </div>
+            <span class="card-click-hint loading-state" data-i18n="landing.loading">กำลังโหลด...</span>
+        </div>
+        <!-- 10-Card Container -->
+        <div class="multi-card-container" id="tenCardContainer" style="display: none;">
+            <div class="multi-card-fan ten-card-fan">
+                <div class="multi-card-item tc-1"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-2"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-3"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-4"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-5"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-6"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-7"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-8"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-9"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-10"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+            </div>
+            <span class="card-click-hint loading-state" data-i18n="landing.loading">กำลังโหลด...</span>
+        </div>
+        <!-- 12-Card Container -->
+        <div class="multi-card-container" id="twelveCardContainer" style="display: none;">
+            <div class="multi-card-fan twelve-card-fan">
+                <div class="multi-card-item twc-1"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-2"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-3"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-4"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-5"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-6"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-7"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-8"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-9"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-10"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-11"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-12"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
             </div>
             <span class="card-click-hint loading-state" data-i18n="landing.loading">กำลังโหลด...</span>
         </div>
@@ -215,6 +347,97 @@
 
     <!-- Overlay -->
     <div class="overlay" id="overlay"></div>
+
+    <!-- Category Selection Overlay -->
+    <div class="category-overlay" id="categoryOverlay">
+        <div class="category-overlay-bg"></div>
+        <div class="category-content">
+            <div class="category-header">
+                <div class="category-sparkles">
+                    <span class="category-spark s1">&#10022;</span>
+                    <span class="category-spark s2">&#10023;</span>
+                    <span class="category-spark s3">&#10022;</span>
+                </div>
+                <h2 class="category-title" data-i18n="category.title">เลือกหมวดที่ต้องการดูดวง</h2>
+                <p class="category-subtitle" data-i18n="category.subtitle">เลือก 1 หมวดเพื่อรับคำทำนาย</p>
+            </div>
+            <div class="category-cards">
+                <!-- LOVE -->
+                <button class="category-card" data-category="love">
+                    <div class="cat-border-glow"></div>
+                    <div class="cat-card-inner">
+                        <div class="cat-nebula"></div>
+                        <div class="cat-particles">
+                            <span>&#9829;</span><span>&#9829;</span><span>&#9829;</span>
+                            <span>&#9829;</span><span>&#9829;</span><span>&#9829;</span>
+                            <span>&#9829;</span><span>&#9829;</span>
+                        </div>
+                        <div class="cat-icon-wrap">
+                            <div class="cat-icon-aura"></div>
+                            <div class="cat-icon">
+                                <svg viewBox="0 0 24 24" width="44" height="44"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#loveGrad)"/><defs><linearGradient id="loveGrad" x1="2" y1="3" x2="22" y2="21"><stop offset="0%" stop-color="#ff6b8a"/><stop offset="100%" stop-color="#ff3366"/></linearGradient></defs></svg>
+                            </div>
+                        </div>
+                        <div class="cat-text">
+                            <span class="cat-title" data-i18n="category.love">Love</span>
+                            <span class="cat-desc" data-i18n="category.loveDesc">ความรัก</span>
+                        </div>
+                        <div class="cat-shimmer"></div>
+                    </div>
+                </button>
+                <!-- WORK -->
+                <button class="category-card" data-category="work">
+                    <div class="cat-border-glow"></div>
+                    <div class="cat-card-inner">
+                        <div class="cat-nebula"></div>
+                        <div class="cat-particles">
+                            <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+                            <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+                            <span>&#9733;</span><span>&#9733;</span>
+                        </div>
+                        <div class="cat-icon-wrap">
+                            <div class="cat-icon-aura"></div>
+                            <div class="cat-icon">
+                                <svg viewBox="0 0 24 24" width="44" height="44"><path d="M13 3L4 14h7l-2 7 9-11h-7l2-7z" fill="url(#workGrad)" stroke-linejoin="round"/><defs><linearGradient id="workGrad" x1="4" y1="3" x2="20" y2="24"><stop offset="0%" stop-color="#64b5ff"/><stop offset="100%" stop-color="#2979ff"/></linearGradient></defs></svg>
+                            </div>
+                        </div>
+                        <div class="cat-text">
+                            <span class="cat-title" data-i18n="category.work">Work</span>
+                            <span class="cat-desc" data-i18n="category.workDesc">การงาน</span>
+                        </div>
+                        <div class="cat-shimmer"></div>
+                    </div>
+                </button>
+                <!-- FINANCE -->
+                <button class="category-card" data-category="finance">
+                    <div class="cat-border-glow"></div>
+                    <div class="cat-card-inner">
+                        <div class="cat-nebula"></div>
+                        <div class="cat-particles">
+                            <span>&#10022;</span><span>&#10022;</span><span>&#10022;</span>
+                            <span>&#10022;</span><span>&#10022;</span><span>&#10022;</span>
+                            <span>&#10022;</span><span>&#10022;</span>
+                        </div>
+                        <div class="cat-icon-wrap">
+                            <div class="cat-icon-aura"></div>
+                            <div class="cat-icon">
+                                <svg viewBox="0 0 24 24" width="44" height="44"><circle cx="12" cy="12" r="10" fill="url(#finGrad)"/><text x="12" y="16.5" text-anchor="middle" font-size="13" font-weight="bold" fill="rgba(120,80,0,0.9)" font-family="serif">$</text><defs><linearGradient id="finGrad" x1="2" y1="2" x2="22" y2="22"><stop offset="0%" stop-color="#ffd54f"/><stop offset="100%" stop-color="#ffab00"/></linearGradient></defs></svg>
+                            </div>
+                        </div>
+                        <div class="cat-text">
+                            <span class="cat-title" data-i18n="category.finance">Finance</span>
+                            <span class="cat-desc" data-i18n="category.financeDesc">การเงิน</span>
+                        </div>
+                        <div class="cat-shimmer"></div>
+                    </div>
+                </button>
+            </div>
+            <button class="category-back-btn" id="categoryBackBtn">
+                <svg viewBox="0 0 24 24" fill="none" width="16" height="16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                <span data-i18n="category.back">กลับ</span>
+            </button>
+        </div>
+    </div>
 
     <!-- Center Card (Large) -->
     <div class="center-card-container" id="centerCard">
@@ -293,6 +516,9 @@
             </div>
 
             <div class="interpretation-fade-overlay" id="interpretationFade"></div>
+
+            <!-- Multi-card result container (hidden by default, shown for 3/4-card modes) -->
+            <div class="multi-result-cards" id="multiResultCards" style="display:none"></div>
 
             <!-- Wallpaper Banner -->
             <a href="https://tarotandbeyond.co/p/rapsap" target="_blank" class="wallpaper-banner" onclick="window.cardCounter && window.cardCounter.trackSocialClick && window.cardCounter.trackSocialClick('wallpaper_banner')">
@@ -758,10 +984,11 @@
     <!-- Scripts (auto cache-bust via deploy timestamp) -->
     <script>
     (function(){
-        var v = '250213t';
+        var v = '250215a';
         var scripts = [
             'js/translations.js',
             'js/card-interpretations.js',
+            'js/card-category-translations.js',
             'js/app.js',
             'js/facebook.js',
             'js/counter.js'

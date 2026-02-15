@@ -40,6 +40,26 @@ let _currentDrawCommentId = null;
 let _pendingDraw = null;
 
 // ========================================
+// Reading Mode (single / three-card)
+// ========================================
+const READING_MODES = [
+    { id: 'single', headingKey: 'landing.heading', clickKey: 'landing.clickToDraw' },
+    { id: 'three-card', headingKey: 'landing.heading3', clickKey: 'landing.clickToDraw3' },
+    { id: 'four-card', headingKey: 'landing.heading4', clickKey: 'landing.clickToDraw4' },
+    { id: 'ten-card', headingKey: 'landing.heading10', clickKey: 'landing.clickToDraw10' },
+    { id: 'twelve-card', headingKey: 'landing.heading12', clickKey: 'landing.clickToDraw12' }
+];
+let currentModeIndex = 0;
+let currentReadingMode = 'single';
+let currentReadingCategory = null; // 'love', 'work', or 'finance'
+
+// Multi-card selection state
+var multiCardSelections = [];   // [{card, positionKey}]
+var multiCardPositions = [];    // ['past','present','future'] or +['outcome']
+var multiCardTarget = 0;        // 3 or 4 (0 = single mode)
+var _multiDisabledCards = [];   // track disabled card elements across picks
+
+// ========================================
 // Internationalization (i18n)
 // ========================================
 let currentLang = 'th';
@@ -88,6 +108,23 @@ function getCardInterpretation(card) {
         return trans.en.interpretation;
     }
     return card.interpretation;
+}
+
+// Get translated category field (love, work, finance, health, loveQuote, etc.)
+function getCardCategoryField(card, fieldName) {
+    if (currentLang === 'th') {
+        return card[fieldName] || '';
+    }
+    if (typeof cardCategoryTranslations !== 'undefined') {
+        var trans = cardCategoryTranslations[card.name];
+        if (trans && trans[currentLang] && trans[currentLang][fieldName]) {
+            return trans[currentLang][fieldName];
+        }
+        if (trans && trans.en && trans.en[fieldName]) {
+            return trans.en[fieldName];
+        }
+    }
+    return card[fieldName] || '';
 }
 
 // Set interpretation text as paragraphs (split on blank lines)
@@ -321,6 +358,322 @@ function initLanguageSwitcher() {
     // Initial setup
     updateLangButton();
     applyTranslations();
+}
+
+// ========================================
+// Reading Mode Switching
+// ========================================
+
+function initReadingMode() {
+    var savedMode = localStorage.getItem('tarot-reading-mode');
+    if (savedMode) {
+        var idx = READING_MODES.findIndex(function(m) { return m.id === savedMode; });
+        if (idx !== -1) {
+            currentModeIndex = idx;
+            currentReadingMode = savedMode;
+        }
+    }
+
+    applyModeVisuals(false, 0);
+
+    var prevBtn = document.getElementById('modePrev');
+    var nextBtn = document.getElementById('modeNext');
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            switchMode(-1);
+        });
+    }
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            switchMode(1);
+        });
+    }
+
+    // Direct mode selection via dot buttons
+    document.querySelectorAll('.mode-dot[data-mode-index]').forEach(function(dot) {
+        dot.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var targetIndex = parseInt(dot.getAttribute('data-mode-index'), 10);
+            if (targetIndex === currentModeIndex) return;
+            var direction = targetIndex > currentModeIndex ? 1 : -1;
+            currentModeIndex = targetIndex;
+            currentReadingMode = READING_MODES[targetIndex].id;
+            localStorage.setItem('tarot-reading-mode', currentReadingMode);
+            gtag('event', 'switch_reading_mode', {
+                event_category: 'navigation',
+                reading_mode: currentReadingMode
+            });
+            applyModeVisuals(true, direction);
+        });
+    });
+
+    initModeSwipe();
+}
+
+function switchMode(direction) {
+    var newIndex = (currentModeIndex + direction + READING_MODES.length) % READING_MODES.length;
+    if (newIndex === currentModeIndex) return;
+
+    currentModeIndex = newIndex;
+    currentReadingMode = READING_MODES[newIndex].id;
+    localStorage.setItem('tarot-reading-mode', currentReadingMode);
+
+    gtag('event', 'switch_reading_mode', {
+        event_category: 'navigation',
+        reading_mode: currentReadingMode
+    });
+
+    applyModeVisuals(true, direction);
+}
+
+// ========================================
+// Peek-Flip Gimmick (three-card landing)
+// ========================================
+var peekFlipTimer = null;
+var peekFlipTimeouts = [];
+var peekFlipActive = false;
+var lastPeekFlipItem = null;
+
+function startPeekFlips() {
+    stopPeekFlips();
+    peekFlipActive = true;
+    lastPeekFlipItem = null;
+    peekFlipTimer = setTimeout(function() {
+        doRandomPeekFlip();
+    }, 500);
+}
+
+function stopPeekFlips() {
+    peekFlipActive = false;
+    lastPeekFlipItem = null;
+    clearTimeout(peekFlipTimer);
+    peekFlipTimer = null;
+    peekFlipTimeouts.forEach(function(t) { clearTimeout(t); });
+    peekFlipTimeouts = [];
+    document.querySelectorAll('.three-card-item.peek-flip, .multi-card-item.peek-flip').forEach(function(el) {
+        el.classList.remove('peek-flip');
+    });
+}
+
+function getActiveCardItems() {
+    var containerMap = {
+        'three-card': '#threeCardContainer .three-card-item',
+        'four-card': '#fourCardContainer .multi-card-item',
+        'ten-card': '#tenCardContainer .multi-card-item',
+        'twelve-card': '#twelveCardContainer .multi-card-item'
+    };
+    var selector = containerMap[currentReadingMode];
+    return selector ? document.querySelectorAll(selector) : [];
+}
+
+function doRandomPeekFlip() {
+    if (!peekFlipActive) return;
+    if (!tarotData || !tarotData.cards || !tarotData.cards.length) return;
+
+    var items = getActiveCardItems();
+    // Exclude last flipped card so same card never flips twice in a row
+    var available = [];
+    items.forEach(function(el) {
+        if (el !== lastPeekFlipItem) available.push(el);
+    });
+    if (available.length === 0) return;
+
+    var item = available[Math.floor(Math.random() * available.length)];
+    var randomCard = tarotData.cards[Math.floor(Math.random() * tarotData.cards.length)];
+    lastPeekFlipItem = item;
+
+    // Set front image
+    var frontImg = item.querySelector('.three-card-front-img, .multi-card-front-img');
+    if (frontImg) frontImg.src = 'images/tarot/' + randomCard.image;
+
+    // Flip to show front
+    item.classList.add('peek-flip');
+
+    // After 2-3s, start flipping back AND immediately flip next card
+    var showDuration = 2000 + Math.random() * 1000;
+    var t1 = setTimeout(function() {
+        if (!peekFlipActive) return;
+        item.classList.remove('peek-flip');
+        doRandomPeekFlip();
+    }, showDuration);
+    peekFlipTimeouts.push(t1);
+}
+
+function resetThreeCardAnimations(container) {
+    var cards = container.querySelectorAll('.three-card-item');
+    cards.forEach(function(card) {
+        card.style.animation = 'none';
+    });
+    container.offsetHeight; // force reflow
+    cards.forEach(function(card) {
+        // Random delay between 0–3s so each card starts at a different phase
+        var delay = (Math.random() * 3).toFixed(2);
+        card.style.animationDelay = '-' + delay + 's';
+        card.style.animation = '';
+    });
+}
+
+function applyModeVisuals(animate, direction) {
+    var titles = document.querySelectorAll('.mode-title');
+
+    // All card containers mapped by mode
+    var containerMap = {
+        'single': document.getElementById('spinningCardContainer'),
+        'three-card': document.getElementById('threeCardContainer'),
+        'four-card': document.getElementById('fourCardContainer'),
+        'ten-card': document.getElementById('tenCardContainer'),
+        'twelve-card': document.getElementById('twelveCardContainer')
+    };
+
+    var activeContainer = containerMap[currentReadingMode];
+
+    // Update title visibility
+    titles.forEach(function(titleEl) {
+        var mode = titleEl.getAttribute('data-mode');
+        if (mode === currentReadingMode) {
+            if (animate) {
+                titleEl.classList.remove('slide-left', 'slide-right', 'active');
+                titleEl.classList.add(direction > 0 ? 'slide-right' : 'slide-left');
+                titleEl.offsetHeight; // force reflow
+                titleEl.classList.remove('slide-left', 'slide-right');
+                titleEl.classList.add('active');
+            } else {
+                titleEl.classList.remove('slide-left', 'slide-right');
+                titleEl.classList.add('active');
+            }
+        } else {
+            if (animate) {
+                titleEl.classList.remove('active');
+                titleEl.classList.add(direction > 0 ? 'slide-left' : 'slide-right');
+            } else {
+                titleEl.classList.remove('active', 'slide-left', 'slide-right');
+            }
+        }
+    });
+
+    // Hide all containers, then show the active one
+    var isSingle = currentReadingMode === 'single';
+
+    if (animate) {
+        // Stop sparkles for non-single modes
+        if (!isSingle) stopFloatingSparkles();
+
+        // Fade out all currently visible containers
+        Object.keys(containerMap).forEach(function(mode) {
+            var c = containerMap[mode];
+            if (c && mode !== currentReadingMode && c.style.display !== 'none') {
+                c.style.opacity = '0';
+            }
+        });
+
+        setTimeout(function() {
+            // Hide all non-active containers
+            Object.keys(containerMap).forEach(function(mode) {
+                var c = containerMap[mode];
+                if (c && mode !== currentReadingMode) {
+                    c.style.display = 'none';
+                }
+            });
+
+            // Show active container
+            if (activeContainer) {
+                activeContainer.style.opacity = '0';
+                activeContainer.style.display = isSingle ? '' : 'flex';
+
+                // Reset floating animations for three-card
+                if (currentReadingMode === 'three-card') {
+                    resetThreeCardAnimations(activeContainer);
+                }
+
+                requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                        activeContainer.style.opacity = '1';
+                    });
+                });
+            }
+
+            if (isSingle) {
+                startCardRotation();
+                createFloatingSparkles();
+            }
+        }, 400);
+    } else {
+        if (!isSingle) stopFloatingSparkles();
+
+        // Immediately hide all, show active
+        Object.keys(containerMap).forEach(function(mode) {
+            var c = containerMap[mode];
+            if (c && mode !== currentReadingMode) {
+                c.style.display = 'none';
+            }
+        });
+
+        if (activeContainer) {
+            activeContainer.style.display = isSingle ? '' : 'flex';
+            activeContainer.style.opacity = '0';
+
+            if (currentReadingMode === 'three-card') {
+                resetThreeCardAnimations(activeContainer);
+            }
+
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    activeContainer.style.opacity = '1';
+                });
+            });
+        }
+    }
+
+    // Update dot indicators
+    document.querySelectorAll('.mode-dot').forEach(function(dot, i) {
+        dot.classList.toggle('active', i === currentModeIndex);
+    });
+
+    // Toggle peek-flips for multi-card modes
+    var landingPage = document.getElementById('landingPage');
+    if (landingPage) {
+        var isMulti = currentReadingMode !== 'single';
+        landingPage.classList.remove('cosmic-theme');
+        if (isMulti) {
+            startPeekFlips();
+        } else {
+            stopPeekFlips();
+        }
+    }
+}
+
+function initModeSwipe() {
+    var landingPage = document.getElementById('landingPage');
+    var touchStartX = 0;
+    var touchStartY = 0;
+    var isSwiping = false;
+
+    landingPage.addEventListener('touchstart', function(e) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        isSwiping = true;
+    }, { passive: true });
+
+    landingPage.addEventListener('touchmove', function(e) {
+        if (!isSwiping) return;
+        var dy = Math.abs(e.touches[0].clientY - touchStartY);
+        var dx = Math.abs(e.touches[0].clientX - touchStartX);
+        if (dy > dx * 1.5) {
+            isSwiping = false;
+        }
+    }, { passive: true });
+
+    landingPage.addEventListener('touchend', function(e) {
+        if (!isSwiping) return;
+        isSwiping = false;
+        var touchEndX = e.changedTouches[0].clientX;
+        var diff = touchStartX - touchEndX;
+        if (Math.abs(diff) >= 50) {
+            switchMode(diff > 0 ? 1 : -1);
+        }
+    }, { passive: true });
 }
 
 // ========================================
@@ -629,21 +982,44 @@ function markPageReady() {
         header.classList.add('revealed');
     }
 
-    // Add glow effect to card
+    // Add glow effect to the active card container
     const cardContainer = document.getElementById('spinningCardContainer');
+    const threeCardContainer = document.getElementById('threeCardContainer');
     if (cardContainer) {
         cardContainer.classList.add('ready-glow');
+    }
+    if (threeCardContainer) {
+        threeCardContainer.classList.add('ready-glow');
     }
 
     // Update hint text with ready animation (after header animation)
     setTimeout(() => {
-        const hintText = document.querySelector('.card-click-hint');
-        if (hintText) {
-            hintText.textContent = t('landing.clickToDraw');
-            hintText.setAttribute('data-i18n', 'landing.clickToDraw');
-            hintText.classList.remove('loading-state');
-            hintText.classList.add('ready-state');
+        // Update hint for single mode
+        const singleHint = cardContainer ? cardContainer.querySelector('.card-click-hint') : null;
+        if (singleHint) {
+            singleHint.textContent = t('landing.clickToDraw');
+            singleHint.setAttribute('data-i18n', 'landing.clickToDraw');
+            singleHint.classList.remove('loading-state');
+            singleHint.classList.add('ready-state');
         }
+
+        // Update hints for multi-card modes
+        var multiHintMap = {
+            'threeCardContainer': 'landing.clickToDraw3',
+            'fourCardContainer': 'landing.clickToDraw4',
+            'tenCardContainer': 'landing.clickToDraw10',
+            'twelveCardContainer': 'landing.clickToDraw12'
+        };
+        Object.keys(multiHintMap).forEach(function(containerId) {
+            var container = document.getElementById(containerId);
+            var hint = container ? container.querySelector('.card-click-hint') : null;
+            if (hint) {
+                hint.textContent = t(multiHintMap[containerId]);
+                hint.setAttribute('data-i18n', multiHintMap[containerId]);
+                hint.classList.remove('loading-state');
+                hint.classList.add('ready-state');
+            }
+        });
 
         // Reveal brand at bottom
         const brand = document.querySelector('.landing-brand');
@@ -656,9 +1032,14 @@ function markPageReady() {
 
 // Wait for all resources to load
 async function waitForResources() {
-    // Start the card rotation animation immediately
-    startCardRotation();
-    createFloatingSparkles();
+    // Initialize reading mode (restore from localStorage)
+    initReadingMode();
+
+    // Start the card rotation animation immediately (only for single mode)
+    if (currentReadingMode === 'single') {
+        startCardRotation();
+        createFloatingSparkles();
+    }
 
     // Load tarot data and essential images in parallel
     const essentialImages = [
@@ -905,6 +1286,106 @@ function createCardBurst() {
     }, 2000);
 }
 
+// ========================================
+// Category Selection Overlay
+// ========================================
+
+function handleLandingCardClick() {
+    if (!isPageReady) return;
+    showCategoryOverlay();
+}
+
+function showCategoryOverlay() {
+    var overlay = document.getElementById('categoryOverlay');
+    if (!overlay) return;
+
+    // Reset state
+    overlay.classList.remove('closing');
+    overlay.querySelectorAll('.category-card').forEach(function(c) {
+        c.classList.remove('selected');
+    });
+
+    overlay.classList.add('active');
+
+    gtag('event', 'show_category_overlay', {
+        event_category: 'navigation',
+        reading_mode: currentReadingMode
+    });
+}
+
+function closeCategoryOverlay(callback) {
+    var overlay = document.getElementById('categoryOverlay');
+    if (!overlay) return;
+
+    overlay.classList.add('closing');
+
+    setTimeout(function() {
+        overlay.classList.remove('active', 'closing');
+        if (callback) callback();
+    }, 350);
+}
+
+function selectCategory(category) {
+    currentReadingCategory = category;
+
+    gtag('event', 'select_category', {
+        event_category: 'engagement',
+        category: category,
+        reading_mode: currentReadingMode
+    });
+
+    // Visual feedback: highlight selected card
+    var overlay = document.getElementById('categoryOverlay');
+    overlay.querySelectorAll('.category-card').forEach(function(c) {
+        c.classList.remove('selected');
+    });
+    var selectedCard = overlay.querySelector('.category-card[data-category="' + category + '"]');
+    if (selectedCard) selectedCard.classList.add('selected');
+
+    // Brief pause for visual feedback, then close and start experience
+    setTimeout(function() {
+        closeCategoryOverlay(function() {
+            startExperience();
+        });
+    }, 200);
+}
+
+// Initialize category card click handlers
+(function initCategoryOverlay() {
+    document.querySelectorAll('.category-card').forEach(function(card) {
+        card.addEventListener('click', function() {
+            var category = this.getAttribute('data-category');
+            if (category) selectCategory(category);
+        });
+    });
+
+    // Back button — close overlay and return to landing
+    var backBtn = document.getElementById('categoryBackBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', function() {
+            closeCategoryOverlay();
+        });
+    }
+})();
+
+// ========================================
+// Multi-Card Mode Init
+// ========================================
+function initMultiCardMode() {
+    multiCardSelections = [];
+    _multiDisabledCards = [];
+    if (currentReadingMode === 'three-card') {
+        multiCardTarget = 3;
+        multiCardPositions = ['past', 'present', 'future'];
+    } else if (currentReadingMode === 'four-card') {
+        multiCardTarget = 4;
+        multiCardPositions = ['past', 'present', 'future', 'outcome'];
+    } else {
+        multiCardTarget = 0;
+        multiCardPositions = [];
+    }
+}
+
 // Start the experience (when card is clicked)
 function startExperience() {
     // Don't allow starting if page is not ready yet
@@ -913,6 +1394,9 @@ function startExperience() {
     }
 
     gtag('event', 'start_experience', { event_category: 'navigation' });
+
+    // Stop peek-flip gimmick
+    stopPeekFlips();
 
     // Increment global draw counter in Firebase (updates display automatically)
     if (window.cardCounter && window.cardCounter.incrementGlobalDraw) {
@@ -925,13 +1409,75 @@ function startExperience() {
     // Play card select sound effect (magic sparkle)
     playSoundEffect('cardSelect');
 
+    const landingPage = document.getElementById('landingPage');
+    const mainPage = document.getElementById('mainPage');
+    const cardGrid = document.getElementById('cardGrid');
+
+    // === MULTI-CARD MODE: simpler fade-out transition ===
+    if (currentReadingMode !== 'single') {
+        var multiContainerMap = {
+            'three-card': 'threeCardContainer',
+            'four-card': 'fourCardContainer',
+            'ten-card': 'tenCardContainer',
+            'twelve-card': 'twelveCardContainer'
+        };
+        var activeContainerId = multiContainerMap[currentReadingMode];
+        var activeMultiContainer = activeContainerId ? document.getElementById(activeContainerId) : null;
+        var multiHint = activeMultiContainer ? activeMultiContainer.querySelector('.card-click-hint') : null;
+
+        // Fade out header
+        var modeSelector = document.getElementById('modeSelector');
+        var modeDots = document.getElementById('modeDots');
+        if (modeSelector) { modeSelector.style.transition = 'opacity 0.5s ease'; modeSelector.style.opacity = '0'; }
+        if (modeDots) { modeDots.style.transition = 'opacity 0.5s ease'; modeDots.style.opacity = '0'; }
+        document.querySelector('.landing-tagline').style.opacity = '0';
+        document.querySelector('.landing-sparkles').style.opacity = '0';
+        if (multiHint) multiHint.style.opacity = '0';
+
+        // Fade out card container with scale
+        if (activeMultiContainer) {
+            activeMultiContainer.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            activeMultiContainer.style.opacity = '0';
+            activeMultiContainer.style.transform = 'scale(0.85)';
+        }
+
+        // Hide other landing elements
+        setTimeout(function() {
+            document.querySelector('.landing-brand').style.opacity = '0';
+            document.querySelector('.landing-instruction').style.opacity = '0';
+        }, 200);
+
+        // Prepare main page
+        setTimeout(function() {
+            landingPage.style.pointerEvents = 'none';
+            cardGrid.classList.add('stacked');
+            mainPage.classList.add('visible');
+
+            var langSwitcher = document.querySelector('.lang-switcher');
+            var muteBtn = document.querySelector('.mute-btn');
+            var profileSwitcher = document.querySelector('.profile-switcher');
+            if (langSwitcher) langSwitcher.style.display = 'none';
+            if (muteBtn) muteBtn.style.display = 'none';
+            if (profileSwitcher) profileSwitcher.style.display = 'none';
+        }, 400);
+
+        // Spread cards and hide landing
+        setTimeout(function() {
+            initMultiCardMode();
+            animateToGrid();
+            setTimeout(function() {
+                landingPage.classList.add('hidden');
+                updateCommentsBtnVisibility();
+            }, 300);
+        }, 700);
+
+        return;
+    }
+
+    // === SINGLE CARD MODE: original spinning card transition ===
     const spinningCard = document.getElementById('spinningCard');
     const spinningCardContainer = document.getElementById('spinningCardContainer');
     const spinningCardWrapper = spinningCardContainer.querySelector('.spinning-card-wrapper');
-    const landingPage = document.getElementById('landingPage');
-    const mainPage = document.getElementById('mainPage');
-    const landingHeading = document.querySelector('.landing-heading');
-    const cardGrid = document.getElementById('cardGrid');
 
     // cardWidth determined later when grid is visible
 
@@ -964,16 +1510,13 @@ function startExperience() {
     // Hide hint text
     spinningCardContainer.querySelector('.card-click-hint').style.opacity = '0';
 
-    // Fade out the original header smoothly
-    // First, freeze current state by removing animation and setting explicit values
-    landingHeading.style.animation = 'none';
-    landingHeading.style.opacity = '1';
-    landingHeading.style.transform = 'translateY(0) scale(1)';
-    landingHeading.style.transition = 'opacity 0.6s ease';
-    // Then fade out in next frame
-    requestAnimationFrame(() => {
-        landingHeading.style.opacity = '0';
-    });
+    // Fade out the header and mode selector
+    var modeSelector2 = document.getElementById('modeSelector');
+    var modeDots2 = document.getElementById('modeDots');
+    if (modeSelector2) { modeSelector2.style.transition = 'opacity 0.5s ease'; modeSelector2.style.opacity = '0'; }
+    if (modeDots2) { modeDots2.style.transition = 'opacity 0.5s ease'; modeDots2.style.opacity = '0'; }
+    document.querySelector('.landing-tagline').style.opacity = '0';
+    document.querySelector('.landing-sparkles').style.opacity = '0';
 
     // Hide other landing elements
     setTimeout(() => {
@@ -1656,9 +2199,20 @@ function selectCard(cardId, cardElement) {
             // Step 4: Show card name + quote after flip, wait for user tap
             setTimeout(function() {
                 document.getElementById('centerCardInfoName').textContent = getCardName(card.name);
-                document.getElementById('centerCardInfoQuote').textContent = '"' + getCardQuote(card) + '"';
-                var continueText = translations[currentLang] && translations[currentLang].result && translations[currentLang].result.tapToContinue;
-                document.getElementById('centerCardInfoContinue').textContent = continueText || 'Tap to see your reading';
+
+                // Multi-card mode: show position label instead of quote
+                if (multiCardTarget > 0) {
+                    var pickIndex = multiCardSelections.length; // 0-based
+                    var posKey = multiCardPositions[pickIndex];
+                    var posLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[posKey]) || posKey;
+                    document.getElementById('centerCardInfoQuote').textContent = '✦ ' + posLabel + ' ✦';
+                    var counterText = (pickIndex + 1) + ' / ' + multiCardTarget;
+                    document.getElementById('centerCardInfoContinue').textContent = counterText;
+                } else {
+                    document.getElementById('centerCardInfoQuote').textContent = '"' + getCardQuote(card) + '"';
+                    var continueText = translations[currentLang] && translations[currentLang].result && translations[currentLang].result.tapToContinue;
+                    document.getElementById('centerCardInfoContinue').textContent = continueText || 'Tap to see your reading';
+                }
 
                 centerEl.classList.add('show-info');
                 spawnRevealParticles();
@@ -1667,7 +2221,24 @@ function selectCard(cardId, cardElement) {
                     centerEl.removeEventListener('click', onContinueTap);
                     document.getElementById('overlay').removeEventListener('click', onContinueTap);
                     clearRevealParticles();
-                    proceedToResult(card);
+
+                    if (multiCardTarget > 0) {
+                        // Store this selection
+                        var pickIdx = multiCardSelections.length;
+                        var pKey = multiCardPositions[pickIdx];
+                        multiCardSelections.push({ card: card, positionKey: pKey });
+                        _multiDisabledCards.push(cardElement);
+
+                        if (multiCardSelections.length < multiCardTarget) {
+                            // Not last card — return to grid for next pick
+                            returnToGridForNextPick();
+                        } else {
+                            // Last card — proceed to multi result
+                            proceedToMultiResult();
+                        }
+                    } else {
+                        proceedToResult(card);
+                    }
                 }
                 centerEl.addEventListener('click', onContinueTap);
                 document.getElementById('overlay').addEventListener('click', onContinueTap);
@@ -1699,6 +2270,144 @@ function spawnRevealParticles() {
 function clearRevealParticles() {
     var container = document.getElementById('centerCardParticles');
     if (container) container.innerHTML = '';
+}
+
+// Return to grid after picking a multi-card (not the last one)
+function returnToGridForNextPick() {
+    var centerEl = document.getElementById('centerCard');
+    centerEl.classList.remove('show-info');
+
+    // Fade out center card + overlay
+    centerEl.style.transition = 'opacity 0.35s ease';
+    centerEl.style.opacity = '0';
+
+    setTimeout(function() {
+        centerEl.classList.remove('active');
+        centerEl.style.transition = '';
+        centerEl.style.opacity = '';
+        document.getElementById('overlay').classList.remove('active');
+        document.getElementById('centerCardInner').classList.remove('flipped');
+
+        // Re-enable grid cards except already-selected ones
+        document.querySelectorAll('.card-container').forEach(function(c) {
+            c.classList.remove('disabled');
+            c.style.opacity = '';
+            c.classList.remove('selecting');
+            // Keep selected cards faded out
+            if (_multiDisabledCards.indexOf(c) >= 0) {
+                c.classList.add('disabled');
+                c.style.opacity = '0.25';
+                c.style.pointerEvents = 'none';
+            }
+        });
+
+        isAnimating = false;
+    }, 350);
+}
+
+// Multi-card result: populate and show all selected cards
+function proceedToMultiResult() {
+    gtag('event', 'view_multi_result', {
+        event_category: 'engagement',
+        card_count: multiCardSelections.length
+    });
+
+    var container = document.getElementById('multiResultCards');
+    if (!container) return;
+
+    // Hide single-card result elements
+    document.getElementById('resultCardName').style.display = 'none';
+    document.querySelector('.result-quote-block').style.display = 'none';
+    document.querySelector('.result-star-divider').style.display = 'none';
+    document.querySelector('.result-glass-card').style.display = 'none';
+    var fade = document.getElementById('interpretationFade');
+    if (fade) fade.style.display = 'none';
+
+    // Build multi-result HTML
+    var html = '';
+
+    // Card thumbnails row
+    html += '<div class="multi-result-row">';
+    for (var i = 0; i < multiCardSelections.length; i++) {
+        var sel = multiCardSelections[i];
+        var posLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[sel.positionKey]) || sel.positionKey;
+        html += '<div class="multi-result-card-item">';
+        html += '<img class="multi-result-card-img" src="images/tarot/' + sel.card.image + '" alt="' + sel.card.name + '">';
+        html += '<div class="multi-result-card-label">' + posLabel + '</div>';
+        html += '</div>';
+    }
+    html += '</div>';
+
+    // Per-card interpretation sections
+    for (var j = 0; j < multiCardSelections.length; j++) {
+        var s = multiCardSelections[j];
+        var pLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[s.positionKey]) || s.positionKey;
+        var prophecyTitle = (translations[currentLang] && translations[currentLang].result && translations[currentLang].result.prophecyTitle) || 'คำทำนาย';
+        html += '<div class="multi-result-section">';
+        html += '<div class="multi-result-position">✦ ' + pLabel + '</div>';
+        html += '<div class="multi-result-card-name">' + getCardName(s.card.name) + '</div>';
+        html += '<div class="multi-result-quote">"' + getCardQuote(s.card) + '"</div>';
+        html += '<div class="multi-result-glass">';
+        html += '<div class="result-section-header">';
+        html += '<svg class="result-section-icon" viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M12 2l2.09 6.26L20.18 9l-4.64 4.14L16.73 20 12 16.77 7.27 20l1.19-6.86L3.82 9l6.09-.74L12 2z" fill="rgba(154,170,212,0.6)" stroke="none"/></svg>';
+        html += '<span>' + prophecyTitle + '</span>';
+        html += '</div>';
+        var interpText = getCardInterpretation(s.card);
+        var interpParas = interpText.split(/\n\s*\n/).map(function(p) {
+            var safe = p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return '<p>' + safe + '</p>';
+        }).join('');
+        html += '<div class="multi-result-interpretation">' + interpParas + '</div>';
+        html += '</div>';
+        if (j < multiCardSelections.length - 1) {
+            html += '<div class="multi-result-divider"><span></span><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M12 2l2.09 6.26L20.18 9l-4.64 4.14L16.73 20 12 16.77 7.27 20l1.19-6.86L3.82 9l6.09-.74L12 2z" fill="rgba(154,170,212,0.35)" stroke="none"/></svg><span></span></div>';
+        }
+        html += '</div>';
+    }
+
+    container.innerHTML = html;
+    container.style.display = 'block';
+
+    // Populate sticky card with first card
+    var firstCard = multiCardSelections[0].card;
+    document.getElementById('resultStickyCardImg').src = 'images/tarot/' + firstCard.image;
+    document.getElementById('resultStickyCardName').textContent = getCardName(firstCard.name);
+    document.getElementById('resultStickyCardQuote').textContent = getCardQuote(firstCard);
+    document.getElementById('resultStickyCard').classList.remove('minimized');
+
+    // Clean up center card + overlay
+    var centerCard = document.getElementById('centerCard');
+    centerCard.classList.remove('show-info');
+    clearRevealParticles();
+    centerCard.classList.add('fly-to-header');
+
+    setTimeout(function() {
+        var resultPanel = document.getElementById('resultPanel');
+        resultPanel.scrollTop = 0;
+        resultPanel.classList.add('active');
+    }, 200);
+
+    setTimeout(function() {
+        var el = document.getElementById('centerCard');
+        el.classList.remove('active');
+        el.classList.remove('fly-to-header');
+        el.style.transition = '';
+        el.style.transform = '';
+        el.style.opacity = '';
+        document.getElementById('overlay').classList.remove('active');
+    }, 500);
+
+    isAnimating = false;
+    initStickyCardObserver();
+    initCommentForm();
+    initCommentMinimizer();
+
+    // Auto-save first card draw
+    currentCardData = firstCard;
+    _currentDrawCommentId = null;
+    _pendingDraw = null;
+    autoSaveDrawOnReveal(firstCard);
+    updateCommentsBtnVisibility();
 }
 
 // Step 6: Card flies to header + show result panel (called after user taps)
@@ -1803,6 +2512,25 @@ function closeResult() {
     // Hide result panel
     document.getElementById('resultPanel').classList.remove('active');
 
+    // Reset multi-card state
+    multiCardSelections = [];
+    multiCardTarget = 0;
+    multiCardPositions = [];
+    _multiDisabledCards = [];
+
+    // Restore single-card result elements (may have been hidden by multi-result)
+    document.getElementById('resultCardName').style.display = '';
+    var quoteBlock = document.querySelector('.result-quote-block');
+    if (quoteBlock) quoteBlock.style.display = '';
+    var starDiv = document.querySelector('.result-star-divider');
+    if (starDiv) starDiv.style.display = '';
+    var glassCard = document.querySelector('.result-glass-card');
+    if (glassCard) glassCard.style.display = '';
+    var interpFade = document.getElementById('interpretationFade');
+    if (interpFade) interpFade.style.display = '';
+    var multiContainer = document.getElementById('multiResultCards');
+    if (multiContainer) { multiContainer.style.display = 'none'; multiContainer.innerHTML = ''; }
+
     // Hide comments button when going back to card spread
     updateCommentsBtnVisibility();
 
@@ -1836,6 +2564,10 @@ function closeResult() {
 
 // Event listeners
 document.getElementById('spinningCardContainer').addEventListener('click', startExperience);
+document.getElementById('threeCardContainer').addEventListener('click', handleLandingCardClick);
+document.getElementById('fourCardContainer').addEventListener('click', handleLandingCardClick);
+document.getElementById('tenCardContainer').addEventListener('click', startExperience);
+document.getElementById('twelveCardContainer').addEventListener('click', startExperience);
 const resultCloseBtn = document.getElementById('resultClose');
 if (resultCloseBtn) resultCloseBtn.addEventListener('click', closeResult);
 
@@ -1852,7 +2584,18 @@ document.addEventListener('keydown', (e) => {
         }
         const landingPage = document.getElementById('landingPage');
         if (!landingPage.classList.contains('hidden')) {
-            startExperience();
+            if (currentReadingMode === 'three-card' || currentReadingMode === 'four-card') {
+                handleLandingCardClick();
+            } else {
+                startExperience();
+            }
+        }
+    }
+    // Arrow keys for mode switching on landing page
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        const landingPage = document.getElementById('landingPage');
+        if (landingPage && !landingPage.classList.contains('hidden')) {
+            switchMode(e.key === 'ArrowRight' ? 1 : -1);
         }
     }
 });
@@ -2853,6 +3596,25 @@ function closeBlessingAndRestart() {
 }
 
 function goToLandingPage() {
+    currentReadingCategory = null;
+    multiCardSelections = [];
+    multiCardTarget = 0;
+    multiCardPositions = [];
+    _multiDisabledCards = [];
+
+    // Restore single-card result elements
+    document.getElementById('resultCardName').style.display = '';
+    var _qb = document.querySelector('.result-quote-block');
+    if (_qb) _qb.style.display = '';
+    var _sd = document.querySelector('.result-star-divider');
+    if (_sd) _sd.style.display = '';
+    var _gc = document.querySelector('.result-glass-card');
+    if (_gc) _gc.style.display = '';
+    var _if = document.getElementById('interpretationFade');
+    if (_if) _if.style.display = '';
+    var _mc = document.getElementById('multiResultCards');
+    if (_mc) { _mc.style.display = 'none'; _mc.innerHTML = ''; }
+
     const landingPage = document.getElementById('landingPage');
     const mainPage = document.getElementById('mainPage');
     const spinningCardContainer = document.getElementById('spinningCardContainer');
@@ -2942,12 +3704,33 @@ function goToLandingPage() {
         landingHeading.style.transform = '';
         landingHeading.style.transition = '';
 
+        // Reset mode selector and dots visibility
+        var modeSel = document.getElementById('modeSelector');
+        var modeDts = document.getElementById('modeDots');
+        if (modeSel) { modeSel.style.transition = 'none'; modeSel.style.opacity = '0'; }
+        if (modeDts) { modeDts.style.transition = 'none'; modeDts.style.opacity = '0'; }
+        var tagline = document.querySelector('.landing-tagline');
+        var sparkles = document.querySelector('.landing-sparkles');
+        if (tagline) tagline.style.opacity = '0';
+        if (sparkles) sparkles.style.opacity = '0';
+
+        // Reset 3-card container
+        var threeContainer = document.getElementById('threeCardContainer');
+        if (threeContainer) {
+            threeContainer.style.transition = 'none';
+            threeContainer.style.transform = '';
+            threeContainer.style.opacity = '0';
+        }
+
         if (landingBrand) {
             landingBrand.style.opacity = '0';
         }
         if (landingInstruction) {
             landingInstruction.style.opacity = '0';
         }
+
+        // Apply mode visuals (show correct container without animation)
+        applyModeVisuals(false, 0);
 
         // Show landing page
         landingPage.classList.remove('hidden');
@@ -2983,13 +3766,31 @@ function goToLandingPage() {
 
         // Step 3: Fade in landing elements smoothly
         requestAnimationFrame(() => {
-            // Fade in spinning card
-            spinningCardContainer.style.transition = 'opacity 0.5s ease';
-            spinningCardContainer.style.opacity = '1';
+            // Fade in the active card container
+            var returnContainerMap = {
+                'single': 'spinningCardContainer',
+                'three-card': 'threeCardContainer',
+                'four-card': 'fourCardContainer',
+                'ten-card': 'tenCardContainer',
+                'twelve-card': 'twelveCardContainer'
+            };
+            var returnContainerId = returnContainerMap[currentReadingMode];
+            var returnContainer = returnContainerId ? document.getElementById(returnContainerId) : null;
+            if (returnContainer) {
+                returnContainer.style.transition = 'opacity 0.5s ease';
+                returnContainer.style.transform = '';
+                returnContainer.style.opacity = '1';
+            }
 
-            // Fade in heading
-            landingHeading.style.transition = 'opacity 0.5s ease';
-            landingHeading.style.opacity = '1';
+            // Fade in mode selector and header elements
+            var ms = document.getElementById('modeSelector');
+            var md = document.getElementById('modeDots');
+            var tl = document.querySelector('.landing-tagline');
+            var sp = document.querySelector('.landing-sparkles');
+            if (ms) { ms.style.transition = 'opacity 0.5s ease'; ms.style.opacity = '1'; }
+            if (md) { md.style.transition = 'opacity 0.5s ease'; md.style.opacity = '1'; }
+            if (tl) { tl.style.transition = 'opacity 0.5s ease'; tl.style.opacity = '1'; }
+            if (sp) { sp.style.transition = 'opacity 0.5s ease'; sp.style.opacity = '1'; }
 
             // Fade in other elements with slight delays
             setTimeout(() => {
@@ -3007,9 +3808,11 @@ function goToLandingPage() {
             }, 300);
         });
 
-        // Restart spinning card interval and sparkles
-        startCardRotation();
-        createFloatingSparkles();
+        // Restart spinning card rotation and sparkles (only for single mode)
+        if (currentReadingMode === 'single') {
+            startCardRotation();
+            createFloatingSparkles();
+        }
 
         // Reset state
         isPaused = false;

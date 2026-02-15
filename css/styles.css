@@ -137,6 +137,988 @@ body {
     transform: none;
 }
 
+/* ==================== MODE SELECTOR ==================== */
+
+.mode-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0;
+    position: relative;
+}
+
+.mode-title-wrapper {
+    position: relative;
+    overflow: hidden;
+    min-height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.mode-title-wrapper .mode-title {
+    position: absolute;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    white-space: nowrap;
+}
+
+.mode-title-wrapper .mode-title.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.mode-title-wrapper .mode-title.slide-left {
+    opacity: 0;
+    transform: translateX(-30px);
+}
+
+.mode-title-wrapper .mode-title.slide-right {
+    opacity: 0;
+    transform: translateX(30px);
+}
+
+.mode-title-wrapper .mode-title:not(.active):not(.slide-left):not(.slide-right) {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.mode-arrow {
+    position: absolute;
+    top: calc(5vh + 1.75rem);
+    background: none;
+    border: none;
+    color: rgba(192, 200, 224, 0.85);
+    cursor: pointer;
+    padding: 8px 2px;
+    transition: color 0.3s ease, transform 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    line-height: 1;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    z-index: 2001;
+}
+
+.mode-arrow-left {
+    left: 40px;
+    animation: arrowPulseLeft 2s ease-in-out infinite;
+}
+
+.mode-arrow-right {
+    right: 40px;
+    animation: arrowPulseRight 2s ease-in-out infinite;
+}
+
+@keyframes arrowPulseLeft {
+    0%, 100% { transform: translateX(0); opacity: 0.5; }
+    50% { transform: translateX(-5px); opacity: 1; }
+}
+
+@keyframes arrowPulseRight {
+    0%, 100% { transform: translateX(0); opacity: 0.5; }
+    50% { transform: translateX(5px); opacity: 1; }
+}
+
+.mode-arrow:hover {
+    color: rgba(220, 225, 240, 1);
+    animation: none;
+}
+
+.mode-arrow:active {
+    transform: scale(0.85);
+    color: rgba(220, 225, 240, 1);
+    animation: none;
+}
+
+.mode-dots {
+    display: flex;
+    gap: 3px;
+    justify-content: center;
+    align-items: flex-end;
+    margin-top: 8px;
+    padding: 3px;
+    background: rgba(154, 170, 212, 0.06);
+    border-radius: 12px;
+    border: 1px solid rgba(154, 170, 212, 0.08);
+}
+
+.mode-dot {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: rgba(192, 200, 224, 0.3);
+    cursor: pointer;
+    transition: all 0.35s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Mini card icons */
+.mode-dot-cards {
+    display: flex;
+    align-items: center;
+    gap: 1.5px;
+    height: 14px;
+}
+
+.mode-dot-cards i {
+    display: block;
+    width: 5px;
+    height: 8px;
+    border-radius: 1px;
+    background: currentColor;
+    opacity: 0.7;
+}
+
+/* Fan-style for 3 cards */
+.mode-dot-cards.c3 { gap: 0.5px; }
+.mode-dot-cards.c3 i:first-child { transform: rotate(-10deg); height: 7px; }
+.mode-dot-cards.c3 i:last-child { transform: rotate(10deg); height: 7px; }
+
+/* Fan for 4 cards */
+.mode-dot-cards.c4 { gap: 0; }
+.mode-dot-cards.c4 i { width: 4px; height: 7px; }
+.mode-dot-cards.c4 i:nth-child(1) { transform: rotate(-12deg); height: 6px; }
+.mode-dot-cards.c4 i:nth-child(2) { transform: rotate(-4deg); }
+.mode-dot-cards.c4 i:nth-child(3) { transform: rotate(4deg); }
+.mode-dot-cards.c4 i:nth-child(4) { transform: rotate(12deg); height: 6px; }
+
+/* Grid for 10 — show as 5 tiny blocks (representing 2 rows) */
+.mode-dot-cards.c10 { gap: 1px; flex-wrap: wrap; width: 20px; justify-content: center; }
+.mode-dot-cards.c10 i { width: 3px; height: 5px; border-radius: 0.5px; }
+
+/* Grid for 12 — show as 6 tiny blocks */
+.mode-dot-cards.c12 { gap: 1px; flex-wrap: wrap; width: 22px; justify-content: center; }
+.mode-dot-cards.c12 i { width: 3px; height: 5px; border-radius: 0.5px; }
+
+/* Number label */
+.mode-dot-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.3px;
+}
+
+/* Hover */
+.mode-dot:hover {
+    color: rgba(192, 200, 224, 0.55);
+    background: rgba(154, 170, 212, 0.06);
+}
+
+/* Active state */
+.mode-dot.active {
+    color: rgba(192, 200, 224, 0.9);
+    background: rgba(154, 170, 212, 0.12);
+    border-color: rgba(154, 170, 212, 0.18);
+    box-shadow: 0 0 16px rgba(154, 170, 212, 0.1), inset 0 0 8px rgba(154, 170, 212, 0.05);
+}
+
+.mode-dot.active .mode-dot-cards i {
+    opacity: 1;
+}
+
+/* Press */
+.mode-dot:active {
+    transform: scale(0.94);
+}
+
+/* ==================== THREE-CARD LANDING ==================== */
+
+.three-card-container {
+    position: relative;
+    top: -20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: auto;
+    margin-bottom: auto;
+    cursor: pointer;
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 100;
+}
+
+.three-card-fan {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 480px;
+    height: 448px;
+}
+
+.three-card-item {
+    position: absolute;
+    width: 208px;
+    height: 371px;
+    border-radius: 10px;
+    perspective: 800px;
+}
+
+/* 3D flip wrapper */
+.three-card-flipper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.9s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.three-card-item.peek-flip .three-card-flipper {
+    transform: rotateY(180deg);
+}
+
+.three-card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.4),
+        0 5px 20px rgba(154, 170, 212, 0.15);
+}
+
+.three-card-front {
+    transform: rotateY(180deg);
+    background: #fff;
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.4),
+        0 5px 20px rgba(154, 170, 212, 0.15);
+}
+
+.three-card-front-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.three-card-item .card-back-galaxy {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+
+/* Position labels (Past / Present / Future / Outcome) */
+.card-position-label {
+    position: absolute;
+    bottom: -32px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(192, 200, 224, 0.85);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+/* Counter-rotate labels so they stay horizontal on tilted cards */
+.three-card-left .card-position-label {
+    transform: translateX(-50%) rotate(12deg);
+}
+.three-card-right .card-position-label {
+    transform: translateX(-50%) rotate(-12deg);
+}
+.fc-1 .card-position-label {
+    transform: translateX(-50%) rotate(15deg);
+}
+.fc-2 .card-position-label {
+    transform: translateX(-50%) rotate(5deg);
+}
+.fc-3 .card-position-label {
+    transform: translateX(-50%) rotate(-5deg);
+}
+.fc-4 .card-position-label {
+    transform: translateX(-50%) rotate(-15deg);
+}
+
+/* Offset galaxy animations per card so they don't look identical */
+.three-card-center .galaxy-bg { animation-delay: -9s; }
+.three-card-center .galaxy-stars { animation-delay: -4s; }
+.three-card-center .galaxy-stars-2 { animation-delay: -3s; }
+.three-card-center .galaxy-shimmer { animation-delay: -2s; }
+.three-card-center .galaxy-orbit { animation-delay: -3.5s; }
+.three-card-center .galaxy-aurora { animation-delay: -3s; }
+.three-card-center .galaxy-ss-1 { animation-delay: -1.5s; }
+.three-card-center .galaxy-ss-2 { animation-delay: -3.5s; }
+.three-card-center .galaxy-ss-3 { animation-delay: -2s; }
+
+.three-card-right .galaxy-bg { animation-delay: -17s; }
+.three-card-right .galaxy-stars { animation-delay: -8s; }
+.three-card-right .galaxy-stars-2 { animation-delay: -5s; }
+.three-card-right .galaxy-shimmer { animation-delay: -3.5s; }
+.three-card-right .galaxy-orbit { animation-delay: -7s; }
+.three-card-right .galaxy-aurora { animation-delay: -5.5s; }
+.three-card-right .galaxy-ss-1 { animation-delay: -3s; }
+.three-card-right .galaxy-ss-2 { animation-delay: -1s; }
+.three-card-right .galaxy-ss-3 { animation-delay: -4.5s; }
+
+.three-card-left {
+    transform: translateX(-128px) rotate(-12deg);
+    animation: cardFloat1 4s ease-in-out infinite;
+    z-index: 1;
+}
+
+.three-card-center {
+    transform: translateX(0) rotate(0deg) translateY(-19px);
+    animation: cardFloat2 4s ease-in-out infinite 0.6s;
+    z-index: 3;
+}
+
+.three-card-right {
+    transform: translateX(128px) rotate(12deg);
+    animation: cardFloat3 4s ease-in-out infinite 1.2s;
+    z-index: 2;
+}
+
+@keyframes cardFloat1 {
+    0%, 100% { transform: translateX(-128px) rotate(-12deg) translateY(0); }
+    50% { transform: translateX(-128px) rotate(-12deg) translateY(-16px); }
+}
+
+@keyframes cardFloat2 {
+    0%, 100% { transform: translateX(0) rotate(0deg) translateY(-19px); }
+    50% { transform: translateX(0) rotate(0deg) translateY(-35px); }
+}
+
+@keyframes cardFloat3 {
+    0%, 100% { transform: translateX(128px) rotate(12deg) translateY(0); }
+    50% { transform: translateX(128px) rotate(12deg) translateY(-16px); }
+}
+
+.three-card-container:hover .three-card-face {
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.4),
+        0 5px 25px rgba(154, 170, 212, 0.3);
+}
+
+.three-card-container.ready-glow {
+    animation: cardReadyReveal 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.three-card-container.ready-glow::after {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(ellipse at center, rgba(154, 170, 212, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+    animation: subtleGlow 3s ease-in-out infinite;
+}
+
+.three-card-container .card-click-hint {
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Prompt', sans-serif;
+    font-weight: 300;
+    font-size: 0.9rem;
+    color: var(--burgundy);
+    opacity: 0.8;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+}
+
+.three-card-container .card-click-hint.loading-state {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.three-card-container .card-click-hint.ready-state {
+    animation: hintReveal 0.6s ease forwards, pulse 2s ease-in-out 0.6s infinite;
+}
+
+/* ==================== CARD FACE REALISM EFFECTS ==================== */
+
+/* Thin elegant border - defines card edge like a real card */
+.spinning-card-face,
+.three-card-face {
+    border: 1px solid rgba(192, 200, 224, 0.12);
+}
+
+/* Inner depth shadow via ::before - card surface looks recessed */
+.spinning-card-face::before,
+.three-card-face::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow:
+        inset 0 0 25px rgba(0, 0, 0, 0.2),
+        inset 0 2px 6px rgba(0, 0, 0, 0.15),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+/* Light reflection via ::after - glossy diagonal sheen */
+.spinning-card-face::after,
+.three-card-face::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.18) 0%,
+        rgba(255, 255, 255, 0.08) 20%,
+        transparent 45%,
+        transparent 80%,
+        rgba(255, 255, 255, 0.04) 100%
+    );
+    z-index: 11;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+/* Card thickness - subtle bottom/right edge shadow */
+.spinning-card-face,
+.three-card-face {
+    outline: 1px solid rgba(0, 0, 0, 0.15);
+    outline-offset: -1px;
+}
+
+/* Card front - vignette darkens edges for depth on white surface */
+.spinning-card-front::before,
+.three-card-front::before {
+    box-shadow:
+        inset 0 0 40px rgba(0, 0, 0, 0.18),
+        inset 0 0 80px rgba(0, 0, 0, 0.08),
+        inset 0 3px 8px rgba(0, 0, 0, 0.12),
+        inset 0 -3px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Silver-blue tinted reflection on card front (white-on-white invisible, so use tint) */
+.spinning-card-front::after,
+.three-card-front::after {
+    background: linear-gradient(
+        135deg,
+        rgba(180, 200, 235, 0.22) 0%,
+        rgba(170, 190, 225, 0.1) 25%,
+        transparent 50%,
+        transparent 80%,
+        rgba(170, 190, 225, 0.06) 100%
+    );
+}
+
+/* ==================== MULTI-CARD CONTAINERS (4, 10, 12) ==================== */
+
+.multi-card-container {
+    position: relative;
+    top: -10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: auto;
+    margin-bottom: auto;
+    cursor: pointer;
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 100;
+}
+
+.multi-card-fan {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.multi-card-item {
+    position: absolute;
+    border-radius: 8px;
+    perspective: 600px;
+}
+
+/* Multi-card 3D flip */
+.multi-card-flipper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.9s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.multi-card-item.peek-flip .multi-card-flipper {
+    transform: rotateY(180deg);
+}
+
+.multi-card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.4),
+        0 4px 15px rgba(154, 170, 212, 0.15);
+}
+
+.multi-card-front {
+    transform: rotateY(180deg);
+    background: #fff;
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.4),
+        0 4px 15px rgba(154, 170, 212, 0.15);
+}
+
+.multi-card-front-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.multi-card-item .card-back-galaxy {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+}
+
+.multi-card-container .card-click-hint {
+    position: absolute;
+    bottom: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Prompt', sans-serif;
+    font-weight: 300;
+    font-size: 0.9rem;
+    color: var(--burgundy);
+    opacity: 0.8;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+}
+
+.multi-card-container .card-click-hint.loading-state {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.multi-card-container .card-click-hint.ready-state {
+    animation: hintReveal 0.6s ease forwards, pulse 2s ease-in-out 0.6s infinite;
+}
+
+/* ===== 4-Card Fan Layout ===== */
+.four-card-fan {
+    width: 500px;
+    height: 400px;
+}
+
+.four-card-fan .multi-card-item {
+    width: 160px;
+    height: 285px;
+}
+
+.fc-1 {
+    transform: translateX(-170px) rotate(-15deg);
+    animation: fcFloat1 4s ease-in-out infinite;
+    z-index: 1;
+}
+.fc-2 {
+    transform: translateX(-58px) rotate(-5deg) translateY(-15px);
+    animation: fcFloat2 4s ease-in-out infinite 0.5s;
+    z-index: 2;
+}
+.fc-3 {
+    transform: translateX(58px) rotate(5deg) translateY(-15px);
+    animation: fcFloat3 4s ease-in-out infinite 1s;
+    z-index: 3;
+}
+.fc-4 {
+    transform: translateX(170px) rotate(15deg);
+    animation: fcFloat4 4s ease-in-out infinite 1.5s;
+    z-index: 1;
+}
+
+@keyframes fcFloat1 {
+    0%, 100% { transform: translateX(-170px) rotate(-15deg) translateY(0); }
+    50% { transform: translateX(-170px) rotate(-15deg) translateY(-14px); }
+}
+@keyframes fcFloat2 {
+    0%, 100% { transform: translateX(-58px) rotate(-5deg) translateY(-15px); }
+    50% { transform: translateX(-58px) rotate(-5deg) translateY(-29px); }
+}
+@keyframes fcFloat3 {
+    0%, 100% { transform: translateX(58px) rotate(5deg) translateY(-15px); }
+    50% { transform: translateX(58px) rotate(5deg) translateY(-29px); }
+}
+@keyframes fcFloat4 {
+    0%, 100% { transform: translateX(170px) rotate(15deg) translateY(0); }
+    50% { transform: translateX(170px) rotate(15deg) translateY(-14px); }
+}
+
+/* Offset galaxy animations per card */
+.fc-2 .galaxy-bg { animation-delay: -7s; }
+.fc-2 .galaxy-stars { animation-delay: -3s; }
+.fc-2 .galaxy-shimmer { animation-delay: -2s; }
+.fc-3 .galaxy-bg { animation-delay: -13s; }
+.fc-3 .galaxy-stars { animation-delay: -6s; }
+.fc-3 .galaxy-shimmer { animation-delay: -4s; }
+.fc-4 .galaxy-bg { animation-delay: -19s; }
+.fc-4 .galaxy-stars { animation-delay: -9s; }
+.fc-4 .galaxy-shimmer { animation-delay: -5s; }
+
+/* ===== 10-Card Celtic Cross Spread ===== */
+/*
+   Layout:
+              [3]
+    [5]    [1]+[2]    [6]     [10]
+              [4]              [9]
+                               [8]
+                               [7]
+   Card 2 rotated 90° crossing over card 1
+*/
+.ten-card-fan {
+    width: 500px;
+    height: 440px;
+}
+
+.ten-card-fan .multi-card-item {
+    width: 80px;
+    height: 128px;
+    border-radius: 6px;
+}
+
+.ten-card-fan .card-back-galaxy { border-radius: 6px; }
+.ten-card-fan .card-back-seal { width: 32px; height: 32px; }
+
+/* 1: Significator — center of the cross */
+.tc-1  { transform: translate(-65px, 0px);  z-index: 2; animation: ccFloat 5s ease-in-out infinite; }
+/* 2: Crossing — rotated 90° over card 1 */
+.tc-2  { transform: translate(-65px, 0px) rotate(90deg); z-index: 3; animation: ccFloat 5s ease-in-out infinite 0.5s; }
+/* 3: Crown — above center */
+.tc-3  { transform: translate(-65px, -140px); z-index: 1; animation: ccFloat 5s ease-in-out infinite 1s; }
+/* 4: Base — below center */
+.tc-4  { transform: translate(-65px, 140px); z-index: 1; animation: ccFloat 5s ease-in-out infinite 1.5s; }
+/* 5: Past — left of center */
+.tc-5  { transform: translate(-185px, 0px); z-index: 1; animation: ccFloat 5s ease-in-out infinite 2s; }
+/* 6: Future — right of center */
+.tc-6  { transform: translate(55px, 0px); z-index: 1; animation: ccFloat 5s ease-in-out infinite 2.5s; }
+/* 7-10: Staff column — right side, bottom to top */
+.tc-7  { transform: translate(180px, 195px); z-index: 1; animation: ccFloat 5s ease-in-out infinite 3s; }
+.tc-8  { transform: translate(180px, 65px);  z-index: 1; animation: ccFloat 5s ease-in-out infinite 3.5s; }
+.tc-9  { transform: translate(180px, -65px); z-index: 1; animation: ccFloat 5s ease-in-out infinite 4s; }
+.tc-10 { transform: translate(180px, -195px); z-index: 1; animation: ccFloat 5s ease-in-out infinite 4.5s; }
+
+@keyframes ccFloat {
+    0%, 100% { margin-top: 0; }
+    50% { margin-top: -8px; }
+}
+
+/* Subtle cross guide lines */
+.ten-card-fan::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: calc(50% - 65px);
+    width: 1px; height: 300px;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(180deg, transparent, rgba(154, 170, 212, 0.06) 30%, rgba(154, 170, 212, 0.06) 70%, transparent);
+    pointer-events: none;
+}
+
+.ten-card-fan::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: calc(50% - 65px);
+    width: 260px; height: 1px;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(90deg, transparent, rgba(154, 170, 212, 0.06) 30%, rgba(154, 170, 212, 0.06) 70%, transparent);
+    pointer-events: none;
+}
+
+/* Offset galaxy animations for each 10-card */
+.tc-2 .galaxy-bg { animation-delay: -3s; }
+.tc-3 .galaxy-bg { animation-delay: -6s; }
+.tc-4 .galaxy-bg { animation-delay: -9s; }
+.tc-5 .galaxy-bg { animation-delay: -12s; }
+.tc-6 .galaxy-bg { animation-delay: -15s; }
+.tc-7 .galaxy-bg { animation-delay: -18s; }
+.tc-8 .galaxy-bg { animation-delay: -21s; }
+.tc-9 .galaxy-bg { animation-delay: -4s; }
+.tc-10 .galaxy-bg { animation-delay: -8s; }
+
+/* ===== 12-Card Zodiac Wheel Spread ===== */
+.twelve-card-fan {
+    width: 520px;
+    height: 520px;
+}
+
+.twelve-card-fan .multi-card-item {
+    width: 85px;
+    height: 136px;
+    border-radius: 6px;
+}
+
+.twelve-card-fan .card-back-galaxy { border-radius: 6px; }
+.twelve-card-fan .card-back-seal { width: 32px; height: 32px; }
+
+/* Zodiac wheel ring — subtle circle behind the cards */
+.twelve-card-fan::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 400px; height: 400px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px solid rgba(154, 170, 212, 0.08);
+    pointer-events: none;
+}
+
+/* Inner decorative ring */
+.twelve-card-fan::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 300px; height: 300px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px dashed rgba(154, 170, 212, 0.05);
+    pointer-events: none;
+}
+
+/* 12 houses — radius 200px, cards upright */
+.twc-1  { transform: translate(-200px, 0px);    animation: twcF1 5s ease-in-out infinite; }
+.twc-2  { transform: translate(-173px, 100px);  animation: twcF2 5s ease-in-out infinite 0.4s; }
+.twc-3  { transform: translate(-100px, 173px);  animation: twcF3 5s ease-in-out infinite 0.8s; }
+.twc-4  { transform: translate(0px, 200px);     animation: twcF4 5s ease-in-out infinite 1.2s; }
+.twc-5  { transform: translate(100px, 173px);   animation: twcF5 5s ease-in-out infinite 1.6s; }
+.twc-6  { transform: translate(173px, 100px);   animation: twcF6 5s ease-in-out infinite 2s; }
+.twc-7  { transform: translate(200px, 0px);     animation: twcF7 5s ease-in-out infinite 2.4s; }
+.twc-8  { transform: translate(173px, -100px);  animation: twcF8 5s ease-in-out infinite 2.8s; }
+.twc-9  { transform: translate(100px, -173px);  animation: twcF9 5s ease-in-out infinite 3.2s; }
+.twc-10 { transform: translate(0px, -200px);    animation: twcF10 5s ease-in-out infinite 3.6s; }
+.twc-11 { transform: translate(-100px, -173px); animation: twcF11 5s ease-in-out infinite 4s; }
+.twc-12 { transform: translate(-173px, -100px); animation: twcF12 5s ease-in-out infinite 4.4s; }
+
+/* Gentle radial breathing */
+@keyframes twcF1  { 0%,100% { transform: translate(-200px, 0px); }   50% { transform: translate(-208px, 0px); } }
+@keyframes twcF2  { 0%,100% { transform: translate(-173px, 100px); } 50% { transform: translate(-180px, 104px); } }
+@keyframes twcF3  { 0%,100% { transform: translate(-100px, 173px); } 50% { transform: translate(-104px, 180px); } }
+@keyframes twcF4  { 0%,100% { transform: translate(0px, 200px); }    50% { transform: translate(0px, 208px); } }
+@keyframes twcF5  { 0%,100% { transform: translate(100px, 173px); }  50% { transform: translate(104px, 180px); } }
+@keyframes twcF6  { 0%,100% { transform: translate(173px, 100px); }  50% { transform: translate(180px, 104px); } }
+@keyframes twcF7  { 0%,100% { transform: translate(168px, 0px); }    50% { transform: translate(176px, 0px); } }
+@keyframes twcF7  { 0%,100% { transform: translate(200px, 0px); }     50% { transform: translate(208px, 0px); } }
+@keyframes twcF8  { 0%,100% { transform: translate(173px, -100px); } 50% { transform: translate(180px, -104px); } }
+@keyframes twcF9  { 0%,100% { transform: translate(100px, -173px); } 50% { transform: translate(104px, -180px); } }
+@keyframes twcF10 { 0%,100% { transform: translate(0px, -200px); }   50% { transform: translate(0px, -208px); } }
+@keyframes twcF11 { 0%,100% { transform: translate(-100px, -173px); } 50% { transform: translate(-104px, -180px); } }
+@keyframes twcF12 { 0%,100% { transform: translate(-173px, -100px); } 50% { transform: translate(-180px, -104px); } }
+
+/* Offset galaxy animations for 12-card */
+.twc-2 .galaxy-bg { animation-delay: -2s; }
+.twc-3 .galaxy-bg { animation-delay: -4s; }
+.twc-4 .galaxy-bg { animation-delay: -6s; }
+.twc-5 .galaxy-bg { animation-delay: -8s; }
+.twc-6 .galaxy-bg { animation-delay: -10s; }
+.twc-7 .galaxy-bg { animation-delay: -12s; }
+.twc-8 .galaxy-bg { animation-delay: -14s; }
+.twc-9 .galaxy-bg { animation-delay: -16s; }
+.twc-10 .galaxy-bg { animation-delay: -18s; }
+.twc-11 .galaxy-bg { animation-delay: -20s; }
+.twc-12 .galaxy-bg { animation-delay: -22s; }
+
+/* ==================== COSMIC THEME (Three-Card Mode) ==================== */
+
+/* Background overlays — always present, fade in/out via opacity */
+.landing-page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(200, 100, 40, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 75%, rgba(180, 80, 30, 0.12) 0%, transparent 45%),
+        radial-gradient(ellipse at 50% 50%, rgba(160, 70, 25, 0.08) 0%, transparent 60%),
+        linear-gradient(180deg, #080408 0%, #12080a 30%, #1a0e0c 50%, #12080a 70%, #080408 100%);
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Warm-tinted star field */
+.landing-page::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    background-image:
+        radial-gradient(1.2px 1.2px at 10% 15%, rgba(255, 200, 150, 0.7) 50%, transparent 100%),
+        radial-gradient(1px 1px at 25% 42%, rgba(255, 220, 170, 0.5) 50%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 40% 8%, rgba(255, 180, 130, 0.8) 50%, transparent 100%),
+        radial-gradient(1px 1px at 55% 65%, rgba(255, 230, 190, 0.4) 50%, transparent 100%),
+        radial-gradient(1.3px 1.3px at 70% 28%, rgba(255, 190, 140, 0.6) 50%, transparent 100%),
+        radial-gradient(1px 1px at 85% 55%, rgba(255, 210, 160, 0.5) 50%, transparent 100%),
+        radial-gradient(1.4px 1.4px at 15% 78%, rgba(255, 220, 170, 0.6) 50%, transparent 100%),
+        radial-gradient(1px 1px at 48% 88%, rgba(255, 180, 130, 0.4) 50%, transparent 100%),
+        radial-gradient(1.1px 1.1px at 62% 35%, rgba(255, 230, 200, 0.5) 50%, transparent 100%),
+        radial-gradient(1.3px 1.3px at 92% 72%, rgba(255, 200, 150, 0.6) 50%, transparent 100%),
+        radial-gradient(2px 2px at 78% 12%, rgba(255, 160, 110, 0.8) 50%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 50% 25%, rgba(255, 240, 210, 0.5) 50%, transparent 100%),
+        radial-gradient(2.2px 2.2px at 20% 60%, rgba(240, 130, 70, 0.7) 50%, transparent 100%);
+}
+
+/* Fade in when cosmic theme active */
+.landing-page.cosmic-theme::before,
+.landing-page.cosmic-theme::after {
+    opacity: 1;
+}
+
+/* Content above background layers */
+.landing-page.cosmic-theme .landing-header,
+.landing-page.cosmic-theme .spinning-card-container,
+.landing-page.cosmic-theme .three-card-container,
+.landing-page.cosmic-theme .multi-card-container,
+.landing-page.cosmic-theme .landing-instruction,
+.landing-page.cosmic-theme .landing-brand {
+    position: relative;
+    z-index: 1;
+}
+
+/* Smooth transitions when switching themes */
+.landing-page .landing-heading,
+.landing-page .landing-tagline,
+.landing-page .landing-spark,
+.landing-page .mode-dots,
+.landing-page .mode-dot,
+.landing-page .mode-arrow {
+    transition: color 0.8s ease, background 0.8s ease, box-shadow 0.8s ease, border-color 0.8s ease;
+}
+.landing-page .three-card-face {
+    transition: box-shadow 0.8s ease;
+}
+
+/* Orange accent — three-card elements */
+.landing-page.cosmic-theme .three-card-face {
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.4),
+        0 5px 25px rgba(220, 130, 60, 0.25),
+        0 0 40px rgba(200, 110, 50, 0.1);
+}
+
+.landing-page.cosmic-theme .three-card-container:hover .three-card-face {
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.4),
+        0 5px 30px rgba(220, 130, 60, 0.35),
+        0 0 50px rgba(200, 110, 50, 0.15);
+}
+
+.landing-page.cosmic-theme .three-card-container.ready-glow::after {
+    background: radial-gradient(ellipse at center, rgba(210, 120, 50, 0.12) 0%, transparent 70%);
+}
+
+/* Orange-tinted text and UI */
+.landing-page.cosmic-theme .landing-heading,
+.landing-page.cosmic-theme .landing-tagline,
+.landing-page.cosmic-theme .card-click-hint {
+    color: rgba(255, 215, 175, 0.85);
+}
+
+.landing-page.cosmic-theme .landing-spark {
+    color: rgba(255, 175, 130, 0.6);
+}
+
+.landing-page.cosmic-theme .mode-dots {
+    background: rgba(210, 140, 90, 0.06);
+    border-color: rgba(210, 140, 90, 0.1);
+}
+
+.landing-page.cosmic-theme .mode-dot.active {
+    background: rgba(230, 140, 70, 0.15);
+    color: rgba(255, 200, 160, 0.9);
+    border-color: rgba(230, 140, 70, 0.2);
+    box-shadow: 0 0 16px rgba(230, 140, 70, 0.12), inset 0 0 8px rgba(230, 140, 70, 0.05);
+}
+
+.landing-page.cosmic-theme .mode-dot {
+    color: rgba(210, 140, 90, 0.3);
+}
+
+.landing-page.cosmic-theme .mode-dot:hover {
+    background: rgba(210, 140, 90, 0.08);
+    color: rgba(255, 200, 160, 0.55);
+}
+
+.landing-page.cosmic-theme .mode-arrow {
+    color: rgba(255, 200, 165, 0.85);
+}
+
+/* ---- Cosmic galaxy card-back — Sunset Nebula ---- */
+
+.landing-page.cosmic-theme .card-back-galaxy {
+    background: #0c0610;
+    overflow: hidden;
+}
+.landing-page.cosmic-theme .galaxy-bg {
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(230, 100, 50, 0.5) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 75%, rgba(180, 60, 120, 0.35) 0%, transparent 45%),
+        radial-gradient(ellipse at 50% 50%, rgba(255, 140, 60, 0.25) 0%, transparent 55%),
+        radial-gradient(ellipse at 20% 80%, rgba(120, 50, 140, 0.3) 0%, transparent 45%),
+        linear-gradient(180deg, #08030a 0%, #180c14 30%, #1e1018 50%, #180c14 70%, #08030a 100%);
+    animation: cosmicDrift 20s ease-in-out infinite;
+}
+.landing-page.cosmic-theme .galaxy-stars {
+    background-image:
+        radial-gradient(1.2px 1.2px at 10% 15%, rgba(255, 200, 160, 0.8) 50%, transparent 100%),
+        radial-gradient(1px 1px at 30% 40%, rgba(255, 180, 220, 0.6) 50%, transparent 100%),
+        radial-gradient(1.3px 1.3px at 50% 10%, rgba(255, 220, 170, 0.7) 50%, transparent 100%),
+        radial-gradient(1px 1px at 70% 55%, rgba(255, 190, 140, 0.6) 50%, transparent 100%),
+        radial-gradient(1.2px 1.2px at 85% 30%, rgba(255, 210, 180, 0.5) 50%, transparent 100%),
+        radial-gradient(1px 1px at 15% 70%, rgba(255, 170, 200, 0.6) 50%, transparent 100%),
+        radial-gradient(1.3px 1.3px at 60% 80%, rgba(255, 200, 150, 0.5) 50%, transparent 100%),
+        radial-gradient(1.1px 1.1px at 90% 65%, rgba(255, 230, 200, 0.6) 50%, transparent 100%);
+}
+.landing-page.cosmic-theme .galaxy-aurora {
+    background: linear-gradient(170deg, transparent 0%, rgba(230, 80, 50, 0.15) 25%, rgba(200, 60, 120, 0.12) 50%, rgba(255, 120, 60, 0.1) 75%, transparent 100%);
+}
+.landing-page.cosmic-theme .galaxy-shimmer {
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 160, 100, 0.08) 45%, rgba(255, 190, 140, 0.14) 50%, rgba(255, 160, 100, 0.08) 55%, transparent 70%);
+}
+.landing-page.cosmic-theme .galaxy-orbit::before {
+    background: conic-gradient(from 0deg, transparent 0%, rgba(240, 130, 70, 0.6) 10%, rgba(200, 70, 130, 0.3) 25%, transparent 40%, rgba(255, 150, 80, 0.4) 55%, transparent 75%, rgba(220, 90, 140, 0.3) 90%, transparent 100%);
+}
+.landing-page.cosmic-theme .galaxy-orbit::after {
+    background: rgba(255, 200, 160, 0.95);
+    box-shadow: 0 0 8px rgba(240, 130, 70, 0.8), 0 0 16px rgba(200, 70, 130, 0.4);
+}
+.landing-page.cosmic-theme .card-back-seal {
+    filter: drop-shadow(0 0 12px rgba(240, 110, 60, 0.5));
+}
+.landing-page.cosmic-theme .galaxy-shooting-star {
+    background: linear-gradient(180deg, transparent 0%, rgba(255, 180, 140, 0.4) 30%, rgba(255, 220, 190, 0.95) 100%);
+}
+
+@keyframes cosmicDrift {
+    0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    25% { transform: translate(6%, -3%) rotate(1.5deg) scale(1.03); }
+    50% { transform: translate(-4%, 5%) rotate(-1deg) scale(1.01); }
+    75% { transform: translate(-6%, -3%) rotate(0.5deg) scale(1.04); }
+}
+
+/* ==================== END COSMIC THEME ==================== */
+
 /* Sparkle divider between title and tagline */
 .landing-sparkles {
     display: flex;
@@ -275,6 +1257,12 @@ html[lang="ja"] .landing-tagline {
 }
 
 .landing-page.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.landing-page.hidden .mode-arrow {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -2411,6 +3399,493 @@ header {
     opacity: 1;
     visibility: visible;
     overflow: hidden;
+}
+
+/* ==================== CATEGORY SELECTION OVERLAY ==================== */
+.category-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0s 0.5s;
+}
+.category-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease, visibility 0s 0s;
+}
+.category-overlay-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 30%, rgba(12, 16, 42, 0.93) 0%, rgba(2, 3, 10, 0.97) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+.category-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 20px 16px;
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Header */
+.category-header {
+    margin-bottom: 28px;
+    opacity: 0;
+    transform: translateY(-20px);
+}
+.category-overlay.active .category-header {
+    animation: catFadeDown 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+.category-sparkles {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 14px;
+    font-size: 0.85rem;
+    color: rgba(154, 170, 212, 0.45);
+}
+.category-spark {
+    animation: landingSparkle 3s ease-in-out infinite;
+}
+.category-spark.s2 { animation-delay: 1s; }
+.category-spark.s3 { animation-delay: 2s; }
+.category-title {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 400;
+    font-size: 1.1rem;
+    color: rgba(192, 200, 224, 0.9);
+    letter-spacing: 0.5px;
+    margin: 0 0 6px;
+}
+.category-subtitle {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 200;
+    font-size: 0.78rem;
+    color: rgba(154, 170, 212, 0.4);
+    letter-spacing: 0.3px;
+    margin: 0;
+}
+
+/* Category Cards Container */
+.category-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: center;
+}
+
+/* ============ CATEGORY CARD — EPIC VERSION ============ */
+.category-card {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+    padding: 3px;
+    background: transparent;
+    border: none;
+    border-radius: 22px;
+    cursor: pointer;
+    outline: none;
+    font-family: 'Prompt', sans-serif;
+    color: #C0C8E0;
+    opacity: 0;
+    transform: translateY(40px) scale(0.85);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Staggered entrance */
+.category-overlay.active .category-card:nth-child(1) {
+    animation: catCardIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+.category-overlay.active .category-card:nth-child(2) {
+    animation: catCardIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
+}
+.category-overlay.active .category-card:nth-child(3) {
+    animation: catCardIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+}
+
+/* ---- Rotating border glow (the "aura ring") ---- */
+.cat-border-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    opacity: 0.4;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+.cat-border-glow::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 24px;
+    padding: 2px;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+[data-category="love"] .cat-border-glow::before {
+    background: conic-gradient(from var(--cat-angle, 0deg),
+        transparent 0%, #ff6b8a 15%, transparent 30%,
+        #ff3366 50%, transparent 65%, #ff8fa8 80%, transparent 100%);
+    animation: catBorderSpin 4s linear infinite;
+}
+[data-category="work"] .cat-border-glow::before {
+    background: conic-gradient(from var(--cat-angle, 0deg),
+        transparent 0%, #64b5ff 15%, transparent 30%,
+        #2979ff 50%, transparent 65%, #90caf9 80%, transparent 100%);
+    animation: catBorderSpin 5s linear infinite;
+}
+[data-category="finance"] .cat-border-glow::before {
+    background: conic-gradient(from var(--cat-angle, 0deg),
+        transparent 0%, #ffd54f 15%, transparent 30%,
+        #ffab00 50%, transparent 65%, #ffe082 80%, transparent 100%);
+    animation: catBorderSpin 4.5s linear infinite;
+}
+.category-card:hover .cat-border-glow { opacity: 1; }
+
+/* ---- Inner card body ---- */
+.cat-card-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 24px 22px;
+    border-radius: 20px;
+    overflow: hidden;
+    z-index: 1;
+    background: rgba(8, 12, 35, 0.85);
+}
+
+/* ---- Nebula background inside card ---- */
+.cat-nebula {
+    position: absolute;
+    inset: 0;
+    opacity: 0.5;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+[data-category="love"] .cat-nebula {
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(255, 50, 80, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 30%, rgba(255, 120, 160, 0.08) 0%, transparent 40%);
+    animation: catNebulaLove 6s ease-in-out infinite alternate;
+}
+[data-category="work"] .cat-nebula {
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(40, 100, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 30%, rgba(100, 180, 255, 0.08) 0%, transparent 40%);
+    animation: catNebulaWork 7s ease-in-out infinite alternate;
+}
+[data-category="finance"] .cat-nebula {
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(255, 180, 0, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 30%, rgba(255, 220, 80, 0.08) 0%, transparent 40%);
+    animation: catNebulaFin 5.5s ease-in-out infinite alternate;
+}
+.category-card:hover .cat-nebula { opacity: 1; }
+
+/* ---- Always-on floating particles ---- */
+.cat-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+.cat-particles span {
+    position: absolute;
+    opacity: 0;
+    animation: catFloat 4s ease-in-out infinite;
+}
+.cat-particles span:nth-child(1) { left: 8%; bottom: -5%; font-size: 9px; animation-delay: 0s; }
+.cat-particles span:nth-child(2) { left: 22%; bottom: -8%; font-size: 12px; animation-delay: 0.6s; }
+.cat-particles span:nth-child(3) { left: 40%; bottom: -5%; font-size: 7px; animation-delay: 1.2s; }
+.cat-particles span:nth-child(4) { left: 58%; bottom: -10%; font-size: 10px; animation-delay: 1.8s; }
+.cat-particles span:nth-child(5) { left: 72%; bottom: -5%; font-size: 8px; animation-delay: 2.4s; }
+.cat-particles span:nth-child(6) { left: 88%; bottom: -8%; font-size: 11px; animation-delay: 3s; }
+.cat-particles span:nth-child(7) { left: 50%; bottom: -12%; font-size: 6px; animation-delay: 3.5s; }
+.cat-particles span:nth-child(8) { left: 15%; bottom: -6%; font-size: 8px; animation-delay: 0.3s; }
+
+[data-category="love"] .cat-particles span { color: rgba(255, 100, 140, 0.7); }
+[data-category="work"] .cat-particles span { color: rgba(100, 170, 255, 0.7); }
+[data-category="finance"] .cat-particles span { color: rgba(255, 210, 60, 0.7); }
+.category-card:hover .cat-particles span { animation-duration: 2.8s; }
+
+/* ---- Icon wrapper with aura ring ---- */
+.cat-icon-wrap {
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cat-icon {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 8px rgba(255,255,255,0.15));
+}
+/* Pulsing aura ring behind icon */
+.cat-icon-aura {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    opacity: 0.4;
+    transition: opacity 0.4s ease;
+    z-index: 0;
+}
+[data-category="love"] .cat-icon-aura {
+    background: radial-gradient(circle, rgba(255, 70, 110, 0.3) 0%, transparent 70%);
+    animation: catAuraPulse 2s ease-in-out infinite;
+}
+[data-category="work"] .cat-icon-aura {
+    background: radial-gradient(circle, rgba(60, 130, 255, 0.3) 0%, transparent 70%);
+    animation: catAuraPulse 2.5s ease-in-out infinite;
+}
+[data-category="finance"] .cat-icon-aura {
+    background: radial-gradient(circle, rgba(255, 190, 0, 0.3) 0%, transparent 70%);
+    animation: catAuraPulse 2.2s ease-in-out infinite;
+}
+.category-card:hover .cat-icon-aura { opacity: 1; }
+
+/* Icon-specific animations */
+[data-category="love"] .cat-icon svg {
+    animation: catHeartbeat 1.5s ease-in-out infinite;
+}
+[data-category="work"] .cat-icon svg {
+    animation: catLightningPulse 2s ease-in-out infinite;
+}
+[data-category="finance"] .cat-icon svg {
+    animation: catCoinShine 2.5s ease-in-out infinite;
+}
+
+/* ---- Text ---- */
+.cat-text {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+.cat-title {
+    font-family: 'Prompt', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    line-height: 1.3;
+    transition: text-shadow 0.4s ease;
+}
+[data-category="love"] .cat-title {
+    color: #ffb0c4;
+    text-shadow: 0 0 20px rgba(255, 80, 120, 0);
+}
+[data-category="work"] .cat-title {
+    color: #a0c8ff;
+    text-shadow: 0 0 20px rgba(60, 130, 255, 0);
+}
+[data-category="finance"] .cat-title {
+    color: #ffe088;
+    text-shadow: 0 0 20px rgba(255, 190, 0, 0);
+}
+.category-card:hover [data-category="love"] .cat-title,
+[data-category="love"]:hover .cat-title {
+    text-shadow: 0 0 25px rgba(255, 80, 120, 0.4);
+}
+[data-category="work"]:hover .cat-title {
+    text-shadow: 0 0 25px rgba(60, 130, 255, 0.4);
+}
+[data-category="finance"]:hover .cat-title {
+    text-shadow: 0 0 25px rgba(255, 190, 0, 0.4);
+}
+
+.cat-desc {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 200;
+    font-size: 0.82rem;
+    color: rgba(154, 170, 212, 0.5);
+    margin-top: 3px;
+}
+
+/* ---- Shimmer sweep ---- */
+.cat-shimmer {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.07) 50%, transparent 65%);
+    background-size: 300% 100%;
+    background-position: 100% 0;
+    pointer-events: none;
+    z-index: 3;
+    transition: background-position 0s;
+}
+.category-card:hover .cat-shimmer {
+    background-position: -100% 0;
+    transition: background-position 1s ease;
+}
+
+/* ---- Hover: lift + intensify everything ---- */
+.category-card:hover {
+    transform: translateY(-6px) scale(1.03);
+}
+.category-card:active {
+    transform: scale(0.97);
+    transition-duration: 0.1s;
+}
+
+/* ---- Selected state (epic flash) ---- */
+.category-card.selected {
+    transform: scale(1.06) !important;
+    transition-duration: 0.15s !important;
+}
+.category-card.selected .cat-border-glow { opacity: 1; }
+.category-card.selected .cat-nebula { opacity: 1; }
+.category-card.selected .cat-icon-aura { opacity: 1; transform: scale(1.3); }
+[data-category="love"].selected .cat-card-inner {
+    box-shadow: inset 0 0 40px rgba(255, 60, 100, 0.1);
+}
+[data-category="work"].selected .cat-card-inner {
+    box-shadow: inset 0 0 40px rgba(40, 110, 255, 0.1);
+}
+[data-category="finance"].selected .cat-card-inner {
+    box-shadow: inset 0 0 40px rgba(255, 180, 0, 0.1);
+}
+
+/* Back button */
+.category-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 28px;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid rgba(154, 170, 212, 0.12);
+    border-radius: 24px;
+    color: rgba(154, 170, 212, 0.5);
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+.category-overlay.active .category-back-btn {
+    animation: catFadeDown 0.4s ease 0.6s both;
+}
+.category-back-btn:hover {
+    color: #C0C8E0;
+    border-color: rgba(154, 170, 212, 0.3);
+    background: rgba(154, 170, 212, 0.05);
+}
+.category-back-btn svg { transition: transform 0.3s ease; }
+.category-back-btn:hover svg { transform: translateX(-3px); }
+
+/* Close animation */
+.category-overlay.closing {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+.category-overlay.closing .category-card {
+    transform: scale(0.8) translateY(15px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+/* ============ KEYFRAMES ============ */
+@keyframes catFadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes catCardIn {
+    0% { opacity: 0; transform: translateY(40px) scale(0.85); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Rotating border aura */
+@keyframes catBorderSpin {
+    to { --cat-angle: 360deg; }
+}
+@property --cat-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+/* Icon aura breathing */
+@keyframes catAuraPulse {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.25); opacity: 0.7; }
+}
+/* Love: heartbeat */
+@keyframes catHeartbeat {
+    0%, 100% { transform: scale(1); }
+    14% { transform: scale(1.25); }
+    28% { transform: scale(0.95); }
+    42% { transform: scale(1.18); }
+    56% { transform: scale(1); }
+}
+/* Work: power surge */
+@keyframes catLightningPulse {
+    0%, 100% { transform: translateY(0) scale(1); filter: brightness(1) drop-shadow(0 0 4px rgba(100,170,255,0.3)); }
+    20% { transform: translateY(-4px) scale(1.12); filter: brightness(1.4) drop-shadow(0 0 12px rgba(100,170,255,0.6)); }
+    40% { transform: translateY(0) scale(1); filter: brightness(1) drop-shadow(0 0 4px rgba(100,170,255,0.3)); }
+    60% { transform: translateY(-2px) scale(1.06); filter: brightness(1.2) drop-shadow(0 0 8px rgba(100,170,255,0.5)); }
+    80% { transform: translateY(0) scale(1); filter: brightness(1) drop-shadow(0 0 4px rgba(100,170,255,0.3)); }
+}
+/* Finance: coin gleam */
+@keyframes catCoinShine {
+    0%, 100% { transform: rotateY(0deg) scale(1); filter: brightness(1) drop-shadow(0 0 6px rgba(255,200,40,0.3)); }
+    50% { transform: rotateY(20deg) scale(1.12); filter: brightness(1.35) drop-shadow(0 0 14px rgba(255,200,40,0.6)); }
+}
+/* Particles floating up */
+@keyframes catFloat {
+    0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+    10% { opacity: 0.6; }
+    50% { opacity: 0.8; }
+    100% { transform: translateY(-90px) translateX(8px) scale(0.2) rotate(30deg); opacity: 0; }
+}
+/* Nebula breathing */
+@keyframes catNebulaLove {
+    0% { background-position: 0% 50%; opacity: 0.5; }
+    100% { background-position: 100% 50%; opacity: 0.8; }
+}
+@keyframes catNebulaWork {
+    0% { background-position: 0% 50%; opacity: 0.5; }
+    100% { background-position: 100% 50%; opacity: 0.8; }
+}
+@keyframes catNebulaFin {
+    0% { background-position: 0% 50%; opacity: 0.5; }
+    100% { background-position: 100% 50%; opacity: 0.8; }
+}
+
+/* ============ DESKTOP ============ */
+@media (min-width: 600px) {
+    .category-content { max-width: 760px; }
+    .category-cards {
+        flex-direction: row;
+        justify-content: center;
+        gap: 22px;
+    }
+    .category-card { max-width: 220px; }
+    .cat-card-inner {
+        flex-direction: column;
+        text-align: center;
+        padding: 32px 20px 28px;
+        gap: 14px;
+    }
+    .cat-text { align-items: center; text-align: center; }
+    .cat-icon-wrap { width: 72px; height: 72px; }
+    .cat-icon svg { width: 50px; height: 50px; }
 }
 
 /* Result Panel — full-screen scrollable */
@@ -7488,6 +8963,105 @@ footer {
         height: 268px;
     }
 
+    .three-card-fan {
+        width: 416px;
+        height: 384px;
+    }
+
+    .three-card-item {
+        width: 176px;
+        height: 314px;
+    }
+
+    .three-card-left {
+        transform: translateX(-104px) rotate(-12deg);
+        animation-name: cardFloat1m;
+    }
+    .three-card-center {
+        transform: translateX(0) rotate(0deg) translateY(-16px);
+        animation-name: cardFloat2m;
+    }
+    .three-card-right {
+        transform: translateX(104px) rotate(12deg);
+        animation-name: cardFloat3m;
+    }
+
+    .card-position-label {
+        font-size: 11px;
+        bottom: -28px;
+    }
+
+    @keyframes cardFloat1m {
+        0%, 100% { transform: translateX(-104px) rotate(-12deg) translateY(0); }
+        50% { transform: translateX(-104px) rotate(-12deg) translateY(-13px); }
+    }
+    @keyframes cardFloat2m {
+        0%, 100% { transform: translateX(0) rotate(0deg) translateY(-16px); }
+        50% { transform: translateX(0) rotate(0deg) translateY(-29px); }
+    }
+    @keyframes cardFloat3m {
+        0%, 100% { transform: translateX(104px) rotate(12deg) translateY(0); }
+        50% { transform: translateX(104px) rotate(12deg) translateY(-13px); }
+    }
+
+    /* 4-card responsive */
+    .four-card-fan { width: 420px; height: 350px; }
+    .four-card-fan .multi-card-item { width: 136px; height: 243px; }
+    .fc-1 { transform: translateX(-144px) rotate(-15deg); }
+    .fc-2 { transform: translateX(-49px) rotate(-5deg) translateY(-12px); }
+    .fc-3 { transform: translateX(49px) rotate(5deg) translateY(-12px); }
+    .fc-4 { transform: translateX(144px) rotate(15deg); }
+    @keyframes fcFloat1 { 0%,100% { transform: translateX(-144px) rotate(-15deg) translateY(0); } 50% { transform: translateX(-144px) rotate(-15deg) translateY(-12px); } }
+    @keyframes fcFloat2 { 0%,100% { transform: translateX(-49px) rotate(-5deg) translateY(-12px); } 50% { transform: translateX(-49px) rotate(-5deg) translateY(-24px); } }
+    @keyframes fcFloat3 { 0%,100% { transform: translateX(49px) rotate(5deg) translateY(-12px); } 50% { transform: translateX(49px) rotate(5deg) translateY(-24px); } }
+    @keyframes fcFloat4 { 0%,100% { transform: translateX(144px) rotate(15deg) translateY(0); } 50% { transform: translateX(144px) rotate(15deg) translateY(-12px); } }
+
+    /* 10-card Celtic Cross responsive */
+    .ten-card-fan { width: 420px; height: 380px; }
+    .ten-card-fan .multi-card-item { width: 68px; height: 108px; }
+    .ten-card-fan .card-back-seal { width: 28px; height: 28px; }
+    .tc-1  { transform: translate(-55px, 0px); }
+    .tc-2  { transform: translate(-55px, 0px) rotate(90deg); }
+    .tc-3  { transform: translate(-55px, -120px); }
+    .tc-4  { transform: translate(-55px, 120px); }
+    .tc-5  { transform: translate(-155px, 0px); }
+    .tc-6  { transform: translate(45px, 0px); }
+    .tc-7  { transform: translate(152px, 155px); }
+    .tc-8  { transform: translate(152px, 52px); }
+    .tc-9  { transform: translate(152px, -52px); }
+    .tc-10 { transform: translate(152px, -155px); }
+
+    /* 12-card zodiac responsive — radius 168px */
+    .twelve-card-fan { width: 450px; height: 450px; }
+    .twelve-card-fan .multi-card-item { width: 70px; height: 112px; }
+    .twelve-card-fan .card-back-seal { width: 28px; height: 28px; }
+    .twelve-card-fan::before { width: 336px; height: 336px; }
+    .twelve-card-fan::after { width: 252px; height: 252px; }
+    .twc-1  { transform: translate(-168px, 0px); }
+    .twc-2  { transform: translate(-146px, 84px); }
+    .twc-3  { transform: translate(-84px, 146px); }
+    .twc-4  { transform: translate(0px, 168px); }
+    .twc-5  { transform: translate(84px, 146px); }
+    .twc-6  { transform: translate(146px, 84px); }
+    .twc-7  { transform: translate(168px, 0px); }
+    .twc-8  { transform: translate(146px, -84px); }
+    .twc-9  { transform: translate(84px, -146px); }
+    .twc-10 { transform: translate(0px, -168px); }
+    .twc-11 { transform: translate(-84px, -146px); }
+    .twc-12 { transform: translate(-146px, -84px); }
+    @keyframes twcF1  { 0%,100% { transform: translate(-168px, 0px); }   50% { transform: translate(-175px, 0px); } }
+    @keyframes twcF2  { 0%,100% { transform: translate(-146px, 84px); }  50% { transform: translate(-152px, 88px); } }
+    @keyframes twcF3  { 0%,100% { transform: translate(-84px, 146px); }  50% { transform: translate(-88px, 152px); } }
+    @keyframes twcF4  { 0%,100% { transform: translate(0px, 168px); }    50% { transform: translate(0px, 175px); } }
+    @keyframes twcF5  { 0%,100% { transform: translate(84px, 146px); }   50% { transform: translate(88px, 152px); } }
+    @keyframes twcF6  { 0%,100% { transform: translate(146px, 84px); }   50% { transform: translate(152px, 88px); } }
+    @keyframes twcF7  { 0%,100% { transform: translate(168px, 0px); }    50% { transform: translate(175px, 0px); } }
+    @keyframes twcF8  { 0%,100% { transform: translate(146px, -84px); }  50% { transform: translate(152px, -88px); } }
+    @keyframes twcF9  { 0%,100% { transform: translate(84px, -146px); }  50% { transform: translate(88px, -152px); } }
+    @keyframes twcF10 { 0%,100% { transform: translate(0px, -168px); }   50% { transform: translate(0px, -175px); } }
+    @keyframes twcF11 { 0%,100% { transform: translate(-84px, -146px); } 50% { transform: translate(-88px, -152px); } }
+    @keyframes twcF12 { 0%,100% { transform: translate(-146px, -84px); } 50% { transform: translate(-152px, -88px); } }
+
     .card-click-hint {
         font-size: 0.85rem;
         bottom: -50px;
@@ -7580,6 +9154,117 @@ footer {
         width: 180px;
         height: 321px;
     }
+
+    .three-card-fan {
+        width: 384px;
+        height: 352px;
+    }
+
+    .three-card-item {
+        width: 160px;
+        height: 285px;
+    }
+
+    .three-card-left {
+        transform: translateX(-93px) rotate(-10deg);
+        animation-name: cardFloat1s;
+    }
+    .three-card-center {
+        transform: translateX(0) rotate(0deg) translateY(-13px);
+        animation-name: cardFloat2s;
+    }
+    .three-card-right {
+        transform: translateX(93px) rotate(10deg);
+        animation-name: cardFloat3s;
+    }
+
+    .three-card-left .card-position-label {
+        transform: translateX(-50%) rotate(10deg);
+    }
+    .three-card-right .card-position-label {
+        transform: translateX(-50%) rotate(-10deg);
+    }
+
+    .card-position-label {
+        font-size: 10px;
+        bottom: -24px;
+        letter-spacing: 1px;
+    }
+
+    @keyframes cardFloat1s {
+        0%, 100% { transform: translateX(-93px) rotate(-10deg) translateY(0); }
+        50% { transform: translateX(-93px) rotate(-10deg) translateY(-11px); }
+    }
+    @keyframes cardFloat2s {
+        0%, 100% { transform: translateX(0) rotate(0deg) translateY(-13px); }
+        50% { transform: translateX(0) rotate(0deg) translateY(-24px); }
+    }
+    @keyframes cardFloat3s {
+        0%, 100% { transform: translateX(93px) rotate(10deg) translateY(0); }
+        50% { transform: translateX(93px) rotate(10deg) translateY(-11px); }
+    }
+
+    /* 4-card small screen */
+    .four-card-fan { width: 340px; height: 300px; }
+    .four-card-fan .multi-card-item { width: 110px; height: 196px; }
+    .fc-1 { transform: translateX(-116px) rotate(-14deg); }
+    .fc-2 { transform: translateX(-40px) rotate(-4deg) translateY(-10px); }
+    .fc-3 { transform: translateX(40px) rotate(4deg) translateY(-10px); }
+    .fc-4 { transform: translateX(116px) rotate(14deg); }
+    .fc-1 .card-position-label { transform: translateX(-50%) rotate(14deg); }
+    .fc-2 .card-position-label { transform: translateX(-50%) rotate(4deg); }
+    .fc-3 .card-position-label { transform: translateX(-50%) rotate(-4deg); }
+    .fc-4 .card-position-label { transform: translateX(-50%) rotate(-14deg); }
+    @keyframes fcFloat1 { 0%,100% { transform: translateX(-116px) rotate(-14deg) translateY(0); } 50% { transform: translateX(-116px) rotate(-14deg) translateY(-10px); } }
+    @keyframes fcFloat2 { 0%,100% { transform: translateX(-40px) rotate(-4deg) translateY(-10px); } 50% { transform: translateX(-40px) rotate(-4deg) translateY(-20px); } }
+    @keyframes fcFloat3 { 0%,100% { transform: translateX(40px) rotate(4deg) translateY(-10px); } 50% { transform: translateX(40px) rotate(4deg) translateY(-20px); } }
+    @keyframes fcFloat4 { 0%,100% { transform: translateX(116px) rotate(14deg) translateY(0); } 50% { transform: translateX(116px) rotate(14deg) translateY(-10px); } }
+
+    /* 10-card Celtic Cross small screen */
+    .ten-card-fan { width: 340px; height: 320px; }
+    .ten-card-fan .multi-card-item { width: 55px; height: 88px; }
+    .ten-card-fan .card-back-seal { width: 22px; height: 22px; }
+    .tc-1  { transform: translate(-44px, 0px); }
+    .tc-2  { transform: translate(-44px, 0px) rotate(90deg); }
+    .tc-3  { transform: translate(-44px, -98px); }
+    .tc-4  { transform: translate(-44px, 98px); }
+    .tc-5  { transform: translate(-126px, 0px); }
+    .tc-6  { transform: translate(38px, 0px); }
+    .tc-7  { transform: translate(124px, 130px); }
+    .tc-8  { transform: translate(124px, 43px); }
+    .tc-9  { transform: translate(124px, -43px); }
+    .tc-10 { transform: translate(124px, -130px); }
+
+    /* 12-card zodiac small screen — radius 140px */
+    .twelve-card-fan { width: 380px; height: 380px; }
+    .twelve-card-fan .multi-card-item { width: 56px; height: 90px; }
+    .twelve-card-fan .card-back-seal { width: 22px; height: 22px; }
+    .twelve-card-fan::before { width: 280px; height: 280px; }
+    .twelve-card-fan::after { width: 210px; height: 210px; }
+    .twc-1  { transform: translate(-140px, 0px); }
+    .twc-2  { transform: translate(-121px, 70px); }
+    .twc-3  { transform: translate(-70px, 121px); }
+    .twc-4  { transform: translate(0px, 140px); }
+    .twc-5  { transform: translate(70px, 121px); }
+    .twc-6  { transform: translate(121px, 70px); }
+    .twc-7  { transform: translate(140px, 0px); }
+    .twc-8  { transform: translate(121px, -70px); }
+    .twc-9  { transform: translate(70px, -121px); }
+    .twc-10 { transform: translate(0px, -140px); }
+    .twc-11 { transform: translate(-70px, -121px); }
+    .twc-12 { transform: translate(-121px, -70px); }
+    @keyframes twcF1  { 0%,100% { transform: translate(-140px, 0px); }   50% { transform: translate(-146px, 0px); } }
+    @keyframes twcF2  { 0%,100% { transform: translate(-121px, 70px); }  50% { transform: translate(-127px, 73px); } }
+    @keyframes twcF3  { 0%,100% { transform: translate(-70px, 121px); }  50% { transform: translate(-73px, 127px); } }
+    @keyframes twcF4  { 0%,100% { transform: translate(0px, 140px); }    50% { transform: translate(0px, 146px); } }
+    @keyframes twcF5  { 0%,100% { transform: translate(70px, 121px); }   50% { transform: translate(73px, 127px); } }
+    @keyframes twcF6  { 0%,100% { transform: translate(121px, 70px); }   50% { transform: translate(127px, 73px); } }
+    @keyframes twcF7  { 0%,100% { transform: translate(140px, 0px); }    50% { transform: translate(146px, 0px); } }
+    @keyframes twcF8  { 0%,100% { transform: translate(121px, -70px); }  50% { transform: translate(127px, -73px); } }
+    @keyframes twcF9  { 0%,100% { transform: translate(70px, -121px); }  50% { transform: translate(73px, -127px); } }
+    @keyframes twcF10 { 0%,100% { transform: translate(0px, -140px); }   50% { transform: translate(0px, -146px); } }
+    @keyframes twcF11 { 0%,100% { transform: translate(-70px, -121px); } 50% { transform: translate(-73px, -127px); } }
+    @keyframes twcF12 { 0%,100% { transform: translate(-121px, -70px); } 50% { transform: translate(-127px, -73px); } }
 
     .card-click-hint {
         font-size: 0.8rem;
@@ -9805,6 +11490,130 @@ footer {
         padding: 6px 10px;
         font-size: 0.75rem;
     }
+}
+
+/* ==================== MULTI-CARD RESULT ==================== */
+.multi-result-cards {
+    padding: 0 0 20px;
+}
+
+/* Horizontal card thumbnails row */
+.multi-result-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 0 24px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.multi-result-card-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    animation: multiCardFadeIn 0.5s ease both;
+}
+.multi-result-card-item:nth-child(1) { animation-delay: 0s; }
+.multi-result-card-item:nth-child(2) { animation-delay: 0.1s; }
+.multi-result-card-item:nth-child(3) { animation-delay: 0.2s; }
+.multi-result-card-item:nth-child(4) { animation-delay: 0.3s; }
+
+.multi-result-card-img {
+    width: 72px;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 12px rgba(154, 170, 212, 0.25), 0 0 20px rgba(154, 170, 212, 0.1);
+    border: 1px solid rgba(154, 170, 212, 0.2);
+    transition: transform 0.3s ease;
+}
+.multi-result-card-item:hover .multi-result-card-img {
+    transform: translateY(-3px);
+}
+
+.multi-result-card-label {
+    margin-top: 8px;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(154, 170, 212, 0.8);
+    font-weight: 500;
+}
+
+/* Per-card interpretation section */
+.multi-result-section {
+    margin-bottom: 8px;
+    animation: multiSectionSlideUp 0.5s ease both;
+}
+.multi-result-section:nth-child(2) { animation-delay: 0.15s; }
+.multi-result-section:nth-child(3) { animation-delay: 0.3s; }
+.multi-result-section:nth-child(4) { animation-delay: 0.45s; }
+.multi-result-section:nth-child(5) { animation-delay: 0.6s; }
+
+.multi-result-position {
+    text-align: center;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    color: #9AAAD4;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.multi-result-card-name {
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #C0C8E0;
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+}
+
+.multi-result-quote {
+    text-align: center;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: rgba(192, 200, 224, 0.65);
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+.multi-result-glass {
+    background: rgba(15, 22, 55, 0.6);
+    border: 1px solid rgba(154, 170, 212, 0.12);
+    border-radius: 14px;
+    padding: 18px 16px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.multi-result-interpretation {
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: rgba(192, 200, 224, 0.85);
+}
+
+/* Divider between cards */
+.multi-result-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+.multi-result-divider span {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(154, 170, 212, 0.2), transparent);
+}
+
+@keyframes multiCardFadeIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes multiSectionSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* ==================== SOCIAL FEATURES ==================== */

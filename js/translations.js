@@ -41,8 +41,20 @@ const translations = {
             loading: "กำลังโหลด...",
             instruction: "จับไพ่ทาโรต์ 1 ใบเพื่อดูดวงประจำวัน",
             clickToDraw: "แตะไพ่เพื่อเริ่มดูดวง",
+            heading3: "จับไพ่ 3 ใบ",
+            clickToDraw3: "แตะไพ่เพื่อเริ่มจับ 3 ใบ",
+            heading4: "จับไพ่ 4 ใบ",
+            clickToDraw4: "แตะไพ่เพื่อเริ่มจับ 4 ใบ",
+            heading10: "จับไพ่ 10 ใบ",
+            clickToDraw10: "แตะไพ่เพื่อเริ่มจับ 10 ใบ",
+            heading12: "จับไพ่ 12 ใบ",
+            clickToDraw12: "แตะไพ่เพื่อเริ่มจับ 12 ใบ",
             totalDrawsPrefix: "ทำนายแล้ว",
-            totalDrawsSuffix: "ครั้ง"
+            totalDrawsSuffix: "ครั้ง",
+            past: "อดีต",
+            present: "ปัจจุบัน",
+            future: "อนาคต",
+            outcome: "สรุป"
         },
         main: {
             title: "เลือกไพ่ 1 ใบเพื่อรับข้อความประจำวัน",
@@ -200,6 +212,17 @@ const translations = {
             newCards: "เพื่อนจับไพ่ใหม่",
             markAllRead: "อ่านทั้งหมดแล้ว",
             newBadge: "NEW"
+        },
+        category: {
+            title: "เลือกหมวดที่ต้องการดูดวง",
+            subtitle: "เลือก 1 หมวดเพื่อรับคำทำนายเฉพาะด้าน",
+            love: "ความรัก",
+            loveDesc: "ความสัมพันธ์ คนรัก คู่ครอง",
+            work: "การงาน",
+            workDesc: "หน้าที่ อาชีพ ความก้าวหน้า",
+            finance: "การเงิน",
+            financeDesc: "รายได้ ทรัพย์สิน โชคลาภ",
+            back: "กลับ"
         }
     },
     en: {
@@ -209,8 +232,20 @@ const translations = {
             loading: "Loading...",
             instruction: "Draw a tarot card to reveal today's message",
             clickToDraw: "Tap card to draw",
+            heading3: "3-Card Draw",
+            clickToDraw3: "Tap to draw 3 cards",
+            heading4: "4-Card Draw",
+            clickToDraw4: "Tap to draw 4 cards",
+            heading10: "10-Card Draw",
+            clickToDraw10: "Tap to draw 10 cards",
+            heading12: "12-Card Draw",
+            clickToDraw12: "Tap to draw 12 cards",
             totalDrawsPrefix: "",
-            totalDrawsSuffix: "readings so far"
+            totalDrawsSuffix: "readings so far",
+            past: "Past",
+            present: "Present",
+            future: "Future",
+            outcome: "Outcome"
         },
         main: {
             title: "Pick a card to reveal today's message",
@@ -368,6 +403,17 @@ const translations = {
             newCards: "Friends drew new cards",
             markAllRead: "Mark all read",
             newBadge: "NEW"
+        },
+        category: {
+            title: "Choose your reading category",
+            subtitle: "Select a focus area for your fortune",
+            love: "Love",
+            loveDesc: "Romance, relationships & soulmates",
+            work: "Work",
+            workDesc: "Career, ambition & growth",
+            finance: "Finance",
+            financeDesc: "Wealth, fortune & prosperity",
+            back: "Back"
         }
     },
     "zh-CN": {
@@ -377,8 +423,20 @@ const translations = {
             loading: "加载中...",
             instruction: "抽一张塔罗牌，揭示今日讯息",
             clickToDraw: "点击抽牌",
+            heading3: "三牌占卜",
+            clickToDraw3: "点击抽取3张牌",
+            heading4: "四牌占卜",
+            clickToDraw4: "点击抽取4张牌",
+            heading10: "十牌占卜",
+            clickToDraw10: "点击抽取10张牌",
+            heading12: "十二牌占卜",
+            clickToDraw12: "点击抽取12张牌",
             totalDrawsPrefix: "已占卜",
-            totalDrawsSuffix: "次"
+            totalDrawsSuffix: "次",
+            past: "过去",
+            present: "现在",
+            future: "未来",
+            outcome: "结果"
         },
         main: {
             title: "选一张牌揭示今日讯息",
@@ -536,6 +594,17 @@ const translations = {
             newCards: "好友抽了新牌",
             markAllRead: "全部已读",
             newBadge: "NEW"
+        },
+        category: {
+            title: "选择您的占卜类别",
+            subtitle: "选择一个方面来获取预言",
+            love: "爱情",
+            loveDesc: "恋爱、缘分、伴侣关系",
+            work: "事业",
+            workDesc: "职业、前途、发展方向",
+            finance: "财运",
+            financeDesc: "收入、财富、好运降临",
+            back: "返回"
         }
     },
     "zh-TW": {
@@ -545,8 +614,20 @@ const translations = {
             loading: "載入中...",
             instruction: "抽一張塔羅牌，揭示今日訊息",
             clickToDraw: "點擊抽牌",
+            heading3: "三牌占卜",
+            clickToDraw3: "點擊抽取3張牌",
+            heading4: "四牌占卜",
+            clickToDraw4: "點擊抽取4張牌",
+            heading10: "十牌占卜",
+            clickToDraw10: "點擊抽取10張牌",
+            heading12: "十二牌占卜",
+            clickToDraw12: "點擊抽取12張牌",
             totalDrawsPrefix: "已占卜",
-            totalDrawsSuffix: "次"
+            totalDrawsSuffix: "次",
+            past: "過去",
+            present: "現在",
+            future: "未來",
+            outcome: "結果"
         },
         main: {
             title: "選一張牌揭示今日訊息",
@@ -704,6 +785,17 @@ const translations = {
             newCards: "好友抽了新牌",
             markAllRead: "全部已讀",
             newBadge: "NEW"
+        },
+        category: {
+            title: "選擇您的占卜類別",
+            subtitle: "選擇一個方面來獲取預言",
+            love: "愛情",
+            loveDesc: "戀愛、緣分、伴侶關係",
+            work: "事業",
+            workDesc: "職業、前途、發展方向",
+            finance: "財運",
+            financeDesc: "收入、財富、好運降臨",
+            back: "返回"
         }
     },
     ko: {
@@ -713,8 +805,20 @@ const translations = {
             loading: "로딩 중...",
             instruction: "타로 카드를 뽑아 오늘의 메시지를 확인하세요",
             clickToDraw: "카드를 탭하여 뽑기",
+            heading3: "3카드 드로우",
+            clickToDraw3: "탭하여 3장 뽑기",
+            heading4: "4카드 드로우",
+            clickToDraw4: "탭하여 4장 뽑기",
+            heading10: "10카드 드로우",
+            clickToDraw10: "탭하여 10장 뽑기",
+            heading12: "12카드 드로우",
+            clickToDraw12: "탭하여 12장 뽑기",
             totalDrawsPrefix: "",
-            totalDrawsSuffix: "회 리딩 완료"
+            totalDrawsSuffix: "회 리딩 완료",
+            past: "과거",
+            present: "현재",
+            future: "미래",
+            outcome: "결과"
         },
         main: {
             title: "카드를 선택하여 오늘의 메시지를 확인하세요",
@@ -872,6 +976,17 @@ const translations = {
             newCards: "친구가 새 카드를 뽑았어요",
             markAllRead: "모두 읽음",
             newBadge: "NEW"
+        },
+        category: {
+            title: "운세 카테고리를 선택하세요",
+            subtitle: "하나의 영역을 선택하여 운세를 받으세요",
+            love: "연애",
+            loveDesc: "사랑, 인연, 소울메이트",
+            work: "직장",
+            workDesc: "커리어, 성장, 목표 달성",
+            finance: "재물",
+            financeDesc: "수입, 재산, 행운의 기회",
+            back: "뒤로"
         }
     },
     ja: {
@@ -881,8 +996,20 @@ const translations = {
             loading: "読み込み中...",
             instruction: "タロットカードを引いて今日のメッセージを受け取りましょう",
             clickToDraw: "カードをタップして引く",
+            heading3: "3カードドロー",
+            clickToDraw3: "タップして3枚引く",
+            heading4: "4カードドロー",
+            clickToDraw4: "タップして4枚引く",
+            heading10: "10カードドロー",
+            clickToDraw10: "タップして10枚引く",
+            heading12: "12カードドロー",
+            clickToDraw12: "タップして12枚引く",
             totalDrawsPrefix: "",
-            totalDrawsSuffix: "回の鑑定済み"
+            totalDrawsSuffix: "回の鑑定済み",
+            past: "過去",
+            present: "現在",
+            future: "未来",
+            outcome: "結果"
         },
         main: {
             title: "カードを選んで今日のメッセージを受け取る",
@@ -1040,6 +1167,17 @@ const translations = {
             newCards: "友達が新しいカードを引きました",
             markAllRead: "すべて既読",
             newBadge: "NEW"
+        },
+        category: {
+            title: "占いのカテゴリーを選択",
+            subtitle: "1つの分野を選んで運勢を見る",
+            love: "恋愛",
+            loveDesc: "恋、縁結び、パートナー",
+            work: "仕事",
+            workDesc: "キャリア、成長、目標達成",
+            finance: "金運",
+            financeDesc: "収入、財産、幸運の到来",
+            back: "戻る"
         }
     },
     fr: {
@@ -1049,8 +1187,20 @@ const translations = {
             loading: "Chargement...",
             instruction: "Tirez une carte de tarot pour découvrir le message du jour",
             clickToDraw: "Touchez la carte pour tirer",
+            heading3: "Tirage 3 Cartes",
+            clickToDraw3: "Touchez pour tirer 3 cartes",
+            heading4: "Tirage 4 Cartes",
+            clickToDraw4: "Touchez pour tirer 4 cartes",
+            heading10: "Tirage 10 Cartes",
+            clickToDraw10: "Touchez pour tirer 10 cartes",
+            heading12: "Tirage 12 Cartes",
+            clickToDraw12: "Touchez pour tirer 12 cartes",
             totalDrawsPrefix: "",
-            totalDrawsSuffix: "tirages effectués"
+            totalDrawsSuffix: "tirages effectués",
+            past: "Passé",
+            present: "Présent",
+            future: "Futur",
+            outcome: "Issue"
         },
         main: {
             title: "Choisissez une carte pour le message du jour",
@@ -1208,6 +1358,17 @@ const translations = {
             newCards: "Vos amis ont tiré de nouvelles cartes",
             markAllRead: "Tout marquer comme lu",
             newBadge: "NEW"
+        },
+        category: {
+            title: "Choisissez votre domaine",
+            subtitle: "Sélectionnez un domaine pour votre prédiction",
+            love: "Amour",
+            loveDesc: "Romance, relations & âme sœur",
+            work: "Travail",
+            workDesc: "Carrière, ambition & évolution",
+            finance: "Finances",
+            financeDesc: "Richesse, fortune & prospérité",
+            back: "Retour"
         }
     }
 };
