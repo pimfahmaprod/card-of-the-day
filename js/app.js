@@ -2506,6 +2506,20 @@ function handleRevealTap(e) {
 function revealCard(index) {
     var cardEl = revealQueue[index];
     cardEl.classList.remove('reveal-next');
+
+    // Ensure front image is loaded before flipping
+    var frontImg = cardEl.querySelector('.three-card-front-img, .multi-card-front-img');
+    if (frontImg && !frontImg.complete) {
+        frontImg.onload = frontImg.onerror = function() {
+            frontImg.onload = frontImg.onerror = null;
+            _doRevealFlip(cardEl, index);
+        };
+    } else {
+        _doRevealFlip(cardEl, index);
+    }
+}
+
+function _doRevealFlip(cardEl, index) {
     playSoundEffect('cardReveal');
 
     if (cardEl.classList.contains('three-card-item')) {
