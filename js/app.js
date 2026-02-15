@@ -2129,10 +2129,12 @@ function selectCard(cardId, cardElement) {
     cardElement.style.transform = 'translateY(-20px) scale(1.15)';
     cardElement.style.zIndex = '100';
 
-    // Fade out and disable other cards
+    // Fade out and disable other cards (preserve already-disabled multi-card picks)
     document.querySelectorAll('.card-container').forEach(c => {
         if (c !== cardElement) {
-            c.style.opacity = '';
+            if (_multiDisabledCards.indexOf(c) < 0) {
+                c.style.opacity = '';
+            }
             c.classList.add('disabled');
         }
     });
@@ -2374,6 +2376,12 @@ function proceedToMultiResult() {
     document.getElementById('resultStickyCardName').textContent = getCardName(firstCard.name);
     document.getElementById('resultStickyCardQuote').textContent = getCardQuote(firstCard);
     document.getElementById('resultStickyCard').classList.remove('minimized');
+
+    // Fade out the last selected card in the grid
+    if (selectedCardElement) {
+        selectedCardElement.style.transition = 'opacity 0.5s ease';
+        selectedCardElement.style.opacity = '0';
+    }
 
     // Clean up center card + overlay
     var centerCard = document.getElementById('centerCard');
