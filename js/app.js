@@ -2842,13 +2842,13 @@ function proceedToMultiResult() {
         html += '<div class="multi-result-section" data-card-index="' + j + '">';
         html += '<div class="multi-result-position">✦ ' + pLabel + '</div>';
         html += '<div class="multi-result-card-name">' + getCardName(s.card.name) + '</div>';
-        html += '<div class="multi-result-quote">"' + getCardQuote(s.card) + '"</div>';
+        html += '<div class="multi-result-quote">"' + getMultiCardQuote(s.card) + '"</div>';
         html += '<div class="multi-result-glass">';
         html += '<div class="result-section-header">';
         html += '<svg class="result-section-icon" viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M12 2l2.09 6.26L20.18 9l-4.64 4.14L16.73 20 12 16.77 7.27 20l1.19-6.86L3.82 9l6.09-.74L12 2z" fill="rgba(154,170,212,0.6)" stroke="none"/></svg>';
         html += '<span>' + prophecyTitle + '</span>';
         html += '</div>';
-        var interpText = getCardInterpretation(s.card);
+        var interpText = getMultiCardInterpretation(s.card);
         var interpParas = interpText.split(/\n\s*\n/).map(function(p) {
             var safe = p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             return '<p>' + safe + '</p>';
@@ -3149,41 +3149,26 @@ function showToast(message) {
     }, 2500);
 }
 
-// Try Web Share API first (best for mobile)
-function tryWebShare() {
-    if (navigator.share) {
-        gtag('event', 'share', {
-            event_category: 'sharing',
-            method: 'native_share',
-            card_name: currentCardData ? currentCardData.name : ''
-        });
-        navigator.share({
-            title: t('share.title'),
-            text: getShareText(),
-            url: siteUrl
-        }).catch(() => {});
-        return true;
-    }
-    return false;
-}
-
 function shareToFacebook() {
     gtag('event', 'share', {
         event_category: 'sharing',
         method: 'messenger',
         card_name: currentCardData ? currentCardData.name : ''
     });
-    // Share to Facebook Messenger
-    const text = getShareText() + '\n\n' + siteUrl;
-    navigator.clipboard.writeText(text).then(() => {
-        showToast(t('share.copiedForMessenger'));
-        setTimeout(() => {
-            // Try Messenger deep link first (works on mobile), fallback to web
-            const fbAppId = typeof FACEBOOK_APP_ID !== 'undefined' ? FACEBOOK_APP_ID : '940915038262874';
-            const messengerUrl = `https://www.facebook.com/dialog/send?app_id=${fbAppId}&link=${encodeURIComponent(siteUrl)}&redirect_uri=${encodeURIComponent(siteUrl)}`;
-            window.open(messengerUrl, '_blank', 'width=600,height=400');
-        }, 500);
-    });
+    var link = encodeURIComponent(siteUrl);
+    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+        // Deep link opens Messenger app friend picker directly
+        window.location.href = 'fb-messenger://share/?link=' + link;
+    } else {
+        var fbAppId = typeof FACEBOOK_APP_ID !== 'undefined' ? FACEBOOK_APP_ID : '940915038262874';
+        window.open(
+            'https://www.facebook.com/dialog/send?app_id=' + fbAppId +
+            '&link=' + link +
+            '&redirect_uri=' + link,
+            '_blank', 'width=600,height=500'
+        );
+    }
 }
 
 function shareToLine() {
@@ -3192,21 +3177,35 @@ function shareToLine() {
         method: 'line',
         card_name: currentCardData ? currentCardData.name : ''
     });
-    // LINE already opens chat/messaging
-    const text = encodeURIComponent(getShareText() + '\n' + siteUrl);
-    window.open(`https://line.me/R/share?text=${text}`, '_blank', 'width=600,height=400');
+    var text = encodeURIComponent(getShareText() + '\n' + siteUrl);
+    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+        // Deep link opens LINE app friend picker
+        window.location.href = 'https://line.me/R/share?text=' + text;
+    } else {
+        window.open('https://line.me/R/share?text=' + text, '_blank', 'width=600,height=500');
+    }
 }
 
-function copyLink() {
+function shareNative() {
     gtag('event', 'share', {
         event_category: 'sharing',
-        method: 'copy_link',
+        method: 'native_share',
         card_name: currentCardData ? currentCardData.name : ''
     });
-    const text = getShareText() + '\n\n' + siteUrl;
-    navigator.clipboard.writeText(text).then(() => {
-        showToast(t('share.copiedText'));
-    });
+    if (navigator.share) {
+        navigator.share({
+            title: t('share.title'),
+            text: getShareText(),
+            url: siteUrl
+        }).catch(function() {});
+    } else {
+        // Desktop fallback: copy to clipboard
+        var text = getShareText() + '\n\n' + siteUrl;
+        navigator.clipboard.writeText(text).then(function() {
+            showToast(t('share.copiedText'));
+        });
+    }
 }
 
 // Comment Functions
@@ -4829,8 +4828,9 @@ function createFeedCard(comment) {
                 mPos = translations[currentLang].landing[mCard.positionKey] || mCard.positionKey;
             }
             if (mTarot) {
-                var mQuote = getCardQuote(mTarot);
-                var mInterp = getCardInterpretation(mTarot);
+                var feedCat = comment.readingCategory || null;
+                var mQuote = feedCat ? (getCardCategoryField(mTarot, feedCat + 'Quote') || getCardQuote(mTarot)) : getCardQuote(mTarot);
+                var mInterp = feedCat ? (getCardCategoryField(mTarot, feedCat) || getCardInterpretation(mTarot)) : getCardInterpretation(mTarot);
                 expandedInfoHtml += '<div class="feed-multi-interp" data-index="' + mj + '"' + (mj !== 0 ? ' style="display:none"' : '') + '>';
                 expandedInfoHtml += '<div class="feed-multi-interp-pos">✦ ' + escapeHtml(mPos) + '</div>';
                 expandedInfoHtml += '<div class="feed-multi-interp-name">' + escapeHtml(getCardName(mCard.cardName) || mCard.cardName) + '</div>';
@@ -4853,8 +4853,9 @@ function createFeedCard(comment) {
         if (tarotData && tarotData.cards) {
             var tarotCard = tarotData.cards.find(function(c) { return c.id === comment.cardId || c.name === comment.cardName; });
             if (tarotCard) {
-                interpretationText = getCardInterpretation(tarotCard);
-                quoteText = getCardQuote(tarotCard);
+                var feedCat = comment.readingCategory || null;
+                interpretationText = feedCat ? (getCardCategoryField(tarotCard, feedCat) || getCardInterpretation(tarotCard)) : getCardInterpretation(tarotCard);
+                quoteText = feedCat ? (getCardCategoryField(tarotCard, feedCat + 'Quote') || getCardQuote(tarotCard)) : getCardQuote(tarotCard);
             }
         }
         expandedInfoHtml = '<div class="feed-card-info">' +
@@ -7761,30 +7762,80 @@ document.addEventListener('DOMContentLoaded', () => {
 let currentCardData = null;
 
 function shareOrDownload(canvas, filename) {
-    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile && navigator.canShare) {
-        canvas.toBlob(function(blob) {
-            if (!blob) { fallbackDownload(); return; }
-            var file = new File([blob], filename, { type: 'image/png' });
-            if (navigator.canShare({ files: [file] })) {
-                navigator.share({ files: [file] }).then(function() {
-                    showToast(t('image.saved'));
-                }).catch(function() {
-                    // User cancelled share — not an error
-                });
-            } else {
-                fallbackDownload();
-            }
-        }, 'image/png');
-    } else {
-        fallbackDownload();
+    showSavePreview(canvas, filename);
+}
+
+function showSavePreview(canvas, filename) {
+    var popup = document.getElementById('savePreviewPopup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'savePreviewPopup';
+        popup.className = 'save-preview-popup';
+        document.body.appendChild(popup);
     }
-    function fallbackDownload() {
+
+    var dataUrl = canvas.toDataURL('image/png');
+    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    var canShare = isMobile && navigator.canShare;
+
+    popup.innerHTML =
+        '<div class="save-preview-overlay"></div>' +
+        '<div class="save-preview-content">' +
+            '<button class="save-preview-close">&times;</button>' +
+            '<div class="save-preview-img-wrap">' +
+                '<img class="save-preview-img" src="' + dataUrl + '" alt="Preview">' +
+            '</div>' +
+            '<div class="save-preview-buttons">' +
+                (canShare ? '<button class="save-preview-btn save-preview-share">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> ' +
+                    t('image.share') +
+                '</button>' : '') +
+                '<button class="save-preview-btn save-preview-download">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> ' +
+                    t('image.download') +
+                '</button>' +
+            '</div>' +
+        '</div>';
+
+    popup.classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    var closeBtn = popup.querySelector('.save-preview-close');
+    var overlay = popup.querySelector('.save-preview-overlay');
+
+    function closePopup() {
+        popup.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    closeBtn.addEventListener('click', closePopup);
+    overlay.addEventListener('click', closePopup);
+
+    // Download — fresh user gesture
+    var dlBtn = popup.querySelector('.save-preview-download');
+    dlBtn.addEventListener('click', function() {
         var link = document.createElement('a');
         link.download = filename;
-        link.href = canvas.toDataURL('image/png');
+        link.href = dataUrl;
         link.click();
         showToast(t('image.saved'));
+        closePopup();
+    });
+
+    // Share — fresh user gesture on mobile
+    if (canShare) {
+        var shareBtn = popup.querySelector('.save-preview-share');
+        shareBtn.addEventListener('click', function() {
+            fetch(dataUrl).then(function(res) { return res.blob(); }).then(function(blob) {
+                var file = new File([blob], filename, { type: 'image/png' });
+                if (navigator.canShare({ files: [file] })) {
+                    navigator.share({ files: [file] }).then(function() {
+                        showToast(t('image.saved'));
+                        closePopup();
+                    }).catch(function() { /* user cancelled */ });
+                }
+            });
+        });
     }
 }
 
@@ -7948,6 +7999,17 @@ function getMultiCardQuote(card) {
         quote = getCardQuote(card);
     }
     return quote;
+}
+
+function getMultiCardInterpretation(card) {
+    var interp = '';
+    if (currentReadingCategory) {
+        interp = getCardCategoryField(card, currentReadingCategory);
+    }
+    if (!interp) {
+        interp = getCardInterpretation(card);
+    }
+    return interp;
 }
 
 function getPositionLabel(index) {

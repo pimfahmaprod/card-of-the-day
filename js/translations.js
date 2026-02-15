@@ -76,7 +76,7 @@ const translations = {
             wideImage: "รูปกว้าง",
             messenger: "ส่งทาง Messenger",
             line: "ส่งทาง LINE",
-            copyLink: "คัดลอกลิงก์",
+            moreShare: "แชร์เพิ่มเติม",
             tapToContinue: "แตะเพื่อดูคำทำนาย"
         },
         comment: {
@@ -157,7 +157,9 @@ const translations = {
         image: {
             selectFirst: "กรุณาเลือกไพ่ก่อน",
             creating: "กำลังสร้างรูป...",
-            saved: "บันทึกรูปสำเร็จ!"
+            saved: "บันทึกรูปสำเร็จ!",
+            share: "แชร์",
+            download: "บันทึกรูป"
         },
         sections: {
             popular: "✦ ยอดนิยม",
@@ -274,7 +276,7 @@ const translations = {
             wideImage: "Wide image",
             messenger: "Share via Messenger",
             line: "Share via LINE",
-            copyLink: "Copy link",
+            moreShare: "More sharing",
             tapToContinue: "Tap to see your reading"
         },
         comment: {
@@ -355,7 +357,9 @@ const translations = {
         image: {
             selectFirst: "Please select a card first",
             creating: "Creating image...",
-            saved: "Image saved!"
+            saved: "Image saved!",
+            share: "Share",
+            download: "Save Image"
         },
         sections: {
             popular: "✦ Popular",
@@ -472,7 +476,7 @@ const translations = {
             wideImage: "宽图",
             messenger: "分享到Messenger",
             line: "分享到LINE",
-            copyLink: "复制链接",
+            moreShare: "更多分享",
             tapToContinue: "点击查看解读"
         },
         comment: {
@@ -553,7 +557,9 @@ const translations = {
         image: {
             selectFirst: "请先选择一张牌",
             creating: "正在生成图片...",
-            saved: "图片保存成功！"
+            saved: "图片保存成功！",
+            share: "分享",
+            download: "保存图片"
         },
         sections: {
             popular: "✦ 热门",
@@ -670,7 +676,7 @@ const translations = {
             wideImage: "寬圖",
             messenger: "分享到Messenger",
             line: "分享到LINE",
-            copyLink: "複製連結",
+            moreShare: "更多分享",
             tapToContinue: "點擊查看解讀"
         },
         comment: {
@@ -751,7 +757,9 @@ const translations = {
         image: {
             selectFirst: "請先選擇一張牌",
             creating: "正在產生圖片...",
-            saved: "圖片儲存成功！"
+            saved: "圖片儲存成功！",
+            share: "分享",
+            download: "儲存圖片"
         },
         sections: {
             popular: "✦ 熱門",
@@ -868,7 +876,7 @@ const translations = {
             wideImage: "와이드 이미지",
             messenger: "메신저로 공유",
             line: "LINE으로 공유",
-            copyLink: "링크 복사",
+            moreShare: "더 공유하기",
             tapToContinue: "탭하여 해석 보기"
         },
         comment: {
@@ -949,7 +957,9 @@ const translations = {
         image: {
             selectFirst: "먼저 카드를 선택해주세요",
             creating: "이미지 생성 중...",
-            saved: "이미지 저장 완료!"
+            saved: "이미지 저장 완료!",
+            share: "공유",
+            download: "이미지 저장"
         },
         sections: {
             popular: "✦ 인기",
@@ -1066,7 +1076,7 @@ const translations = {
             wideImage: "ワイド画像",
             messenger: "メッセンジャーでシェア",
             line: "LINEでシェア",
-            copyLink: "リンクをコピー",
+            moreShare: "その他の共有",
             tapToContinue: "タップして占い結果を見る"
         },
         comment: {
@@ -1147,7 +1157,9 @@ const translations = {
         image: {
             selectFirst: "先にカードを選んでください",
             creating: "画像を作成中...",
-            saved: "画像を保存しました！"
+            saved: "画像を保存しました！",
+            share: "共有",
+            download: "画像を保存"
         },
         sections: {
             popular: "✦ 人気",
@@ -1264,7 +1276,7 @@ const translations = {
             wideImage: "Image large",
             messenger: "Partager via Messenger",
             line: "Partager via LINE",
-            copyLink: "Copier le lien",
+            moreShare: "Plus de partage",
             tapToContinue: "Appuyez pour voir votre tirage"
         },
         comment: {
@@ -1345,7 +1357,9 @@ const translations = {
         image: {
             selectFirst: "Veuillez d'abord choisir une carte",
             creating: "Création de l'image...",
-            saved: "Image enregistrée !"
+            saved: "Image enregistrée !",
+            share: "Partager",
+            download: "Enregistrer"
         },
         sections: {
             popular: "✦ Populaire",
