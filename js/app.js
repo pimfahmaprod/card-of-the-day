@@ -2544,7 +2544,7 @@ function dismissRevealOverlay() {
     document.body.appendChild(scrollHint);
     setTimeout(function() { scrollHint.classList.add('visible'); }, 500);
 
-    // Step 4: Dismiss fully — slide up and remove overlay
+    // Step 4: Dismiss fully — stash overlay (keep content for re-open)
     var _dismissed = false;
     function fullyDismiss() {
         if (_dismissed) return;
@@ -2556,13 +2556,15 @@ function dismissRevealOverlay() {
         overlay.classList.add('closing');
         setTimeout(function() {
             overlay.classList.remove('active', 'minimized', 'closing');
+            overlay.classList.add('stashed');
             overlay.style.transform = '';
-            document.getElementById('revealFanWrapper').innerHTML = '';
             cardInfo.classList.remove('switching');
-            document.getElementById('revealCardInfoName').textContent = '';
-            document.getElementById('revealCardInfoQuote').textContent = '';
             document.getElementById('revealPrompt').style.opacity = '';
             if (scrollHint.parentNode) scrollHint.remove();
+            // Add view-cards button on sticky card
+            _addRevealReopenBtn();
+            // Enable pull-down to reopen
+            _initPullDownToReveal();
         }, 400);
     }
 
@@ -2580,6 +2582,94 @@ function dismissRevealOverlay() {
 
     // Auto-dismiss after 3.5 seconds
     var _autoDismiss = setTimeout(fullyDismiss, 3500);
+}
+
+// ── Re-open reveal overlay from result page ──
+
+function _addRevealReopenBtn() {
+    var sticky = document.getElementById('resultStickyCard');
+    if (!sticky || sticky.querySelector('.reveal-reopen-btn')) return;
+    var btn = document.createElement('button');
+    btn.className = 'reveal-reopen-btn';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="2" y="3" width="8" height="12" rx="1.5"/><rect x="14" y="3" width="8" height="12" rx="1.5"/><path d="M6 19l6-3 6 3"/></svg>';
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        reopenRevealOverlay();
+    });
+    sticky.appendChild(btn);
+}
+
+function _removeRevealReopenBtn() {
+    var btn = document.querySelector('.reveal-reopen-btn');
+    if (btn) btn.remove();
+}
+
+var _pullDownTouchY = 0;
+var _pullDownHandler = null;
+var _pullDownStartHandler = null;
+
+function _initPullDownToReveal() {
+    _destroyPullDownToReveal();
+    var resultPanel = document.getElementById('resultPanel');
+    _pullDownStartHandler = function(e) { _pullDownTouchY = e.touches[0].clientY; };
+    _pullDownHandler = function(e) {
+        if (resultPanel.scrollTop > 0) return;
+        var dy = e.touches[0].clientY - _pullDownTouchY;
+        if (dy > 70) {
+            _pullDownTouchY = 9999; // prevent re-trigger
+            reopenRevealOverlay();
+        }
+    };
+    resultPanel.addEventListener('touchstart', _pullDownStartHandler, { passive: true });
+    resultPanel.addEventListener('touchmove', _pullDownHandler, { passive: true });
+}
+
+function _destroyPullDownToReveal() {
+    var resultPanel = document.getElementById('resultPanel');
+    if (_pullDownStartHandler) resultPanel.removeEventListener('touchstart', _pullDownStartHandler);
+    if (_pullDownHandler) resultPanel.removeEventListener('touchmove', _pullDownHandler);
+    _pullDownStartHandler = null;
+    _pullDownHandler = null;
+}
+
+function reopenRevealOverlay() {
+    var overlay = document.getElementById('revealOverlay');
+    if (!overlay.classList.contains('stashed')) return;
+    var fanWrapper = document.getElementById('revealFanWrapper');
+    if (!fanWrapper.innerHTML.trim()) return; // no content to show
+
+    overlay.classList.remove('stashed');
+    overlay.classList.add('active', 'minimized');
+
+    // Show card info of the last revealed card
+    var cardInfo = document.getElementById('revealCardInfo');
+    cardInfo.classList.add('visible');
+    cardInfo.classList.remove('switching');
+
+    // Dismiss on tap or swipe up
+    function _closeback() {
+        overlay.removeEventListener('click', _closeback);
+        overlay.removeEventListener('touchstart', _tsHandler);
+        overlay.removeEventListener('touchend', _teHandler);
+        overlay.classList.add('closing');
+        setTimeout(function() {
+            overlay.classList.remove('active', 'minimized', 'closing');
+            overlay.classList.add('stashed');
+        }, 400);
+    }
+
+    setTimeout(function() {
+        overlay.addEventListener('click', _closeback);
+    }, 300);
+
+    // Swipe up to close
+    var _ty = 0;
+    function _tsHandler(e) { _ty = e.touches[0].clientY; }
+    function _teHandler(e) {
+        if (_ty - e.changedTouches[0].clientY > 50) _closeback();
+    }
+    overlay.addEventListener('touchstart', _tsHandler, { passive: true });
+    overlay.addEventListener('touchend', _teHandler, { passive: true });
 }
 
 // Select card
@@ -4221,13 +4311,17 @@ function goToLandingPage() {
     clearCategoryTheme();
     hideMultiPickIndicator();
 
-    // Clean up reveal overlay if still minimized
+    // Fully clean up reveal overlay (destroy content)
     var _revealOv = document.getElementById('revealOverlay');
-    _revealOv.classList.remove('active', 'minimized', 'closing');
+    _revealOv.classList.remove('active', 'minimized', 'closing', 'stashed');
     _revealOv.style.transform = '';
     document.getElementById('revealFanWrapper').innerHTML = '';
-    var _scrollHint = _revealOv.querySelector('.reveal-scroll-hint');
+    document.getElementById('revealCardInfoName').textContent = '';
+    document.getElementById('revealCardInfoQuote').textContent = '';
+    var _scrollHint = document.querySelector('.reveal-scroll-hint');
     if (_scrollHint) _scrollHint.remove();
+    _removeRevealReopenBtn();
+    _destroyPullDownToReveal();
 
     // Restore sticky card to single-card layout
     var _sticky = document.getElementById('resultStickyCard');
@@ -8124,7 +8218,7 @@ function drawMultiVerticalLayout(ctx, cardImages, width, height, colors) {
     curY += 25;
 
     // --- Two-column area: cards left, text right ---
-    var footerH = 140; // Space for footer + jubpai.com promo
+    var footerH = 95; // Space for footer row
     var padL = 60;
     var padR = 55;
     var columnGap = 30;
@@ -8221,8 +8315,8 @@ function drawMultiVerticalLayout(ctx, cardImages, width, height, colors) {
     drawFooterWithPromo(ctx, {
         iconSize: 20,
         centerX: width / 2,
-        footerY: height - 130,
-        width: width,
+        footerY: height - 92,
+        width: width - 100,
         color: 'rgba(' + colors.lightRgb + ', 0.45)',
         accentColor: colors.accent || '#C8A96E'
     });
@@ -8251,7 +8345,7 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
 
     // --- 2x2 Grid layout (or 2+1 for 3 cards) ---
     var gridTop = safePad + 45;
-    var footerH = 90; // Space for footer + jubpai.com promo
+    var footerH = 70; // Space for footer row
     var colGap = 30;
     var rowGap = 14;
     var availH = height - gridTop - footerH - 10;
@@ -8349,10 +8443,10 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
 
     // Footer with promo
     drawFooterWithPromo(ctx, {
-        iconSize: 14,
+        iconSize: 13,
         centerX: width / 2,
-        footerY: height - 85,
-        width: width,
+        footerY: height - 80,
+        width: width - 120,
         color: 'rgba(' + colors.lightRgb + ', 0.45)',
         accentColor: colors.accent || '#C8A96E',
         compact: true
@@ -8367,7 +8461,7 @@ function drawMultiWideLayout(ctx, cardImages, width, height, colors) {
     var padL = 50;
     var padR = 50;
     var padT = 48;
-    var footerH = 70;
+    var footerH = 55;
     var cardGap = 20;
     var textH = 55; // space for position + name below cards
 
@@ -8462,8 +8556,8 @@ function drawMultiWideLayout(ctx, cardImages, width, height, colors) {
     drawFooterWithPromo(ctx, {
         iconSize: 10,
         centerX: width / 2,
-        footerY: height - 90,
-        width: width,
+        footerY: height - 66,
+        width: width - 80,
         color: 'rgba(' + colors.lightRgb + ', 0.4)',
         accentColor: colors.accent || '#C8A96E',
         compact: true
@@ -8588,7 +8682,7 @@ function drawLineIcon(ctx, x, y, size, color) {
     ctx.fillText('L', x + size/2, y + size * 0.68);
 }
 
-// Unified footer with social icons + jubpai.com promo
+// Unified footer: social left, jubpai.com right — same row
 // opts: { iconSize, centerX, footerY, width, color, accentColor, compact }
 function drawFooterWithPromo(ctx, opts) {
     var iconSize = opts.iconSize || 14;
@@ -8597,56 +8691,52 @@ function drawFooterWithPromo(ctx, opts) {
     var accentColor = opts.accentColor || '#C8A96E';
     var compact = opts.compact || false;
     var centerX = opts.centerX;
+    var areaW = opts.width || 600;
 
-    // --- Row 1: Social icons + text ---
-    var leftIconsWidth = iconSize * 1.4 * 3 + iconSize;
-    var gap = compact ? 25 : 40;
-    var rightIconWidth = iconSize;
-    var totalIconsWidth = leftIconsWidth + gap + rightIconWidth + (compact ? 80 : 110);
-    var startX = centerX - totalIconsWidth / 2;
+    var leftX = centerX - areaW / 2 + (compact ? 10 : 20);
+    var rightX = centerX + areaW / 2 - (compact ? 10 : 20);
 
-    drawSocialIcons(ctx, startX, footerY, iconSize, color);
-    ctx.textAlign = 'center';
-    var labelSize = compact ? 10 : 12;
+    // --- Left side: Social icons row + labels ---
+    var leftIconsEndX = drawSocialIcons(ctx, leftX, footerY, iconSize, color);
+    var lineGap = compact ? 8 : 12;
+    drawLineIcon(ctx, leftIconsEndX + lineGap, footerY, iconSize, color);
+
+    // Labels below icons
+    var labelSize = compact ? 9 : 11;
+    var labelY = footerY + iconSize + (compact ? 11 : 14);
     ctx.font = labelSize + 'px "Prompt", sans-serif';
     ctx.fillStyle = color;
-    ctx.fillText('Pimfahmaprod', startX + leftIconsWidth / 2, footerY + iconSize + (compact ? 12 : 16));
+    ctx.textAlign = 'left';
+    ctx.fillText('Pimfahmaprod · Line: @Pimfah', leftX, labelY);
 
-    var lineIconX = startX + leftIconsWidth + gap;
-    drawLineIcon(ctx, lineIconX, footerY, iconSize, color);
-    ctx.textAlign = 'center';
-    ctx.font = labelSize + 'px "Prompt", sans-serif';
-    ctx.fillStyle = color;
-    ctx.fillText('Line: @Pimfah', lineIconX + iconSize / 2, footerY + iconSize + (compact ? 12 : 16));
+    // --- Right side: jubpai.com promo ---
+    var promoSize = compact ? 14 : 17;
+    var promoMidY = footerY + iconSize * 0.35;
 
-    // --- Row 2: jubpai.com promo ---
-    var promoY = footerY + iconSize + (compact ? 28 : 36);
-    var promoSize = compact ? 13 : 15;
-
-    // Glow effect behind text
+    // Glow effect
     ctx.save();
     ctx.shadowColor = accentColor;
-    ctx.shadowBlur = 12;
-    ctx.textAlign = 'center';
+    ctx.shadowBlur = 15;
+    ctx.textAlign = 'right';
     ctx.font = 'bold ' + promoSize + 'px "Cormorant Garamond", "Prompt", serif';
     ctx.fillStyle = accentColor;
-    ctx.fillText('✧  jubpai.com  ✧', centerX, promoY);
+    ctx.fillText('✧  jubpai.com  ✧', rightX, promoMidY);
     ctx.restore();
 
-    // Draw again without shadow for crisp text
-    ctx.textAlign = 'center';
+    // Crisp text on top
+    ctx.textAlign = 'right';
     ctx.font = 'bold ' + promoSize + 'px "Cormorant Garamond", "Prompt", serif';
     ctx.fillStyle = accentColor;
-    ctx.fillText('✧  jubpai.com  ✧', centerX, promoY);
+    ctx.fillText('✧  jubpai.com  ✧', rightX, promoMidY);
 
-    // Subtext
+    // Subtext below
     var subSize = compact ? 9 : 11;
     ctx.font = subSize + 'px "Prompt", sans-serif';
-    ctx.fillStyle = 'rgba(200, 169, 110, 0.6)';
-    ctx.fillText('จับไพ่รายวัน ฟรี!', centerX, promoY + (compact ? 14 : 17));
+    ctx.fillStyle = 'rgba(200, 169, 110, 0.55)';
+    ctx.textAlign = 'right';
+    ctx.fillText('จับไพ่รายวัน ฟรี!', rightX, promoMidY + (compact ? 14 : 18));
 
-    // Return total height used
-    return promoY + (compact ? 14 : 17) - footerY + 4;
+    return iconSize + (compact ? 11 : 14) + labelSize + 4;
 }
 
 function drawVerticalLayout(ctx, cardImg, width, height) {
@@ -8714,15 +8804,15 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
     // Interpretation text - full text with bounds (preserve paragraph breaks)
     ctx.font = '26px "Prompt", sans-serif';
     ctx.fillStyle = '#C0C8E0';
-    const maxInterpretY = height - 210; // Leave space for footer + promo
+    const maxInterpretY = height - 140; // Leave space for footer
     wrapTextWithParagraphsCenter(ctx, getCardInterpretation(currentCardData), width / 2, interpretY + 110, width - 160, 38, maxInterpretY);
 
     // Footer with promo
     drawFooterWithPromo(ctx, {
         iconSize: 22,
         centerX: width / 2,
-        footerY: height - 150,
-        width: width,
+        footerY: height - 100,
+        width: width - 100,
         color: 'rgba(160, 180, 220, 0.6)',
         accentColor: '#C8A96E'
     });
@@ -8791,15 +8881,15 @@ function drawSquareLayout(ctx, cardImg, width, height) {
     // Interpretation - full text with bounds (preserve paragraph breaks)
     ctx.font = '17px "Prompt", sans-serif';
     ctx.fillStyle = '#C0C8E0';
-    const maxInterpretY = height - safePadding - 130; // Leave space for footer + promo
+    const maxInterpretY = height - safePadding - 80; // Leave space for footer
     wrapTextWithParagraphs(ctx, getCardInterpretation(currentCardData), textX, 360, textWidth, 25, maxInterpretY);
 
     // Footer with promo (centered in the text column area)
     var textCenterX = textX + textWidth / 2;
     drawFooterWithPromo(ctx, {
-        iconSize: 15,
+        iconSize: 13,
         centerX: textCenterX,
-        footerY: height - safePadding - 65,
+        footerY: height - safePadding - 38,
         width: textWidth,
         color: 'rgba(160, 180, 220, 0.55)',
         accentColor: '#C8A96E',
@@ -8867,7 +8957,7 @@ function drawWideLayout(ctx, cardImg, width, height) {
     // Interpretation - full text with bounds (preserve paragraph breaks)
     ctx.font = '16px "Prompt", sans-serif';
     ctx.fillStyle = '#C0C8E0';
-    const maxInterpretY = height - 120; // Leave space for footer + promo within border
+    const maxInterpretY = height - 85; // Leave space for footer within border
     wrapTextWithParagraphs(ctx, getCardInterpretation(currentCardData), textX, 260, textWidth, 22, maxInterpretY);
 
     // Footer with promo (centered in text column area, within inner border)
@@ -8875,7 +8965,7 @@ function drawWideLayout(ctx, cardImg, width, height) {
     drawFooterWithPromo(ctx, {
         iconSize: 11,
         centerX: textCenterX,
-        footerY: height - 95,
+        footerY: height - 68,
         width: textWidth,
         color: 'rgba(160, 180, 220, 0.55)',
         accentColor: '#C8A96E',

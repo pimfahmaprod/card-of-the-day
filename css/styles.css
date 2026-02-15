@@ -9841,6 +9841,54 @@ footer {
     50% { transform: translateY(6px); opacity: 1; }
 }
 
+/* ── Stashed state: hidden but content preserved ── */
+.reveal-overlay.stashed {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* ── Reopen button on sticky card ── */
+.reveal-reopen-btn {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    z-index: 11;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(154, 170, 212, 0.2);
+    border-radius: 50%;
+    background: rgba(154, 170, 212, 0.08);
+    color: rgba(192, 204, 228, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.reveal-reopen-btn:hover,
+.reveal-reopen-btn:active {
+    background: rgba(154, 170, 212, 0.18);
+    color: rgba(220, 225, 240, 0.9);
+    border-color: rgba(154, 170, 212, 0.4);
+    box-shadow: 0 0 12px rgba(154, 170, 212, 0.2);
+}
+
+.result-sticky-card.minimized .reveal-reopen-btn {
+    top: 6px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+}
+
+.result-sticky-card.minimized .reveal-reopen-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
 .reveal-overlay-bg {
     position: absolute;
     inset: 0;
