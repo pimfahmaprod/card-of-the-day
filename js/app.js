@@ -1004,17 +1004,8 @@ function preloadImage(src) {
 
 // ── Preload overlay ──
 function createPreloadOverlay() {
-    var overlay = document.createElement('div');
-    overlay.className = 'preload-overlay';
-    overlay.id = 'preloadOverlay';
-    overlay.innerHTML =
-        '<div class="preload-progress-wrap">' +
-            '<div class="preload-label" id="preloadLabel">preparing…</div>' +
-            '<div class="preload-bar-track"><div class="preload-bar-fill" id="preloadFill"></div></div>' +
-            '<div class="preload-percent" id="preloadPercent">0 %</div>' +
-        '</div>';
-    document.body.appendChild(overlay);
-    return overlay;
+    // Overlay is already in HTML — just return it
+    return document.getElementById('preloadOverlay');
 }
 
 function updatePreloadProgress(loaded, total, label) {
