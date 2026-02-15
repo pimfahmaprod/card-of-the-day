@@ -1238,6 +1238,11 @@ async function waitForResources() {
 }
 
 // Background image preloader — does not block page interaction
+var _lazyLoadPaused = false;
+
+function _pauseLazyLoad() { _lazyLoadPaused = true; }
+function _resumeLazyLoad() { _lazyLoadPaused = false; }
+
 function _lazyLoadRemainingImages() {
     var allImages = [];
 
@@ -1266,6 +1271,11 @@ function _lazyLoadRemainingImages() {
 
     function loadNext() {
         if (idx >= allImages.length) return;
+        if (_lazyLoadPaused) {
+            // Retry after a short wait
+            setTimeout(loadNext, 200);
+            return;
+        }
         var src = allImages[idx++];
         preloadImage(src).then(loadNext).catch(loadNext);
     }
@@ -2167,6 +2177,7 @@ function applyCardLayout() {
 // Animate cards from stack to overlapping grid rows (fly from center)
 function animateToGrid() {
     playSoundEffect('cardSpread');
+    _pauseLazyLoad(); // pause background downloads during animation
 
     const grid = document.querySelector('.card-grid');
     const containers = Array.from(document.querySelectorAll('.card-container'));
@@ -2180,8 +2191,8 @@ function animateToGrid() {
     containers.forEach(c => { c.style.opacity = '1'; });
 
     // Deal cards: top-left first → right → next row (grid index 0 flies first)
-    const DELAY_PER_CARD = 12;  // ms between each card flying out
-    const FLY_DURATION = 400;   // ms for each card's flight
+    const DELAY_PER_CARD = 18;  // ms between each card (~1 card per frame at 60fps)
+    const FLY_DURATION = 380;   // ms for each card's flight
 
     // Pre-calculate the center position (where stacked cards are)
     const gridRect = grid.getBoundingClientRect();
@@ -2237,6 +2248,7 @@ function animateToGrid() {
             container.style.setProperty('--float-delay', `${(gridIndex % 10) * 0.3}s`);
             requestAnimationFrame(() => { container.classList.add('floating'); });
         });
+        _resumeLazyLoad(); // resume background downloads after animation
     }, totalAnimTime);
 }
 
