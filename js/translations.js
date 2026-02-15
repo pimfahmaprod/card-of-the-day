@@ -65,6 +65,7 @@ const translations = {
         },
         result: {
             saveImage: "เซฟรูป :",
+            quickSave: "บันทึกรูป",
             share: "บอกต่อ :",
             copy: "คัดลอก",
             acceptProphecy: "น้อมรับคำทำนาย",
@@ -231,6 +232,7 @@ const translations = {
         reveal: {
             tapToReveal: "แตะเพื่อเปิดไพ่",
             tapToContinue: "แตะเพื่อดูคำทำนาย",
+            tapToClose: "แตะเพื่อกลับ",
             skip: "ข้าม ›"
         }
     },
@@ -265,6 +267,7 @@ const translations = {
         },
         result: {
             saveImage: "Save Image:",
+            quickSave: "Save Image",
             share: "Share:",
             copy: "Copy",
             acceptProphecy: "Accept the Prophecy",
@@ -431,6 +434,7 @@ const translations = {
         reveal: {
             tapToReveal: "Tap to reveal",
             tapToContinue: "Tap to see your reading",
+            tapToClose: "Tap to go back",
             skip: "Skip ›"
         }
     },
@@ -465,6 +469,7 @@ const translations = {
         },
         result: {
             saveImage: "保存图片：",
+            quickSave: "保存图片",
             share: "分享：",
             copy: "复制",
             acceptProphecy: "接受预言",
@@ -631,6 +636,7 @@ const translations = {
         reveal: {
             tapToReveal: "点击翻牌",
             tapToContinue: "点击查看解读",
+            tapToClose: "点击返回",
             skip: "跳过 ›"
         }
     },
@@ -665,6 +671,7 @@ const translations = {
         },
         result: {
             saveImage: "儲存圖片：",
+            quickSave: "儲存圖片",
             share: "分享：",
             copy: "複製",
             acceptProphecy: "接受預言",
@@ -831,6 +838,7 @@ const translations = {
         reveal: {
             tapToReveal: "點擊翻牌",
             tapToContinue: "點擊查看解讀",
+            tapToClose: "點擊返回",
             skip: "跳過 ›"
         }
     },
@@ -865,6 +873,7 @@ const translations = {
         },
         result: {
             saveImage: "이미지 저장:",
+            quickSave: "이미지 저장",
             share: "공유:",
             copy: "복사",
             acceptProphecy: "예언 받아들이기",
@@ -1031,6 +1040,7 @@ const translations = {
         reveal: {
             tapToReveal: "탭하여 카드 공개",
             tapToContinue: "탭하여 해석 보기",
+            tapToClose: "탭하여 돌아가기",
             skip: "건너뛰기 ›"
         }
     },
@@ -1065,6 +1075,7 @@ const translations = {
         },
         result: {
             saveImage: "画像を保存：",
+            quickSave: "画像を保存",
             share: "シェア：",
             copy: "コピー",
             acceptProphecy: "予言を受け入れる",
@@ -1231,6 +1242,7 @@ const translations = {
         reveal: {
             tapToReveal: "タップしてカードを開く",
             tapToContinue: "タップして占い結果を見る",
+            tapToClose: "タップして戻る",
             skip: "スキップ ›"
         }
     },
@@ -1265,6 +1277,7 @@ const translations = {
         },
         result: {
             saveImage: "Enregistrer :",
+            quickSave: "Enregistrer",
             share: "Partager :",
             copy: "Copier",
             acceptProphecy: "Accepter la prophétie",
@@ -1431,6 +1444,7 @@ const translations = {
         reveal: {
             tapToReveal: "Appuyez pour révéler",
             tapToContinue: "Appuyez pour voir la lecture",
+            tapToClose: "Appuyez pour revenir",
             skip: "Passer ›"
         }
     }

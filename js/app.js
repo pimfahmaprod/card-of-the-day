@@ -2639,21 +2639,28 @@ function reopenRevealOverlay() {
     if (!fanWrapper.innerHTML.trim()) return; // no content to show
 
     overlay.classList.remove('stashed');
-    overlay.classList.add('active', 'minimized');
+    overlay.classList.add('active');
 
     // Show card info of the last revealed card
     var cardInfo = document.getElementById('revealCardInfo');
     cardInfo.classList.add('visible');
     cardInfo.classList.remove('switching');
 
+    // Show prompt to go back
+    var prompt = document.getElementById('revealPrompt');
+    var tr = translations[currentLang] && translations[currentLang].reveal;
+    prompt.textContent = (tr && tr.tapToClose) || 'Tap to go back';
+    prompt.style.opacity = '';
+
     // Dismiss on tap or swipe up
     function _closeback() {
         overlay.removeEventListener('click', _closeback);
         overlay.removeEventListener('touchstart', _tsHandler);
         overlay.removeEventListener('touchend', _teHandler);
+        prompt.style.opacity = '0';
         overlay.classList.add('closing');
         setTimeout(function() {
-            overlay.classList.remove('active', 'minimized', 'closing');
+            overlay.classList.remove('active', 'closing');
             overlay.classList.add('stashed');
         }, 400);
     }
