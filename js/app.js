@@ -612,6 +612,8 @@ function applyModeVisuals(animate, direction) {
                 startCardRotation();
                 createFloatingSparkles();
             }
+
+            syncMobileHint();
         }, 400);
     } else {
         if (!isSingle) stopFloatingSparkles();
@@ -638,6 +640,8 @@ function applyModeVisuals(animate, direction) {
                 });
             });
         }
+
+        syncMobileHint();
     }
 
     // Update dot indicators
@@ -675,6 +679,8 @@ function applyModeVisuals(animate, direction) {
         } else {
             stopPeekFlips();
         }
+
+        syncMobileHint();
     }
 }
 
@@ -1085,7 +1091,35 @@ function markPageReady() {
             brand.classList.add('revealed');
         }
 
+        // Sync mobile hint
+        syncMobileHint();
+
     }, 600);
+}
+
+// Sync the mobile-only landing hint with the active container's hint
+function syncMobileHint() {
+    var mobileHint = document.getElementById('landingHintMobile');
+    if (!mobileHint) return;
+
+    var containerMap = {
+        'single': document.getElementById('spinningCardContainer'),
+        'three-card': document.getElementById('threeCardContainer'),
+        'four-card': document.getElementById('fourCardContainer'),
+        'ten-card': document.getElementById('tenCardContainer'),
+        'twelve-card': document.getElementById('twelveCardContainer')
+    };
+
+    var activeContainer = containerMap[currentReadingMode];
+    var sourceHint = activeContainer ? activeContainer.querySelector('.card-click-hint') : null;
+
+    if (sourceHint) {
+        mobileHint.textContent = sourceHint.textContent;
+        mobileHint.className = 'landing-hint-mobile';
+        if (sourceHint.classList.contains('loading-state')) mobileHint.classList.add('loading-state');
+        if (sourceHint.classList.contains('ready-state')) mobileHint.classList.add('ready-state');
+        if (sourceHint.classList.contains('coming-soon-state')) mobileHint.classList.add('coming-soon-state');
+    }
 }
 
 // Wait for all resources to load

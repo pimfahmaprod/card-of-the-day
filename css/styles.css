@@ -460,14 +460,14 @@ body {
     transform: rotateY(180deg);
 }
 
-/* iOS Safari: backface-visibility fallback via opacity fade at midpoint */
+/* iOS Safari: backface-visibility fallback via opacity swap at flip midpoint */
 .three-card-front {
     opacity: 0;
-    transition: opacity 0.12s ease 0.2s;
+    transition: opacity 0.01s ease 0.4s;
 }
 .three-card-back {
     opacity: 1;
-    transition: opacity 0.12s ease 0.2s;
+    transition: opacity 0.01s ease 0.4s;
 }
 .three-card-item.peek-flip .three-card-front {
     opacity: 1;
@@ -624,7 +624,7 @@ body {
 
 .three-card-container .card-click-hint {
     position: absolute;
-    bottom: -50px;
+    bottom: -60px;
     left: 50%;
     transform: translateX(-50%);
     font-family: 'Prompt', sans-serif;
@@ -760,14 +760,14 @@ body {
     transform: rotateY(180deg);
 }
 
-/* iOS Safari: backface-visibility fallback via opacity fade at midpoint */
+/* iOS Safari: backface-visibility fallback via opacity swap at flip midpoint */
 .multi-card-front {
     opacity: 0;
-    transition: opacity 0.12s ease 0.2s;
+    transition: opacity 0.01s ease 0.4s;
 }
 .multi-card-back {
     opacity: 1;
-    transition: opacity 0.12s ease 0.2s;
+    transition: opacity 0.01s ease 0.4s;
 }
 .multi-card-item.peek-flip .multi-card-front {
     opacity: 1;
@@ -811,7 +811,7 @@ body {
 
 .multi-card-container .card-click-hint {
     position: absolute;
-    bottom: -45px;
+    bottom: -60px;
     left: 50%;
     transform: translateX(-50%);
     font-family: 'Prompt', sans-serif;
@@ -1837,6 +1837,11 @@ html[lang="ja"] .landing-tagline {
 
 /* Landing Instruction */
 .landing-instruction {
+    display: none;
+}
+
+/* Mobile-only hint (shown at bottom of screen on mobile) */
+.landing-hint-mobile {
     display: none;
 }
 
@@ -4252,6 +4257,7 @@ header {
     z-index: 1002;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.4s ease, visibility 0s 0.4s;
@@ -10423,6 +10429,38 @@ footer {
     .card-click-hint {
         font-size: 0.85rem;
         bottom: -50px;
+        display: none !important;
+    }
+
+    .landing-hint-mobile {
+        display: block;
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: 'Prompt', sans-serif;
+        font-weight: 300;
+        font-size: 0.85rem;
+        color: var(--burgundy);
+        opacity: 0.8;
+        white-space: nowrap;
+        z-index: 5;
+    }
+
+    .landing-hint-mobile.loading-state {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .landing-hint-mobile.ready-state {
+        animation: hintReveal 0.6s ease forwards, pulse 2s ease-in-out 0.6s infinite;
+    }
+
+    .landing-hint-mobile.coming-soon-state {
+        opacity: 0.5;
+    }
+
+    .landing-brand {
+        bottom: 35px;
     }
 
     .card-grid {
@@ -10635,6 +10673,10 @@ footer {
     .card-click-hint {
         font-size: 0.8rem;
         bottom: -50px;
+    }
+
+    .landing-hint-mobile {
+        font-size: 0.8rem;
     }
 
     .card-grid {
