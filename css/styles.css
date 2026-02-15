@@ -460,14 +460,14 @@ body {
     transform: rotateY(180deg);
 }
 
-/* iOS Safari: backface-visibility fallback via opacity swap at flip midpoint */
+/* iOS Safari: backface-visibility fallback via opacity cross-fade at flip midpoint */
 .three-card-front {
     opacity: 0;
-    transition: opacity 0.01s ease 0.35s;
+    transition: opacity 0.2s ease 0.28s;
 }
 .three-card-back {
     opacity: 1;
-    transition: opacity 0.01s ease 0.35s;
+    transition: opacity 0.2s ease 0.28s;
 }
 .three-card-item.peek-flip .three-card-front {
     opacity: 1;
@@ -760,14 +760,14 @@ body {
     transform: rotateY(180deg);
 }
 
-/* iOS Safari: backface-visibility fallback via opacity swap at flip midpoint */
+/* iOS Safari: backface-visibility fallback via opacity cross-fade at flip midpoint */
 .multi-card-front {
     opacity: 0;
-    transition: opacity 0.01s ease 0.35s;
+    transition: opacity 0.2s ease 0.28s;
 }
 .multi-card-back {
     opacity: 1;
-    transition: opacity 0.01s ease 0.35s;
+    transition: opacity 0.2s ease 0.28s;
 }
 .multi-card-item.peek-flip .multi-card-front {
     opacity: 1;
