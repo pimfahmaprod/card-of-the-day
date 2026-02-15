@@ -2887,6 +2887,10 @@ function proceedToMultiResult() {
         var resultPanel = document.getElementById('resultPanel');
         resultPanel.scrollTop = 0;
         resultPanel.classList.add('active');
+
+        // Clear 78 cards from DOM to free GPU/memory for result page
+        var cardGrid = document.getElementById('cardGrid');
+        if (cardGrid) cardGrid.innerHTML = '';
     }, 200);
 
     isAnimating = false;
@@ -2968,6 +2972,12 @@ function proceedToResult(card, skipFlyAnimation) {
         selectedCardElement.style.transition = 'opacity 0.5s ease';
         selectedCardElement.style.opacity = '0';
     }
+
+    // Clear 78 cards from DOM after transition to free GPU/memory
+    setTimeout(function() {
+        var cardGrid = document.getElementById('cardGrid');
+        if (cardGrid) cardGrid.innerHTML = '';
+    }, 600);
 
     isAnimating = false;
 
@@ -4801,7 +4811,7 @@ function createFeedCard(comment) {
             if (mc.positionKey && translations[currentLang] && translations[currentLang].landing) {
                 posLabel = translations[currentLang].landing[mc.positionKey] || mc.positionKey;
             }
-            imageHtml += '<div class="feed-multi-card-item">' +
+            imageHtml += '<div class="feed-multi-card-item' + (mi === 0 ? ' active' : '') + '" data-index="' + mi + '">' +
                 '<img src="images/tarot/' + escapeHtml(mc.cardImage || mc.cardName + '.png') + '" alt="' + escapeHtml(mc.cardName) + '" onerror="this.style.display=\'none\'">' +
                 '<span class="feed-multi-card-name">' + escapeHtml(getCardName(mc.cardName) || mc.cardName) + '</span>' +
                 (posLabel ? '<span class="feed-multi-card-pos">' + escapeHtml(posLabel) + '</span>' : '') +
@@ -4821,7 +4831,7 @@ function createFeedCard(comment) {
             if (mTarot) {
                 var mQuote = getCardQuote(mTarot);
                 var mInterp = getCardInterpretation(mTarot);
-                expandedInfoHtml += '<div class="feed-multi-interp">';
+                expandedInfoHtml += '<div class="feed-multi-interp" data-index="' + mj + '"' + (mj !== 0 ? ' style="display:none"' : '') + '>';
                 expandedInfoHtml += '<div class="feed-multi-interp-pos">✦ ' + escapeHtml(mPos) + '</div>';
                 expandedInfoHtml += '<div class="feed-multi-interp-name">' + escapeHtml(getCardName(mCard.cardName) || mCard.cardName) + '</div>';
                 if (mQuote) expandedInfoHtml += '<div class="feed-card-quote">"' + escapeHtml(mQuote) + '"</div>';
@@ -4885,6 +4895,20 @@ function createFeedCard(comment) {
                 '</div>' +
             '</div>' +
         '</div>';
+
+    // Wire up multi-card tab switching
+    if (isMulti) {
+        card.querySelectorAll('.feed-multi-card-item').forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var idx = item.dataset.index;
+                // Switch active thumbnail
+                card.querySelectorAll('.feed-multi-card-item').forEach(function(t) { t.classList.toggle('active', t.dataset.index === idx); });
+                // Switch visible interpretation
+                card.querySelectorAll('.feed-multi-interp').forEach(function(s) { s.style.display = s.dataset.index === idx ? '' : 'none'; });
+            });
+        });
+    }
 
     // Toggle expanded section on card click
     var feedHeader = card.querySelector('.feed-card-header');

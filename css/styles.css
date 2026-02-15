@@ -8909,7 +8909,12 @@ footer {
     border: 1px solid rgba(255, 213, 79, 0.25);
 }
 
-/* Multi-card fan in feed expanded */
+/* Multi-card feed: stack cards above interpretation */
+.feed-card-expanded:has(.feed-multi-cards) {
+    flex-direction: column;
+    align-items: stretch;
+}
+
 .feed-multi-cards {
     display: flex;
     justify-content: center;
@@ -8925,6 +8930,21 @@ footer {
     flex: 1;
     min-width: 0;
     max-width: 100px;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.feed-multi-card-item.active {
+    opacity: 1;
+}
+
+.feed-multi-card-item:not(.active):hover {
+    opacity: 0.7;
+}
+
+.feed-multi-card-item.active img {
+    box-shadow: 0 0 12px rgba(160, 140, 255, 0.4), 0 0 4px rgba(200, 180, 255, 0.3);
 }
 
 .feed-multi-card-item img {
@@ -8956,17 +8976,19 @@ footer {
 .feed-multi-info {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 0;
+    width: 100%;
 }
 
 .feed-multi-interp {
     padding-top: 10px;
-    border-top: 1px solid rgba(154, 170, 212, 0.08);
+    border-top: none;
+    animation: feedInterpFadeIn 0.35s ease;
 }
 
-.feed-multi-interp:first-child {
-    border-top: none;
-    padding-top: 0;
+@keyframes feedInterpFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .feed-multi-interp-pos {
