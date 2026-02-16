@@ -3114,13 +3114,12 @@ function proceedToMultiResult() {
         var pLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[s.positionKey]) || s.positionKey;
         var prophecyTitle = (translations[currentLang] && translations[currentLang].result && translations[currentLang].result.prophecyTitle) || 'คำทำนาย';
         html += '<div class="multi-result-section" data-card-index="' + j + '">';
-        html += '<div class="multi-result-position">✦ ' + pLabel + '</div>';
+        html += '<div class="multi-result-position">✦ ' + pLabel + ' ✦</div>';
         html += '<div class="multi-result-card-name">' + getCardName(s.card.name) + '</div>';
         html += '<div class="multi-result-quote">"' + getMultiCardQuote(s.card) + '"</div>';
         html += '<div class="multi-result-glass">';
         html += '<div class="result-section-header">';
-        html += '<svg class="result-section-icon" viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M12 2l2.09 6.26L20.18 9l-4.64 4.14L16.73 20 12 16.77 7.27 20l1.19-6.86L3.82 9l6.09-.74L12 2z" fill="rgba(154,170,212,0.6)" stroke="none"/></svg>';
-        html += '<span>' + prophecyTitle + '</span>';
+        html += '<span>✦ ' + prophecyTitle + ' ✦</span>';
         html += '</div>';
         var interpText = getMultiCardInterpretation(s.card);
         var interpParas = interpText.split(/\n\s*\n/).map(function(p) {
