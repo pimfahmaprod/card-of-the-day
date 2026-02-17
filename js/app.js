@@ -4089,10 +4089,10 @@ function resetCommentForm() {
         </g>
     </svg>`;
 
-    // Create exactly 2 lanterns - left and right, perfectly balanced
+    // Create exactly 2 lanterns - left and right, perfectly balanced with equal margins
     const lanternPositions = [
-        { left: '20%', finalTop: '100px', swingDuration: '3s', dropDelay: '0.5s' },  // Left lantern
-        { left: '80%', finalTop: '100px', swingDuration: '3.2s', dropDelay: '0.7s' } // Right lantern
+        { left: '15%', finalTop: '100px', swingDuration: '3s', dropDelay: '0.5s' },  // Left lantern
+        { left: '85%', finalTop: '100px', swingDuration: '3.2s', dropDelay: '0.7s' } // Right lantern
     ];
 
     lanternPositions.forEach(function(pos) {

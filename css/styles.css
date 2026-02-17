@@ -253,6 +253,7 @@ body {
     top: -200px;
     width: 90px;
     height: 180px;
+    transform: translateX(-50%);
     animation: lanternDrop var(--drop-duration, 2s) ease-out forwards,
                lanternSwing var(--swing-duration, 3s) ease-in-out infinite;
     animation-delay: var(--drop-delay, 0s), calc(var(--drop-delay, 0s) + var(--drop-duration, 2s));
@@ -3335,6 +3336,52 @@ header {
 }
 
 /* Animations removed for simple red envelope design */
+
+/* ===== Mobile Responsive - Red Envelope Card Back ===== */
+@media (max-width: 768px) {
+    .card-back-galaxy::after {
+        inset: 8px;
+        border: 2px solid #FFD700;
+        border-radius: 6px;
+        box-shadow:
+            0 0 0 1px rgba(255, 215, 0, 0.5) inset,
+            0 0 0 4px #C8102E inset,
+            0 0 0 6px #FFD700 inset,
+            0 0 10px rgba(255, 215, 0, 0.3);
+    }
+
+    .card-back-galaxy > img.card-back-seal {
+        max-width: 65%;
+        max-height: 65%;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-back-galaxy::after {
+        inset: 6px;
+        border: 1.5px solid #FFD700;
+        border-radius: 5px;
+        box-shadow:
+            0 0 0 1px rgba(255, 215, 0, 0.5) inset,
+            0 0 0 3px #C8102E inset,
+            0 0 0 5px #FFD700 inset,
+            0 0 8px rgba(255, 215, 0, 0.25);
+    }
+
+    .card-back-galaxy > img.card-back-seal {
+        max-width: 60%;
+        max-height: 60%;
+        filter:
+            brightness(0)
+            invert(1)
+            sepia(1)
+            saturate(2.5)
+            hue-rotate(5deg)
+            brightness(1.2)
+            drop-shadow(0 1px 3px rgba(139, 69, 0, 0.4))
+            drop-shadow(0 0 6px rgba(255, 215, 0, 0.5));
+    }
+}
 
 /* ===== Subtle golden sparkles — twinkling effect for ang pao shimmer ===== */
 
