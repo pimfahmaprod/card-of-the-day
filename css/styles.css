@@ -1943,6 +1943,8 @@ html[lang="ja"] .landing-tagline {
     margin-top: auto;
     margin-bottom: auto;
     transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
+    filter: drop-shadow(0 30px 50px rgba(255, 215, 0, 0.4))
+            drop-shadow(0 15px 30px rgba(0, 0, 0, 0.3));
 }
 
 .spinning-card-wrapper {
@@ -1978,9 +1980,6 @@ html[lang="ja"] .landing-tagline {
     backface-visibility: hidden;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow:
-        0 30px 60px rgba(255, 215, 0, 0.5),
-        0 15px 40px rgba(0, 0, 0, 0.4);
 }
 
 .spinning-card-face img {
@@ -2022,6 +2021,8 @@ html[lang="ja"] .landing-tagline {
 
 .spinning-card-container:hover {
     transform: scale(1.05);
+    filter: drop-shadow(0 35px 60px rgba(255, 215, 0, 0.5))
+            drop-shadow(0 18px 35px rgba(0, 0, 0, 0.35));
 }
 
 /* Sparkle particles - floating stars */
@@ -3539,15 +3540,20 @@ header {
 
 /* Note: ::after is used for the gold border frame above */
 
-/* Hide all decorative elements for clean red envelope look */
+/* Hide only orbit, aurora, and shooting stars for clean red envelope look */
+/* Keep galaxy-stars, galaxy-stars-2, galaxy-shimmer for sparkle particles */
 .galaxy-bg,
-.galaxy-stars,
-.galaxy-stars-2,
-.galaxy-shimmer,
 .galaxy-orbit,
 .galaxy-aurora,
 .galaxy-shooting-star {
     display: none !important;
+}
+
+/* Enable particles for sparkle effect */
+.galaxy-stars,
+.galaxy-stars-2,
+.galaxy-shimmer {
+    display: block !important;
 }
 
 /* ── Grid cards: static gold glow for performance ── */
@@ -13542,18 +13548,35 @@ footer {
 }
 
 .multi-result-glass {
-    background: rgba(15, 22, 55, 0.6);
-    border: 1px solid rgba(255, 215, 0, 0.12);
-    border-radius: 14px;
-    padding: 18px 16px;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: linear-gradient(135deg, rgba(13, 19, 51, 0.85), rgba(20, 27, 69, 0.75));
+    border: 2px solid;
+    border-image: linear-gradient(135deg, rgba(220, 38, 38, 0.4), rgba(234, 179, 8, 0.3), rgba(192, 200, 224, 0.2)) 1;
+    border-radius: 16px;
+    padding: 20px 18px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.08),
+                0 0 40px rgba(234, 179, 8, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.multi-result-glass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(234, 179, 8, 0.3), rgba(220, 38, 38, 0.3), transparent);
 }
 
 .multi-result-interpretation {
     font-size: 0.92rem;
     line-height: 1.75;
-    color: rgba(255, 245, 220, 0.85);
+    color: rgba(210, 215, 235, 0.92);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Divider between cards */
@@ -13567,7 +13590,13 @@ footer {
 .multi-result-divider span {
     flex: 1;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(220, 38, 38, 0.3),
+        rgba(234, 179, 8, 0.35),
+        rgba(220, 38, 38, 0.3),
+        transparent);
+    box-shadow: 0 0 8px rgba(234, 179, 8, 0.2);
 }
 
 @keyframes multiCardFadeIn {
@@ -13785,3 +13814,531 @@ footer {
     }
 }
 
+
+/* ===== CORRECTED: Proper 富 character sizing with correct selectors ===== */
+
+/* Landing page spinning card - needs to target the actual class */
+.spinning-card-back.card-back-galaxy::before {
+    font-size: 85px !important;
+}
+
+/* Four-card fan - perfect size (user confirmed) */
+.four-card-fan .card-back-galaxy::before {
+    font-size: 85px !important;
+}
+
+/* Blessing screen - needs correct selector */
+.blessing-card-back.card-back-galaxy::before {
+    font-size: 85px !important;
+}
+
+/* ===== RESPONSIVE: Corrected selectors ===== */
+
+@media (max-width: 768px) {
+    /* Spinning card - tablet */
+    .spinning-card-back.card-back-galaxy::before {
+        font-size: 70px !important;
+    }
+    
+    /* Four-card fan - tablet */
+    .four-card-fan .card-back-galaxy::before {
+        font-size: 70px !important;
+    }
+    
+    /* Blessing screen - tablet */
+    .blessing-card-back.card-back-galaxy::before {
+        font-size: 70px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Spinning card - mobile */
+    .spinning-card-back.card-back-galaxy::before {
+        font-size: 60px !important;
+    }
+    
+    /* Four-card fan - mobile */
+    .four-card-fan .card-back-galaxy::before {
+        font-size: 60px !important;
+    }
+    
+    /* Blessing screen - mobile */
+    .blessing-card-back.card-back-galaxy::before {
+        font-size: 60px !important;
+    }
+}
+
+/* Center card in main selection screen */
+.card-face.card-back.card-back-galaxy::before {
+    font-size: 85px !important;
+}
+
+@media (max-width: 768px) {
+    .card-face.card-back.card-back-galaxy::before {
+        font-size: 70px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-face.card-back.card-back-galaxy::before {
+        font-size: 60px !important;
+    }
+}
+
+/* ===== NEW APPROACH: Large centered box with centered text ===== */
+
+/* Base styling - large box centered on card */
+.card-back-galaxy::before {
+    /* Make the box larger */
+    width: 80% !important;
+    height: 80% !important;
+    max-width: 300px !important;
+    max-height: 500px !important;
+    
+    /* Center the box on card */
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    
+    /* Center text within box */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    
+    /* Make text much larger */
+    font-size: 120px !important;
+    line-height: 1 !important;
+}
+
+/* Override for grid - keep small */
+.card-container .card-back-galaxy::before {
+    width: 90% !important;
+    height: 90% !important;
+    font-size: 60px !important;
+}
+
+/* Three cards - larger text in box */
+.three-card-item .card-back-galaxy::before {
+    font-size: 90px !important;
+}
+
+/* Ten cards - medium text */
+.ten-card-fan .card-back-galaxy::before {
+    font-size: 50px !important;
+}
+
+/* Twelve cards - medium text */
+.twelve-card-fan .card-back-galaxy::before {
+    font-size: 45px !important;
+}
+
+/* ===== Responsive adjustments ===== */
+
+@media (max-width: 768px) {
+    .card-back-galaxy::before {
+        font-size: 100px !important;
+    }
+    
+    .three-card-item .card-back-galaxy::before {
+        font-size: 75px !important;
+    }
+    
+    .ten-card-fan .card-back-galaxy::before {
+        font-size: 40px !important;
+    }
+    
+    .twelve-card-fan .card-back-galaxy::before {
+        font-size: 35px !important;
+    }
+    
+    .card-container .card-back-galaxy::before {
+        font-size: 50px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-back-galaxy::before {
+        font-size: 80px !important;
+    }
+    
+    .three-card-item .card-back-galaxy::before {
+        font-size: 60px !important;
+    }
+    
+    .ten-card-fan .card-back-galaxy::before {
+        font-size: 32px !important;
+    }
+    
+    .twelve-card-fan .card-back-galaxy::before {
+        font-size: 28px !important;
+    }
+    
+    .card-container .card-back-galaxy::before {
+        font-size: 40px !important;
+    }
+}
+
+/* ===== ADJUSTED: Font sizes proportional to card sizes ===== */
+
+/* Large cards (spinning, 4-card, center, blessing) - biggest text */
+.spinning-card-back.card-back-galaxy::before,
+.four-card-fan .card-back-galaxy::before,
+.card-face.card-back.card-back-galaxy::before,
+.blessing-card-back.card-back-galaxy::before {
+    font-size: 140px !important;
+}
+
+/* Three cards - medium-large */
+.three-card-item .card-back-galaxy::before {
+    font-size: 110px !important;
+}
+
+/* Grid cards - small */
+.card-container .card-back-galaxy::before {
+    font-size: 55px !important;
+}
+
+/* Ten cards - very small */
+.ten-card-fan .card-back-galaxy::before {
+    font-size: 42px !important;
+}
+
+/* Twelve cards - very small */
+.twelve-card-fan .card-back-galaxy::before {
+    font-size: 38px !important;
+}
+
+/* ===== Tablet responsive ===== */
+@media (max-width: 768px) {
+    .spinning-card-back.card-back-galaxy::before,
+    .four-card-fan .card-back-galaxy::before,
+    .card-face.card-back.card-back-galaxy::before,
+    .blessing-card-back.card-back-galaxy::before {
+        font-size: 110px !important;
+    }
+    
+    .three-card-item .card-back-galaxy::before {
+        font-size: 85px !important;
+    }
+    
+    .card-container .card-back-galaxy::before {
+        font-size: 45px !important;
+    }
+    
+    .ten-card-fan .card-back-galaxy::before {
+        font-size: 34px !important;
+    }
+    
+    .twelve-card-fan .card-back-galaxy::before {
+        font-size: 30px !important;
+    }
+}
+
+/* ===== Mobile responsive ===== */
+@media (max-width: 480px) {
+    .spinning-card-back.card-back-galaxy::before,
+    .four-card-fan .card-back-galaxy::before,
+    .card-face.card-back.card-back-galaxy::before,
+    .blessing-card-back.card-back-galaxy::before {
+        font-size: 90px !important;
+    }
+    
+    .three-card-item .card-back-galaxy::before {
+        font-size: 70px !important;
+    }
+    
+    .card-container .card-back-galaxy::before {
+        font-size: 38px !important;
+    }
+    
+    .ten-card-fan .card-back-galaxy::before {
+        font-size: 28px !important;
+    }
+    
+    .twelve-card-fan .card-back-galaxy::before {
+        font-size: 25px !important;
+    }
+}
+
+/* ===== FIX: Gold border frame sized properly for each card type ===== */
+
+/* Large cards - standard border */
+.spinning-card-back.card-back-galaxy::after,
+.four-card-fan .card-back-galaxy::after,
+.card-face.card-back.card-back-galaxy::after,
+.blessing-card-back.card-back-galaxy::after {
+    inset: 10px !important;
+    border: 3px solid #FFD700 !important;
+    border-radius: 8px !important;
+}
+
+/* Three cards - medium border */
+.three-card-item .card-back-galaxy::after {
+    inset: 8px !important;
+    border: 2.5px solid #FFD700 !important;
+    border-radius: 7px !important;
+}
+
+/* Grid cards - smaller border */
+.card-container .card-back-galaxy::after {
+    inset: 5px !important;
+    border: 1.5px solid #FFD700 !important;
+    border-radius: 4px !important;
+    box-shadow:
+        0 0 0 0.5px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 3px #C8102E inset,
+        0 0 0 5px #FFD700 inset,
+        0 0 8px rgba(255, 215, 0, 0.3) !important;
+}
+
+/* Ten cards - very small border */
+.ten-card-fan .card-back-galaxy::after {
+    inset: 4px !important;
+    border: 1px solid #FFD700 !important;
+    border-radius: 3px !important;
+    box-shadow:
+        0 0 0 0.5px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 2px #C8102E inset,
+        0 0 0 3px #FFD700 inset,
+        0 0 5px rgba(255, 215, 0, 0.3) !important;
+}
+
+/* Twelve cards - very small border */
+.twelve-card-fan .card-back-galaxy::after {
+    inset: 3px !important;
+    border: 1px solid #FFD700 !important;
+    border-radius: 3px !important;
+    box-shadow:
+        0 0 0 0.5px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 2px #C8102E inset,
+        0 0 0 3px #FFD700 inset,
+        0 0 5px rgba(255, 215, 0, 0.3) !important;
+}
+
+/* ===== Tablet responsive borders ===== */
+@media (max-width: 768px) {
+    .spinning-card-back.card-back-galaxy::after,
+    .four-card-fan .card-back-galaxy::after,
+    .card-face.card-back.card-back-galaxy::after,
+    .blessing-card-back.card-back-galaxy::after {
+        inset: 8px !important;
+        border: 2.5px solid #FFD700 !important;
+        border-radius: 7px !important;
+    }
+    
+    .three-card-item .card-back-galaxy::after {
+        inset: 6px !important;
+        border: 2px solid #FFD700 !important;
+        border-radius: 6px !important;
+    }
+    
+    .card-container .card-back-galaxy::after {
+        inset: 4px !important;
+        border: 1.5px solid #FFD700 !important;
+    }
+    
+    .ten-card-fan .card-back-galaxy::after,
+    .twelve-card-fan .card-back-galaxy::after {
+        inset: 3px !important;
+        border: 1px solid #FFD700 !important;
+    }
+}
+
+/* ===== Mobile responsive borders ===== */
+@media (max-width: 480px) {
+    .spinning-card-back.card-back-galaxy::after,
+    .four-card-fan .card-back-galaxy::after,
+    .card-face.card-back.card-back-galaxy::after,
+    .blessing-card-back.card-back-galaxy::after {
+        inset: 6px !important;
+        border: 2px solid #FFD700 !important;
+        border-radius: 6px !important;
+    }
+    
+    .three-card-item .card-back-galaxy::after {
+        inset: 5px !important;
+        border: 1.5px solid #FFD700 !important;
+        border-radius: 5px !important;
+    }
+    
+    .card-container .card-back-galaxy::after {
+        inset: 3px !important;
+        border: 1px solid #FFD700 !important;
+    }
+    
+    .ten-card-fan .card-back-galaxy::after,
+    .twelve-card-fan .card-back-galaxy::after {
+        inset: 2px !important;
+        border: 0.8px solid #FFD700 !important;
+    }
+}
+
+/* ===== FIX: Reduce font size for 78-card grid ===== */
+
+/* Grid cards - much smaller to fit properly */
+.card-container .card-back-galaxy::before {
+    font-size: 42px !important;
+}
+
+@media (max-width: 768px) {
+    .card-container .card-back-galaxy::before {
+        font-size: 35px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-container .card-back-galaxy::before {
+        font-size: 30px !important;
+    }
+}
+
+/* ===== FIX: Reduce grid font to 50% ===== */
+
+.card-container .card-back-galaxy::before {
+    font-size: 22px !important;
+}
+
+@media (max-width: 768px) {
+    .card-container .card-back-galaxy::before {
+        font-size: 18px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-container .card-back-galaxy::before {
+        font-size: 15px !important;
+    }
+}
+
+/* ===== FINAL FIX: More specific selector for 78-card grid ===== */
+
+/* Use .card-grid for higher specificity */
+.card-grid .card-container .card-back-galaxy::before {
+    font-size: 22px !important;
+}
+
+@media (max-width: 768px) {
+    .card-grid .card-container .card-back-galaxy::before {
+        font-size: 18px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-grid .card-container .card-back-galaxy::before {
+        font-size: 15px !important;
+    }
+}
+
+/* ===== BALANCED: Perfect size for 78-card grid ===== */
+
+.card-grid .card-container .card-back-galaxy::before {
+    font-size: 32px !important;
+}
+
+@media (max-width: 768px) {
+    .card-grid .card-container .card-back-galaxy::before {
+        font-size: 26px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-grid .card-container .card-back-galaxy::before {
+        font-size: 22px !important;
+    }
+}
+
+/* ===== LARGER: 2x size for 78-card grid ===== */
+
+.card-grid .card-container .card-back-galaxy::before {
+    font-size: 64px !important;
+}
+
+@media (max-width: 768px) {
+    .card-grid .card-container .card-back-galaxy::before {
+        font-size: 52px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-grid .card-container .card-back-galaxy::before {
+        font-size: 44px !important;
+    }
+}
+
+/* ===== CHINESE PATTERNS: Add decorative elements to card back ===== */
+
+/* Add Chinese cloud patterns in corners */
+.card-back-galaxy::after {
+    background-image:
+        /* Corner clouds - traditional Chinese style */
+        radial-gradient(ellipse 30px 20px at top 20px left 20px, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.08) 40%, transparent 70%),
+        radial-gradient(ellipse 25px 18px at top 25px left 35px, rgba(255, 215, 0, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 30px 20px at top 20px right 20px, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.08) 40%, transparent 70%),
+        radial-gradient(ellipse 25px 18px at top 25px right 35px, rgba(255, 215, 0, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 30px 20px at bottom 20px left 20px, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.08) 40%, transparent 70%),
+        radial-gradient(ellipse 25px 18px at bottom 25px left 35px, rgba(255, 215, 0, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 30px 20px at bottom 20px right 20px, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.08) 40%, transparent 70%),
+        radial-gradient(ellipse 25px 18px at bottom 25px right 35px, rgba(255, 215, 0, 0.12) 0%, transparent 60%),
+        /* Center glow */
+        radial-gradient(ellipse 120px 180px at center, rgba(255, 215, 0, 0.05) 0%, transparent 60%) !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Add subtle wave patterns to main background */
+.card-back-galaxy {
+    background-image:
+        /* Flowing wave lines - Chinese water pattern */
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 40px,
+            rgba(200, 16, 46, 0.3) 40px,
+            rgba(200, 16, 46, 0.3) 42px,
+            transparent 42px,
+            transparent 80px
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 40px,
+            rgba(200, 16, 46, 0.25) 40px,
+            rgba(200, 16, 46, 0.25) 42px,
+            transparent 42px,
+            transparent 80px
+        ),
+        /* Subtle radial pattern for depth */
+        radial-gradient(circle at 30% 30%, rgba(255, 215, 0, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(255, 215, 0, 0.03) 0%, transparent 50%) !important;
+}
+
+/* Add decorative dots pattern (Chinese lucky coins style) */
+.card-back-galaxy::before {
+    box-shadow:
+        /* Inner glow on character */
+        0 0 20px rgba(255, 215, 0, 0.4),
+        0 0 40px rgba(255, 215, 0, 0.2),
+        /* Lucky coin dots around character */
+        -60px -60px 0 -58px rgba(255, 215, 0, 0.6),
+        60px -60px 0 -58px rgba(255, 215, 0, 0.6),
+        -60px 60px 0 -58px rgba(255, 215, 0, 0.6),
+        60px 60px 0 -58px rgba(255, 215, 0, 0.6),
+        /* Outer glow */
+        0 0 60px rgba(255, 215, 0, 0.15) !important;
+}
+
+/* Enhanced border with Chinese knot pattern */
+.card-back-galaxy::after {
+    box-shadow:
+        /* Multi-layered border for depth */
+        0 0 0 1px rgba(255, 215, 0, 0.6) inset,
+        0 0 0 2px rgba(200, 16, 46, 0.8) inset,
+        0 0 0 6px rgba(200, 16, 46, 0.9) inset,
+        0 0 0 7px rgba(255, 215, 0, 0.7) inset,
+        0 0 0 9px rgba(255, 215, 0, 0.5) inset,
+        /* Outer glow */
+        0 0 15px rgba(255, 215, 0, 0.4),
+        0 0 30px rgba(255, 215, 0, 0.2),
+        /* Decorative corners shadow */
+        inset 8px 8px 12px -8px rgba(255, 215, 0, 0.3),
+        inset -8px -8px 12px -8px rgba(255, 215, 0, 0.3) !important;
+}
