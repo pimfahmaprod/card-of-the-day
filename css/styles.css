@@ -13980,9 +13980,8 @@ footer {
 
 /* ===== ADJUSTED: Font sizes proportional to card sizes ===== */
 
-/* Large cards (spinning, 4-card, center, blessing) - biggest text */
+/* Large cards (spinning, center, blessing) - biggest text */
 .spinning-card-back.card-back-galaxy::before,
-.four-card-fan .card-back-galaxy::before,
 .card-face.card-back.card-back-galaxy::before,
 .blessing-card-back.card-back-galaxy::before {
     font-size: 140px !important;
@@ -14011,7 +14010,6 @@ footer {
 /* ===== Tablet responsive ===== */
 @media (max-width: 768px) {
     .spinning-card-back.card-back-galaxy::before,
-    .four-card-fan .card-back-galaxy::before,
     .card-face.card-back.card-back-galaxy::before,
     .blessing-card-back.card-back-galaxy::before {
         font-size: 110px !important;
@@ -14037,7 +14035,6 @@ footer {
 /* ===== Mobile responsive ===== */
 @media (max-width: 480px) {
     .spinning-card-back.card-back-galaxy::before,
-    .four-card-fan .card-back-galaxy::before,
     .card-face.card-back.card-back-galaxy::before,
     .blessing-card-back.card-back-galaxy::before {
         font-size: 90px !important;
@@ -14341,4 +14338,228 @@ footer {
         /* Decorative corners shadow */
         inset 8px 8px 12px -8px rgba(255, 215, 0, 0.3),
         inset -8px -8px 12px -8px rgba(255, 215, 0, 0.3) !important;
+}
+
+/* ===== FIX: Restore solid red background ===== */
+
+.card-back-galaxy {
+    background-color: #C8102E !important;
+    /* Keep patterns on top of solid color */
+    background-blend-mode: normal !important;
+}
+
+/* Ensure the background is solid and opaque */
+.card-back-galaxy::before,
+.card-back-galaxy::after {
+    background-color: transparent !important;
+}
+
+/* ===== CARD BACK: Sun, Clouds & Waves like main BG ===== */
+
+/* Remove previous plain red, add gradient like main page */
+.card-back-galaxy {
+    background: linear-gradient(
+        180deg,
+        #8B0000 0%,
+        #A52A2A 25%,
+        #C8102E 50%,
+        #8B1538 75%,
+        #6B0F1A 100%
+    ) !important;
+    background-image: 
+        linear-gradient(180deg, #8B0000 0%, #A52A2A 25%, #C8102E 50%, #8B1538 75%, #6B0F1A 100%) !important;
+    overflow: hidden !important;
+}
+
+/* Sun using .galaxy-orbit */
+.card-back-galaxy .galaxy-orbit {
+    display: block !important;
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, #FFD700 0%, #FFA500 50%, transparent 70%);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 20px rgba(255, 215, 0, 0.8),
+        0 0 40px rgba(255, 215, 0, 0.5),
+        0 0 60px rgba(255, 215, 0, 0.3);
+    z-index: 1;
+    animation: sunGlow 3s ease-in-out infinite !important;
+}
+
+/* Sun rays */
+.card-back-galaxy .galaxy-orbit::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(255, 215, 0, 0.3) 10deg,
+        transparent 20deg,
+        transparent 40deg,
+        rgba(255, 215, 0, 0.3) 50deg,
+        transparent 60deg,
+        transparent 80deg,
+        rgba(255, 215, 0, 0.3) 90deg,
+        transparent 100deg,
+        transparent 120deg,
+        rgba(255, 215, 0, 0.3) 130deg,
+        transparent 140deg,
+        transparent 160deg,
+        rgba(255, 215, 0, 0.3) 170deg,
+        transparent 180deg,
+        transparent 200deg,
+        rgba(255, 215, 0, 0.3) 210deg,
+        transparent 220deg,
+        transparent 240deg,
+        rgba(255, 215, 0, 0.3) 250deg,
+        transparent 260deg,
+        transparent 280deg,
+        rgba(255, 215, 0, 0.3) 290deg,
+        transparent 300deg,
+        transparent 320deg,
+        rgba(255, 215, 0, 0.3) 330deg,
+        transparent 340deg,
+        transparent 360deg
+    );
+    border-radius: 50%;
+    animation: sunRaysRotate 20s linear infinite;
+}
+
+@keyframes sunGlow {
+    0%, 100% { 
+        transform: translateX(-50%) scale(1);
+        filter: brightness(1);
+    }
+    50% { 
+        transform: translateX(-50%) scale(1.05);
+        filter: brightness(1.2);
+    }
+}
+
+@keyframes sunRaysRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Floating clouds using .galaxy-aurora */
+.card-back-galaxy .galaxy-aurora {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background-image:
+        /* Cloud 1 */
+        radial-gradient(ellipse 40px 25px at 20% 25%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.2) 40%, transparent 70%),
+        radial-gradient(ellipse 30px 20px at 18% 27%, rgba(255, 255, 255, 0.3) 0%, transparent 60%),
+        radial-gradient(ellipse 35px 22px at 23% 26%, rgba(255, 255, 255, 0.35) 0%, transparent 65%),
+        /* Cloud 2 */
+        radial-gradient(ellipse 45px 28px at 75% 35%, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.18) 40%, transparent 70%),
+        radial-gradient(ellipse 35px 23px at 73% 37%, rgba(255, 255, 255, 0.28) 0%, transparent 60%),
+        radial-gradient(ellipse 38px 25px at 78% 36%, rgba(255, 255, 255, 0.3) 0%, transparent 65%),
+        /* Cloud 3 */
+        radial-gradient(ellipse 35px 22px at 40% 45%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.15) 40%, transparent 70%),
+        radial-gradient(ellipse 28px 18px at 38% 46%, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+    background-repeat: no-repeat;
+    animation: cloudFloat 25s ease-in-out infinite !important;
+}
+
+@keyframes cloudFloat {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(10px); }
+}
+
+/* Waves at bottom - use .galaxy-bg */
+.card-back-galaxy .galaxy-bg {
+    display: block !important;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30%;
+    z-index: 1;
+    background: none !important;
+}
+
+.card-back-galaxy .galaxy-bg::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: 
+        linear-gradient(180deg, transparent 0%, rgba(139, 0, 0, 0.5) 100%);
+    clip-path: polygon(
+        0% 40%,
+        5% 35%,
+        10% 38%,
+        15% 32%,
+        20% 36%,
+        25% 30%,
+        30% 34%,
+        35% 28%,
+        40% 33%,
+        45% 27%,
+        50% 31%,
+        55% 26%,
+        60% 30%,
+        65% 25%,
+        70% 29%,
+        75% 24%,
+        80% 28%,
+        85% 23%,
+        90% 27%,
+        95% 22%,
+        100% 26%,
+        100% 100%,
+        0% 100%
+    );
+}
+
+.card-back-galaxy .galaxy-bg::after {
+    content: '';
+    position: absolute;
+    bottom: -10%;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: 
+        linear-gradient(180deg, transparent 0%, rgba(107, 15, 26, 0.7) 100%);
+    clip-path: polygon(
+        0% 50%,
+        5% 47%,
+        10% 51%,
+        15% 45%,
+        20% 49%,
+        25% 44%,
+        30% 48%,
+        35% 42%,
+        40% 46%,
+        45% 41%,
+        50% 45%,
+        55% 40%,
+        60% 44%,
+        65% 39%,
+        70% 43%,
+        75% 38%,
+        80% 42%,
+        85% 37%,
+        90% 41%,
+        95% 36%,
+        100% 40%,
+        100% 100%,
+        0% 100%
+    );
+}
+
+/* Keep sparkles but reduce for grid performance */
+.card-grid .card-container .galaxy-orbit,
+.card-grid .card-container .galaxy-aurora,
+.card-grid .card-container .galaxy-bg {
+    display: none !important;
 }
