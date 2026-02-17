@@ -91,8 +91,8 @@
         </div>
     </div>
 
-    <!-- Profile/FB Login Button (persistent across all pages) -->
-    <div class="profile-switcher" id="profileSwitcher" style="position: fixed !important; top: 15px !important; right: 15px !important; z-index: 100000 !important; display: block !important; visibility: visible !important; opacity: 1 !important;">
+    <!-- Profile/FB Login Button (persistent across all pages) - Hidden Easter Egg -->
+    <div class="profile-switcher" id="profileSwitcher" style="position: fixed !important; top: 15px !important; right: 15px !important; z-index: 100000 !important; display: none !important; visibility: hidden !important; opacity: 0 !important;">
         <button class="fb-login-btn" id="facebookConnectBtn" onclick="handleProfileClick()" style="display: flex !important; align-items: center !important; gap: 6px !important; background: linear-gradient(135deg, rgba(24, 119, 242, 0.25), rgba(24, 119, 242, 0.12)) !important; border: 1.5px solid rgba(24, 119, 242, 0.5) !important; border-radius: 22px !important; padding: 9px 14px !important; color: #E8E8F0 !important; cursor: pointer !important; font-family: 'Prompt', sans-serif !important; font-size: 0.85rem !important; font-weight: 500 !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; box-shadow: 0 3px 12px rgba(24, 119, 242, 0.25), 0 1px 4px rgba(0, 0, 0, 0.3) !important; visibility: visible !important; opacity: 1 !important;">
             <img id="fbProfilePic" class="fb-profile-pic" alt="" style="display:none; width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 215, 0, 0.5);">
             <svg id="fbIcon" viewBox="0 0 24 24" fill="currentColor" style="display: inline-block !important; width: 19px !important; height: 19px !important; color: #5BA3FF !important; flex-shrink: 0 !important;"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -134,6 +134,82 @@
             <div class="preload-percent" id="preloadPercent">0 %</div>
         </div>
     </div>
+
+    <!-- Easter Egg Script -->
+    <script>
+        (function() {
+            let clickCount = 0;
+            const requiredClicks = 5;
+            let lastClickTime = 0;
+            const resetDelay = 3000; // Reset if 3 seconds between clicks
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const trigger = document.getElementById('easterEggTrigger');
+                const profileSwitcher = document.getElementById('profileSwitcher');
+
+                if (!trigger || !profileSwitcher) return;
+
+                trigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const currentTime = Date.now();
+
+                    // Reset counter if too much time passed
+                    if (currentTime - lastClickTime > resetDelay) {
+                        clickCount = 0;
+                    }
+
+                    lastClickTime = currentTime;
+                    clickCount++;
+
+                    // Visual feedback
+                    trigger.style.transform = 'scale(1.1)';
+                    setTimeout(() => { trigger.style.transform = 'scale(1)'; }, 100);
+
+                    console.log('🎯 Easter egg clicks:', clickCount + '/' + requiredClicks);
+
+                    if (clickCount >= requiredClicks) {
+                        // Unlock the Facebook button!
+                        profileSwitcher.style.display = 'block';
+                        profileSwitcher.style.visibility = 'visible';
+                        profileSwitcher.style.opacity = '1';
+
+                        // Celebration animation
+                        profileSwitcher.style.animation = 'easterEggReveal 0.5s ease-out';
+
+                        console.log('🎉 Easter egg unlocked! Facebook button revealed!');
+
+                        // Optional: Show a subtle notification
+                        trigger.style.color = '#FFD700';
+                        trigger.style.textShadow = '0 0 10px rgba(255, 215, 0, 0.8)';
+
+                        clickCount = 0; // Reset for next time
+                    }
+                });
+
+                // Add CSS animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes easterEggReveal {
+                        0% {
+                            transform: scale(0.5) rotate(-10deg);
+                            opacity: 0;
+                        }
+                        50% {
+                            transform: scale(1.1) rotate(5deg);
+                        }
+                        100% {
+                            transform: scale(1) rotate(0deg);
+                            opacity: 1;
+                        }
+                    }
+                    #easterEggTrigger {
+                        transition: transform 0.1s ease, color 0.3s ease, text-shadow 0.3s ease;
+                    }
+                `;
+                document.head.appendChild(style);
+            });
+        })();
+    </script>
 
     <!-- Landing Page -->
     <div class="landing-page" id="landingPage">
@@ -307,7 +383,7 @@
 
 
         <span class="landing-hint-mobile" id="landingHintMobile"></span>
-        <p class="landing-brand">Pimfahmaprod</p>
+        <p class="landing-brand" id="easterEggTrigger" style="cursor: pointer; user-select: none;">Pimfahmaprod</p>
         <span class="version-tag">v1.2.0</span>
     </div>
     <!-- Reveal Overlay -->
