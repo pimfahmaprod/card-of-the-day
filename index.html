@@ -92,11 +92,11 @@
     </div>
 
     <!-- Profile/FB Login Button (persistent across all pages) -->
-    <div class="profile-switcher" id="profileSwitcher">
-        <button class="fb-login-btn" id="facebookConnectBtn" onclick="handleProfileClick()">
-            <img id="fbProfilePic" class="fb-profile-pic" alt="" style="display:none">
-            <svg id="fbIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            <span id="fbBtnText">Login</span>
+    <div class="profile-switcher" id="profileSwitcher" style="position: fixed !important; top: 15px !important; right: 15px !important; z-index: 100000 !important; display: block !important; visibility: visible !important; opacity: 1 !important;">
+        <button class="fb-login-btn" id="facebookConnectBtn" onclick="handleProfileClick()" style="display: flex !important; align-items: center !important; gap: 6px !important; background: linear-gradient(135deg, rgba(24, 119, 242, 0.25), rgba(24, 119, 242, 0.12)) !important; border: 1.5px solid rgba(24, 119, 242, 0.5) !important; border-radius: 22px !important; padding: 9px 14px !important; color: #E8E8F0 !important; cursor: pointer !important; font-family: 'Prompt', sans-serif !important; font-size: 0.85rem !important; font-weight: 500 !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; box-shadow: 0 3px 12px rgba(24, 119, 242, 0.25), 0 1px 4px rgba(0, 0, 0, 0.3) !important; visibility: visible !important; opacity: 1 !important;">
+            <img id="fbProfilePic" class="fb-profile-pic" alt="" style="display:none; width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 215, 0, 0.5);">
+            <svg id="fbIcon" viewBox="0 0 24 24" fill="currentColor" style="display: inline-block !important; width: 19px !important; height: 19px !important; color: #5BA3FF !important; flex-shrink: 0 !important;"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            <span id="fbBtnText" style="display: inline-block !important;">Login</span>
         </button>
         <div class="profile-dropdown" id="profileDropdown">
             <div class="profile-dropdown-header">
