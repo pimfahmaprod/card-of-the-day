@@ -10367,9 +10367,30 @@ footer {
 .reveal-overlay-bg {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at 50% 30%, rgba(12, 16, 42, 0.93) 0%, rgba(2, 3, 10, 0.97) 100%);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background:
+        radial-gradient(ellipse at 50% 30%, rgba(200, 30, 30, 0.4) 0%, transparent 50%),
+        radial-gradient(ellipse at 30% 70%, rgba(180, 20, 20, 0.3) 0%, transparent 45%),
+        radial-gradient(ellipse at 70% 80%, rgba(160, 15, 15, 0.25) 0%, transparent 40%),
+        linear-gradient(180deg, rgba(139, 0, 0, 0.95) 0%, rgba(100, 0, 0, 0.97) 50%, rgba(80, 0, 0, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+/* Golden fortune atmosphere overlay */
+.reveal-overlay-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.04) 0%, transparent 20%),
+        radial-gradient(circle at 75% 75%, rgba(255, 165, 0, 0.03) 0%, transparent 18%);
+    opacity: 0.8;
+    animation: fortuneAtmosphere 12s ease-in-out infinite alternate;
+}
+
+@keyframes fortuneAtmosphere {
+    0% { opacity: 0.6; transform: scale(1); }
+    100% { opacity: 0.9; transform: scale(1.05); }
 }
 
 .reveal-fan-wrapper {
@@ -13567,3 +13588,200 @@ footer {
 .result-page .share-section {
     display: none !important;
 }
+
+/* OVERRIDE: Make particles MUCH bigger and brighter */
+.card-back-galaxy .galaxy-stars {
+    background-image:
+        radial-gradient(6px 6px at 50% 50%, rgba(255, 215, 0, 1) 15%, rgba(255, 215, 0, 0.9) 35%, transparent 100%),
+        radial-gradient(5px 5px at 70% 30%, rgba(255, 200, 50, 1) 15%, rgba(255, 200, 50, 0.85) 35%, transparent 100%),
+        radial-gradient(5.5px 5.5px at 30% 70%, rgba(255, 215, 0, 1) 15%, rgba(255, 215, 0, 0.95) 35%, transparent 100%),
+        radial-gradient(6px 6px at 85% 50%, rgba(218, 165, 32, 1) 15%, rgba(218, 165, 32, 0.9) 35%, transparent 100%),
+        radial-gradient(5px 5px at 15% 50%, rgba(255, 215, 0, 1) 15%, rgba(255, 215, 0, 0.9) 35%, transparent 100%),
+        radial-gradient(5.5px 5.5px at 50% 15%, rgba(255, 165, 0, 1) 15%, rgba(255, 165, 0, 0.95) 35%, transparent 100%),
+        radial-gradient(5px 5px at 50% 85%, rgba(255, 215, 0, 1) 15%, rgba(255, 215, 0, 0.9) 35%, transparent 100%),
+        radial-gradient(6px 6px at 65% 65%, rgba(218, 165, 32, 1) 15%, rgba(218, 165, 32, 0.9) 35%, transparent 100%) !important;
+    filter: drop-shadow(0 0 6px rgba(255, 215, 0, 1)) drop-shadow(0 0 12px rgba(255, 215, 0, 0.8)) !important;
+}
+
+.card-back-galaxy .galaxy-stars-2 {
+    background-image:
+        radial-gradient(6.5px 6.5px at 60% 40%, rgba(255, 215, 0, 1) 15%, rgba(255, 215, 0, 0.95) 35%, transparent 100%),
+        radial-gradient(5.5px 5.5px at 40% 60%, rgba(255, 200, 50, 1) 15%, rgba(255, 200, 50, 0.9) 35%, transparent 100%),
+        radial-gradient(5px 5px at 80% 70%, rgba(255, 215, 0, 1) 15%, rgba(255, 215, 0, 0.9) 35%, transparent 100%),
+        radial-gradient(6px 6px at 20% 30%, rgba(218, 165, 32, 1) 15%, rgba(218, 165, 32, 0.95) 35%, transparent 100%),
+        radial-gradient(5.5px 5.5px at 75% 20%, rgba(255, 165, 0, 1) 15%, rgba(255, 165, 0, 0.95) 35%, transparent 100%),
+        radial-gradient(6px 6px at 25% 80%, rgba(255, 215, 0, 1) 15%, rgba(255, 215, 0, 0.9) 35%, transparent 100%),
+        radial-gradient(5.5px 5.5px at 55% 55%, rgba(255, 200, 50, 1) 15%, rgba(255, 200, 50, 0.85) 35%, transparent 100%) !important;
+    filter: drop-shadow(0 0 7px rgba(255, 215, 0, 1)) drop-shadow(0 0 14px rgba(255, 215, 0, 0.9)) !important;
+}
+
+.card-back-galaxy .galaxy-shimmer {
+    background: radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.6) 0%, rgba(255, 215, 0, 0.4) 25%, transparent 55%) !important;
+    filter: blur(12px) !important;
+}
+
+/* ENHANCED: Clearer burst animation - less blur at start */
+@keyframes auraBurst1 {
+    0% {
+        opacity: 0;
+        transform: scale(0.2) rotate(0deg);
+        filter: blur(0px);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(0.6) rotate(20deg);
+        filter: blur(0px);
+    }
+    45% {
+        opacity: 1;
+        transform: scale(1.2) rotate(50deg);
+        filter: blur(0.5px);
+    }
+    75% {
+        opacity: 0.5;
+        transform: scale(2) rotate(100deg);
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2.8) rotate(130deg);
+        filter: blur(4px);
+    }
+}
+
+@keyframes auraBurst2 {
+    0% {
+        opacity: 0;
+        transform: scale(0.2) rotate(0deg);
+        filter: blur(0px);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(0.7) rotate(-25deg);
+        filter: blur(0px);
+    }
+    45% {
+        opacity: 1;
+        transform: scale(1.3) rotate(-55deg);
+        filter: blur(0.5px);
+    }
+    75% {
+        opacity: 0.4;
+        transform: scale(2.2) rotate(-105deg);
+        filter: blur(2.5px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(3) rotate(-140deg);
+        filter: blur(5px);
+    }
+}
+
+@keyframes auraWave {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(2.5);
+    }
+}
+
+/* ===== FIX: Consistent 富 sizing across all pages (based on 4-card spread) ===== */
+
+/* Three cards spread - match 4-card proportions */
+.three-card-item .card-back-galaxy::before {
+    font-size: 65px !important;
+}
+
+/* Ten cards Celtic Cross - smaller for compact layout */
+.ten-card-fan .card-back-galaxy::before {
+    font-size: 35px !important;
+}
+
+/* Twelve cards Zodiac - smaller for many cards */
+.twelve-card-fan .card-back-galaxy::before {
+    font-size: 32px !important;
+}
+
+/* Landing page spinning card - same as main */
+.spinning-card .card-back-galaxy::before {
+    font-size: 85px !important;
+}
+
+/* Result page single card - same as main */
+.card-container.result-card .card-back-galaxy::before {
+    font-size: 85px !important;
+}
+
+/* Blessing screen card - same as main */
+.blessing-card .card-back-galaxy::before {
+    font-size: 75px !important;
+}
+
+/* Ensure no overflow in multi-card layouts */
+.multi-card-item .card-back-galaxy {
+    overflow: hidden !important;
+}
+
+.three-card-item .card-back-galaxy {
+    overflow: hidden !important;
+}
+
+/* ===== RESPONSIVE: Adjust for smaller screens ===== */
+
+@media (max-width: 768px) {
+    /* Three cards - tablet */
+    .three-card-item .card-back-galaxy::before {
+        font-size: 55px !important;
+    }
+    
+    /* Ten cards - tablet */
+    .ten-card-fan .card-back-galaxy::before {
+        font-size: 28px !important;
+    }
+    
+    /* Twelve cards - tablet */
+    .twelve-card-fan .card-back-galaxy::before {
+        font-size: 26px !important;
+    }
+    
+    /* Spinning card - tablet */
+    .spinning-card .card-back-galaxy::before {
+        font-size: 70px !important;
+    }
+    
+    /* Blessing card - tablet */
+    .blessing-card .card-back-galaxy::before {
+        font-size: 60px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Three cards - mobile */
+    .three-card-item .card-back-galaxy::before {
+        font-size: 45px !important;
+    }
+    
+    /* Ten cards - mobile */
+    .ten-card-fan .card-back-galaxy::before {
+        font-size: 22px !important;
+    }
+    
+    /* Twelve cards - mobile */
+    .twelve-card-fan .card-back-galaxy::before {
+        font-size: 20px !important;
+    }
+    
+    /* Spinning card - mobile */
+    .spinning-card .card-back-galaxy::before {
+        font-size: 60px !important;
+    }
+    
+    /* Blessing card - mobile */
+    .blessing-card .card-back-galaxy::before {
+        font-size: 50px !important;
+    }
+}
+
