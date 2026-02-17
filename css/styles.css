@@ -76,14 +76,16 @@ body {
     100% { background-position: 100px 0, -100px 0, 50px 0, 100px 0, -100px 0; }
 }
 
-/* Bottom wave layers (like in the image) */
+/* Bottom wave layers - Red Envelope Style */
 .cny-bottom-waves {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 45%;
+    height: 50%;
     z-index: 2;
+    /* Ensure waves extend to bottom */
+    background: linear-gradient(to bottom, transparent 0%, #C8102E 100%);
 }
 
 .cny-wave-layer {
@@ -97,24 +99,24 @@ body {
 }
 
 .cny-wave-1 {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,80 Q150,65 300,80 T600,80 T900,80 T1200,80 L1200,150 L0,150 Z" fill="%238B0000"/><path d="M0,90 Q150,75 300,90 T600,90 T900,90 T1200,90 L1200,150 L0,150 Z" fill="%23A52A2A"/></svg>');
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,80 Q150,65 300,80 T600,80 T900,80 T1200,80 L1200,150 L0,150 Z" fill="%23B91C1C"/><path d="M0,90 Q150,75 300,90 T600,90 T900,90 T1200,90 L1200,150 L0,150 Z" fill="%23A91818"/></svg>');
     animation: waveDrift 25s linear infinite;
     z-index: 1;
-    opacity: 1;
+    opacity: 0.9;
 }
 
 .cny-wave-2 {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,60 Q150,45 300,60 T600,60 T900,60 T1200,60 L1200,150 L0,150 Z" fill="%23B22222"/><path d="M0,70 Q150,55 300,70 T600,70 T900,70 T1200,70 L1200,150 L0,150 Z" fill="%23C03030"/></svg>');
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,60 Q150,45 300,60 T600,60 T900,60 T1200,60 L1200,150 L0,150 Z" fill="%23C8102E"/><path d="M0,70 Q150,55 300,70 T600,70 T900,70 T1200,70 L1200,150 L0,150 Z" fill="%23B91C1C"/></svg>');
     animation: waveDrift 20s linear infinite reverse;
     z-index: 2;
-    opacity: 1;
+    opacity: 0.85;
 }
 
 .cny-wave-3 {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,40 Q150,25 300,40 T600,40 T900,40 T1200,40 L1200,150 L0,150 Z" fill="%23D64545"/><path d="M0,50 Q150,35 300,50 T600,50 T900,50 T1200,50 L1200,150 L0,150 Z" fill="%23E86A6A"/></svg>');
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,40 Q150,25 300,40 T600,40 T900,40 T1200,40 L1200,150 L0,150 Z" fill="%23D4202B"/><path d="M0,50 Q150,35 300,50 T600,50 T900,50 T1200,50 L1200,150 L0,150 Z" fill="%23C8102E"/></svg>');
     animation: waveDrift 18s linear infinite;
     z-index: 3;
-    opacity: 1;
+    opacity: 0.8;
 }
 
 @keyframes waveDrift {
@@ -281,8 +283,8 @@ body {
 }
 
 @keyframes lanternSwing {
-    0%, 100% { transform: rotate(-4deg); }
-    50% { transform: rotate(4deg); }
+    0%, 100% { transform: translateX(-50%) rotate(-4deg); }
+    50% { transform: translateX(-50%) rotate(4deg); }
 }
 
 /* Legacy starfield classes for compatibility (hidden) */
