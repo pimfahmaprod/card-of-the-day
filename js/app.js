@@ -954,8 +954,8 @@ function initAudioElement() {
     audioElement = document.getElementById('bgMusic');
     if (audioElement) {
         // Set source directly on element for better compatibility
-        audioElement.src = 'audio/background.mp3';
-        audioElement.volume = 0.12;
+        audioElement.src = 'audio/tunetank-chinese-new-year-347614.mp3';
+        audioElement.volume = 0.4;
         audioElement.loop = true;
         audioElement.load();
         console.log('Audio element initialized');
@@ -989,7 +989,7 @@ function tryPlayMusic(muteOnFail = false) {
         return;
     }
 
-    audio.volume = 0.12;
+    audio.volume = 0.4;
 
     const playPromise = audio.play();
     if (playPromise !== undefined) {
@@ -8271,11 +8271,11 @@ function getMultiCategoryColors() {
     }
     // Default (no category / single): blue-silver
     return {
-        accent: '#9AAAD4',
-        accentLight: '#C0C8E0',
-        accentGlow: '#7B8EC2',
-        accentRgb: '154,170,212',
-        lightRgb: '192,200,224'
+        accent: '#FFD700',
+        accentLight: '#FFF5DC',
+        accentGlow: '#DAA520',
+        accentRgb: '255,215,0',
+        lightRgb: '255,245,220'
     };
 }
 
@@ -8337,9 +8337,9 @@ function drawMultiShareImage(ctx, cardImages, size, platform) {
 
     // Background gradient with category tint
     var gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#080C24');
-    gradient.addColorStop(0.5, '#0B1030');
-    gradient.addColorStop(1, '#0d1333');
+    gradient.addColorStop(0, '#2A0A0A');
+    gradient.addColorStop(0.5, '#3D1010');
+    gradient.addColorStop(1, '#4A1515');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
 
@@ -8472,7 +8472,7 @@ function drawMultiVerticalLayout(ctx, cardImages, width, height, colors) {
         ctx.fillText('✦ ' + posLabel, textCenterX, textBlockTop + 10);
 
         // Card name (dynamic sizing)
-        ctx.fillStyle = '#C0C8E0';
+        ctx.fillStyle = '#FFF5DC';
         var nameSize = 36;
         ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
         while (ctx.measureText(cardName).width > rightW - 10 && nameSize > 20) {
@@ -8504,7 +8504,7 @@ function drawMultiVerticalLayout(ctx, cardImages, width, height, colors) {
         footerY: height - 92,
         width: width - 100,
         color: 'rgba(' + colors.lightRgb + ', 0.45)',
-        accentColor: colors.accent || '#C8A96E'
+        accentColor: colors.accent || '#FFD700'
     });
 }
 
@@ -8610,7 +8610,7 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
         ctx.fillText(posLabel, pos.cx, belowY);
 
         // Card name (dynamic sizing)
-        ctx.fillStyle = '#C0C8E0';
+        ctx.fillStyle = '#FFF5DC';
         var nameSize = 22;
         ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
         while (ctx.measureText(cardName).width > maxTextW && nameSize > 14) {
@@ -8634,7 +8634,7 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
         footerY: height - 80,
         width: width - 120,
         color: 'rgba(' + colors.lightRgb + ', 0.45)',
-        accentColor: colors.accent || '#C8A96E',
+        accentColor: colors.accent || '#FFD700',
         compact: true
     });
 }
@@ -8727,7 +8727,7 @@ function drawMultiWideLayout(ctx, cardImages, width, height, colors) {
         ctx.fillText(posLabel, cardCenterX, belowY);
 
         // Card name (dynamic sizing, no quotes)
-        ctx.fillStyle = '#C0C8E0';
+        ctx.fillStyle = '#FFF5DC';
         var ns = 16;
         ctx.font = 'bold ' + ns + 'px "Cormorant Garamond", "Prompt", serif';
         var maxNW = cardW + 10;
@@ -8745,7 +8745,7 @@ function drawMultiWideLayout(ctx, cardImages, width, height, colors) {
         footerY: height - 66,
         width: width - 80,
         color: 'rgba(' + colors.lightRgb + ', 0.4)',
-        accentColor: colors.accent || '#C8A96E',
+        accentColor: colors.accent || '#FFD700',
         compact: true
     });
 }
@@ -8757,20 +8757,20 @@ function drawShareImage(ctx, cardImg, size, platform) {
 
     // Background gradient
     const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#080C24');
-    gradient.addColorStop(0.5, '#0B1030');
-    gradient.addColorStop(1, '#0d1333');
+    gradient.addColorStop(0, '#2A0A0A');
+    gradient.addColorStop(0.5, '#3D1010');
+    gradient.addColorStop(1, '#4A1515');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
 
     // Decorative border
-    ctx.strokeStyle = '#2A3570';
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
     ctx.lineWidth = isWide ? 6 : 8;
     const borderPadding = isWide ? 20 : 30;
     ctx.strokeRect(borderPadding, borderPadding, width - borderPadding * 2, height - borderPadding * 2);
 
     // Inner decorative line
-    ctx.strokeStyle = 'rgba(160, 180, 220, 0.3)';
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.25)';
     ctx.lineWidth = 2;
     const innerPadding = borderPadding + 15;
     ctx.strokeRect(innerPadding, innerPadding, width - innerPadding * 2, height - innerPadding * 2);
@@ -8873,8 +8873,8 @@ function drawLineIcon(ctx, x, y, size, color) {
 function drawFooterWithPromo(ctx, opts) {
     var iconSize = opts.iconSize || 14;
     var footerY = opts.footerY;
-    var color = opts.color || 'rgba(160, 180, 220, 0.55)';
-    var accentColor = opts.accentColor || '#C8A96E';
+    var color = opts.color || 'rgba(255, 245, 220, 0.6)';
+    var accentColor = opts.accentColor || '#FFD700';
     var compact = opts.compact || false;
     var centerX = opts.centerX;
     var areaW = opts.width || 600;
@@ -8927,7 +8927,7 @@ function drawFooterWithPromo(ctx, opts) {
 
 function drawVerticalLayout(ctx, cardImg, width, height) {
     // "Card of the Day" title at top
-    ctx.fillStyle = 'rgba(160, 180, 220, 0.6)';
+    ctx.fillStyle = 'rgba(255, 245, 220, 0.7)';
     ctx.font = '28px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'center';
     ctx.fillText('Card of the Day', width / 2, 80);
@@ -8953,13 +8953,13 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
 
     // Card name - right after card
     const nameY = cardBottomY + 80;
-    ctx.fillStyle = '#C0C8E0';
+    ctx.fillStyle = '#FFF5DC';
     ctx.font = 'bold 64px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'center';
     ctx.fillText(getCardName(currentCardData.name), width / 2, nameY);
 
     // Decorative line under name
-    ctx.strokeStyle = 'rgba(160, 180, 220, 0.4)';
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.35)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(width / 2 - 180, nameY + 25);
@@ -8968,7 +8968,7 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
 
     // Quote
     ctx.font = 'italic 36px "Cormorant Garamond", "Prompt", serif';
-    ctx.fillStyle = 'rgba(160, 180, 220, 0.85)';
+    ctx.fillStyle = 'rgba(255, 245, 220, 0.9)';
     const quote = `"${getCardQuote(currentCardData)}"`;
     wrapText(ctx, quote, width / 2, nameY + 90, width - 160, 48);
 
@@ -8976,7 +8976,7 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
     const interpretY = nameY + 200;
 
     // Divider
-    ctx.strokeStyle = 'rgba(160, 180, 220, 0.3)';
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.25)';
     ctx.beginPath();
     ctx.moveTo(120, interpretY);
     ctx.lineTo(width - 120, interpretY);
@@ -8984,12 +8984,12 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
 
     // Interpretation label
     ctx.font = 'bold 28px "Prompt", sans-serif';
-    ctx.fillStyle = '#C0C8E0';
+    ctx.fillStyle = '#FFF5DC';
     ctx.fillText(t('common.prophecy'), width / 2, interpretY + 50);
 
     // Interpretation text - full text with bounds (preserve paragraph breaks)
     ctx.font = '26px "Prompt", sans-serif';
-    ctx.fillStyle = '#C0C8E0';
+    ctx.fillStyle = '#FFF5DC';
     const maxInterpretY = height - 140; // Leave space for footer
     wrapTextWithParagraphsCenter(ctx, getCardInterpretation(currentCardData), width / 2, interpretY + 110, width - 160, 38, maxInterpretY);
 
@@ -8999,8 +8999,8 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
         centerX: width / 2,
         footerY: height - 100,
         width: width - 100,
-        color: 'rgba(160, 180, 220, 0.6)',
-        accentColor: '#C8A96E'
+        color: 'rgba(255, 245, 220, 0.7)',
+        accentColor: '#FFD700'
     });
 }
 
@@ -9032,13 +9032,13 @@ function drawSquareLayout(ctx, cardImg, width, height) {
     const textWidth = width - textX - safePadding - 10; // More right padding
 
     // Title small
-    ctx.fillStyle = 'rgba(160, 180, 220, 0.6)';
+    ctx.fillStyle = 'rgba(255, 245, 220, 0.7)';
     ctx.font = '22px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'left';
     ctx.fillText('Card of the Day', textX, 140);
 
     // Card name - large (with dynamic sizing to fit)
-    ctx.fillStyle = '#C0C8E0';
+    ctx.fillStyle = '#FFF5DC';
     let nameFontSize = 48;
     const cardName = getCardName(currentCardData.name);
     ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", "Prompt", serif`;
@@ -9051,7 +9051,7 @@ function drawSquareLayout(ctx, cardImg, width, height) {
     ctx.fillText(cardName, textX, 195);
 
     // Decorative line
-    ctx.strokeStyle = 'rgba(160, 180, 220, 0.4)';
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.35)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(textX, 220);
@@ -9060,13 +9060,13 @@ function drawSquareLayout(ctx, cardImg, width, height) {
 
     // Quote
     ctx.font = 'italic 22px "Cormorant Garamond", "Prompt", serif';
-    ctx.fillStyle = 'rgba(160, 180, 220, 0.85)';
+    ctx.fillStyle = 'rgba(255, 245, 220, 0.9)';
     const quoteText = `"${getCardQuote(currentCardData)}"`;
     wrapTextLeft(ctx, quoteText, textX, 265, textWidth, 30);
 
     // Interpretation - full text with bounds (preserve paragraph breaks)
     ctx.font = '17px "Prompt", sans-serif';
-    ctx.fillStyle = '#C0C8E0';
+    ctx.fillStyle = '#FFF5DC';
     const maxInterpretY = height - safePadding - 80; // Leave space for footer
     wrapTextWithParagraphs(ctx, getCardInterpretation(currentCardData), textX, 360, textWidth, 25, maxInterpretY);
 
@@ -9077,8 +9077,8 @@ function drawSquareLayout(ctx, cardImg, width, height) {
         centerX: textCenterX,
         footerY: height - safePadding - 38,
         width: textWidth,
-        color: 'rgba(160, 180, 220, 0.55)',
-        accentColor: '#C8A96E',
+        color: 'rgba(255, 245, 220, 0.6)',
+        accentColor: '#FFD700',
         compact: true
     });
 }
@@ -9108,13 +9108,13 @@ function drawWideLayout(ctx, cardImg, width, height) {
     const textWidth = width - textX - 60;
 
     // Title small
-    ctx.fillStyle = 'rgba(160, 180, 220, 0.6)';
+    ctx.fillStyle = 'rgba(255, 245, 220, 0.7)';
     ctx.font = '20px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'left';
     ctx.fillText('Card of the Day', textX, 80);
 
     // Card name - prominent (with dynamic sizing to fit)
-    ctx.fillStyle = '#C0C8E0';
+    ctx.fillStyle = '#FFF5DC';
     let nameFontSize = 42;
     const cardName = getCardName(currentCardData.name);
     ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", "Prompt", serif`;
@@ -9127,7 +9127,7 @@ function drawWideLayout(ctx, cardImg, width, height) {
     ctx.fillText(cardName, textX, 125);
 
     // Decorative line
-    ctx.strokeStyle = 'rgba(160, 180, 220, 0.4)';
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.35)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(textX, 145);
@@ -9136,13 +9136,13 @@ function drawWideLayout(ctx, cardImg, width, height) {
 
     // Quote
     ctx.font = 'italic 20px "Cormorant Garamond", "Prompt", serif';
-    ctx.fillStyle = 'rgba(160, 180, 220, 0.9)';
+    ctx.fillStyle = 'rgba(255, 245, 220, 0.95)';
     const quoteText = `"${getCardQuote(currentCardData)}"`;
     wrapTextLeft(ctx, quoteText, textX, 180, textWidth, 26);
 
     // Interpretation - full text with bounds (preserve paragraph breaks)
     ctx.font = '16px "Prompt", sans-serif';
-    ctx.fillStyle = '#C0C8E0';
+    ctx.fillStyle = '#FFF5DC';
     const maxInterpretY = height - 85; // Leave space for footer within border
     wrapTextWithParagraphs(ctx, getCardInterpretation(currentCardData), textX, 260, textWidth, 22, maxInterpretY);
 
@@ -9153,8 +9153,8 @@ function drawWideLayout(ctx, cardImg, width, height) {
         centerX: textCenterX,
         footerY: height - 68,
         width: textWidth,
-        color: 'rgba(160, 180, 220, 0.55)',
-        accentColor: '#C8A96E',
+        color: 'rgba(255, 245, 220, 0.6)',
+        accentColor: '#FFD700',
         compact: true
     });
 }
