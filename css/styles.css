@@ -250,9 +250,9 @@ body {
 
 .cny-lantern {
     position: absolute;
-    top: -150px;
+    top: -200px;
     width: 90px;
-    height: 120px;
+    height: 180px;
     animation: lanternDrop var(--drop-duration, 2s) ease-out forwards,
                lanternSwing var(--swing-duration, 3s) ease-in-out infinite;
     animation-delay: var(--drop-delay, 0s), calc(var(--drop-delay, 0s) + var(--drop-duration, 2s));
@@ -3297,73 +3297,15 @@ header {
     opacity: 0.85;
 }
 
-@keyframes sealPulseGold {
-    0%, 100% {
-        filter:
-            brightness(0)
-            invert(1)
-            sepia(1)
-            saturate(3)
-            hue-rotate(10deg)
-            brightness(1.4)
-            drop-shadow(0 0 25px rgba(255, 215, 0, 0.95))
-            drop-shadow(0 0 15px rgba(255, 200, 50, 1))
-            drop-shadow(0 0 10px rgba(255, 165, 0, 1))
-            drop-shadow(0 0 35px rgba(218, 165, 32, 0.8))
-            drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
-        transform: scale(1);
-    }
-    50% {
-        filter:
-            brightness(0)
-            invert(1)
-            sepia(1)
-            saturate(3.5)
-            hue-rotate(15deg)
-            brightness(1.6)
-            drop-shadow(0 0 40px rgba(255, 215, 0, 1))
-            drop-shadow(0 0 25px rgba(255, 200, 50, 1))
-            drop-shadow(0 0 18px rgba(255, 165, 0, 1))
-            drop-shadow(0 0 50px rgba(218, 165, 32, 1))
-            drop-shadow(0 3px 12px rgba(0, 0, 0, 0.4));
-        transform: scale(1.05);
-    }
-}
-
-/* Glittery shimmer effect */
-@keyframes horseGlitter {
-    0%, 100% {
-        opacity: 0.9;
-    }
-    50% {
-        opacity: 1;
-    }
-}
-
-/* Traditional Chinese cloud/wave patterns background */
-.galaxy-bg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    opacity: 0.25;
-    background-image:
-        /* Corner decorative clouds */
-        radial-gradient(circle at 15% 15%, rgba(255, 215, 0, 0.3) 0%, transparent 12%),
-        radial-gradient(circle at 10% 18%, rgba(255, 200, 50, 0.25) 0%, transparent 10%),
-        radial-gradient(circle at 18% 12%, rgba(255, 215, 0, 0.2) 0%, transparent 8%),
-        radial-gradient(circle at 85% 15%, rgba(255, 215, 0, 0.3) 0%, transparent 12%),
-        radial-gradient(circle at 90% 18%, rgba(255, 200, 50, 0.25) 0%, transparent 10%),
-        radial-gradient(circle at 82% 12%, rgba(255, 215, 0, 0.2) 0%, transparent 8%),
-        radial-gradient(circle at 15% 85%, rgba(255, 215, 0, 0.3) 0%, transparent 12%),
-        radial-gradient(circle at 10% 82%, rgba(255, 200, 50, 0.25) 0%, transparent 10%),
-        radial-gradient(circle at 18% 88%, rgba(255, 215, 0, 0.2) 0%, transparent 8%),
-        radial-gradient(circle at 85% 85%, rgba(255, 215, 0, 0.3) 0%, transparent 12%),
-        radial-gradient(circle at 90% 82%, rgba(255, 200, 50, 0.25) 0%, transparent 10%),
-        radial-gradient(circle at 82% 88%, rgba(255, 215, 0, 0.2) 0%, transparent 8%);
-    animation: cloudFloat 8s ease-in-out infinite;
-    will-change: transform;
+/* Hide all decorative elements for clean red envelope look */
+.galaxy-bg,
+.galaxy-stars,
+.galaxy-stars-2,
+.galaxy-shimmer,
+.galaxy-orbit,
+.galaxy-aurora,
+.galaxy-shooting-star {
+    display: none !important;
 }
 
 /* ── Grid cards: static gold glow for performance ── */
@@ -3392,35 +3334,7 @@ header {
     filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
 }
 
-@keyframes cloudFloat {
-    0%, 100% {
-        transform: scale(1) rotate(0deg);
-        opacity: 0.25;
-    }
-    50% {
-        transform: scale(1.1) rotate(1deg);
-        opacity: 0.35;
-    }
-}
-
-@keyframes borderGlitter {
-    0%, 100% {
-        box-shadow:
-            inset 0 0 25px rgba(255, 215, 0, 0.4),
-            inset 0 2px 10px rgba(255, 255, 255, 0.3),
-            0 0 20px rgba(255, 215, 0, 0.5),
-            0 0 40px rgba(255, 165, 0, 0.3);
-        filter: brightness(1);
-    }
-    50% {
-        box-shadow:
-            inset 0 0 35px rgba(255, 215, 0, 0.6),
-            inset 0 2px 15px rgba(255, 255, 255, 0.4),
-            0 0 30px rgba(255, 215, 0, 0.7),
-            0 0 50px rgba(255, 165, 0, 0.5);
-        filter: brightness(1.2);
-    }
-}
+/* Animations removed for simple red envelope design */
 
 /* ===== Subtle golden sparkles — twinkling effect for ang pao shimmer ===== */
 

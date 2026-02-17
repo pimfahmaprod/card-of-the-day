@@ -4029,8 +4029,8 @@ function resetCommentForm() {
     const container = document.getElementById('cnyLanterns');
     if (!container) return;
 
-    // Red lantern SVG with gold trim
-    const lanternSVG = `<svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+    // Traditional Chinese red lantern SVG (like reference image)
+    const lanternSVG = `<svg viewBox="0 0 70 140" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <linearGradient id="lanternGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" style="stop-color:#DC143C"/>
@@ -4043,26 +4043,56 @@ function resetCommentForm() {
                 <stop offset="100%" style="stop-color:#DAA520"/>
             </linearGradient>
         </defs>
+        <!-- Hanging string -->
+        <line x1="35" y1="0" x2="35" y2="8" stroke="url(#goldGrad)" stroke-width="2"/>
+
         <!-- Top gold cap -->
-        <ellipse cx="30" cy="8" rx="10" ry="4" fill="url(#goldGrad)"/>
-        <rect x="28" y="2" width="4" height="6" fill="url(#goldGrad)"/>
-        <!-- Lantern body -->
-        <path d="M 20 10 Q 15 25, 15 40 Q 15 55, 20 70 L 40 70 Q 45 55, 45 40 Q 45 25, 40 10 Z"
-              fill="url(#lanternGrad)" stroke="#8B0000" stroke-width="1"/>
-        <!-- Gold decorative lines -->
-        <line x1="20" y1="15" x2="40" y2="15" stroke="url(#goldGrad)" stroke-width="2"/>
-        <line x1="18" y1="40" x2="42" y2="40" stroke="url(#goldGrad)" stroke-width="2.5"/>
-        <line x1="20" y1="65" x2="40" y2="65" stroke="url(#goldGrad)" stroke-width="2"/>
-        <!-- Bottom gold cap -->
-        <ellipse cx="30" cy="72" rx="10" ry="4" fill="url(#goldGrad)"/>
-        <!-- Tassel -->
-        <path d="M 30 74 L 28 82 L 30 80 L 32 82 Z" fill="url(#goldGrad)" opacity="0.9"/>
+        <rect x="25" y="8" width="20" height="6" fill="url(#goldGrad)" rx="1"/>
+        <ellipse cx="35" cy="14" rx="12" ry="5" fill="url(#goldGrad)"/>
+
+        <!-- Lantern spherical body -->
+        <ellipse cx="35" cy="45" rx="25" ry="30" fill="url(#lanternGrad)"/>
+
+        <!-- Vertical gold stripes -->
+        <path d="M 35 16 Q 35 20, 35 74" stroke="url(#goldGrad)" stroke-width="1.5" fill="none"/>
+        <path d="M 25 18 Q 23 45, 25 72" stroke="url(#goldGrad)" stroke-width="1.2" fill="none"/>
+        <path d="M 45 18 Q 47 45, 45 72" stroke="url(#goldGrad)" stroke-width="1.2" fill="none"/>
+        <path d="M 18 25 Q 15 45, 18 65" stroke="url(#goldGrad)" stroke-width="1" fill="none"/>
+        <path d="M 52 25 Q 55 45, 52 65" stroke="url(#goldGrad)" stroke-width="1" fill="none"/>
+        <path d="M 12 35 Q 11 45, 12 55" stroke="url(#goldGrad)" stroke-width="0.8" fill="none"/>
+        <path d="M 58 35 Q 59 45, 58 55" stroke="url(#goldGrad)" stroke-width="0.8" fill="none"/>
+
+        <!-- Horizontal gold bands -->
+        <ellipse cx="35" cy="20" rx="22" ry="3" fill="none" stroke="url(#goldGrad)" stroke-width="1.5"/>
+        <ellipse cx="35" cy="45" rx="25" ry="3" fill="none" stroke="url(#goldGrad)" stroke-width="2"/>
+        <ellipse cx="35" cy="70" rx="22" ry="3" fill="none" stroke="url(#goldGrad)" stroke-width="1.5"/>
+
+        <!-- Bottom gold cap with red section -->
+        <ellipse cx="35" cy="74" rx="12" ry="5" fill="url(#goldGrad)"/>
+        <rect x="28" y="74" width="14" height="12" fill="#8B0000"/>
+        <rect x="28" y="74" width="14" height="2" fill="url(#goldGrad)"/>
+        <circle cx="35" cy="80" r="2" fill="url(#goldGrad)"/>
+
+        <!-- Elaborate tassels -->
+        <g opacity="0.95">
+            <path d="M 30 86 L 28 95 L 29 110 L 28.5 125" stroke="url(#goldGrad)" stroke-width="1.5" fill="none"/>
+            <path d="M 32 86 L 31 95 L 31 110 L 30.5 128" stroke="url(#goldGrad)" stroke-width="1.5" fill="none"/>
+            <path d="M 35 86 L 35 95 L 35 110 L 35 130" stroke="url(#goldGrad)" stroke-width="2" fill="none"/>
+            <path d="M 38 86 L 39 95 L 39 110 L 39.5 128" stroke="url(#goldGrad)" stroke-width="1.5" fill="none"/>
+            <path d="M 40 86 L 42 95 L 41 110 L 41.5 125" stroke="url(#goldGrad)" stroke-width="1.5" fill="none"/>
+            <!-- Tassel ends -->
+            <circle cx="28.5" cy="125" r="1.5" fill="url(#goldGrad)"/>
+            <circle cx="30.5" cy="128" r="1.5" fill="url(#goldGrad)"/>
+            <circle cx="35" cy="130" r="2" fill="url(#goldGrad)"/>
+            <circle cx="39.5" cy="128" r="1.5" fill="url(#goldGrad)"/>
+            <circle cx="41.5" cy="125" r="1.5" fill="url(#goldGrad)"/>
+        </g>
     </svg>`;
 
-    // Create exactly 2 lanterns - left and right, symmetrically positioned
+    // Create exactly 2 lanterns - left and right, perfectly balanced
     const lanternPositions = [
-        { left: '22%', finalTop: '120px', swingDuration: '3s', dropDelay: '0.5s' },  // Left lantern
-        { left: '78%', finalTop: '120px', swingDuration: '3.2s', dropDelay: '0.7s' } // Right lantern
+        { left: '20%', finalTop: '100px', swingDuration: '3s', dropDelay: '0.5s' },  // Left lantern
+        { left: '80%', finalTop: '100px', swingDuration: '3.2s', dropDelay: '0.7s' } // Right lantern
     ];
 
     lanternPositions.forEach(function(pos) {
