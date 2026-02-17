@@ -3382,7 +3382,7 @@ header {
     pointer-events: none;
 }
 
-/* Clean double gold border */
+/* Modern gold border with subtle corner decorations */
 .card-back-galaxy::after {
     content: '';
     position: absolute;
@@ -3396,62 +3396,148 @@ header {
         0 0 15px rgba(255, 215, 0, 0.3);
     z-index: 2;
     pointer-events: none;
+    /* Subtle corner decorations - modern geometric */
+    background-image:
+        /* Top-left corner */
+        linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, transparent 50%),
+        /* Top-right corner */
+        linear-gradient(225deg, rgba(255, 215, 0, 0.15) 0%, transparent 50%),
+        /* Bottom-left corner */
+        linear-gradient(45deg, rgba(255, 215, 0, 0.15) 0%, transparent 50%),
+        /* Bottom-right corner */
+        linear-gradient(315deg, rgba(255, 215, 0, 0.15) 0%, transparent 50%),
+        /* Center subtle radial */
+        radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
+    background-size: 60px 60px, 60px 60px, 60px 60px, 60px 60px, 100% 100%;
+    background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%, center;
+    background-repeat: no-repeat;
 }
 
 .card-back-galaxy > img.card-back-seal {
-    /* Hide original static horse image */
+    /* Hide original image */
     display: none !important;
 }
 
-/* Chinese blessing character 福 (Fú = Fortune/Happiness) */
+/* Enable intense aura burst for card back */
+.card-back-galaxy .galaxy-stars {
+    display: block !important;
+    animation: auraBurst1 3s ease-out infinite !important;
+    transform-origin: 50% 50%;
+}
+
+.card-back-galaxy .galaxy-stars-2 {
+    display: block !important;
+    animation: auraBurst2 3.5s ease-out infinite !important;
+    animation-delay: 0.5s !important;
+    transform-origin: 50% 50%;
+}
+
+.card-back-galaxy .galaxy-shimmer {
+    display: block !important;
+    animation: auraWave 2.5s ease-in-out infinite !important;
+    animation-delay: 0.2s !important;
+    transform-origin: 50% 50%;
+}
+
+/* Shimmer wave for extra intensity */
+@keyframes auraWave {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.5);
+    }
+}
+
+/* Intense aura burst animation - Layer 1 */
+@keyframes auraBurst1 {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) rotate(0deg);
+        filter: blur(0px);
+    }
+    15% {
+        opacity: 1;
+        transform: scale(0.5) rotate(15deg);
+        filter: blur(0px);
+    }
+    40% {
+        opacity: 0.9;
+        transform: scale(1) rotate(45deg);
+        filter: blur(1px);
+    }
+    70% {
+        opacity: 0.4;
+        transform: scale(1.8) rotate(90deg);
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2.5) rotate(120deg);
+        filter: blur(4px);
+    }
+}
+
+/* Intense aura burst animation - Layer 2 (reverse rotation) */
+@keyframes auraBurst2 {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) rotate(0deg);
+        filter: blur(0px);
+    }
+    15% {
+        opacity: 1;
+        transform: scale(0.6) rotate(-20deg);
+        filter: blur(0px);
+    }
+    40% {
+        opacity: 0.85;
+        transform: scale(1.1) rotate(-50deg);
+        filter: blur(1px);
+    }
+    70% {
+        opacity: 0.3;
+        transform: scale(2) rotate(-95deg);
+        filter: blur(3px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2.8) rotate(-130deg);
+        filter: blur(5px);
+    }
+}
+
+/* Modern Chinese wealth character 富 (Fù = Wealth/Prosperity) */
 .card-back-galaxy::before {
-    content: '福';
+    content: '富';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 140px;
-    font-weight: 900;
-    font-family: 'KaiTi', 'STKaiti', 'BiauKai', 'SimSun', 'FangSong', serif;
-    color: #FFD700;
+    font-size: 85px;
+    font-weight: 700;
+    font-family: 'KaiTi', 'STKaiti', 'BiauKai', 'SimSun', serif;
+    background: linear-gradient(135deg, #FFD700 0%, #FDB931 50%, #FFED4E 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     z-index: 3;
-    text-shadow:
-        0 0 20px rgba(255, 215, 0, 0.8),
-        0 0 40px rgba(255, 215, 0, 0.5),
-        0 4px 8px rgba(139, 69, 0, 0.6);
-    -webkit-text-stroke: 2px #B8860B;
+    filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.3));
     letter-spacing: 0;
     line-height: 1;
-    animation: fuGlow 4s ease-in-out infinite;
-    /* 8-frame horse galloping sprite sheet */
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100"><defs><style>.h%7Bfill:%23D4AF37;%7D</style></defs><g id="f1"><path class="h" d="M20,70 Q18,60 20,50 L22,45 Q24,40 26,38 L30,35 Q35,32 40,32 Q45,32 48,35 L50,38 Q52,42 52,47 L52,55 L48,65 L42,72 L38,75 Q35,76 32,75 L28,72 Q22,68 20,70 M45,50 Q48,48 50,50 L52,55 L50,60 Q48,62 45,60 L42,55 Q42,52 45,50 M25,72 L22,80 L20,85 Q20,88 22,88 L25,85 L28,78 M35,75 L32,83 L30,88 Q30,90 32,90 L35,87 L38,80 M45,72 L42,80 L40,86 Q40,88 42,88 L45,85 L48,78 M52,68 L50,76 L48,82 Q48,84 50,84 L52,81 L54,74"/></g><g id="f2" transform="translate(100,0)"><path class="h" d="M20,68 Q18,58 20,48 L22,43 Q24,38 27,36 L32,33 Q37,30 42,30 Q47,30 50,33 L53,37 Q55,42 55,48 L54,58 L50,68 L44,74 L40,76 Q37,77 34,76 L30,73 Q24,69 20,68 M47,48 Q50,46 52,48 L54,53 L52,58 Q50,60 47,58 L44,53 Q44,50 47,48 M25,73 L23,82 L22,87 Q22,90 24,90 L27,87 L29,80 M52,73 L50,82 L49,87 Q49,90 51,90 L54,87 L56,80 M38,76 L36,85 L35,90 Q35,92 37,92 L40,89 L42,82 M45,74 L44,83 L43,88 Q43,90 45,90 L48,87 L50,80"/></g><g id="f3" transform="translate(200,0)"><path class="h" d="M20,65 Q18,55 20,45 L23,40 Q26,35 30,33 L35,30 Q40,28 45,28 Q50,28 54,31 L57,35 Q60,40 60,46 L59,57 L54,67 L48,73 L43,75 Q40,76 37,75 L32,71 Q26,67 20,65 M50,46 Q53,44 55,46 L57,51 L55,56 Q53,58 50,56 L47,51 Q47,48 50,46 M27,71 L26,80 L25,86 Q25,89 27,89 L30,86 L32,79 M38,75 L37,84 L36,90 Q36,92 38,92 L41,89 L43,82 M48,73 L48,82 L48,88 Q48,90 50,90 L53,87 L55,80 M56,69 L56,78 L57,84 Q57,86 59,86 L61,83 L62,76"/></g><g id="f4" transform="translate(300,0)"><path class="h" d="M20,70 Q18,60 20,50 L22,45 Q25,40 29,38 L34,35 Q39,33 44,33 Q49,33 52,36 L55,40 Q57,45 57,51 L56,60 L51,69 L45,74 L41,76 Q38,77 35,76 L31,73 Q25,69 20,70 M48,51 Q51,49 53,51 L55,56 L53,61 Q51,63 48,61 L45,56 Q45,53 48,51 M26,73 L24,82 L23,88 Q23,90 25,90 L28,87 L30,80 M35,76 L33,85 L32,91 Q32,93 34,93 L37,90 L39,83 M44,74 L42,83 L41,89 Q41,91 43,91 L46,88 L48,81 M53,71 L51,80 L50,86 Q50,88 52,88 L55,85 L57,78"/></g><g id="f5" transform="translate(400,0)"><path class="h" d="M20,72 Q18,62 20,52 L22,47 Q24,42 27,40 L31,37 Q36,35 41,35 Q46,35 49,38 L52,42 Q54,47 54,53 L53,62 L49,71 L43,76 L39,78 Q36,79 33,78 L29,75 Q23,71 20,72 M46,53 Q49,51 51,53 L53,58 L51,63 Q49,65 46,63 L43,58 Q43,55 46,53 M54,72 L53,81 L52,87 Q52,89 54,89 L57,86 L59,79 M42,78 L41,87 L40,93 Q40,95 42,95 L45,92 L47,85 M32,78 L30,87 L29,92 Q29,94 31,94 L34,91 L36,84 M25,75 L23,84 L22,90 Q22,92 24,92 L27,89 L29,82"/></g><g id="f6" transform="translate(500,0)"><path class="h" d="M20,68 Q18,58 20,48 L23,43 Q26,38 30,36 L35,33 Q40,31 45,31 Q50,31 53,34 L56,38 Q58,43 58,49 L57,59 L52,68 L46,73 L42,75 Q39,76 36,75 L32,72 Q26,68 20,68 M48,49 Q51,47 53,49 L55,54 L53,59 Q51,61 48,59 L45,54 Q45,51 48,49 M28,72 L27,81 L26,87 Q26,89 28,89 L31,86 L33,79 M38,75 L37,84 L36,90 Q36,92 38,92 L41,89 L43,82 M47,73 L46,82 L45,88 Q45,90 47,90 L50,87 L52,80 M55,70 L54,79 L53,85 Q53,87 55,87 L58,84 L60,77"/></g><g id="f7" transform="translate(600,0)"><path class="h" d="M20,70 Q18,60 20,50 L22,45 Q24,40 27,38 L32,35 Q37,33 42,33 Q47,33 50,36 L53,40 Q55,45 55,51 L54,60 L49,69 L43,74 L39,76 Q36,77 33,76 L29,73 Q23,69 20,70 M46,51 Q49,49 51,51 L53,56 L51,61 Q49,63 46,61 L43,56 Q43,53 46,51 M25,73 L23,82 L22,88 Q22,90 24,90 L27,87 L29,80 M33,76 L31,85 L30,91 Q30,93 32,93 L35,90 L37,83 M42,74 L40,83 L39,89 Q39,91 41,91 L44,88 L46,81 M51,71 L49,80 L48,86 Q48,88 50,88 L53,85 L55,78"/></g><g id="f8" transform="translate(700,0)"><path class="h" d="M20,65 Q18,55 20,45 L23,40 Q26,35 30,33 L35,30 Q40,28 45,28 Q50,28 53,31 L56,35 Q58,40 58,46 L57,56 L52,65 L46,71 L42,73 Q39,74 36,73 L32,70 Q26,66 20,65 M48,46 Q51,44 53,46 L55,51 L53,56 Q51,58 48,56 L45,51 Q45,48 48,46 M27,70 L26,79 L25,85 Q25,87 27,87 L30,84 L32,77 M36,73 L35,82 L34,88 Q34,90 36,90 L39,87 L41,80 M45,71 L44,80 L43,86 Q43,88 45,88 L48,85 L50,78 M53,68 L52,77 L51,83 Q51,85 53,85 L56,82 L58,75"/></g></svg>');
-    background-size: 800px 100px;
-    background-position: 0 center;
-    background-repeat: no-repeat;
-    /* Gold embossed effect */
-    filter:
-        brightness(0)
-        invert(1)
-        sepia(1)
-        saturate(2.5)
-        hue-rotate(5deg)
-        brightness(1.3)
-        drop-shadow(0 2px 4px rgba(139, 69, 0, 0.4))
-        drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
-    opacity: 0.9;
-    /* 8-frame sprite animation */
-    animation: horseSpriteRun 0.8s steps(8) infinite;
+    opacity: 0.95;
+    animation: gentleFloat 6s ease-in-out infinite;
 }
 
-/* Sprite sheet animation - moves through 8 frames */
-@keyframes horseSpriteRun {
-    0% {
-        background-position: 0 center;
-    }
-    100% {
-        background-position: -800px center;
-    }
+/* Gentle floating animation for 富 */
+@keyframes gentleFloat {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+    50% { transform: translate(-50%, -50%) translateY(-5px); }
 }
+
+/* Note: ::after is used for the gold border frame above */
 
 /* Hide all decorative elements for clean red envelope look */
 .galaxy-bg,
@@ -3490,10 +3576,21 @@ header {
     filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
 }
 
-/* Disable horse animation in grid for performance */
+/* Disable animations in grid for performance */
 .card-container .card-back-galaxy::before {
     animation: none !important;
-    background-position: -200px center; /* Show frame 3 as static pose */
+    font-size: 48px !important; /* Smaller to prevent overflow */
+}
+
+.card-container .card-back-galaxy {
+    overflow: hidden; /* Prevent text overflow */
+}
+
+.card-container .card-back-galaxy .galaxy-stars,
+.card-container .card-back-galaxy .galaxy-stars-2,
+.card-container .card-back-galaxy .galaxy-shimmer {
+    display: none !important;
+    animation: none !important;
 }
 
 /* Animations removed for simple red envelope design */
@@ -3512,8 +3609,7 @@ header {
     }
 
     .card-back-galaxy::before {
-        width: 130px;
-        height: 130px;
+        font-size: 70px;
     }
 
     .card-back-galaxy > img.card-back-seal {
@@ -3535,8 +3631,7 @@ header {
     }
 
     .card-back-galaxy::before {
-        width: 110px;
-        height: 110px;
+        font-size: 60px;
     }
 
     .card-back-galaxy > img.card-back-seal {
@@ -4123,9 +4218,23 @@ header {
 .category-overlay-bg {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at 50% 30%, rgba(12, 16, 42, 0.93) 0%, rgba(2, 3, 10, 0.97) 100%);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(200, 30, 30, 0.4) 0%, transparent 40%),
+        radial-gradient(ellipse at 70% 80%, rgba(180, 20, 20, 0.3) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 50%, rgba(139, 0, 0, 0.95) 0%, rgba(80, 0, 0, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+/* Chinese cloud pattern overlay */
+.category-overlay-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 25% 35%, rgba(255, 215, 0, 0.03) 0%, transparent 15%),
+        radial-gradient(circle at 75% 65%, rgba(255, 165, 0, 0.02) 0%, transparent 12%);
+    opacity: 0.6;
 }
 .category-content {
     position: relative;
@@ -4252,7 +4361,7 @@ header {
 }
 .category-card:hover .cat-border-glow { opacity: 1; }
 
-/* ---- Inner card body ---- */
+/* ---- Inner card body - Red Envelope Style ---- */
 .cat-card-inner {
     position: relative;
     display: flex;
@@ -4262,7 +4371,22 @@ header {
     border-radius: 20px;
     overflow: hidden;
     z-index: 1;
-    background: rgba(8, 12, 35, 0.85);
+    background: linear-gradient(135deg, rgba(139, 0, 0, 0.92) 0%, rgba(160, 20, 20, 0.88) 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 215, 0, 0.15),
+        0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Gold fortune pattern inside cards */
+.cat-card-inner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 85% 15%, rgba(255, 215, 0, 0.08) 0%, transparent 25%),
+        radial-gradient(circle at 15% 85%, rgba(255, 165, 0, 0.06) 0%, transparent 20%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 /* ---- Nebula background inside card ---- */
@@ -6262,7 +6386,7 @@ footer {
     gap: 6px;
     animation: none;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25), 0 0 8px rgba(255, 215, 0, 0.1);
-    background: linear-gradient(135deg, #151d48 0%, #1c2658 100%);
+    background: linear-gradient(135deg, #A52A2A 0%, #8B0000 100%);
     border-color: rgba(255, 215, 0, 0.2);
 }
 
@@ -6502,47 +6626,64 @@ footer {
     bottom: 12px;
 }
 
-/* Accept Prophecy Button — Mystical Blessing Style */
+/* Accept Prophecy Button — CNY Fortune Blessing Style */
 .comment-submit-btn {
     width: 100%;
     max-width: 100%;
-    padding: 16px 28px;
-    border-radius: 30px;
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    background: linear-gradient(135deg, #1a2255 0%, #243072 40%, #1e2a60 100%);
-    color: #d4daf0;
+    padding: 18px 32px;
+    border-radius: 32px;
+    border: 2px solid rgba(255, 215, 0, 0.5);
+    background: linear-gradient(135deg, #C8102E 0%, #DC143C 40%, #B22222 70%, #8B0000 100%);
+    color: #FFF5DC;
     cursor: pointer;
     font-family: 'Prompt', sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
-    letter-spacing: 1.5px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow:
-        0 0 20px rgba(255, 215, 0, 0.15),
-        0 0 60px rgba(255, 215, 0, 0.08),
-        0 4px 15px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 215, 0, 0.15);
+        0 0 30px rgba(255, 215, 0, 0.4),
+        0 0 80px rgba(255, 165, 0, 0.2),
+        0 6px 20px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 215, 0, 0.3),
+        inset 0 -1px 0 rgba(139, 0, 0, 0.5);
     position: relative;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     animation: acceptBtnPulse 3s ease-in-out infinite;
     z-index: 1;
 }
 
-/* Pulsing glow aura */
+/* CNY prosperity pattern overlay */
+.comment-submit-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.15) 0%, transparent 30%),
+        radial-gradient(circle at 80% 70%, rgba(255, 165, 0, 0.12) 0%, transparent 25%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Pulsing golden glow aura - CNY Fortune */
 .accept-btn-glow {
     position: absolute;
-    inset: -3px;
-    border-radius: 32px;
-    background: linear-gradient(135deg, rgba(255,215,0,0.4), rgba(120,140,200,0.1), rgba(180,190,230,0.4));
+    inset: -4px;
+    border-radius: 36px;
+    background: linear-gradient(135deg,
+        rgba(255, 215, 0, 0.6),
+        rgba(255, 165, 0, 0.4),
+        rgba(255, 215, 0, 0.6));
     background-size: 200% 200%;
     animation: acceptGlowRotate 4s linear infinite;
     z-index: -1;
-    opacity: 0.5;
-    filter: blur(2px);
+    opacity: 0.7;
+    filter: blur(3px);
     transition: opacity 0.4s ease;
 }
 
@@ -6557,11 +6698,11 @@ footer {
 
 .accept-sparkle {
     position: absolute;
-    width: 3px;
-    height: 3px;
+    width: 4px;
+    height: 4px;
     border-radius: 50%;
-    background: rgba(200, 210, 240, 0.8);
-    box-shadow: 0 0 4px rgba(180, 195, 235, 0.6);
+    background: rgba(255, 215, 0, 0.9);
+    box-shadow: 0 0 6px rgba(255, 165, 0, 0.8), 0 0 12px rgba(255, 215, 0, 0.4);
     animation: acceptSparkleFloat 3s ease-in-out infinite;
     opacity: 0;
 }
