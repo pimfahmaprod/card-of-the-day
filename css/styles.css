@@ -247,9 +247,9 @@ body {
 
 .cny-lantern {
     position: absolute;
-    top: -120px;
-    width: 60px;
-    height: 80px;
+    top: -150px;
+    width: 90px;
+    height: 120px;
     animation: lanternDrop var(--drop-duration, 2s) ease-out forwards,
                lanternSwing var(--swing-duration, 3s) ease-in-out infinite;
     animation-delay: var(--drop-delay, 0s), calc(var(--drop-delay, 0s) + var(--drop-duration, 2s));
@@ -3306,88 +3306,65 @@ header {
     max-height: 55%;
     object-fit: contain;
     z-index: 5;
-    /* Golden glittery effect like Chinese New Year red envelope */
+    /* Transform black horse to golden embossed effect */
     filter:
-        drop-shadow(0 0 20px rgba(255, 215, 0, 0.9))
-        drop-shadow(0 0 12px rgba(255, 200, 50, 0.95))
-        drop-shadow(0 0 8px rgba(255, 165, 0, 1))
-        drop-shadow(0 0 25px rgba(218, 165, 32, 0.7))
-        brightness(1.3)
-        saturate(1.4)
-        contrast(1.1);
+        brightness(0)            /* Make it black first */
+        invert(1)                /* Flip black to white */
+        sepia(1)                 /* Add sepia tone */
+        saturate(3)              /* Boost saturation */
+        hue-rotate(10deg)        /* Adjust to gold hue */
+        brightness(1.4)          /* Make it bright gold */
+        drop-shadow(0 0 25px rgba(255, 215, 0, 0.95))
+        drop-shadow(0 0 15px rgba(255, 200, 50, 1))
+        drop-shadow(0 0 10px rgba(255, 165, 0, 1))
+        drop-shadow(0 0 35px rgba(218, 165, 32, 0.8))
+        drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));    /* Embossed shadow */
     animation: sealPulseGold 3s ease-in-out infinite, horseGlitter 2s linear infinite;
+    /* Subtle embossed effect */
+    mix-blend-mode: screen;
+    opacity: 0.9;
 }
 
 @keyframes sealPulseGold {
     0%, 100% {
         filter:
-            drop-shadow(0 0 20px rgba(255, 215, 0, 0.9))
-            drop-shadow(0 0 12px rgba(255, 200, 50, 0.95))
-            drop-shadow(0 0 8px rgba(255, 165, 0, 1))
-            drop-shadow(0 0 25px rgba(218, 165, 32, 0.7))
-            brightness(1.3)
-            saturate(1.4)
-            contrast(1.1);
+            brightness(0)
+            invert(1)
+            sepia(1)
+            saturate(3)
+            hue-rotate(10deg)
+            brightness(1.4)
+            drop-shadow(0 0 25px rgba(255, 215, 0, 0.95))
+            drop-shadow(0 0 15px rgba(255, 200, 50, 1))
+            drop-shadow(0 0 10px rgba(255, 165, 0, 1))
+            drop-shadow(0 0 35px rgba(218, 165, 32, 0.8))
+            drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
         transform: scale(1);
     }
     50% {
         filter:
-            drop-shadow(0 0 35px rgba(255, 215, 0, 1))
-            drop-shadow(0 0 20px rgba(255, 200, 50, 1))
-            drop-shadow(0 0 15px rgba(255, 165, 0, 1))
-            drop-shadow(0 0 40px rgba(218, 165, 32, 0.9))
-            brightness(1.5)
-            saturate(1.6)
-            contrast(1.2);
-        transform: scale(1.08);
+            brightness(0)
+            invert(1)
+            sepia(1)
+            saturate(3.5)
+            hue-rotate(15deg)
+            brightness(1.6)
+            drop-shadow(0 0 40px rgba(255, 215, 0, 1))
+            drop-shadow(0 0 25px rgba(255, 200, 50, 1))
+            drop-shadow(0 0 18px rgba(255, 165, 0, 1))
+            drop-shadow(0 0 50px rgba(218, 165, 32, 1))
+            drop-shadow(0 3px 12px rgba(0, 0, 0, 0.4));
+        transform: scale(1.05);
     }
 }
 
 /* Glittery shimmer effect */
 @keyframes horseGlitter {
     0%, 100% {
-        filter:
-            drop-shadow(0 0 20px rgba(255, 215, 0, 0.9))
-            drop-shadow(0 0 12px rgba(255, 200, 50, 0.95))
-            drop-shadow(0 0 8px rgba(255, 165, 0, 1))
-            drop-shadow(0 0 25px rgba(218, 165, 32, 0.7))
-            brightness(1.3)
-            saturate(1.4)
-            contrast(1.1)
-            hue-rotate(0deg);
-    }
-    25% {
-        filter:
-            drop-shadow(0 0 22px rgba(255, 215, 0, 0.95))
-            drop-shadow(0 0 14px rgba(255, 200, 50, 1))
-            drop-shadow(0 0 10px rgba(255, 165, 0, 1))
-            drop-shadow(0 0 28px rgba(218, 165, 32, 0.8))
-            brightness(1.4)
-            saturate(1.5)
-            contrast(1.15)
-            hue-rotate(5deg);
+        opacity: 0.9;
     }
     50% {
-        filter:
-            drop-shadow(0 0 25px rgba(255, 215, 0, 1))
-            drop-shadow(0 0 16px rgba(255, 200, 50, 1))
-            drop-shadow(0 0 12px rgba(255, 165, 0, 1))
-            drop-shadow(0 0 30px rgba(218, 165, 32, 0.85))
-            brightness(1.5)
-            saturate(1.6)
-            contrast(1.2)
-            hue-rotate(8deg);
-    }
-    75% {
-        filter:
-            drop-shadow(0 0 22px rgba(255, 215, 0, 0.95))
-            drop-shadow(0 0 14px rgba(255, 200, 50, 1))
-            drop-shadow(0 0 10px rgba(255, 165, 0, 1))
-            drop-shadow(0 0 28px rgba(218, 165, 32, 0.8))
-            brightness(1.4)
-            saturate(1.5)
-            contrast(1.15)
-            hue-rotate(3deg);
+        opacity: 1;
     }
 }
 
@@ -3551,6 +3528,13 @@ header {
     0% { transform: translateX(-150%); }
     30% { transform: translateX(150%); }
     100% { transform: translateX(150%); }
+}
+
+/* Hide space-themed elements for red envelope style */
+.galaxy-orbit,
+.galaxy-aurora,
+.galaxy-shooting-star {
+    display: none !important;
 }
 
 /* ===== Prosperity ring — rotating golden circle around the seal ===== */

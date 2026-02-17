@@ -4061,8 +4061,8 @@ function resetCommentForm() {
 
     // Create exactly 2 lanterns - left and right, symmetrically positioned
     const lanternPositions = [
-        { left: '15%', finalTop: '80px', swingDuration: '3s', dropDelay: '0.5s' },  // Left lantern
-        { left: '85%', finalTop: '80px', swingDuration: '3.2s', dropDelay: '0.7s' } // Right lantern
+        { left: '22%', finalTop: '120px', swingDuration: '3s', dropDelay: '0.5s' },  // Left lantern
+        { left: '78%', finalTop: '120px', swingDuration: '3.2s', dropDelay: '0.7s' } // Right lantern
     ];
 
     lanternPositions.forEach(function(pos) {
