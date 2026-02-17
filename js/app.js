@@ -4059,29 +4059,26 @@ function resetCommentForm() {
         <path d="M 30 74 L 28 82 L 30 80 L 32 82 Z" fill="url(#goldGrad)" opacity="0.9"/>
     </svg>`;
 
-    // Create 5-8 lanterns at random positions
-    const count = 5 + Math.floor(Math.random() * 4);
-    for (let i = 0; i < count; i++) {
+    // Create exactly 2 lanterns - left and right, symmetrically positioned
+    const lanternPositions = [
+        { left: '15%', finalTop: '80px', swingDuration: '3s', dropDelay: '0.5s' },  // Left lantern
+        { left: '85%', finalTop: '80px', swingDuration: '3.2s', dropDelay: '0.7s' } // Right lantern
+    ];
+
+    lanternPositions.forEach(function(pos) {
         const lantern = document.createElement('div');
         lantern.className = 'cny-lantern';
         lantern.innerHTML = lanternSVG;
 
-        // Random horizontal position
-        lantern.style.left = (10 + Math.random() * 80) + '%';
-
-        // Random drop timing and final position
-        const dropDelay = Math.random() * 2;
-        const dropDuration = 1.5 + Math.random() * 1;
-        const finalTop = 50 + Math.random() * 150;
-        const swingDuration = 2.5 + Math.random() * 1.5;
-
-        lantern.style.setProperty('--drop-delay', dropDelay + 's');
-        lantern.style.setProperty('--drop-duration', dropDuration + 's');
-        lantern.style.setProperty('--final-top', finalTop + 'px');
-        lantern.style.setProperty('--swing-duration', swingDuration + 's');
+        // Position settings
+        lantern.style.left = pos.left;
+        lantern.style.setProperty('--drop-delay', pos.dropDelay);
+        lantern.style.setProperty('--drop-duration', '2s');
+        lantern.style.setProperty('--final-top', pos.finalTop);
+        lantern.style.setProperty('--swing-duration', pos.swingDuration);
 
         container.appendChild(lantern);
-    }
+    });
 })();
 
 // Header shooting stars — spawns mini shooting stars inside .comments-panel-header
