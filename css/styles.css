@@ -45,8 +45,9 @@ body {
     min-height: -webkit-fill-available;
 }
 
-/* ==================== STARFIELD BACKGROUND ==================== */
-.starfield {
+/* ==================== CHINESE NEW YEAR LAYERED BACKGROUND ==================== */
+
+.cny-background {
     position: fixed;
     inset: 0;
     pointer-events: none;
@@ -54,65 +55,215 @@ body {
     overflow: hidden;
 }
 
-.star {
+/* Red seigaiha wave pattern background */
+.cny-wave-bg {
     position: absolute;
+    inset: 0;
+    background-color: #C03030;
+    background-image:
+        radial-gradient(circle at 100% 150%, #C03030 24%, #B82E2E 25%, #B82E2E 28%, #C03030 29%, #C03030 36%, #B02C2C 36%, #B02C2C 40%, transparent 40%, transparent),
+        radial-gradient(circle at 0 150%, #C03030 24%, #B82E2E 25%, #B82E2E 28%, #C03030 29%, #C03030 36%, #B02C2C 36%, #B02C2C 40%, transparent 40%, transparent),
+        radial-gradient(circle at 50% 100%, #B82E2E 10%, #C03030 11%, #C03030 23%, #B82E2E 24%, #B82E2E 30%),
+        radial-gradient(circle at 100% 50%, #B82E2E 24%, #C03030 25%, #C03030 27%, #B82E2E 28%, #B82E2E 36%, #B02C2C 36%, #B02C2C 40%, transparent 40%, transparent),
+        radial-gradient(circle at 0 50%, #B82E2E 24%, #C03030 25%, #C03030 27%, #B82E2E 28%, #B82E2E 36%, #B02C2C 36%, #B02C2C 40%, transparent 40%, transparent);
+    background-size: 100px 50px;
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+    animation: wavePatternDrift 30s linear infinite;
+}
+
+@keyframes wavePatternDrift {
+    0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
+    100% { background-position: 100px 0, -100px 0, 50px 0, 100px 0, -100px 0; }
+}
+
+/* Bottom wave layers (like in the image) */
+.cny-bottom-waves {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 35%;
+    z-index: 2;
+}
+
+.cny-wave-layer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background-size: 50% 100%;
+    background-repeat: repeat-x;
+}
+
+.cny-wave-1 {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,60 C300,100 600,100 900,60 C1050,30 1200,30 1200,60 L1200,120 L0,120 Z" fill="%23D4A574" opacity="0.3"/></svg>');
+    animation: waveDrift 25s linear infinite;
+    z-index: 1;
+}
+
+.cny-wave-2 {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,80 C200,40 400,40 600,80 C900,130 1000,130 1200,80 L1200,120 L0,120 Z" fill="%23E8C397" opacity="0.5"/></svg>');
+    animation: waveDrift 20s linear infinite reverse;
+    z-index: 2;
+}
+
+.cny-wave-3 {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,50 C400,90 800,90 1200,50 L1200,120 L0,120 Z" fill="%23F5D5B5" opacity="0.7"/></svg>');
+    animation: waveDrift 18s linear infinite;
+    z-index: 3;
+}
+
+@keyframes waveDrift {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* Central sun/moon with wave pattern */
+.cny-sun {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(350px, 40vw);
+    height: min(350px, 40vw);
     border-radius: 50%;
-    background: #fff;
-    animation: twinkle ease-in-out infinite alternate;
+    background: radial-gradient(circle at 30% 30%, #FFE5B4, #FDD58C 40%, #EABA6B 70%, #D4A574 100%);
+    box-shadow: 0 0 60px rgba(255, 215, 0, 0.4), 0 0 120px rgba(255, 165, 0, 0.2);
+    z-index: 1;
+    animation: sunGlow 8s ease-in-out infinite;
 }
 
-.star--sm {
-    width: 1px;
-    height: 1px;
-}
-
-.star--md {
-    width: 1.5px;
-    height: 1.5px;
-    box-shadow: 0 0 2px rgba(200, 216, 240, 0.3);
-}
-
-.star--lg {
-    width: 2px;
-    height: 2px;
-    box-shadow: 0 0 4px rgba(200, 216, 240, 0.4), 0 0 8px rgba(200, 216, 240, 0.15);
-}
-
-@keyframes twinkle {
-    0% { opacity: var(--star-min, 0.15); }
-    100% { opacity: var(--star-max, 0.8); }
-}
-
-/* Shooting stars */
-.shooting-star {
+.cny-sun-pattern {
     position: absolute;
-    width: var(--shoot-len, 80px);
-    height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(200, 216, 240, 0.5) 50%, rgba(255, 255, 255, 0.8) 100%);
-    border-radius: 0.5px;
-    transform: rotate(var(--shoot-angle, 140deg));
-    opacity: 0;
-    will-change: transform, opacity;
-    animation: shootingStar var(--shoot-dur, 0.8s) ease-in forwards;
-    animation-delay: var(--shoot-delay, 0s);
+    inset: 10%;
+    border-radius: 50%;
+    background-image:
+        radial-gradient(circle at 100% 150%, transparent 24%, rgba(218,165,32,0.3) 25%, rgba(218,165,32,0.3) 28%, transparent 29%, transparent 36%, rgba(218,165,32,0.2) 36%, rgba(218,165,32,0.2) 40%, transparent 40%),
+        radial-gradient(circle at 0 150%, transparent 24%, rgba(218,165,32,0.3) 25%, rgba(218,165,32,0.3) 28%, transparent 29%, transparent 36%, rgba(218,165,32,0.2) 36%, rgba(218,165,32,0.2) 40%, transparent 40%),
+        radial-gradient(circle at 50% 100%, rgba(218,165,32,0.25) 10%, transparent 11%, transparent 23%, rgba(218,165,32,0.3) 24%, rgba(218,165,32,0.3) 30%);
+    background-size: 75px 37.5px;
+    animation: sunPatternRotate 40s linear infinite;
 }
 
-@keyframes shootingStar {
+@keyframes sunGlow {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.02); opacity: 0.95; }
+}
+
+@keyframes sunPatternRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Floating golden clouds */
+.cny-clouds {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+}
+
+.cny-cloud {
+    position: absolute;
+    background: radial-gradient(ellipse at center, rgba(244, 220, 181, 0.8) 0%, rgba(234, 202, 164, 0.6) 40%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(8px);
+}
+
+.cny-cloud-1 {
+    width: 180px;
+    height: 80px;
+    bottom: 25%;
+    left: -50px;
+    animation: cloudFloatRight 35s ease-in-out infinite;
+}
+
+.cny-cloud-2 {
+    width: 220px;
+    height: 95px;
+    bottom: 30%;
+    right: -80px;
+    animation: cloudFloatLeft 40s ease-in-out infinite;
+    animation-delay: 5s;
+}
+
+.cny-cloud-3 {
+    width: 150px;
+    height: 65px;
+    bottom: 35%;
+    left: -40px;
+    animation: cloudFloatRight 30s ease-in-out infinite;
+    animation-delay: 10s;
+}
+
+.cny-cloud-4 {
+    width: 200px;
+    height: 85px;
+    bottom: 20%;
+    right: -70px;
+    animation: cloudFloatLeft 38s ease-in-out infinite;
+    animation-delay: 15s;
+}
+
+@keyframes cloudFloatRight {
+    0% { transform: translateX(0); opacity: 0; }
+    10% { opacity: 0.8; }
+    90% { opacity: 0.8; }
+    100% { transform: translateX(calc(100vw + 300px)); opacity: 0; }
+}
+
+@keyframes cloudFloatLeft {
+    0% { transform: translateX(0); opacity: 0; }
+    10% { opacity: 0.8; }
+    90% { opacity: 0.8; }
+    100% { transform: translateX(calc(-100vw - 300px)); opacity: 0; }
+}
+
+/* Hanging lanterns container */
+.cny-lanterns {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+}
+
+.cny-lantern {
+    position: absolute;
+    top: -120px;
+    width: 60px;
+    height: 80px;
+    animation: lanternDrop var(--drop-duration, 2s) ease-out forwards,
+               lanternSwing var(--swing-duration, 3s) ease-in-out infinite;
+    animation-delay: var(--drop-delay, 0s), calc(var(--drop-delay, 0s) + var(--drop-duration, 2s));
+    transform-origin: top center;
+}
+
+.cny-lantern svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.6));
+}
+
+@keyframes lanternDrop {
     0% {
+        top: -120px;
         opacity: 0;
-        transform: rotate(var(--shoot-angle, 215deg)) translateX(0);
     }
-    8% {
+    10% {
         opacity: 1;
     }
-    70% {
-        opacity: 0.6;
-    }
     100% {
-        opacity: 0;
-        transform: rotate(var(--shoot-angle, 215deg)) translateX(var(--shoot-dist, 200px));
+        top: var(--final-top, 80px);
+        opacity: 1;
     }
 }
+
+@keyframes lanternSwing {
+    0%, 100% { transform: rotate(-4deg); }
+    50% { transform: rotate(4deg); }
+}
+
+/* Legacy starfield classes for compatibility (hidden) */
+.starfield, .star, .shooting-star { display: none !important; }
 
 /* ==================== PRELOAD OVERLAY ==================== */
 .preload-overlay {

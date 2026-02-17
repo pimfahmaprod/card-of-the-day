@@ -4024,60 +4024,64 @@ function resetCommentForm() {
 }
 
 // Character count listeners
-// Starfield background
-(function createStarfield() {
-    const container = document.getElementById('starfield');
+// Chinese New Year Lanterns
+(function createCNYLanterns() {
+    const container = document.getElementById('cnyLanterns');
     if (!container) return;
-    const sizes = ['sm', 'md', 'lg'];
-    const weights = [0.6, 0.3, 0.1]; // 60% small, 30% medium, 10% large
-    const count = 100;
-    const frag = document.createDocumentFragment();
+
+    // Red lantern SVG with gold trim
+    const lanternSVG = `<svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="lanternGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#DC143C"/>
+                <stop offset="50%" style="stop-color:#B22222"/>
+                <stop offset="100%" style="stop-color:#8B0000"/>
+            </linearGradient>
+            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#FFD700"/>
+                <stop offset="50%" style="stop-color:#FFA500"/>
+                <stop offset="100%" style="stop-color:#DAA520"/>
+            </linearGradient>
+        </defs>
+        <!-- Top gold cap -->
+        <ellipse cx="30" cy="8" rx="10" ry="4" fill="url(#goldGrad)"/>
+        <rect x="28" y="2" width="4" height="6" fill="url(#goldGrad)"/>
+        <!-- Lantern body -->
+        <path d="M 20 10 Q 15 25, 15 40 Q 15 55, 20 70 L 40 70 Q 45 55, 45 40 Q 45 25, 40 10 Z"
+              fill="url(#lanternGrad)" stroke="#8B0000" stroke-width="1"/>
+        <!-- Gold decorative lines -->
+        <line x1="20" y1="15" x2="40" y2="15" stroke="url(#goldGrad)" stroke-width="2"/>
+        <line x1="18" y1="40" x2="42" y2="40" stroke="url(#goldGrad)" stroke-width="2.5"/>
+        <line x1="20" y1="65" x2="40" y2="65" stroke="url(#goldGrad)" stroke-width="2"/>
+        <!-- Bottom gold cap -->
+        <ellipse cx="30" cy="72" rx="10" ry="4" fill="url(#goldGrad)"/>
+        <!-- Tassel -->
+        <path d="M 30 74 L 28 82 L 30 80 L 32 82 Z" fill="url(#goldGrad)" opacity="0.9"/>
+    </svg>`;
+
+    // Create 5-8 lanterns at random positions
+    const count = 5 + Math.floor(Math.random() * 4);
     for (let i = 0; i < count; i++) {
-        const r = Math.random();
-        const size = r < weights[0] ? sizes[0] : r < weights[0] + weights[1] ? sizes[1] : sizes[2];
-        const star = document.createElement('div');
-        star.className = 'star star--' + size;
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.setProperty('--star-min', (Math.random() * 0.15 + 0.05).toFixed(2));
-        star.style.setProperty('--star-max', (Math.random() * 0.5 + 0.5).toFixed(2));
-        star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-        star.style.animationDelay = (Math.random() * 5) + 's';
-        frag.appendChild(star);
-    }
-    container.appendChild(frag);
+        const lantern = document.createElement('div');
+        lantern.className = 'cny-lantern';
+        lantern.innerHTML = lanternSVG;
 
-    // Shooting stars — thin streaks matching comet direction
-    function spawnShootingStar() {
-        const el = document.createElement('div');
-        el.className = 'shooting-star';
-        el.style.left = (20 + Math.random() * 80) + '%';
-        el.style.top = (Math.random() * 60) + '%';
-        // Same direction as comet: ~140deg ±8deg
-        const angle = 136 + Math.random() * 16;
-        const len = 60 + Math.random() * 80;
-        const dist = 100 + Math.random() * 160;
-        const dur = (0.4 + Math.random() * 0.4).toFixed(2);
-        el.style.setProperty('--shoot-angle', angle.toFixed(0) + 'deg');
-        el.style.setProperty('--shoot-len', len.toFixed(0) + 'px');
-        el.style.setProperty('--shoot-dist', dist.toFixed(0) + 'px');
-        el.style.setProperty('--shoot-dur', dur + 's');
-        container.appendChild(el);
-        el.addEventListener('animationend', () => el.remove(), { once: true });
-    }
+        // Random horizontal position
+        lantern.style.left = (10 + Math.random() * 80) + '%';
 
-    // Meteor shower: bursts of 1-3 stars every 1.5-3.5s
-    (function scheduleNext() {
-        const delay = 1500 + Math.random() * 2000;
-        setTimeout(() => {
-            const burst = Math.random() < 0.35 ? (Math.random() < 0.5 ? 3 : 2) : 1;
-            for (let i = 0; i < burst; i++) {
-                setTimeout(spawnShootingStar, i * (100 + Math.random() * 250));
-            }
-            scheduleNext();
-        }, delay);
-    })();
-    setTimeout(spawnShootingStar, 800);
+        // Random drop timing and final position
+        const dropDelay = Math.random() * 2;
+        const dropDuration = 1.5 + Math.random() * 1;
+        const finalTop = 50 + Math.random() * 150;
+        const swingDuration = 2.5 + Math.random() * 1.5;
+
+        lantern.style.setProperty('--drop-delay', dropDelay + 's');
+        lantern.style.setProperty('--drop-duration', dropDuration + 's');
+        lantern.style.setProperty('--final-top', finalTop + 'px');
+        lantern.style.setProperty('--swing-duration', swingDuration + 's');
+
+        container.appendChild(lantern);
+    }
 })();
 
 // Header shooting stars — spawns mini shooting stars inside .comments-panel-header
