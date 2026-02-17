@@ -82,7 +82,7 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 35%;
+    height: 45%;
     z-index: 2;
 }
 
@@ -97,21 +97,24 @@ body {
 }
 
 .cny-wave-1 {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,60 C300,100 600,100 900,60 C1050,30 1200,30 1200,60 L1200,120 L0,120 Z" fill="%23D4A574" opacity="0.3"/></svg>');
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,80 Q150,65 300,80 T600,80 T900,80 T1200,80 L1200,150 L0,150 Z" fill="%238B0000"/><path d="M0,90 Q150,75 300,90 T600,90 T900,90 T1200,90 L1200,150 L0,150 Z" fill="%23A52A2A"/></svg>');
     animation: waveDrift 25s linear infinite;
     z-index: 1;
+    opacity: 1;
 }
 
 .cny-wave-2 {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,80 C200,40 400,40 600,80 C900,130 1000,130 1200,80 L1200,120 L0,120 Z" fill="%23E8C397" opacity="0.5"/></svg>');
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,60 Q150,45 300,60 T600,60 T900,60 T1200,60 L1200,150 L0,150 Z" fill="%23B22222"/><path d="M0,70 Q150,55 300,70 T600,70 T900,70 T1200,70 L1200,150 L0,150 Z" fill="%23C03030"/></svg>');
     animation: waveDrift 20s linear infinite reverse;
     z-index: 2;
+    opacity: 1;
 }
 
 .cny-wave-3 {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,50 C400,90 800,90 1200,50 L1200,120 L0,120 Z" fill="%23F5D5B5" opacity="0.7"/></svg>');
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,40 Q150,25 300,40 T600,40 T900,40 T1200,40 L1200,150 L0,150 Z" fill="%23D64545"/><path d="M0,50 Q150,35 300,50 T600,50 T900,50 T1200,50 L1200,150 L0,150 Z" fill="%23E86A6A"/></svg>');
     animation: waveDrift 18s linear infinite;
     z-index: 3;
+    opacity: 1;
 }
 
 @keyframes waveDrift {
@@ -3240,89 +3243,58 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Rich red envelope background - vibrant and glossy */
-    background:
-        radial-gradient(ellipse at 30% 20%, rgba(255, 50, 50, 0.3), transparent 60%),
-        radial-gradient(ellipse at 70% 80%, rgba(220, 20, 60, 0.25), transparent 50%),
-        linear-gradient(145deg,
-            #C8102E 0%,    /* Bright Chinese red */
-            #E31C23 15%,   /* Vivid red */
-            #DC143C 35%,   /* Crimson */
-            #B91C1C 55%,   /* Deep red */
-            #C8102E 75%,   /* Back to Chinese red */
-            #E31C23 100%
-        );
+    /* Solid bright red like real ang pao */
+    background: linear-gradient(180deg, #D4202B 0%, #C8102E 50%, #B91C1C 100%);
     position: relative;
-    box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.15);
 }
 
-/* Glossy finish overlay */
+/* Simple glossy paper texture */
 .card-back-galaxy::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        160deg,
-        rgba(255, 255, 255, 0.25) 0%,
-        transparent 35%,
-        transparent 65%,
-        rgba(255, 255, 255, 0.12) 100%
-    );
+    background:
+        radial-gradient(ellipse at 30% 30%, rgba(255, 255, 255, 0.15), transparent 50%),
+        radial-gradient(ellipse at 70% 70%, rgba(0, 0, 0, 0.08), transparent 40%);
     z-index: 1;
     pointer-events: none;
 }
 
-/* Decorative gold border with corner ornaments */
+/* Clean double gold border */
 .card-back-galaxy::after {
     content: '';
     position: absolute;
-    inset: 12px;
-    border: 2.5px solid;
-    border-image: linear-gradient(135deg,
-        #FFD700 0%,
-        #FFED4E 20%,
-        #FFB800 35%,
-        #FFD700 50%,
-        #FFA500 65%,
-        #FFED4E 80%,
-        #FFD700 100%
-    ) 1;
-    border-radius: 10px;
+    inset: 10px;
+    border: 3px solid #FFD700;
+    border-radius: 8px;
     box-shadow:
-        inset 0 0 25px rgba(255, 215, 0, 0.4),
-        inset 0 2px 10px rgba(255, 255, 255, 0.3),
-        0 0 20px rgba(255, 215, 0, 0.5),
-        0 0 40px rgba(255, 165, 0, 0.3);
-    z-index: 10;
+        0 0 0 1px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 6px #C8102E inset,
+        0 0 0 9px #FFD700 inset,
+        0 0 15px rgba(255, 215, 0, 0.3);
+    z-index: 2;
     pointer-events: none;
-    animation: borderGlitter 3s ease-in-out infinite;
 }
 
 .card-back-galaxy > img.card-back-seal {
     position: relative;
     width: auto;
     height: auto;
-    max-width: 55%;
-    max-height: 55%;
+    max-width: 70%;
+    max-height: 70%;
     object-fit: contain;
-    z-index: 5;
-    /* Transform black horse to golden embossed effect */
+    z-index: 3;
+    /* Gold embossed print effect */
     filter:
-        brightness(0)            /* Make it black first */
-        invert(1)                /* Flip black to white */
-        sepia(1)                 /* Add sepia tone */
-        saturate(3)              /* Boost saturation */
-        hue-rotate(10deg)        /* Adjust to gold hue */
-        brightness(1.4)          /* Make it bright gold */
-        drop-shadow(0 0 25px rgba(255, 215, 0, 0.95))
-        drop-shadow(0 0 15px rgba(255, 200, 50, 1))
-        drop-shadow(0 0 10px rgba(255, 165, 0, 1))
-        drop-shadow(0 0 35px rgba(218, 165, 32, 0.8))
-        drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));    /* Embossed shadow */
-    animation: sealPulseGold 3s ease-in-out infinite, horseGlitter 2s linear infinite;
-    /* Subtle embossed effect */
-    mix-blend-mode: screen;
-    opacity: 0.9;
+        brightness(0)
+        invert(1)
+        sepia(1)
+        saturate(2.5)
+        hue-rotate(5deg)
+        brightness(1.3)
+        drop-shadow(0 2px 4px rgba(139, 69, 0, 0.4))
+        drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+    opacity: 0.85;
 }
 
 @keyframes sealPulseGold {
