@@ -14563,3 +14563,202 @@ footer {
 .card-grid .card-container .galaxy-bg {
     display: none !important;
 }
+
+/* ===== REMOVE INNER GOLD FRAME: Keep only outer border ===== */
+
+.card-back-galaxy::after {
+    /* Remove all inset borders, keep only outer border and glow */
+    box-shadow:
+        0 0 15px rgba(255, 215, 0, 0.4),
+        0 0 30px rgba(255, 215, 0, 0.2) !important;
+    /* Keep the border itself */
+    border: 3px solid #FFD700 !important;
+    /* Remove inner decorative patterns */
+    background-image: none !important;
+}
+
+/* Adjust for different card sizes */
+.three-card-item .card-back-galaxy::after {
+    box-shadow:
+        0 0 12px rgba(255, 215, 0, 0.4),
+        0 0 25px rgba(255, 215, 0, 0.2) !important;
+}
+
+.card-grid .card-container .card-back-galaxy::after,
+.ten-card-fan .card-back-galaxy::after,
+.twelve-card-fan .card-back-galaxy::after {
+    box-shadow:
+        0 0 8px rgba(255, 215, 0, 0.3),
+        0 0 15px rgba(255, 215, 0, 0.15) !important;
+}
+
+/* ===== RESTORE: Original gold border frame ===== */
+
+.card-back-galaxy::after {
+    /* Original multi-layered gold border */
+    box-shadow:
+        0 0 0 1px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 6px #C8102E inset,
+        0 0 0 9px #FFD700 inset,
+        0 0 15px rgba(255, 215, 0, 0.3) !important;
+    background-image: none !important;
+}
+
+/* Large cards */
+.spinning-card-back.card-back-galaxy::after,
+.four-card-fan .card-back-galaxy::after,
+.card-face.card-back.card-back-galaxy::after,
+.blessing-card-back.card-back-galaxy::after {
+    inset: 10px !important;
+    border: 3px solid #FFD700 !important;
+    box-shadow:
+        0 0 0 1px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 6px #C8102E inset,
+        0 0 0 9px #FFD700 inset,
+        0 0 15px rgba(255, 215, 0, 0.3) !important;
+}
+
+/* Three cards */
+.three-card-item .card-back-galaxy::after {
+    box-shadow:
+        0 0 0 1px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 4px #C8102E inset,
+        0 0 0 6px #FFD700 inset,
+        0 0 10px rgba(255, 215, 0, 0.3) !important;
+}
+
+/* Grid and small cards */
+.card-grid .card-container .card-back-galaxy::after {
+    box-shadow:
+        0 0 0 0.5px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 3px #C8102E inset,
+        0 0 0 5px #FFD700 inset,
+        0 0 8px rgba(255, 215, 0, 0.3) !important;
+}
+
+.ten-card-fan .card-back-galaxy::after,
+.twelve-card-fan .card-back-galaxy::after {
+    box-shadow:
+        0 0 0 0.5px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 2px #C8102E inset,
+        0 0 0 3px #FFD700 inset,
+        0 0 5px rgba(255, 215, 0, 0.3) !important;
+}
+
+/* ===== CLEAN: Remove all inner gold shadows ===== */
+
+.card-back-galaxy::after {
+    /* Only outer border and glow - NO inset shadows */
+    box-shadow: 
+        0 0 15px rgba(255, 215, 0, 0.4),
+        0 0 30px rgba(255, 215, 0, 0.2) !important;
+    background-image: none !important;
+    background-color: transparent !important;
+}
+
+/* Apply to all card types */
+.spinning-card-back.card-back-galaxy::after,
+.four-card-fan .card-back-galaxy::after,
+.card-face.card-back.card-back-galaxy::after,
+.blessing-card-back.card-back-galaxy::after,
+.three-card-item .card-back-galaxy::after,
+.card-grid .card-container .card-back-galaxy::after,
+.ten-card-fan .card-back-galaxy::after,
+.twelve-card-fan .card-back-galaxy::after {
+    box-shadow: 
+        0 0 15px rgba(255, 215, 0, 0.4),
+        0 0 30px rgba(255, 215, 0, 0.2) !important;
+    background-image: none !important;
+    background-color: transparent !important;
+}
+
+/* Also clean the character shadow - remove corner dots */
+.card-back-galaxy::before {
+    box-shadow:
+        0 0 20px rgba(255, 215, 0, 0.4),
+        0 0 40px rgba(255, 215, 0, 0.2) !important;
+}
+
+/* ===== RESTORE border + REMOVE inner content glow ===== */
+
+/* Restore original multi-layered border frame */
+.card-back-galaxy::after {
+    box-shadow:
+        0 0 0 1px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 6px #C8102E inset,
+        0 0 0 9px #FFD700 inset,
+        0 0 15px rgba(255, 215, 0, 0.3) !important;
+    background-image: none !important;
+}
+
+.spinning-card-back.card-back-galaxy::after,
+.four-card-fan .card-back-galaxy::after,
+.card-face.card-back.card-back-galaxy::after,
+.blessing-card-back.card-back-galaxy::after {
+    box-shadow:
+        0 0 0 1px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 6px #C8102E inset,
+        0 0 0 9px #FFD700 inset,
+        0 0 15px rgba(255, 215, 0, 0.3) !important;
+}
+
+.three-card-item .card-back-galaxy::after {
+    box-shadow:
+        0 0 0 1px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 4px #C8102E inset,
+        0 0 0 6px #FFD700 inset,
+        0 0 10px rgba(255, 215, 0, 0.3) !important;
+}
+
+.card-grid .card-container .card-back-galaxy::after {
+    box-shadow:
+        0 0 0 0.5px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 3px #C8102E inset,
+        0 0 0 5px #FFD700 inset,
+        0 0 8px rgba(255, 215, 0, 0.3) !important;
+}
+
+.ten-card-fan .card-back-galaxy::after,
+.twelve-card-fan .card-back-galaxy::after {
+    box-shadow:
+        0 0 0 0.5px rgba(255, 215, 0, 0.5) inset,
+        0 0 0 2px #C8102E inset,
+        0 0 0 3px #FFD700 inset,
+        0 0 5px rgba(255, 215, 0, 0.3) !important;
+}
+
+/* REMOVE inner content glow (the unwanted outer-shadow effect inside) */
+.card-back-galaxy::before {
+    box-shadow: none !important;
+    filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.3)) !important;
+}
+
+/* Remove any background glows inside content area */
+.card-back-galaxy .galaxy-shimmer {
+    display: none !important;
+}
+
+/* ===== FIX: Four-card font size override ===== */
+
+/* Four cards - should be 85px not 120px */
+.four-card-fan .card-back-galaxy::before {
+    font-size: 85px !important;
+}
+
+@media (max-width: 768px) {
+    .four-card-fan .card-back-galaxy::before {
+        font-size: 70px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .four-card-fan .card-back-galaxy::before {
+        font-size: 60px !important;
+    }
+}
+
+/* ===== REMOVE: Sun from card back ===== */
+
+.card-back-galaxy .galaxy-orbit {
+    display: none !important;
+}
