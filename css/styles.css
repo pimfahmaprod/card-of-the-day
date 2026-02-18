@@ -138,6 +138,8 @@ body {
     z-index: 1;
     /* Opening animation + continuous glow */
     animation: sunEntrance 2s ease-out forwards, sunGlow 8s ease-in-out infinite 2s;
+    /* Promote to own GPU layer — prevents recomposites from affecting spinning card */
+    will-change: transform;
 }
 
 /* Radiant sun rays effect */
@@ -188,12 +190,14 @@ body {
     );
     animation: sunRaysRotate 50s linear infinite, sunRaysEntrance 2.5s ease-out;
     pointer-events: none;
+    will-change: transform;
 }
 
 .cny-sun-pattern {
     position: absolute;
     inset: 10%;
     border-radius: 50%;
+    will-change: transform;
     background-image:
         radial-gradient(circle at 100% 150%, transparent 24%, rgba(218,165,32,0.3) 25%, rgba(218,165,32,0.3) 28%, transparent 29%, transparent 36%, rgba(218,165,32,0.2) 36%, rgba(218,165,32,0.2) 40%, transparent 40%),
         radial-gradient(circle at 0 150%, transparent 24%, rgba(218,165,32,0.3) 25%, rgba(218,165,32,0.3) 28%, transparent 29%, transparent 36%, rgba(218,165,32,0.2) 36%, rgba(218,165,32,0.2) 40%, transparent 40%),
@@ -220,10 +224,12 @@ body {
     }
 }
 
-/* Continuous glowing animation */
+/* Continuous glowing animation — scale only, no opacity change.
+   Opacity changes on this large box-shadow element force full recomposite
+   on mobile, causing all overlapping elements (spinning card) to flicker. */
 @keyframes sunGlow {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    50% { transform: translate(-50%, -50%) scale(1.02); opacity: 0.95; }
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.02); }
 }
 
 @keyframes sunPatternRotate {
