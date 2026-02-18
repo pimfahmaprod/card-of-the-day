@@ -4382,17 +4382,19 @@ header {
 }
 .center-card .card-front {
     opacity: 0;
-    transition: opacity 0.15s ease 0.2s, box-shadow 1.5s ease;
+    transition: opacity 0.15s ease, box-shadow 1.5s ease;
 }
 .center-card .card-back {
     opacity: 1;
-    transition: opacity 0.15s ease 0.2s, box-shadow 1.5s ease;
+    transition: opacity 0.15s ease, box-shadow 1.5s ease;
 }
 .center-card.flipped .card-front {
     opacity: 1;
+    transition-delay: 0.2s;
 }
 .center-card.flipped .card-back {
     opacity: 0;
+    transition-delay: 0.2s;
 }
 
 /* Glow on card faces (box-shadow instead of filter to preserve 3D context on iOS Safari) */
@@ -15084,4 +15086,49 @@ footer {
 .spinning-card-container {
     transform: translate3d(0, 0, 0);
     -webkit-transform: translate3d(0, 0, 0);
+}
+
+/* Additional mobile fixes for iOS flickering */
+@media (max-width: 768px) {
+    /* Reduce repaints by simplifying background */
+    .cny-background {
+        will-change: auto;
+        transform: translate3d(0, 0, 0);
+    }
+
+    /* Simplify wave animations on mobile */
+    .cny-wave-layer-1,
+    .cny-wave-layer-2,
+    .cny-wave-layer-3 {
+        will-change: auto;
+    }
+
+    /* Prevent iOS scroll flickering */
+    body {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Reduce sun animation complexity */
+    .cny-sun-rays {
+        animation: none;
+    }
+}
+
+/* Force simpler rendering on small mobile */
+@media (max-width: 480px) {
+    /* Hide large clouds completely on small devices */
+    .cny-cloud-7,
+    .cny-cloud-8 {
+        display: none;
+    }
+
+    /* Simplify sun */
+    .cny-sun-pattern {
+        animation: none;
+    }
+
+    /* Reduce animation FPS for smoother performance */
+    .cny-cloud {
+        animation-timing-function: linear;
+    }
 }
