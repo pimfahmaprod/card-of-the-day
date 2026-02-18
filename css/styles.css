@@ -228,8 +228,8 @@ body {
    Opacity changes on this large box-shadow element force full recomposite
    on mobile, causing all overlapping elements (spinning card) to flicker. */
 @keyframes sunGlow {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.02); }
+    0%, 100% { transform: translate(-50%, -50%) scale(1) translateY(0); }
+    50% { transform: translate(-50%, -50%) scale(1.02) translateY(0); }
 }
 
 @keyframes sunPatternRotate {
