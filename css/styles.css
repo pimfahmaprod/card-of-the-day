@@ -319,15 +319,15 @@ body {
 
 @keyframes cloudFloatRight {
     0% { transform: translateX(0); opacity: 0; }
-    3% { opacity: 1; }
-    97% { opacity: 1; }
+    5% { opacity: 1; }
+    90% { opacity: 1; }
     100% { transform: translateX(calc(100vw + 300px)); opacity: 0; }
 }
 
 @keyframes cloudFloatLeft {
     0% { transform: translateX(0); opacity: 0; }
-    3% { opacity: 1; }
-    97% { opacity: 1; }
+    5% { opacity: 1; }
+    90% { opacity: 1; }
     100% { transform: translateX(calc(-100vw - 300px)); opacity: 0; }
 }
 
@@ -1537,8 +1537,8 @@ body {
 }
 
 @keyframes landingSparkle {
-    0%, 100% { opacity: 0.7; transform: scale(0.9); }
-    50% { opacity: 1; transform: scale(1.2); }
+    0%, 100% { opacity: 0.6; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.15); }
 }
 
 /* Tagline — per-language modern fonts */
@@ -1989,25 +1989,31 @@ html[lang="ja"] .landing-tagline {
 }
 
 .spinning-card-front {
-    animation: spinFrontVis 3s step-end infinite;
+    animation: spinFrontVis 3s linear infinite;
 }
 
 .spinning-card-back {
     transform: rotateY(180deg);
-    animation: spinBackVis 3s step-end infinite;
+    animation: spinBackVis 3s linear infinite;
 }
 
 /* iOS Safari: backface-visibility breaks with child animations.
-   Use synced visibility animations as a robust fallback. */
+   Use smooth opacity swap instead of step-end visibility to avoid flicker. */
 @keyframes spinFrontVis {
-    0%    { visibility: visible; }
-    25%   { visibility: hidden; }   /* 90deg – back starts facing */
-    75%   { visibility: visible; }  /* 270deg – front starts facing */
+    0%    { opacity: 1; }
+    24%   { opacity: 1; }
+    25%   { opacity: 0; }
+    74%   { opacity: 0; }
+    75%   { opacity: 1; }
+    100%  { opacity: 1; }
 }
 @keyframes spinBackVis {
-    0%    { visibility: hidden; }
-    25%   { visibility: visible; }
-    75%   { visibility: hidden; }
+    0%    { opacity: 0; }
+    24%   { opacity: 0; }
+    25%   { opacity: 1; }
+    74%   { opacity: 1; }
+    75%   { opacity: 0; }
+    100%  { opacity: 0; }
 }
 
 @keyframes spinOnY {
@@ -13548,35 +13554,19 @@ footer {
 }
 
 .multi-result-glass {
-    background: linear-gradient(135deg, rgba(13, 19, 51, 0.85), rgba(20, 27, 69, 0.75));
-    border: 2px solid;
-    border-image: linear-gradient(135deg, rgba(220, 38, 38, 0.4), rgba(234, 179, 8, 0.3), rgba(192, 200, 224, 0.2)) 1;
+    background: rgba(139, 0, 0, 0.88);
+    border: 1px solid rgba(255, 215, 0, 0.12);
     border-radius: 16px;
-    padding: 20px 18px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.08),
-                0 0 40px rgba(234, 179, 8, 0.04),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    padding: 20px 22px 24px;
     position: relative;
     overflow: hidden;
 }
 
-.multi-result-glass::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(234, 179, 8, 0.3), rgba(220, 38, 38, 0.3), transparent);
-}
 
 .multi-result-interpretation {
     font-size: 0.92rem;
     line-height: 1.75;
-    color: rgba(210, 215, 235, 0.92);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    color: rgba(255, 245, 220, 0.95);
 }
 
 /* Divider between cards */

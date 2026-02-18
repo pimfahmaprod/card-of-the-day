@@ -1361,7 +1361,7 @@ function createFloatingSparkles() {
 
         // Remove after animation
         setTimeout(() => sparkle.remove(), duration * 1000);
-    }, 200);
+    }, 400);
 }
 
 function stopFloatingSparkles() {
@@ -4436,7 +4436,7 @@ function startBlessingSparkles() {
 
         // Remove after animation
         setTimeout(() => sparkle.remove(), duration * 1000);
-    }, 150);
+    }, 350);
 }
 
 function stopBlessingSparkles() {
