@@ -15094,8 +15094,11 @@ footer {
         transform: translateX(128px) rotate(12deg) translateZ(0);
     }
 
-    /* Enable particle animations but disable heavy effects on mobile */
+    /* Disable all animations on mobile to prevent flickering */
     .three-card-item .galaxy-bg,
+    .three-card-item .galaxy-stars,
+    .three-card-item .galaxy-stars-2,
+    .three-card-item .galaxy-shimmer,
     .three-card-item .galaxy-orbit,
     .three-card-item .galaxy-aurora,
     .three-card-item .galaxy-ss-1,
@@ -15103,11 +15106,6 @@ footer {
     .three-card-item .galaxy-ss-3 {
         animation: none !important;
     }
-
-    /* Keep particle animations enabled for visual effect */
-    /* .three-card-item .galaxy-stars,
-    .three-card-item .galaxy-stars-2,
-    .three-card-item .galaxy-shimmer - animations now enabled */
 }
 
 /* More aggressive optimization for small mobile */
