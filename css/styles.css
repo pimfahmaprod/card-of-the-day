@@ -14990,3 +14990,98 @@ footer {
 .card-back-galaxy .galaxy-orbit {
     display: none !important;
 }
+
+/* ==================== MOBILE PERFORMANCE OPTIMIZATIONS ==================== */
+/* Reduce GPU-intensive effects on mobile to prevent flickering */
+@media (max-width: 768px) {
+    /* Simplify cloud rendering */
+    .cny-cloud {
+        will-change: auto;
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+    }
+
+    /* Reduce lantern effects */
+    .cny-lantern img {
+        filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.3));
+    }
+
+    /* Simplify spinning card shadows */
+    .spinning-card-container {
+        filter: drop-shadow(0 20px 30px rgba(255, 215, 0, 0.25))
+                drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+    }
+
+    .spinning-card-container:hover {
+        filter: drop-shadow(0 20px 30px rgba(255, 215, 0, 0.25))
+                drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+    }
+
+    /* Reduce sun effects */
+    .cny-sun {
+        will-change: auto;
+    }
+
+    .cny-sun-pattern {
+        will-change: auto;
+    }
+}
+
+/* Extra optimizations for very small devices */
+@media (max-width: 480px) {
+    /* Further reduce effects */
+    .cny-lantern img {
+        filter: none;
+    }
+
+    /* Simplify card shadows */
+    .spinning-card-container {
+        filter: drop-shadow(0 15px 20px rgba(0, 0, 0, 0.3));
+    }
+
+    .spinning-card-container:hover {
+        filter: drop-shadow(0 15px 20px rgba(0, 0, 0, 0.3));
+    }
+
+    /* Reduce number of visible clouds on very small screens */
+    .cny-cloud-2,
+    .cny-cloud-5,
+    .cny-cloud-9 {
+        display: none;
+    }
+}
+
+/* Prevent animation flickering on mobile webkit */
+@media (max-width: 768px) {
+    .cny-cloud,
+    .cny-lantern,
+    .spinning-card-container,
+    .spinning-card-wrapper,
+    .spinning-card {
+        -webkit-transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        -webkit-perspective: 1000;
+    }
+
+    /* Disable complex animations on low-end devices */
+    @media (prefers-reduced-motion: reduce) {
+        .cny-cloud {
+            animation: none;
+        }
+        
+        .cny-lantern {
+            animation: lanternSwing var(--swing-duration, 3s) ease-in-out infinite;
+            top: var(--final-top, 80px);
+            opacity: 1;
+        }
+    }
+}
+
+/* Force hardware acceleration for key elements */
+.cny-clouds,
+.cny-lanterns,
+.spinning-card-container {
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+}
