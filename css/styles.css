@@ -206,10 +206,12 @@ body {
     animation: sunPatternRotate 40s linear infinite;
 }
 
-/* Opening entrance animation for sun */
+/* Opening entrance animation for sun.
+   IMPORTANT: both sunEntrance and sunGlow must use the SAME transform function
+   list (translate + scale) so mobile Safari can smoothly hand off between them. */
 @keyframes sunEntrance {
     0% {
-        transform: translate(-50%, -50%) scale(0.3) translateY(100px);
+        transform: translate(-50%, calc(-50% + 100px)) scale(0.3);
         opacity: 0;
         filter: blur(20px);
     }
@@ -218,7 +220,7 @@ body {
         filter: blur(5px);
     }
     100% {
-        transform: translate(-50%, -50%) scale(1) translateY(0);
+        transform: translate(-50%, -50%) scale(1);
         opacity: 1;
         filter: blur(0);
     }
@@ -228,8 +230,8 @@ body {
    Opacity changes on this large box-shadow element force full recomposite
    on mobile, causing all overlapping elements (spinning card) to flicker. */
 @keyframes sunGlow {
-    0%, 100% { transform: translate(-50%, -50%) scale(1) translateY(0); }
-    50% { transform: translate(-50%, -50%) scale(1.02) translateY(0); }
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.02); }
 }
 
 @keyframes sunPatternRotate {
@@ -14364,7 +14366,7 @@ footer {
         0 0 40px rgba(255, 215, 0, 0.5),
         0 0 60px rgba(255, 215, 0, 0.3);
     z-index: 1;
-    animation: sunGlow 3s ease-in-out infinite !important;
+    animation: sunGlowCardBack 3s ease-in-out infinite !important;
 }
 
 /* Sun rays */
@@ -14407,14 +14409,12 @@ footer {
     animation: sunRaysRotate 20s linear infinite;
 }
 
-@keyframes sunGlow {
-    0%, 100% { 
+@keyframes sunGlowCardBack {
+    0%, 100% {
         transform: translateX(-50%) scale(1);
-        filter: brightness(1);
     }
-    50% { 
+    50% {
         transform: translateX(-50%) scale(1.05);
-        filter: brightness(1.2);
     }
 }
 
