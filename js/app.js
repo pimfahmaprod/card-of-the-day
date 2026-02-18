@@ -4640,19 +4640,19 @@ function goToLandingPage() {
             face.style.boxShadow = '';
             face.style.visibility = '';
             face.style.animation = 'none';
+            face.style.opacity = ''; // Clear any inline opacity from previous state
         });
 
         // Reset spinning card wrapper
         spinningCardWrapper.style.transition = '';
-        spinningCardWrapper.style.transform = '';
+        spinningCardWrapper.style.transform = 'rotateY(0deg)'; // Explicitly start at 0 degrees
         spinningCardWrapper.style.animation = 'none';
 
         // Force reflow so browser registers 'none', then start all animations in sync
         spinningCardWrapper.offsetHeight;
 
+        spinningCardWrapper.style.transform = ''; // Clear to let animation control it
         spinningCardWrapper.style.animation = 'spinOnY 3s linear infinite';
-        if (frontFace) frontFace.style.animation = 'spinFrontVis 3s step-end infinite';
-        if (backFace) backFace.style.animation = 'spinBackVis 3s step-end infinite';
 
         // Reset spinning card tilt
         spinningCard.style.transition = '';
@@ -10341,22 +10341,16 @@ waitForResources();
     function resetLandingPageElements() {
         var landingPage = document.getElementById('landingPage');
         if (!landingPage || landingPage.style.display === 'none') return;
-        
-        // Ensure spinning card front is visible
-        var frontFace = document.querySelector('.spinning-card-front');
-        var backFace = document.querySelector('.spinning-card-back');
-        if (frontFace && backFace) {
-            frontFace.style.opacity = '1';
-            backFace.style.opacity = '0';
-        }
-        
+
+        // Don't touch face opacity - it's managed by startFaceVisibilitySync
+
         // Ensure heading is visible
         var activeHeading = document.querySelector('.mode-title.active');
         if (activeHeading) {
             activeHeading.style.opacity = '1';
         }
-        
-        // Restart card rotation if in single mode
+
+        // Restart card rotation if in single mode and not already running
         if (currentReadingMode === 'single') {
             var wrapper = document.querySelector('.spinning-card-wrapper');
             if (wrapper && !wrapper._spinIterationHandler) {
