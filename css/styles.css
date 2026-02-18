@@ -15132,3 +15132,56 @@ footer {
         animation-timing-function: linear;
     }
 }
+
+/* Fix three-card flickering on mobile landing page */
+@media (max-width: 768px) {
+    .three-card-item {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        will-change: transform;
+    }
+
+    .three-card-face {
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+
+    /* Simplify float animations on mobile */
+    .three-card-left,
+    .three-card-center,
+    .three-card-right {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+
+    /* Disable galaxy animations inside cards on mobile */
+    .three-card-item .galaxy-bg,
+    .three-card-item .galaxy-stars,
+    .three-card-item .galaxy-stars-2,
+    .three-card-item .galaxy-shimmer,
+    .three-card-item .galaxy-orbit,
+    .three-card-item .galaxy-aurora,
+    .three-card-item .galaxy-ss-1,
+    .three-card-item .galaxy-ss-2,
+    .three-card-item .galaxy-ss-3 {
+        animation: none !important;
+    }
+}
+
+/* More aggressive optimization for small mobile */
+@media (max-width: 480px) {
+    /* Disable floating animation on small screens */
+    .three-card-left,
+    .three-card-center,
+    .three-card-right {
+        animation: none !important;
+    }
+
+    /* Force GPU compositing for cards */
+    .three-card-container {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+    }
+}
