@@ -4527,11 +4527,16 @@ header {
     transform: translateZ(0);
 }
 
-/* Reduce blur on mobile to prevent flickering */
+/* Disable backdrop-filter on mobile to prevent Android flickering */
 @media (max-width: 768px) {
     .category-overlay-bg {
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        /* Compensate with more opaque background */
+        background:
+            radial-gradient(ellipse at 30% 20%, rgba(200, 30, 30, 0.5) 0%, transparent 40%),
+            radial-gradient(ellipse at 70% 80%, rgba(180, 20, 20, 0.4) 0%, transparent 40%),
+            radial-gradient(ellipse at 50% 50%, rgba(139, 0, 0, 0.98) 0%, rgba(60, 0, 0, 1) 100%);
     }
 }
 
@@ -5041,22 +5046,40 @@ header {
         display: none; /* Disable complex border sweep on mobile */
     }
 
-    /* Hardware acceleration for landing page elements to prevent flickering during transitions */
+    /* Reduce hardware acceleration on mobile - too many layers cause Android flickering */
     .landing-tagline,
     .landing-sparkles,
     .landing-brand,
     .landing-instruction,
     .mode-selector,
     #modeDots,
-    .card-click-hint,
-    .three-card-container,
-    .four-card-container,
-    .ten-card-container,
-    .twelve-card-container {
-        transform: translateZ(0);
-        will-change: opacity, transform;
+    .card-click-hint {
+        /* Only use backface-visibility, no will-change to reduce GPU layers */
         backface-visibility: hidden;
         -webkit-backface-visibility: hidden;
+    }
+
+    /* Remove will-change from category overlay on mobile */
+    .category-overlay {
+        will-change: auto !important;
+    }
+
+    .category-overlay.closing .category-card {
+        will-change: auto !important;
+    }
+
+    /* Faster transitions on mobile to reduce flickering window */
+    .category-overlay.closing {
+        transition: opacity 0.2s ease !important;
+    }
+
+    .category-overlay.closing .category-card {
+        transition: transform 0.2s ease, opacity 0.2s ease !important;
+    }
+
+    /* Simplify category flash on mobile - disable completely */
+    .category-flash {
+        display: none !important;
     }
 }
 
