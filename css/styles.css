@@ -4490,6 +4490,9 @@ header {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.5s ease, visibility 0s 0.5s;
+    /* Hardware acceleration for smoother transitions */
+    transform: translateZ(0);
+    will-change: opacity;
 }
 .category-overlay.active {
     opacity: 1;
@@ -4505,6 +4508,16 @@ header {
         radial-gradient(ellipse at 50% 50%, rgba(139, 0, 0, 0.95) 0%, rgba(80, 0, 0, 0.98) 100%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    /* Hardware acceleration */
+    transform: translateZ(0);
+}
+
+/* Reduce blur on mobile to prevent flickering */
+@media (max-width: 768px) {
+    .category-overlay-bg {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
 }
 
 /* Chinese cloud pattern overlay */
@@ -4903,11 +4916,15 @@ header {
 .category-overlay.closing {
     opacity: 0;
     transition: opacity 0.4s ease;
+    /* Hardware acceleration */
+    transform: translateZ(0);
 }
 .category-overlay.closing .category-card {
-    transform: scale(0.8) translateY(15px);
+    transform: scale(0.8) translateY(15px) translateZ(0);
     opacity: 0;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    /* Use separate transitions instead of 'all' for better performance */
+    will-change: transform, opacity;
 }
 
 /* ============ KEYFRAMES ============ */
@@ -4982,6 +4999,8 @@ header {
     z-index: 3600;
     pointer-events: none;
     animation: catEdgeFade 1.4s ease-out forwards;
+    /* Hardware acceleration */
+    transform: translateZ(0);
 }
 
 /* Soft vignette glow from all edges */
@@ -4994,6 +5013,36 @@ header {
         inset 0 0 140px 40px rgba(var(--cat-glow-rgb, 168,184,216), 0.18),
         inset 0 0 240px 80px rgba(var(--cat-glow-rgb, 168,184,216), 0.06);
     animation: catEdgePulse 1.4s ease-out forwards;
+    /* Hardware acceleration */
+    transform: translateZ(0);
+}
+
+/* Simplify flash effect on mobile to prevent flickering */
+@media (max-width: 768px) {
+    .category-flash::before {
+        box-shadow: inset 0 0 80px 20px rgba(var(--cat-primary-rgb, 168,184,216), 0.35);
+    }
+    .category-flash::after {
+        display: none; /* Disable complex border sweep on mobile */
+    }
+
+    /* Hardware acceleration for landing page elements to prevent flickering during transitions */
+    .landing-tagline,
+    .landing-sparkles,
+    .landing-brand,
+    .landing-instruction,
+    .mode-selector,
+    #modeDots,
+    .card-click-hint,
+    .three-card-container,
+    .four-card-container,
+    .ten-card-container,
+    .twelve-card-container {
+        transform: translateZ(0);
+        will-change: opacity, transform;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+    }
 }
 
 /* Light sweep — bright accent tracing the border */
