@@ -51,7 +51,7 @@ body {
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
     overflow: hidden;
 }
 
@@ -82,10 +82,10 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 50%;
+    height: 20%;
     z-index: 2;
     /* Ensure waves extend to bottom */
-    background: linear-gradient(to bottom, transparent 0%, #C8102E 100%);
+    background: linear-gradient(to bottom, transparent 0%, #C8102E 70%);
 }
 
 .cny-wave-layer {
@@ -99,24 +99,24 @@ body {
 }
 
 .cny-wave-1 {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,80 Q150,65 300,80 T600,80 T900,80 T1200,80 L1200,150 L0,150 Z" fill="%23B91C1C"/><path d="M0,90 Q150,75 300,90 T600,90 T900,90 T1200,90 L1200,150 L0,150 Z" fill="%23A91818"/></svg>');
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,100 Q150,90 300,100 T600,100 T900,100 T1200,100 L1200,150 L0,150 Z" fill="%23B91C1C"/><path d="M0,110 Q150,100 300,110 T600,110 T900,110 T1200,110 L1200,150 L0,150 Z" fill="%23A91818"/></svg>');
     animation: waveDrift 25s linear infinite;
     z-index: 1;
-    opacity: 0.9;
+    opacity: 0.95;
 }
 
 .cny-wave-2 {
     background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,60 Q150,45 300,60 T600,60 T900,60 T1200,60 L1200,150 L0,150 Z" fill="%23C8102E"/><path d="M0,70 Q150,55 300,70 T600,70 T900,70 T1200,70 L1200,150 L0,150 Z" fill="%23B91C1C"/></svg>');
     animation: waveDrift 20s linear infinite reverse;
     z-index: 2;
-    opacity: 0.85;
+    opacity: 0.9;
 }
 
 .cny-wave-3 {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,40 Q150,25 300,40 T600,40 T900,40 T1200,40 L1200,150 L0,150 Z" fill="%23D4202B"/><path d="M0,50 Q150,35 300,50 T600,50 T900,50 T1200,50 L1200,150 L0,150 Z" fill="%23C8102E"/></svg>');
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150"><path d="M0,20 Q150,10 300,20 T600,20 T900,20 T1200,20 L1200,150 L0,150 Z" fill="%23D4202B"/><path d="M0,30 Q150,20 300,30 T600,30 T900,30 T1200,30 L1200,150 L0,150 Z" fill="%23C8102E"/></svg>');
     animation: waveDrift 18s linear infinite;
     z-index: 3;
-    opacity: 0.8;
+    opacity: 0.85;
 }
 
 @keyframes waveDrift {
@@ -591,8 +591,8 @@ body {
 .cny-lantern {
     position: absolute;
     top: -200px;
-    width: 120px;
-    height: 240px;
+    width: clamp(280px, 28vw, 450px);
+    height: clamp(560px, 56vw, 900px);
     left: 50%;
     transform: translateX(-50%);
     animation: lanternDrop var(--drop-duration, 2s) ease-out forwards,
@@ -619,7 +619,7 @@ body {
         opacity: 1;
     }
     100% {
-        top: var(--final-top, 80px);
+        top: var(--final-top, -20px);
         opacity: 1;
         transform: translateX(-50%) rotate(0deg);
     }
@@ -1313,7 +1313,7 @@ body {
     overflow: hidden;
     box-shadow:
         0 10px 25px rgba(0, 0, 0, 0.4),
-        0 4px 15px rgba(255, 215, 0, 0.15);
+        0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .multi-card-front {
@@ -1321,7 +1321,7 @@ body {
     background: #fff;
     box-shadow:
         0 10px 25px rgba(0, 0, 0, 0.4),
-        0 4px 15px rgba(255, 215, 0, 0.15);
+        0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .multi-card-front-img {
@@ -1591,7 +1591,7 @@ body {
         linear-gradient(180deg, #080408 0%, #12080a 30%, #1a0e0c 50%, #12080a 70%, #080408 100%);
     opacity: 0;
     transition: opacity 0.8s ease;
-    z-index: 0;
+    z-index: -1;
     pointer-events: none;
 }
 
@@ -1600,7 +1600,7 @@ body {
     content: '';
     position: absolute;
     inset: 0;
-    z-index: 0;
+    z-index: -1;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.8s ease;
@@ -3308,7 +3308,7 @@ header {
         transparent 70%
     );
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
     animation: ambientCatGlow 4s ease-in-out infinite alternate;
 }
 
@@ -3553,12 +3553,12 @@ header {
     backface-visibility: hidden;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Only show shadow on spread cards, not stacked */
 .card-container.spread .card-face {
-    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Stacked cards - minimal individual shadows */
@@ -3576,7 +3576,7 @@ header {
     width: 90px;
     height: 160px;
     border-radius: 10px;
-    box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), 0 5px 15px rgba(0, 0, 0, 0.2);
     z-index: -1;
     pointer-events: none;
 }
@@ -3653,8 +3653,6 @@ header {
     background-size: 60px 60px, 60px 60px, 60px 60px, 60px 60px, 100% 100%;
     background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%, center;
     background-repeat: no-repeat;
-}
-
 }
 
 /* Enable intense aura burst for card back */
@@ -3748,6 +3746,9 @@ header {
     }
 }
 
+
+/* Note: ::after is used for the gold border frame above */
+
 /* Modern Chinese wealth character 富 (Fù = Wealth/Prosperity) */
 .card-back-galaxy::before {
     content: '富';
@@ -3763,7 +3764,7 @@ header {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     z-index: 3;
-    filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.3));
+    filter: none;
     letter-spacing: 0;
     line-height: 1;
     opacity: 0.95;
@@ -3775,8 +3776,6 @@ header {
     0%, 100% { transform: translate(-50%, -50%) translateY(0); }
     50% { transform: translate(-50%, -50%) translateY(-5px); }
 }
-
-/* Note: ::after is used for the gold border frame above */
 
 /* Hide only orbit, aurora, and shooting stars for clean red envelope look */
 /* Keep galaxy-stars, galaxy-stars-2, galaxy-shimmer for sparkle particles */
@@ -4030,7 +4029,7 @@ header {
     bottom: 5%;
     left: -20%;
     width: 140%;
-    height: 40%;
+    height: 60%;
     z-index: 3;
     background: linear-gradient(
         180deg,
@@ -4151,7 +4150,7 @@ header {
         transparent 75%);
     opacity: 0;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
 }
 
 .center-card {
@@ -4180,7 +4179,7 @@ header {
     right: -40px;
     bottom: -120px;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
     overflow: visible;
 }
 
@@ -4384,7 +4383,7 @@ header {
 .center-card-container.show-info .center-card .card-face {
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.4),
-        0 0 20px rgba(255, 215, 0, 0.35),
+        0 0 20px rgba(160, 180, 220, 0.15),
         0 0 50px rgba(120, 145, 210, 0.2),
         0 0 80px rgba(100, 130, 200, 0.12);
 }
@@ -4566,7 +4565,7 @@ header {
     opacity: 0.4;
     transition: opacity 0.5s ease;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
 }
 .cat-border-glow::before {
     content: '';
@@ -4623,7 +4622,7 @@ header {
         radial-gradient(circle at 85% 15%, rgba(255, 215, 0, 0.08) 0%, transparent 25%),
         radial-gradient(circle at 15% 85%, rgba(255, 165, 0, 0.06) 0%, transparent 20%);
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
 }
 
 /* ---- Nebula background inside card ---- */
@@ -4633,7 +4632,7 @@ header {
     opacity: 0.5;
     transition: opacity 0.5s ease;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
 }
 [data-category="love"] .cat-nebula {
     background:
@@ -4708,7 +4707,7 @@ header {
     border-radius: 50%;
     opacity: 0.4;
     transition: opacity 0.4s ease;
-    z-index: 0;
+    z-index: -1;
 }
 [data-category="love"] .cat-icon-aura {
     background: radial-gradient(circle, rgba(255, 70, 110, 0.3) 0%, transparent 70%);
@@ -5057,7 +5056,7 @@ header {
     top: 0;
     left: 0;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
     box-shadow:
         18px 40px 0 0 rgba(255,255,255,0.5),
         55px 95px 0 0 rgba(255,255,255,0.2),
@@ -5261,7 +5260,7 @@ header {
     top: 0;
     left: 0;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
     box-shadow:
         15px 8px 0 0 rgba(255,255,255,0.6),
         48px 5px 0 0 rgba(255,255,255,0.25),
@@ -5304,7 +5303,7 @@ header {
     border-radius: 0.5px;
     opacity: 0;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
     will-change: transform, opacity;
     animation: headerShootingStar var(--hss-dur, 0.6s) ease-in forwards;
     animation-delay: var(--hss-delay, 0s);
@@ -6038,7 +6037,7 @@ footer {
         rgba(195, 170, 120, 0.2) 60%,
         transparent 70%
     );
-    z-index: 0;
+    z-index: -1;
     opacity: 0;
     animation: bannerBorderReveal 1s ease 1.3s forwards, bannerBorderSpin 6s linear 1.3s infinite;
     pointer-events: none;
@@ -6055,7 +6054,7 @@ footer {
             rgba(45, 38, 28, 0.95) 30%,
             rgba(35, 30, 22, 0.98) 60%,
             rgba(25, 22, 18, 0.98) 100%);
-    z-index: 0;
+    z-index: -1;
     pointer-events: none;
 }
 
@@ -6884,7 +6883,7 @@ footer {
         0 0 80px rgba(255, 165, 0, 0.2),
         0 6px 20px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 215, 0, 0.3),
-        inset 0 -1px 0 rgba(139, 0, 0, 0.5);
+        inset 0 -1px 0 rgba(220, 50, 50, 0.9);
     position: relative;
     overflow: hidden;
     display: flex;
@@ -6991,7 +6990,7 @@ footer {
     transform: translate(-50%, -50%);
     transition: width 0.5s ease, height 0.5s ease, opacity 0.5s ease;
     opacity: 0;
-    z-index: 0;
+    z-index: -1;
 }
 
 .comment-submit-btn:hover::after {
@@ -7369,7 +7368,7 @@ footer {
         415px 870px 0 0.5px rgba(255,245,220,0.3);
     animation: headerStarsTwinkle 4s ease-in-out infinite alternate;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
 }
 
 .comments-panel.show {
@@ -7429,7 +7428,7 @@ footer {
         470px 7px 0 0 rgba(255,255,255,0.6);
     animation: headerStarsTwinkle 4s ease-in-out infinite alternate;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
 }
 
 /* Header shooting stars — spawned by JS inside the header */
@@ -7440,7 +7439,7 @@ footer {
     border-radius: 0.5px;
     opacity: 0;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
     will-change: transform, opacity;
     animation: headerShootingStar var(--hss-dur, 0.6s) ease-in forwards;
     animation-delay: var(--hss-delay, 0s);
@@ -13046,7 +13045,7 @@ footer {
     background-size: 200% 200%;
     animation: lineGlowSweep 4s ease-in-out infinite;
     opacity: 0.5;
-    z-index: 0;
+    z-index: -1;
     pointer-events: none;
 }
 
@@ -14522,33 +14521,22 @@ footer {
 /* Add decorative dots pattern (Chinese lucky coins style) */
 .card-back-galaxy::before {
     box-shadow:
-        /* Inner glow on character */
-        0 0 20px rgba(255, 215, 0, 0.4),
-        0 0 40px rgba(255, 215, 0, 0.2),
-        /* Lucky coin dots around character */
+        /* Lucky coin dots around character (no glow) */
         -60px -60px 0 -58px rgba(255, 215, 0, 0.6),
         60px -60px 0 -58px rgba(255, 215, 0, 0.6),
         -60px 60px 0 -58px rgba(255, 215, 0, 0.6),
-        60px 60px 0 -58px rgba(255, 215, 0, 0.6),
-        /* Outer glow */
-        0 0 60px rgba(255, 215, 0, 0.15) !important;
+        60px 60px 0 -58px rgba(255, 215, 0, 0.6) !important;
 }
 
 /* Enhanced border with Chinese knot pattern */
 .card-back-galaxy::after {
     box-shadow:
-        /* Multi-layered border for depth */
+        /* Multi-layered border for depth (no glow, no corner shadows) */
         0 0 0 1px rgba(255, 215, 0, 0.6) inset,
         0 0 0 2px rgba(200, 16, 46, 0.8) inset,
         0 0 0 6px rgba(200, 16, 46, 0.9) inset,
         0 0 0 7px rgba(255, 215, 0, 0.7) inset,
-        0 0 0 9px rgba(255, 215, 0, 0.5) inset,
-        /* Outer glow */
-        0 0 15px rgba(255, 215, 0, 0.4),
-        0 0 30px rgba(255, 215, 0, 0.2),
-        /* Decorative corners shadow */
-        inset 8px 8px 12px -8px rgba(255, 215, 0, 0.3),
-        inset -8px -8px 12px -8px rgba(255, 215, 0, 0.3) !important;
+        0 0 0 9px rgba(255, 215, 0, 0.5) inset !important;
 }
 
 /* ===== FIX: Restore solid red background ===== */
@@ -14584,7 +14572,7 @@ footer {
 
 /* Sun using .galaxy-orbit */
 .card-back-galaxy .galaxy-orbit {
-    display: block !important;
+    display: none !important;
     position: absolute;
     width: 60px;
     height: 60px;
@@ -14667,8 +14655,8 @@ footer {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 30%;
-    z-index: 1;
+    height: 60%;
+    z-index: 5;
     background: none !important;
 }
 
@@ -14680,7 +14668,7 @@ footer {
     right: 0;
     height: 100%;
     background: 
-        linear-gradient(180deg, transparent 0%, rgba(139, 0, 0, 0.5) 100%);
+        linear-gradient(180deg, transparent 0%, rgba(220, 50, 50, 0.9) 100%);
     clip-path: polygon(
         0% 40%,
         5% 35%,
@@ -14705,9 +14693,8 @@ footer {
         100% 26%,
         100% 100%,
         0% 100%
-    animation: waveMove 8s ease-in-out infinite;
     );
-}
+    animation: waveMove 8s ease-in-out infinite;
 
 .card-back-galaxy .galaxy-bg::after {
     content: '';
@@ -14717,7 +14704,7 @@ footer {
     right: 0;
     height: 100%;
     background: 
-        linear-gradient(180deg, transparent 0%, rgba(107, 15, 26, 0.7) 100%);
+        linear-gradient(180deg, transparent 0%, rgba(200, 60, 40, 0.95) 100%);
     clip-path: polygon(
         0% 50%,
         5% 47%,
@@ -14834,13 +14821,11 @@ footer {
         0 0 5px rgba(255, 215, 0, 0.3) !important;
 }
 
-/* ===== CLEAN: Remove all inner gold shadows ===== */
+/* ===== CLEAN: Remove all inner gold shadows and outer glow ===== */
 
 .card-back-galaxy::after {
-    /* Only outer border and glow - NO inset shadows */
-    box-shadow: 
-        0 0 15px rgba(255, 215, 0, 0.4),
-        0 0 30px rgba(255, 215, 0, 0.2) !important;
+    /* No glow, no inset shadows */
+    box-shadow: none !important;
     background-image: none !important;
     background-color: transparent !important;
 }
@@ -14854,29 +14839,24 @@ footer {
 .card-grid .card-container .card-back-galaxy::after,
 .ten-card-fan .card-back-galaxy::after,
 .twelve-card-fan .card-back-galaxy::after {
-    box-shadow: 
-        0 0 15px rgba(255, 215, 0, 0.4),
-        0 0 30px rgba(255, 215, 0, 0.2) !important;
+    box-shadow: none !important;
     background-image: none !important;
     background-color: transparent !important;
 }
 
-/* Also clean the character shadow - remove corner dots */
+/* Also clean the character shadow - remove all glows */
 .card-back-galaxy::before {
-    box-shadow:
-        0 0 20px rgba(255, 215, 0, 0.4),
-        0 0 40px rgba(255, 215, 0, 0.2) !important;
+    box-shadow: none !important;
 }
 
 /* ===== RESTORE border + REMOVE inner content glow ===== */
 
-/* Restore original multi-layered border frame */
+/* Restore original multi-layered border frame (no outer glow) */
 .card-back-galaxy::after {
     box-shadow:
         0 0 0 1px rgba(255, 215, 0, 0.5) inset,
         0 0 0 6px #C8102E inset,
-        0 0 0 9px #FFD700 inset,
-        0 0 15px rgba(255, 215, 0, 0.3) !important;
+        0 0 0 9px #FFD700 inset !important;
     background-image: none !important;
 }
 
@@ -14887,24 +14867,21 @@ footer {
     box-shadow:
         0 0 0 1px rgba(255, 215, 0, 0.5) inset,
         0 0 0 6px #C8102E inset,
-        0 0 0 9px #FFD700 inset,
-        0 0 15px rgba(255, 215, 0, 0.3) !important;
+        0 0 0 9px #FFD700 inset !important;
 }
 
 .three-card-item .card-back-galaxy::after {
     box-shadow:
         0 0 0 1px rgba(255, 215, 0, 0.5) inset,
         0 0 0 4px #C8102E inset,
-        0 0 0 6px #FFD700 inset,
-        0 0 10px rgba(255, 215, 0, 0.3) !important;
+        0 0 0 6px #FFD700 inset !important;
 }
 
 .card-grid .card-container .card-back-galaxy::after {
     box-shadow:
         0 0 0 0.5px rgba(255, 215, 0, 0.5) inset,
         0 0 0 3px #C8102E inset,
-        0 0 0 5px #FFD700 inset,
-        0 0 8px rgba(255, 215, 0, 0.3) !important;
+        0 0 0 5px #FFD700 inset !important;
 }
 
 .ten-card-fan .card-back-galaxy::after,
@@ -14912,19 +14889,13 @@ footer {
     box-shadow:
         0 0 0 0.5px rgba(255, 215, 0, 0.5) inset,
         0 0 0 2px #C8102E inset,
-        0 0 0 3px #FFD700 inset,
-        0 0 5px rgba(255, 215, 0, 0.3) !important;
+        0 0 0 3px #FFD700 inset !important;
 }
 
 /* REMOVE inner content glow (the unwanted outer-shadow effect inside) */
 .card-back-galaxy::before {
     box-shadow: none !important;
-    filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.3)) !important;
-}
-
-/* Remove any background glows inside content area */
-.card-back-galaxy .galaxy-shimmer {
-    display: none !important;
+    filter: none !important;
 }
 
 /* ===== FIX: Four-card font size override ===== */
@@ -15033,7 +15004,7 @@ footer {
         
         .cny-lantern {
             animation: lanternSwing var(--swing-duration, 3s) ease-in-out infinite;
-            top: var(--final-top, 80px);
+            top: var(--final-top, -10px);
             opacity: 1;
         }
     }
@@ -15123,11 +15094,8 @@ footer {
         transform: translateX(128px) rotate(12deg) translateZ(0);
     }
 
-    /* Disable galaxy animations inside cards on mobile */
+    /* Enable particle animations but disable heavy effects on mobile */
     .three-card-item .galaxy-bg,
-    .three-card-item .galaxy-stars,
-    .three-card-item .galaxy-stars-2,
-    .three-card-item .galaxy-shimmer,
     .three-card-item .galaxy-orbit,
     .three-card-item .galaxy-aurora,
     .three-card-item .galaxy-ss-1,
@@ -15135,6 +15103,11 @@ footer {
     .three-card-item .galaxy-ss-3 {
         animation: none !important;
     }
+
+    /* Keep particle animations enabled for visual effect */
+    /* .three-card-item .galaxy-stars,
+    .three-card-item .galaxy-stars-2,
+    .three-card-item .galaxy-shimmer - animations now enabled */
 }
 
 /* More aggressive optimization for small mobile */
@@ -15162,4 +15135,16 @@ footer {
 @keyframes waveMove2 {
     0%, 100% { transform: translateX(0); }
     50% { transform: translateX(-3px); }
+}
+
+/* Solid background at bottom to prevent seeing through */
+.cny-bottom-waves::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: #C8102E;
+    z-index: 0;
 }

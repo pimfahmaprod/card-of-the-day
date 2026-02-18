@@ -1937,7 +1937,6 @@ function renderCards() {
             <div class="card">
                 <div class="card-face card-back card-back-galaxy">
                     <div class="galaxy-bg"></div>
-                    <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                 </div>
                 <div class="card-face card-front">
                     <img data-src="images/tarot/${card.image}" alt="${card.name}">
@@ -2486,7 +2485,6 @@ function buildCardBackHTML() {
         '<div class="galaxy-bg"></div>' +
         '<div class="galaxy-stars"></div>' +
         '<div class="galaxy-shimmer"></div>' +
-        '<img class="card-back-seal" src="images/seal_transparent.png" alt="">' +
         '</div>';
 }
 
@@ -4147,8 +4145,8 @@ function resetCommentForm() {
 
     // Create exactly 2 lanterns - left and right, perfectly balanced with equal margins
     const lanternPositions = [
-        { left: '15%', finalTop: '100px', swingDuration: '3s', dropDelay: '0.5s' },  // Left lantern
-        { left: '85%', finalTop: '100px', swingDuration: '3.2s', dropDelay: '0.7s' } // Right lantern
+        { left: '15%', finalTop: '-10px', swingDuration: '3s', dropDelay: '0.5s' },  // Left lantern
+        { left: '85%', finalTop: '-10px', swingDuration: '3.2s', dropDelay: '0.7s' } // Right lantern
     ];
 
     lanternPositions.forEach(function(pos) {
