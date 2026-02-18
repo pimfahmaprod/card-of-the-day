@@ -274,28 +274,28 @@ body {
 }
 
 .cny-cloud-1 {
-    width: 200px;
-    height: 100px;
+    width: 350px;
+    height: 175px;
     top: 22%;
-    left: -220px;
+    left: -370px;
     background-image: url('../images/cloud_1.png');
     animation: cloudFloatRight1 45s linear infinite;
 }
 
 .cny-cloud-2 {
-    width: 240px;
-    height: 120px;
+    width: 420px;
+    height: 210px;
     top: 28%;
-    left: -260px;
+    left: -440px;
     background-image: url('../images/cloud_2.png');
     animation: cloudFloatRight2 55s linear infinite;
 }
 
 .cny-cloud-3 {
-    width: 180px;
-    height: 90px;
+    width: 320px;
+    height: 160px;
     top: 35%;
-    left: -200px;
+    left: -340px;
     background-image: url('../images/cloud_3.png');
     animation: cloudFloatRight3 40s linear infinite;
 }
@@ -303,17 +303,123 @@ body {
 /* Smooth continuous cloud movement - no flickering or disappearing */
 @keyframes cloudFloatRight1 {
     0% { transform: translateX(0); }
-    100% { transform: translateX(calc(100vw + 220px)); }
+    100% { transform: translateX(calc(100vw + 370px)); }
 }
 
 @keyframes cloudFloatRight2 {
     0% { transform: translateX(0); }
-    100% { transform: translateX(calc(100vw + 260px)); }
+    100% { transform: translateX(calc(100vw + 440px)); }
 }
 
 @keyframes cloudFloatRight3 {
     0% { transform: translateX(0); }
-    100% { transform: translateX(calc(100vw + 200px)); }
+    100% { transform: translateX(calc(100vw + 340px)); }
+}
+
+/* Responsive cloud sizes */
+@media (max-width: 1200px) {
+    .cny-cloud-1 {
+        width: 300px;
+        height: 150px;
+        left: -320px;
+    }
+
+    .cny-cloud-2 {
+        width: 360px;
+        height: 180px;
+        left: -380px;
+    }
+
+    .cny-cloud-3 {
+        width: 280px;
+        height: 140px;
+        left: -300px;
+    }
+
+    @keyframes cloudFloatRight1 {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(100vw + 320px)); }
+    }
+
+    @keyframes cloudFloatRight2 {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(100vw + 380px)); }
+    }
+
+    @keyframes cloudFloatRight3 {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(100vw + 300px)); }
+    }
+}
+
+@media (max-width: 768px) {
+    .cny-cloud-1 {
+        width: 220px;
+        height: 110px;
+        left: -240px;
+    }
+
+    .cny-cloud-2 {
+        width: 260px;
+        height: 130px;
+        left: -280px;
+    }
+
+    .cny-cloud-3 {
+        width: 200px;
+        height: 100px;
+        left: -220px;
+    }
+
+    @keyframes cloudFloatRight1 {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(100vw + 240px)); }
+    }
+
+    @keyframes cloudFloatRight2 {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(100vw + 280px)); }
+    }
+
+    @keyframes cloudFloatRight3 {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(100vw + 220px)); }
+    }
+}
+
+@media (max-width: 480px) {
+    .cny-cloud-1 {
+        width: 160px;
+        height: 80px;
+        left: -180px;
+    }
+
+    .cny-cloud-2 {
+        width: 190px;
+        height: 95px;
+        left: -210px;
+    }
+
+    .cny-cloud-3 {
+        width: 150px;
+        height: 75px;
+        left: -170px;
+    }
+
+    @keyframes cloudFloatRight1 {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(100vw + 180px)); }
+    }
+
+    @keyframes cloudFloatRight2 {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(100vw + 210px)); }
+    }
+
+    @keyframes cloudFloatRight3 {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(100vw + 170px)); }
+    }
 }
 
 /* Hanging lanterns container */
