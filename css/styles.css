@@ -332,6 +332,38 @@ body {
     animation-delay: 15s;
 }
 
+/* Large clouds near sun's lower edge */
+.cny-cloud-7 {
+    width: 480px;
+    height: 240px;
+    top: 43%;
+    left: 8%;
+    background-image: url('../images/cloud_1.png');
+    animation: cloudFloatRight7 50s linear infinite;
+    opacity: 0.9;
+}
+
+.cny-cloud-8 {
+    width: 520px;
+    height: 260px;
+    top: 40%;
+    right: 12%;
+    background-image: url('../images/cloud_2.png');
+    animation: cloudFloatLeft8 55s linear infinite;
+    opacity: 0.85;
+}
+
+.cny-cloud-9 {
+    width: 450px;
+    height: 225px;
+    top: 46%;
+    left: -470px;
+    background-image: url('../images/cloud_3.png');
+    animation: cloudFloatRight9 48s linear infinite;
+    animation-delay: 8s;
+    opacity: 0.9;
+}
+
 /* Smooth continuous cloud movement - no flickering or disappearing */
 @keyframes cloudFloatRight1 {
     0% { transform: translateX(0); }
@@ -361,6 +393,21 @@ body {
 @keyframes cloudFloatLeft6 {
     0% { transform: translateX(0); }
     100% { transform: translateX(calc(-100vw - 320px)); }
+}
+
+@keyframes cloudFloatRight7 {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(100vw - 8%)); }
+}
+
+@keyframes cloudFloatLeft8 {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-100vw - 12%)); }
+}
+
+@keyframes cloudFloatRight9 {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(100vw + 470px)); }
 }
 
 
@@ -401,6 +448,24 @@ body {
         height: 130px;
         right: -280px;
     }
+
+    .cny-cloud-7 {
+        width: 400px;
+        height: 200px;
+        left: 6%;
+    }
+
+    .cny-cloud-8 {
+        width: 440px;
+        height: 220px;
+        right: 10%;
+    }
+
+    .cny-cloud-9 {
+        width: 380px;
+        height: 190px;
+        left: -400px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -439,6 +504,24 @@ body {
         height: 95px;
         right: -210px;
     }
+
+    .cny-cloud-7 {
+        width: 300px;
+        height: 150px;
+        left: 5%;
+    }
+
+    .cny-cloud-8 {
+        width: 330px;
+        height: 165px;
+        right: 8%;
+    }
+
+    .cny-cloud-9 {
+        width: 280px;
+        height: 140px;
+        left: -300px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -476,6 +559,24 @@ body {
         width: 140px;
         height: 70px;
         right: -160px;
+    }
+
+    .cny-cloud-7 {
+        width: 220px;
+        height: 110px;
+        left: 4%;
+    }
+
+    .cny-cloud-8 {
+        width: 240px;
+        height: 120px;
+        right: 6%;
+    }
+
+    .cny-cloud-9 {
+        width: 210px;
+        height: 105px;
+        left: -230px;
     }
 }
 
