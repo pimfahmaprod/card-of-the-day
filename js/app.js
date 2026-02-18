@@ -4154,7 +4154,10 @@ function resetCommentForm() {
     lanternPositions.forEach(function(pos) {
         const lantern = document.createElement('div');
         lantern.className = 'cny-lantern';
-        lantern.innerHTML = lanternSVG;
+        const img = document.createElement("img");
+        img.src = "images/chinese_lamp.png";
+        img.alt = "Chinese Lantern";
+        lantern.appendChild(img);
 
         // Position settings
         lantern.style.left = pos.left;
