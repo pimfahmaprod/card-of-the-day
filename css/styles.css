@@ -55,6 +55,21 @@ body {
     overflow: hidden;
 }
 
+/* Pause all background animations when leaving landing page (prevents mobile flickering) */
+.cny-background.animations-paused *,
+.cny-background.animations-paused .cny-sun,
+.cny-background.animations-paused .cny-sun::before,
+.cny-background.animations-paused .cny-sun::after,
+.cny-background.animations-paused .cny-sun-pattern,
+.cny-background.animations-paused .cny-sun-pattern::before,
+.cny-background.animations-paused .cny-sun-pattern::after,
+.cny-background.animations-paused .cny-cloud,
+.cny-background.animations-paused .chinese-lantern,
+.cny-background.animations-paused .lantern-light,
+.cny-background.animations-paused .cny-wave-layer {
+    animation-play-state: paused !important;
+}
+
 /* Red seigaiha wave pattern background - SVG pattern (static) */
 .cny-wave-bg {
     position: absolute;

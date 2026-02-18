@@ -1613,6 +1613,10 @@ function selectCategory(category) {
     var selectedCard = overlay.querySelector('.category-card[data-category="' + category + '"]');
     if (selectedCard) selectedCard.classList.add('selected');
 
+    // Pause background animations immediately to prevent flickering during transition
+    var cnyBg = document.querySelector('.cny-background');
+    if (cnyBg) cnyBg.classList.add('animations-paused');
+
     // Category confirmation flash
     playCategoryFlash(category);
 
@@ -4700,6 +4704,10 @@ function goToLandingPage() {
         // Show landing page
         landingPage.classList.remove('hidden');
         landingPage.style.pointerEvents = 'auto';
+
+        // Resume background animations when returning to landing page
+        var cnyBg = document.querySelector('.cny-background');
+        if (cnyBg) cnyBg.classList.remove('animations-paused');
 
         // Refresh draw counter (fresh from Firebase, skip cache)
         if (window.cardCounter && window.cardCounter.refreshDrawCount) {
