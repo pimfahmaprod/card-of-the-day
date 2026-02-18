@@ -4765,6 +4765,12 @@ function goToLandingPage() {
             if (tl) { tl.style.transition = 'opacity 0.5s ease'; tl.style.opacity = '1'; }
             if (sp) { sp.style.transition = 'opacity 0.5s ease'; sp.style.opacity = '1'; }
 
+            // Fade in landing heading (was missing!)
+            if (landingHeading) {
+                landingHeading.style.transition = 'opacity 0.5s ease';
+                landingHeading.style.opacity = '1';
+            }
+
             // Fade in other elements with slight delays
             setTimeout(() => {
                 if (landingBrand) {
