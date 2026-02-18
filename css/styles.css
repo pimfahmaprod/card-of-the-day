@@ -1989,27 +1989,12 @@ html[lang="ja"] .landing-tagline {
 }
 
 .spinning-card-front {
-    animation: spinFrontVis 3s step-end infinite;
+    /* Opacity controlled by JS (startFaceVisibilitySync) for mobile frame-sync */
 }
 
 .spinning-card-back {
     transform: rotateY(180deg);
-    animation: spinBackVis 3s step-end infinite;
-}
-
-/* iOS Safari: backface-visibility breaks with child animations.
-   Use step-end opacity (not visibility) — opacity:0 keeps the element in the
-   compositing layer so backface-visibility still works, unlike visibility:hidden
-   which removes it and causes a both-hidden flicker frame. */
-@keyframes spinFrontVis {
-    0%    { opacity: 1; }
-    25%   { opacity: 0; }
-    75%   { opacity: 1; }
-}
-@keyframes spinBackVis {
-    0%    { opacity: 0; }
-    25%   { opacity: 1; }
-    75%   { opacity: 0; }
+    /* Opacity controlled by JS (startFaceVisibilitySync) for mobile frame-sync */
 }
 
 @keyframes spinOnY {

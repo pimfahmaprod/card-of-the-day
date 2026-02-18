@@ -634,8 +634,8 @@ function applyModeVisuals(animate, direction) {
         // Cancel any pending mode switch animation
         if (_modeAnimTimer) { clearTimeout(_modeAnimTimer); _modeAnimTimer = null; }
 
-        // Stop sparkles for non-single modes
-        if (!isSingle) stopFloatingSparkles();
+        // Stop sparkles and face-sync for non-single modes
+        if (!isSingle) { stopFloatingSparkles(); stopFaceVisibilitySync(); }
 
         // Capture target mode so the timer uses the correct value
         var targetMode = currentReadingMode;
@@ -683,7 +683,7 @@ function applyModeVisuals(animate, direction) {
             syncMobileHint();
         }, 400);
     } else {
-        if (!isSingle) stopFloatingSparkles();
+        if (!isSingle) { stopFloatingSparkles(); stopFaceVisibilitySync(); }
 
         // Immediately hide all, show active
         Object.keys(containerMap).forEach(function(mode) {
@@ -1324,6 +1324,61 @@ function startCardRotation() {
     wrapper.addEventListener('animationiteration', onIteration);
     // Store ref for cleanup
     wrapper._spinIterationHandler = onIteration;
+
+    // Start JS-based face visibility sync (replaces CSS opacity animations
+    // which flicker on mobile due to two separate animations not being
+    // frame-synchronized)
+    startFaceVisibilitySync(wrapper);
+}
+
+// JS face-visibility sync: toggles front/back opacity in the same RAF callback
+// so both changes always land in the same rendered frame — no mobile flicker.
+let _faceVisRAF = null;
+function startFaceVisibilitySync(wrapper) {
+    stopFaceVisibilitySync(); // prevent double-RAF
+    const card = wrapper.closest('.spinning-card');
+    if (!card) return;
+    const front = card.querySelector('.spinning-card-front');
+    const back = card.querySelector('.spinning-card-back');
+    if (!front || !back) return;
+
+    front.style.opacity = '1';
+    back.style.opacity = '0';
+
+    let cycleStart = performance.now();
+    let lastShowFront = true;
+
+    // Resync at each full rotation to prevent drift
+    function onIteration(e) {
+        if (e.animationName !== 'spinOnY') return;
+        cycleStart = performance.now();
+    }
+    wrapper.addEventListener('animationiteration', onIteration);
+    wrapper._faceVisIterHandler = onIteration;
+
+    function tick() {
+        var progress = ((performance.now() - cycleStart) % 3000) / 3000;
+        var showFront = progress < 0.25 || progress >= 0.75;
+        if (showFront !== lastShowFront) {
+            front.style.opacity = showFront ? '1' : '0';
+            back.style.opacity = showFront ? '0' : '1';
+            lastShowFront = showFront;
+        }
+        _faceVisRAF = requestAnimationFrame(tick);
+    }
+    _faceVisRAF = requestAnimationFrame(tick);
+}
+
+function stopFaceVisibilitySync() {
+    if (_faceVisRAF) {
+        cancelAnimationFrame(_faceVisRAF);
+        _faceVisRAF = null;
+    }
+    var wrapper = document.querySelector('.spinning-card-wrapper');
+    if (wrapper && wrapper._faceVisIterHandler) {
+        wrapper.removeEventListener('animationiteration', wrapper._faceVisIterHandler);
+        wrapper._faceVisIterHandler = null;
+    }
 }
 
 // Create floating sparkles around spinning card
@@ -1719,17 +1774,18 @@ function startExperience() {
         wrapper._spinIterationHandler = null;
     }
     stopFloatingSparkles();
+    stopFaceVisibilitySync();
 
     // Step 1: Stop spinning and show back of card with smooth transition
     spinningCardWrapper.style.transition = 'transform 0.5s ease-out';
     spinningCardWrapper.style.animation = 'none';
     spinningCardWrapper.style.transform = 'rotateY(180deg)';
 
-    // Stop face visibility animations and force back face visible
+    // Force back face visible, front hidden (opacity-based, matching JS sync approach)
     var frontFace = spinningCard.querySelector('.spinning-card-front');
     var backFace = spinningCard.querySelector('.spinning-card-back');
-    if (frontFace) { frontFace.style.animation = 'none'; frontFace.style.visibility = 'hidden'; }
-    if (backFace) { backFace.style.animation = 'none'; backFace.style.visibility = 'visible'; }
+    if (frontFace) { frontFace.style.opacity = '0'; }
+    if (backFace) { backFace.style.opacity = '1'; }
 
     // Step 2: Straighten the card (remove tilt)
     spinningCard.style.transition = 'transform 0.5s ease-out';
