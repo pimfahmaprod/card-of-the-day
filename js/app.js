@@ -10333,3 +10333,54 @@ waitForResources();
         initAnalyticsAccess();
     }
 })();
+
+// Fix: Ensure spinning card and heading are properly shown when returning to landing page
+(function() {
+    // Override window navigation back to ensure landing page elements are visible
+    var originalPushState = history.pushState;
+    var originalReplaceState = history.replaceState;
+    
+    function resetLandingPageElements() {
+        var landingPage = document.getElementById('landingPage');
+        if (!landingPage || landingPage.style.display === 'none') return;
+        
+        // Ensure spinning card front is visible
+        var frontFace = document.querySelector('.spinning-card-front');
+        var backFace = document.querySelector('.spinning-card-back');
+        if (frontFace && backFace) {
+            frontFace.style.opacity = '1';
+            backFace.style.opacity = '0';
+        }
+        
+        // Ensure heading is visible
+        var activeHeading = document.querySelector('.mode-title.active');
+        if (activeHeading) {
+            activeHeading.style.opacity = '1';
+        }
+        
+        // Restart card rotation if in single mode
+        if (currentReadingMode === 'single') {
+            var wrapper = document.querySelector('.spinning-card-wrapper');
+            if (wrapper && !wrapper._spinIterationHandler) {
+                startCardRotation();
+            }
+        }
+    }
+    
+    // Call reset when landing page becomes visible
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === 'style') {
+                var landingPage = document.getElementById('landingPage');
+                if (landingPage && landingPage.style.display !== 'none') {
+                    setTimeout(resetLandingPageElements, 100);
+                }
+            }
+        });
+    });
+    
+    var landingPage = document.getElementById('landingPage');
+    if (landingPage) {
+        observer.observe(landingPage, { attributes: true, attributeFilter: ['style'] });
+    }
+})();
