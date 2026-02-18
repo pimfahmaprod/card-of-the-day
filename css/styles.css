@@ -593,11 +593,13 @@ body {
     top: -200px;
     width: 120px;
     height: 240px;
+    left: 50%;
     transform: translateX(-50%);
     animation: lanternDrop var(--drop-duration, 2s) ease-out forwards,
                lanternSwing var(--swing-duration, 3s) ease-in-out infinite;
-    animation-delay: var(--drop-delay, 0s), calc(var(--drop-delay, 0s) + var(--drop-duration, 2s));
+    animation-delay: var(--drop-delay, 0s), var(--drop-delay, 0s);
     transform-origin: top center;
+    animation-fill-mode: forwards, none;
 }
 
 .cny-lantern img {
@@ -611,6 +613,7 @@ body {
     0% {
         top: -120px;
         opacity: 0;
+        transform: translateX(-50%) rotate(0deg);
     }
     10% {
         opacity: 1;
@@ -618,12 +621,17 @@ body {
     100% {
         top: var(--final-top, 80px);
         opacity: 1;
+        transform: translateX(-50%) rotate(0deg);
     }
 }
 
 @keyframes lanternSwing {
-    0%, 100% { transform: translateX(-50%) rotate(-4deg); }
-    50% { transform: translateX(-50%) rotate(4deg); }
+    0%, 100% {
+        transform: translateX(-50%) rotate(-4deg);
+    }
+    50% {
+        transform: translateX(-50%) rotate(4deg);
+    }
 }
 
 /* Legacy starfield classes for compatibility (hidden) */
