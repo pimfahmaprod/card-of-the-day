@@ -55,7 +55,7 @@ body {
     overflow: hidden;
 }
 
-/* Red seigaiha wave pattern background */
+/* Red seigaiha wave pattern background - Static (no animation) */
 .cny-wave-bg {
     position: absolute;
     inset: 0;
@@ -68,12 +68,7 @@ body {
         radial-gradient(circle at 0 50%, #B82E2E 24%, #C03030 25%, #C03030 27%, #B82E2E 28%, #B82E2E 36%, #B02C2C 36%, #B02C2C 40%, transparent 40%, transparent);
     background-size: 100px 50px;
     background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
-    animation: wavePatternDrift 30s linear infinite;
-}
-
-@keyframes wavePatternDrift {
-    0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
-    100% { background-position: 100px 0, -100px 0, 50px 0, 100px 0, -100px 0; }
+    /* Animation removed - static background */
 }
 
 /* Bottom wave layers - Red Envelope Style */
