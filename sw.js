@@ -97,7 +97,8 @@ async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
   const response = await fetch(request);
-  if (response.ok) {
+  // Skip caching partial responses (206) — Cache API does not support them
+  if (response.ok && response.status !== 206) {
     const cache = await caches.open(CACHE_NAME);
     cache.put(request, response.clone());
   }
@@ -108,7 +109,7 @@ async function staleWhileRevalidate(request) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request);
   const networkPromise = fetch(request).then((response) => {
-    if (response.ok) cache.put(request, response.clone());
+    if (response.ok && response.status !== 206) cache.put(request, response.clone());
     return response;
   });
   return cached || networkPromise;
