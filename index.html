@@ -22,6 +22,14 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="images/icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ไพ่รายวัน">
+    <meta name="mobile-web-app-capable" content="yes">
+
     <!-- Open Graph Meta Tags for Social Sharing -->
     <meta property="og:title" content="Card of the Day - จับไพ่ทาโรต์รายวัน ดูดวงประจำวันฟรี">
     <meta property="og:description" content="จับไพ่ทาโรต์รายวัน! เลือกไพ่ 1 ใบเพื่อรับข้อความประจำวัน พร้อมความหมายไพ่แม่นยำ">
@@ -44,7 +52,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Prompt:wght@200;300;400;500&family=Dancing+Script:wght@400;500;600;700&family=Kanit:wght@200;300&family=Outfit:wght@300;400&family=Gowun+Dodum&family=Zen+Kaku+Gothic+New:wght@400;500&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=260218cny8">
+    <link rel="stylesheet" href="css/styles.css?v=260222pwa3">
 </head>
 <body>
     <!-- Chinese New Year Layered Background -->
@@ -918,6 +926,15 @@
         </div>
         </div><!-- /.blessing-content -->
 
+        <!-- PWA Static Badge - bottom left -->
+        <button class="pwa-static-badge" id="pwaStaticBadge" style="display:none">
+            <span class="pwa-static-badge-icon">✦</span>
+            <span class="pwa-static-badge-text">
+                <strong class="pwa-static-badge-title">บันทึกเป็นแอป</strong>
+                <span class="pwa-static-badge-sub">แตะเพื่อเพิ่มลงหน้าจอ</span>
+            </span>
+        </button>
+
         <!-- Restart button - bottom right -->
         <button class="blessing-restart-btn" id="blessingRestartBtn">
             <span data-i18n="blessing.restart">เริ่มใหม่</span>
@@ -1016,6 +1033,34 @@
         </svg>
     </button>
 
+    <!-- PWA Install Banner (Android/Chrome) -->
+    <div id="pwaInstallBanner" class="pwa-banner" aria-live="polite" aria-atomic="true" style="display:none">
+        <div class="pwa-banner-inner">
+            <div class="pwa-banner-icon-wrap">✦</div>
+            <div class="pwa-banner-text">
+                <strong class="pwa-banner-title">เปิดเป็นแอปบนมือถือ</strong>
+                <span class="pwa-banner-sub">ใช้งานแบบออฟไลน์ · ไม่ต้องเปิดเบราว์เซอร์</span>
+            </div>
+            <button id="pwaInstallBtn" class="pwa-banner-btn">เพิ่มลงหน้าจอ</button>
+            <button id="pwaCloseBtn" class="pwa-banner-close" aria-label="ปิด">✕</button>
+        </div>
+    </div>
+
+    <!-- PWA iOS Install Instructions Modal -->
+    <div id="pwaIosModal" class="pwa-ios-modal" style="display:none">
+        <div class="pwa-ios-inner">
+            <button id="pwaIosClose" class="pwa-ios-close" aria-label="ปิด">✕</button>
+            <div class="pwa-ios-glyph">✦</div>
+            <p class="pwa-ios-title">เพิ่มไพ่รายวันลงหน้าจอ</p>
+            <ol class="pwa-ios-steps">
+                <li>กดปุ่ม <span class="pwa-ios-shareicon">⬆</span> <strong>แชร์</strong> ที่แถบด้านล่าง</li>
+                <li>เลื่อนลงแล้วกด <strong>"เพิ่มไปที่หน้าจอโฮม"</strong></li>
+                <li>กด <strong>เพิ่ม</strong> เพื่อยืนยัน</li>
+            </ol>
+            <div class="pwa-ios-arrow">▼</div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -1032,7 +1077,8 @@
             'js/card-interpretations.js',
             'js/app.js',
             'js/facebook.js',
-            'js/counter.js'
+            'js/counter.js',
+            'js/pwa.js'
         ];
         scripts.forEach(function(src){
             document.write('<script src="'+src+'?v='+v+'"><\/script>');
@@ -1043,6 +1089,14 @@
         def.defer = true;
         document.head.appendChild(def);
     })();
+    </script>
+    <!-- Service Worker Registration -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js').catch(function() {});
+        });
+    }
     </script>
 </body>
 </html>
