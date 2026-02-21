@@ -105,6 +105,82 @@
     @media (max-width: 480px) {
         .pwa-home-badge { bottom: 15px; left: 15px; }
     }
+
+    /* ── iOS Modal (inline to bypass SW cache) ── */
+    .pwa-ios-modal {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        z-index: 10002;
+        display: none;
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        pointer-events: none;
+    }
+    .pwa-ios-modal.pwa-ios-modal--visible {
+        transform: translateY(0);
+        pointer-events: all;
+    }
+    .pwa-ios-inner {
+        background: linear-gradient(160deg, #141b45 0%, #0d1333 60%, #080d24 100%);
+        border-top: 1px solid rgba(154,170,212,0.35);
+        border-radius: 20px 20px 0 0;
+        padding: 24px 24px calc(24px + env(safe-area-inset-bottom,0)) 24px;
+        text-align: center;
+        box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
+        position: relative;
+    }
+    .pwa-ios-close {
+        position: absolute; top: 16px; right: 16px;
+        background: none; border: none;
+        color: rgba(154,170,212,0.5); font-size: 18px;
+        cursor: pointer; padding: 4px;
+    }
+    .pwa-ios-glyph {
+        font-size: 36px; color: #9AAAD4; margin: 4px 0 0;
+        text-shadow: 0 0 20px rgba(154,170,212,0.5);
+    }
+    .pwa-ios-title {
+        font-family: 'Prompt', sans-serif; font-size: 17px;
+        font-weight: 500; color: #C0C8E0; margin: 12px 0 18px;
+    }
+    .pwa-ios-steps {
+        list-style: none; padding: 0; margin: 0 0 20px;
+        text-align: left; display: flex; flex-direction: column;
+        gap: 12px; counter-reset: ios-steps;
+    }
+    .pwa-ios-steps li {
+        font-family: 'Prompt', sans-serif; font-size: 14px;
+        font-weight: 300; color: rgba(192,200,224,0.85);
+        padding-left: 32px; position: relative;
+        counter-increment: ios-steps;
+    }
+    .pwa-ios-steps li::before {
+        content: counter(ios-steps);
+        position: absolute; left: 0; top: 0;
+        width: 22px; height: 22px;
+        background: rgba(154,170,212,0.15);
+        border: 1px solid rgba(154,170,212,0.3);
+        border-radius: 50%; display: flex;
+        align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 500; color: #9AAAD4;
+        line-height: 22px; text-align: center;
+    }
+    .pwa-ios-shareicon {
+        display: inline-block;
+        background: rgba(154,170,212,0.15);
+        border: 1px solid rgba(154,170,212,0.25);
+        border-radius: 6px; padding: 1px 6px;
+        font-size: 13px; margin: 0 2px;
+    }
+    .pwa-ios-arrow {
+        font-size: 22px; color: rgba(154,170,212,0.4);
+        animation: pwaArrowBounce2 1.4s ease-in-out infinite;
+        margin-top: 4px;
+    }
+    @keyframes pwaArrowBounce2 {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(6px); }
+    }
     </style>
 </head>
 <body>
