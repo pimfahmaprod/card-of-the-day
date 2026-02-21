@@ -53,6 +53,59 @@
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/styles.css?v=260222pwa3">
+    <!-- PWA Badge — inline so it bypasses SW cache entirely -->
+    <style>
+    .pwa-home-badge {
+        position: absolute;
+        bottom: 25px;
+        left: 25px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px 10px 12px;
+        border-radius: 22px;
+        border: 1px solid rgba(154, 170, 212, 0.4);
+        background: linear-gradient(135deg, rgba(20,27,70,0.92), rgba(13,19,51,0.92));
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        color: #C0C8E0;
+        font-family: 'Prompt', sans-serif;
+        font-size: 0.78rem;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+        -webkit-tap-highlight-color: transparent;
+        animation: pwaBadgeIn 0.6s ease 3s both;
+        border: none;
+        background: none;
+    }
+    .pwa-home-badge-inner {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px 10px 12px;
+        border-radius: 22px;
+        border: 1px solid rgba(154, 170, 212, 0.4);
+        background: linear-gradient(135deg, rgba(20,27,70,0.92), rgba(13,19,51,0.92));
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+        animation: pwaBadgePing 2.5s ease-in-out 4s infinite;
+    }
+    .pwa-home-badge-icon { font-size: 1.3rem; color: #9AAAD4; text-shadow: 0 0 12px rgba(154,170,212,0.6); }
+    .pwa-home-badge-title { display: block; font-size: 0.78rem; font-weight: 500; color: #C0C8E0; white-space: nowrap; }
+    .pwa-home-badge-sub   { display: block; font-size: 0.63rem; font-weight: 300; color: rgba(154,170,212,0.65); white-space: nowrap; }
+    @keyframes pwaBadgeIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pwaBadgePing {
+        0%, 100% { box-shadow: 0 4px 20px rgba(0,0,0,0.45), 0 0 0 0 rgba(154,170,212,0.4); }
+        50%       { box-shadow: 0 4px 20px rgba(0,0,0,0.45), 0 0 0 9px rgba(154,170,212,0); }
+    }
+    @media (max-width: 480px) {
+        .pwa-home-badge { bottom: 15px; left: 15px; }
+    }
+    </style>
 </head>
 <body>
     <!-- Chinese New Year Layered Background -->
@@ -926,12 +979,14 @@
         </div>
         </div><!-- /.blessing-content -->
 
-        <!-- PWA Static Badge - bottom left -->
-        <button class="pwa-static-badge" id="pwaStaticBadge" style="display:none">
-            <span class="pwa-static-badge-icon">✦</span>
-            <span class="pwa-static-badge-text">
-                <strong class="pwa-static-badge-title">บันทึกเป็นแอป</strong>
-                <span class="pwa-static-badge-sub">แตะเพื่อเพิ่มลงหน้าจอ</span>
+        <!-- PWA Home Badge - purely CSS-driven, no JS required -->
+        <button class="pwa-home-badge" id="pwaHomeBadge">
+            <span class="pwa-home-badge-inner">
+                <span class="pwa-home-badge-icon">✦</span>
+                <span>
+                    <span class="pwa-home-badge-title">บันทึกเป็นแอป</span>
+                    <span class="pwa-home-badge-sub">แตะเพื่อเพิ่มลงหน้าจอ</span>
+                </span>
             </span>
         </button>
 
