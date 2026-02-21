@@ -1,6 +1,6 @@
 {
-  "name": "Card of the Day - ไพ่ทาโรต์รายวัน",
-  "short_name": "ไพ่รายวัน",
+  "name": "JubPai - ไพ่ทาโรต์รายวัน",
+  "short_name": "JubPai",
   "description": "จับไพ่ทาโรต์รายวัน ดูดวงประจำวันฟรี! เลือกไพ่ 1 ใบเพื่อรับข้อความประจำวัน",
   "start_url": "/?source=pwa",
   "scope": "/",

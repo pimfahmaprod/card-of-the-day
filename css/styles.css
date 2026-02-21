@@ -1456,8 +1456,8 @@ body {
 
 /* 1: Significator — center of the cross */
 .tc-1  { transform: translate(-65px, 0px);  z-index: 2; animation: ccFloat 5s ease-in-out infinite; }
-/* 2: Crossing — rotated 270° over card 1 */
-.tc-2  { transform: translate(-65px, 0px) rotate(270deg); z-index: 3; animation: ccFloat 5s ease-in-out infinite 0.5s; }
+/* 2: Crossing — rotated 90° over card 1 */
+.tc-2  { transform: translate(-65px, 0px) rotate(90deg); z-index: 3; animation: ccFloat 5s ease-in-out infinite 0.5s; }
 /* 3: Crown — above center */
 .tc-3  { transform: translate(-65px, -140px); z-index: 1; animation: ccFloat 5s ease-in-out infinite 1s; }
 /* 4: Base — below center */
@@ -11273,7 +11273,7 @@ footer {
     .ten-card-fan { width: 420px; height: 380px; }
     .ten-card-fan .multi-card-item { width: 68px; height: 108px; }
     .tc-1  { transform: translate(-55px, 0px); }
-    .tc-2  { transform: translate(-55px, 0px) rotate(270deg); }
+    .tc-2  { transform: translate(-55px, 0px) rotate(90deg); }
     .tc-3  { transform: translate(-55px, -120px); }
     .tc-4  { transform: translate(-55px, 120px); }
     .tc-5  { transform: translate(-155px, 0px); }
@@ -11515,7 +11515,7 @@ footer {
     .ten-card-fan { width: 340px; height: 320px; }
     .ten-card-fan .multi-card-item { width: 55px; height: 88px; }
     .tc-1  { transform: translate(-44px, 0px); }
-    .tc-2  { transform: translate(-44px, 0px) rotate(270deg); }
+    .tc-2  { transform: translate(-44px, 0px) rotate(90deg); }
     .tc-3  { transform: translate(-44px, -98px); }
     .tc-4  { transform: translate(-44px, 98px); }
     .tc-5  { transform: translate(-126px, 0px); }

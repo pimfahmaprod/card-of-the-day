@@ -8977,7 +8977,7 @@ function _monthLabelFull(i) {
 // Coordinate space: (0,0)=top-left of layout area, (1,1)=bottom-right
 var _CC_POS = [
     { fx: 0.350, fy: 0.500, r:  0 },   // 1: significator (cross center)
-    { fx: 0.350, fy: 0.500, r: 270 },  // 2: crossing (same pos, rotated)
+    { fx: 0.350, fy: 0.500, r:  90 },  // 2: crossing (same pos, rotated)
     { fx: 0.350, fy: 0.240, r:  0 },   // 3: crown
     { fx: 0.350, fy: 0.760, r:  0 },   // 4: base
     { fx: 0.095, fy: 0.500, r:  0 },   // 5: past
