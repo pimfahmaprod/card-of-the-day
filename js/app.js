@@ -46,8 +46,8 @@ const READING_MODES = [
     { id: 'single', headingKey: 'landing.heading', clickKey: 'landing.clickToDraw' },
     { id: 'three-card', headingKey: 'landing.heading3', clickKey: 'landing.clickToDraw3' },
     { id: 'four-card', headingKey: 'landing.heading4', clickKey: 'landing.clickToDraw4' },
-    { id: 'ten-card', headingKey: 'landing.heading10', clickKey: 'landing.clickToDraw10', disabled: true },
-    { id: 'twelve-card', headingKey: 'landing.heading12', clickKey: 'landing.clickToDraw12', disabled: true }
+    { id: 'ten-card', headingKey: 'landing.heading10', clickKey: 'landing.clickToDraw10' },
+    { id: 'twelve-card', headingKey: 'landing.heading12', clickKey: 'landing.clickToDraw12' }
 ];
 
 function isCurrentModeDisabled() {
@@ -1664,6 +1664,16 @@ function initMultiCardMode() {
         multiCardPositions = ['past', 'present', 'future', 'outcome'];
         if (grid) grid.classList.add('multi-select-mode');
         showMultiPickIndicator();
+    } else if (currentReadingMode === 'ten-card') {
+        multiCardTarget = 10;
+        multiCardPositions = ['1','2','3','4','5','6','7','8','9','10'];
+        if (grid) grid.classList.add('multi-select-mode');
+        showMultiPickIndicator();
+    } else if (currentReadingMode === 'twelve-card') {
+        multiCardTarget = 12;
+        multiCardPositions = ['1','2','3','4','5','6','7','8','9','10','11','12'];
+        if (grid) grid.classList.add('multi-select-mode');
+        showMultiPickIndicator();
     } else {
         multiCardTarget = 0;
         multiCardPositions = [];
@@ -2406,6 +2416,27 @@ var revealCardData = null;
 var _revealTapHandler = null;
 var _revealSkipHandler = null;
 
+function scaleBigFanToFit(fanEl) {
+    if (!fanEl) return;
+    // Allow one frame for layout before measuring
+    var naturalW = fanEl.offsetWidth;
+    var naturalH = fanEl.offsetHeight;
+    if (!naturalW || !naturalH) return;
+    var hPad = 24;  // min horizontal padding (px each side)
+    var vReserve = 140; // approx space for prompt + skip + breathing room
+    var maxW = window.innerWidth - hPad * 2;
+    var maxH = window.innerHeight - vReserve;
+    var scale = Math.min(1, maxW / naturalW, maxH / naturalH);
+    fanEl.style.transform = 'scale(' + scale + ')';
+    // Compensate for unused layout space (transform doesn't affect flow)
+    var hLoss = (naturalW * (1 - scale)) / 2;
+    var vLoss = (naturalH * (1 - scale)) / 2;
+    fanEl.style.marginLeft  = '-' + hLoss + 'px';
+    fanEl.style.marginRight = '-' + hLoss + 'px';
+    fanEl.style.marginTop    = '-' + vLoss + 'px';
+    fanEl.style.marginBottom = '-' + vLoss + 'px';
+}
+
 function showRevealOverlay() {
     var overlay = document.getElementById('revealOverlay');
     var fanWrapper = document.getElementById('revealFanWrapper');
@@ -2414,6 +2445,13 @@ function showRevealOverlay() {
 
     // Build fan HTML based on reading mode
     fanWrapper.innerHTML = buildRevealFan();
+
+    // Scale big fans (10/12 cards) to fit viewport
+    if (currentReadingMode === 'ten-card' || currentReadingMode === 'twelve-card') {
+        requestAnimationFrame(function() {
+            scaleBigFanToFit(fanWrapper.querySelector('.reveal-big-fan'));
+        });
+    }
 
     // Determine total cards
     var totalCards = (currentReadingMode === 'single') ? 1 : multiCardTarget;
@@ -2429,7 +2467,7 @@ function showRevealOverlay() {
 
     // Reset card info display
     var cardInfo = document.getElementById('revealCardInfo');
-    cardInfo.classList.remove('visible', 'switching');
+    cardInfo.classList.remove('visible', 'switching', 'no-quote');
     document.getElementById('revealCardInfoName').textContent = '';
     document.getElementById('revealCardInfoQuote').textContent = '';
 
@@ -2479,9 +2517,32 @@ function buildRevealFan() {
         return buildThreeCardReveal();
     } else if (currentReadingMode === 'four-card') {
         return buildFourCardReveal();
+    } else if (currentReadingMode === 'ten-card' || currentReadingMode === 'twelve-card') {
+        return buildBigMultiCardReveal();
     }
     // Fallback for future modes
     return buildSingleCardReveal();
+}
+
+function buildBigMultiCardReveal() {
+    var isTen = currentReadingMode === 'ten-card';
+    var modeClass = isTen ? 'ten-card-fan' : 'twelve-card-fan';
+    var itemPrefix = isTen ? 'tc-' : 'twc-';
+    var html = '<div class="multi-card-fan ' + modeClass + ' reveal-big-fan">';
+    for (var i = 0; i < multiCardSelections.length; i++) {
+        var sel = multiCardSelections[i];
+        html += '<div class="multi-card-item ' + itemPrefix + (i + 1) + '">' +
+            '<div class="multi-card-flipper">' +
+                '<div class="multi-card-face multi-card-back">' + buildCardBackHTML() + '</div>' +
+                '<div class="multi-card-face multi-card-front">' +
+                    '<img class="multi-card-front-img" src="images/tarot/' + sel.card.image + '" alt="' + sel.card.name + '">' +
+                '</div>' +
+            '</div>' +
+            '<span class="card-position-label">' + (currentReadingMode === 'twelve-card' ? _monthLabelFull(i) : (i + 1)) + '</span>' +
+        '</div>';
+    }
+    html += '</div>';
+    return html;
 }
 
 function buildCardBackHTML() {
@@ -2633,13 +2694,18 @@ function showRevealCardInfo(cardData) {
     // Get card name
     var name = getCardName(cardData.name);
 
-    // Get category-specific quote if category is set, otherwise general quote
+    // No quote for 10/12 card modes (interpretations coming soon)
+    var noQuote = (currentReadingMode === 'ten-card' || currentReadingMode === 'twelve-card');
+    infoEl.classList.toggle('no-quote', noQuote);
+
     var quote = '';
-    if (currentReadingCategory) {
-        quote = getCardCategoryField(cardData, currentReadingCategory + 'Quote');
-    }
-    if (!quote) {
-        quote = getCardQuote(cardData);
+    if (!noQuote) {
+        if (currentReadingCategory) {
+            quote = getCardCategoryField(cardData, currentReadingCategory + 'Quote');
+        }
+        if (!quote) {
+            quote = getCardQuote(cardData);
+        }
     }
 
     // If info is already visible, do a switching animation
@@ -3131,7 +3197,9 @@ function proceedToMultiResult() {
     var stickyHtml = '';
     for (var i = 0; i < multiCardSelections.length; i++) {
         var sel = multiCardSelections[i];
-        var posLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[sel.positionKey]) || sel.positionKey;
+        var posLabel = currentReadingMode === 'twelve-card'
+            ? _monthLabelFull(i)
+            : ((translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[sel.positionKey]) || sel.positionKey);
         stickyHtml += '<div class="multi-result-card-item' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">';
         stickyHtml += '<img class="multi-result-card-img" src="images/tarot/' + sel.card.image + '" alt="' + sel.card.name + '">';
         stickyHtml += '<div class="multi-result-card-label">' + posLabel + '</div>';
@@ -3165,31 +3233,54 @@ function proceedToMultiResult() {
 
     // Build multi-result HTML
     var html = '';
+    var lt = translations[currentLang] && translations[currentLang].landing;
+    var isComingSoonMode = (currentReadingMode === 'ten-card' || currentReadingMode === 'twelve-card');
 
-    // Per-card interpretation sections
-    for (var j = 0; j < multiCardSelections.length; j++) {
-        var s = multiCardSelections[j];
-        var pLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[s.positionKey]) || s.positionKey;
-        var prophecyTitle = (translations[currentLang] && translations[currentLang].result && translations[currentLang].result.prophecyTitle) || 'คำทำนาย';
-        html += '<div class="multi-result-section" data-card-index="' + j + '">';
-        html += '<div class="multi-result-position">✦ ' + pLabel + ' ✦</div>';
-        html += '<div class="multi-result-card-name">' + getCardName(s.card.name) + '</div>';
-        html += '<div class="multi-result-quote">"' + getMultiCardQuote(s.card) + '"</div>';
-        html += '<div class="multi-result-glass">';
-        html += '<div class="result-section-header">';
-        html += '<span>✦ ' + prophecyTitle + ' ✦</span>';
+    if (isComingSoonMode) {
+        // Coming Soon layout: show card name list only, no interpretations yet
+        var comingSoonLabel = (lt && lt.comingSoon) || 'Coming Soon';
+        var comingSoonDesc = (lt && lt.comingSoonDesc) || 'Under development';
+        html += '<div class="coming-soon-result-banner">';
+        html += '<div class="coming-soon-result-icon">✦</div>';
+        html += '<div class="coming-soon-result-title">' + comingSoonLabel + '</div>';
+        html += '<div class="coming-soon-result-desc">' + comingSoonDesc + '</div>';
         html += '</div>';
-        var interpText = getMultiCardInterpretation(s.card);
-        var interpParas = interpText.split(/\n\s*\n/).map(function(p) {
-            var safe = p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return '<p>' + safe + '</p>';
-        }).join('');
-        html += '<div class="multi-result-interpretation">' + interpParas + '</div>';
-        html += '</div>';
-        if (j < multiCardSelections.length - 1) {
-            html += '<div class="multi-result-divider"><span></span><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M12 2l2.09 6.26L20.18 9l-4.64 4.14L16.73 20 12 16.77 7.27 20l1.19-6.86L3.82 9l6.09-.74L12 2z" fill="rgba(154,170,212,0.35)" stroke="none"/></svg><span></span></div>';
+        html += '<div class="coming-soon-card-list">';
+        for (var k = 0; k < multiCardSelections.length; k++) {
+            var sk = multiCardSelections[k];
+            html += '<div class="coming-soon-card-row">';
+            html += '<span class="coming-soon-card-num">' + (currentReadingMode === 'twelve-card' ? _monthLabelFull(k) : (k + 1)) + '</span>';
+            html += '<img class="coming-soon-card-thumb" src="images/tarot/' + sk.card.image + '" alt="' + sk.card.name + '">';
+            html += '<span class="coming-soon-card-name">' + getCardName(sk.card.name) + '</span>';
+            html += '</div>';
         }
         html += '</div>';
+    } else {
+        // Per-card interpretation sections (3-card / 4-card)
+        for (var j = 0; j < multiCardSelections.length; j++) {
+            var s = multiCardSelections[j];
+            var pLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[s.positionKey]) || s.positionKey;
+            var prophecyTitle = (translations[currentLang] && translations[currentLang].result && translations[currentLang].result.prophecyTitle) || 'คำทำนาย';
+            html += '<div class="multi-result-section" data-card-index="' + j + '">';
+            html += '<div class="multi-result-position">✦ ' + pLabel + ' ✦</div>';
+            html += '<div class="multi-result-card-name">' + getCardName(s.card.name) + '</div>';
+            html += '<div class="multi-result-quote">"' + getMultiCardQuote(s.card) + '"</div>';
+            html += '<div class="multi-result-glass">';
+            html += '<div class="result-section-header">';
+            html += '<span>✦ ' + prophecyTitle + ' ✦</span>';
+            html += '</div>';
+            var interpText = getMultiCardInterpretation(s.card);
+            var interpParas = interpText.split(/\n\s*\n/).map(function(p) {
+                var safe = p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return '<p>' + safe + '</p>';
+            }).join('');
+            html += '<div class="multi-result-interpretation">' + interpParas + '</div>';
+            html += '</div>';
+            if (j < multiCardSelections.length - 1) {
+                html += '<div class="multi-result-divider"><span></span><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M12 2l2.09 6.26L20.18 9l-4.64 4.14L16.73 20 12 16.77 7.27 20l1.19-6.86L3.82 9l6.09-.74L12 2z" fill="rgba(154,170,212,0.35)" stroke="none"/></svg><span></span></div>';
+            }
+            html += '</div>';
+        }
     }
 
     container.innerHTML = html;
@@ -4457,6 +4548,11 @@ function showBlessingScreen(userName, comment) {
     const restartBtn = document.getElementById('blessingRestartBtn');
     if (restartBtn) {
         restartBtn.onclick = closeBlessingAndRestart;
+    }
+
+    // Offer PWA install after user completes a reading
+    if (typeof window.pwaShowInstallPrompt === 'function') {
+        window.pwaShowInstallPrompt();
     }
 }
 
@@ -8369,6 +8465,18 @@ function getReadingModeTitle() {
     var t = translations[currentLang] && translations[currentLang].landing;
     return (t && t[key]) || 'Card of the Day';
 }
+function getReadingModeTitleEn() {
+    var keyMap = {
+        'single': 'heading',
+        'three-card': 'heading3',
+        'four-card': 'heading4',
+        'ten-card': 'heading10',
+        'twelve-card': 'heading12'
+    };
+    var key = keyMap[currentReadingMode] || 'heading';
+    var t = translations['en'] && translations['en'].landing;
+    return (t && t[key]) || 'Card of the Day';
+}
 
 function getMultiCardQuote(card) {
     var quote = '';
@@ -8433,7 +8541,17 @@ function drawMultiShareImage(ctx, cardImages, size, platform) {
     var innerPadding = borderPadding + 15;
     ctx.strokeRect(innerPadding, innerPadding, width - innerPadding * 2, height - innerPadding * 2);
 
-    if (isVertical) {
+    var isBigSpread = (currentReadingMode === 'ten-card' || currentReadingMode === 'twelve-card');
+    if (isBigSpread) {
+        var isSquare = !isVertical && !isWide;
+        if (currentReadingMode === 'ten-card') {
+            if (isSquare) drawTenCardSquareLayout(ctx, cardImages, width, height, colors);
+            else drawTenCardLayout(ctx, cardImages, width, height, colors);
+        } else {
+            if (isSquare) drawTwelveCardSquareLayout(ctx, cardImages, width, height, colors);
+            else drawTwelveCardLayout(ctx, cardImages, width, height, colors);
+        }
+    } else if (isVertical) {
         drawMultiVerticalLayout(ctx, cardImages, width, height, colors);
     } else if (isWide) {
         drawMultiWideLayout(ctx, cardImages, width, height, colors);
@@ -8819,6 +8937,460 @@ function drawMultiWideLayout(ctx, cardImages, width, height, colors) {
         accentColor: colors.accent || '#FFD700',
         compact: true
     });
+}
+
+// ============================================================
+// 10-Card (Celtic Cross) & 12-Card (Zodiac) Save Image
+// ============================================================
+
+// --- Shared data ---
+var _MONTH_SHORT = {
+    th:    ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'],
+    en:    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    'zh-CN': ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+    'zh-TW': ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+    ko:    ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+    ja:    ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+    fr:    ['Jan','Fév','Mars','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc']
+};
+var _MONTH_FULL = {
+    th:    ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'],
+    en:    ['January','February','March','April','May','June','July','August','September','October','November','December'],
+    'zh-CN': ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'],
+    'zh-TW': ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'],
+    ko:    ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+    ja:    ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+    fr:    ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
+};
+function _monthLabel(i) {
+    var ms = _MONTH_SHORT[currentLang] || _MONTH_SHORT.en;
+    var idx = (new Date().getMonth() + i) % 12;
+    return ms[idx] || String(idx + 1);
+}
+function _monthLabelFull(i) {
+    var mf = _MONTH_FULL[currentLang] || _MONTH_FULL.en;
+    var idx = (new Date().getMonth() + i) % 12;
+    return mf[idx] || _monthLabel(i);
+}
+
+// Celtic Cross normalized card positions [fx, fy, rotateDeg]
+// Coordinate space: (0,0)=top-left of layout area, (1,1)=bottom-right
+var _CC_POS = [
+    { fx: 0.350, fy: 0.500, r:  0 },   // 1: significator (cross center)
+    { fx: 0.350, fy: 0.500, r: 270 },  // 2: crossing (same pos, rotated)
+    { fx: 0.350, fy: 0.240, r:  0 },   // 3: crown
+    { fx: 0.350, fy: 0.760, r:  0 },   // 4: base
+    { fx: 0.095, fy: 0.500, r:  0 },   // 5: past
+    { fx: 0.595, fy: 0.500, r:  0 },   // 6: future
+    { fx: 0.910, fy: 0.875, r:  0 },   // 7: staff (bottom)
+    { fx: 0.910, fy: 0.625, r:  0 },   // 8: staff
+    { fx: 0.910, fy: 0.375, r:  0 },   // 9: staff
+    { fx: 0.910, fy: 0.125, r:  0 },   // 10: staff (top)
+];
+
+// --- Private helpers ---
+function _drawCard(ctx, img, cx, cy, w, h, angle, colors) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    if (angle) ctx.rotate(angle * Math.PI / 180);
+    // After rotation the canvas axes are swapped, so swap draw dimensions
+    // to preserve the intended visual size (w × h in screen space)
+    var dw = angle ? h : w, dh = angle ? w : h;
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetY = 5;
+    if (img) {
+        ctx.drawImage(img, -dw/2, -dh/2, dw, dh);
+    } else {
+        ctx.fillStyle = 'rgba(' + colors.accentRgb + ', 0.08)';
+        ctx.fillRect(-dw/2, -dh/2, dw, dh);
+    }
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.35)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-dw/2, -dh/2, dw, dh);
+    ctx.restore();
+}
+
+function _numBadge(ctx, n, x, y, sz, color) {
+    var r = sz * 0.72;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.fillStyle = '#0d1333';
+    ctx.font = 'bold ' + Math.round(sz * 0.8) + 'px "Prompt",sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(n), x, y + 0.5);
+    ctx.textBaseline = 'alphabetic';
+    ctx.restore();
+}
+
+function _fitText(ctx, text, x, y, maxW, sz, minSz, color) {
+    ctx.fillStyle = color;
+    var s = sz;
+    ctx.font = s + 'px "Cormorant Garamond","Prompt",serif';
+    while (ctx.measureText(text).width > maxW && s > minSz) {
+        s--;
+        ctx.font = s + 'px "Cormorant Garamond","Prompt",serif';
+    }
+    ctx.fillText(text, x, y);
+}
+
+function _bigSpreadFooter(ctx, W, H, padB, colors) {
+    drawFooterWithPromo(ctx, {
+        iconSize: Math.round(Math.min(W, H) * 0.016),
+        centerX: W / 2,
+        footerY: H - Math.round(padB * 0.35),
+        width: W - 80,
+        color: 'rgba(' + colors.lightRgb + ', 0.4)',
+        accentColor: colors.accent || '#9AAAD4',
+        compact: true
+    });
+}
+
+// ─── 10-Card: Story / Wide layouts ───────────────────────────
+function drawTenCardLayout(ctx, cardImages, W, H, colors) {
+    if (W > H) { _tenCardWide(ctx, cardImages, W, H, colors); }
+    else        { _tenCardTall(ctx, cardImages, W, H, colors); }
+}
+
+function _tenCardTall(ctx, cardImages, W, H, colors) {
+    // Layout: title | Celtic Cross (top ~56%) | divider | 2-col name list (bottom ~38%) | footer
+    var padS  = Math.round(W * 0.050);
+    var titleH = Math.round(H * 0.048);
+    var crossH = Math.round(H * 0.555);
+    var footerH = Math.round(H * 0.038);
+    var listH  = H - titleH - crossH - footerH;
+    var crossT = titleH;
+    var listT  = crossT + crossH;
+
+    // Title
+    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.80)';
+    ctx.font = 'bold ' + Math.round(W * 0.042) + 'px "Caveat","Prompt",cursive';
+    ctx.textAlign = 'center';
+    ctx.fillText(getReadingModeTitleEn(), W / 2, Math.round(titleH * 0.78));
+
+    // Cross area
+    var aW = W - padS * 2, aH = crossH;
+    var CARD_H = Math.round(Math.min(aH * 0.215, aW * 0.175 / 0.625));
+    var CARD_W = Math.round(CARD_H * 0.625);
+    var smSz   = Math.max(Math.round(CARD_H * 0.10), 13);
+    var lc = colors.accent;
+
+    function px(fx) { return padS + fx * aW; }
+    function py(fy) { return crossT + fy * aH; }
+
+    for (var i = 0; i < 10; i++) {
+        var p = _CC_POS[i];
+        var dw = p.r ? CARD_H : CARD_W, dh = p.r ? CARD_W : CARD_H;
+        _drawCard(ctx, cardImages[i], px(p.fx), py(p.fy), dw, dh, p.r, colors);
+        if (i !== 1) {  // card 2 badge placed separately on landscape card
+            _numBadge(ctx, i + 1, px(p.fx) - CARD_W/2 + smSz * 0.72, py(p.fy) - CARD_H/2 + smSz * 0.72, smSz, lc);
+        }
+    }
+    // Badge 2 on landscape card: top-left corner = center ± (CARD_H/2, CARD_W/2)
+    _numBadge(ctx, 2, px(_CC_POS[0].fx) - CARD_H/2 + smSz * 0.72, py(_CC_POS[0].fy) - CARD_W/2 + smSz * 0.72, smSz, lc);
+
+    // Divider
+    var divY = listT - 1;
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.22)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padS, divY); ctx.lineTo(W - padS, divY); ctx.stroke();
+
+    // 2-column card name list (cards 1-5 left, 6-10 right)
+    var colGap   = Math.round(W * 0.04);
+    var colW     = (W - padS * 2 - colGap) / 2;
+    var rowH     = listH / 5;
+    var nameSz   = Math.max(Math.round(rowH * 0.29), 22);
+    var numSz    = Math.max(Math.round(rowH * 0.22), 18);
+    var tc       = 'rgba(' + colors.lightRgb + ', 0.85)';
+
+    for (var j = 0; j < 10; j++) {
+        var col   = j < 5 ? 0 : 1;
+        var row   = j < 5 ? j : j - 5;
+        var baseX = padS + col * (colW + colGap);
+        var baseY = listT + row * rowH + rowH * 0.62;
+        var nm    = getCardName(multiCardSelections[j].card.name);
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = lc;
+        ctx.font = 'bold ' + numSz + 'px "Prompt",sans-serif';
+        ctx.fillText(String(j + 1) + '.', baseX, baseY);
+        var numW = ctx.measureText(String(j + 1) + '.').width + 8;
+        ctx.fillStyle = tc;
+        var ns = nameSz;
+        ctx.font = ns + 'px "Cormorant Garamond","Prompt",serif';
+        while (ctx.measureText(nm).width > colW - numW - 4 && ns > 14) { ns--; ctx.font = ns + 'px "Cormorant Garamond","Prompt",serif'; }
+        ctx.fillText(nm, baseX + numW, baseY);
+    }
+
+    _bigSpreadFooter(ctx, W, H, footerH, colors);
+}
+
+function _tenCardWide(ctx, cardImages, W, H, colors) {
+    // Left ~65%: Celtic Cross (no text labels), Right ~33%: numbered card list
+    var padT = Math.round(H * 0.095), padB = Math.round(H * 0.058), padS = Math.round(W * 0.030);
+    var listW  = Math.round(W * 0.30);
+    var crossW = W - listW - padS * 2;
+    var crossH = H - padT - padB;
+
+    // Title
+    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.80)';
+    ctx.font = 'bold ' + Math.round(H * 0.075) + 'px "Caveat","Prompt",cursive';
+    ctx.textAlign = 'left';
+    ctx.fillText(getReadingModeTitleEn(), padS, Math.round(padT * 0.78));
+
+    var CARD_H = Math.round(Math.min(crossH * 0.225, crossW * 0.178 / 0.625));
+    var CARD_W = Math.round(CARD_H * 0.625);
+    var smSz   = Math.max(Math.round(CARD_H * 0.105), 9);
+
+    function px(fx) { return padS + fx * crossW; }
+    function py(fy) { return padT + fy * crossH; }
+
+    for (var i = 0; i < 10; i++) {
+        var p = _CC_POS[i];
+        var dw = p.r ? CARD_H : CARD_W, dh = p.r ? CARD_W : CARD_H;
+        _drawCard(ctx, cardImages[i], px(p.fx), py(p.fy), dw, dh, p.r, colors);
+        if (i !== 1) {
+            _numBadge(ctx, i + 1, px(p.fx) - CARD_W/2 + smSz * 0.72, py(p.fy) - CARD_H/2 + smSz * 0.72, smSz, colors.accent);
+        }
+    }
+    // Badge 2 on landscape card: top-left corner = center ± (CARD_H/2, CARD_W/2)
+    _numBadge(ctx, 2, px(_CC_POS[0].fx) - CARD_H/2 + smSz * 0.72, py(_CC_POS[0].fy) - CARD_W/2 + smSz * 0.72, smSz, colors.accent);
+
+    // Divider
+    var listX = padS + crossW + padS * 0.5;
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.18)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(listX, padT); ctx.lineTo(listX, H - padB); ctx.stroke();
+
+    // Name list
+    var rowH  = (H - padT - padB) / 10;
+    var nSz   = Math.max(Math.round(rowH * 0.30), 11);
+    var lnSz  = Math.max(Math.round(rowH * 0.24), 9);
+    var listAvW = W - listX - 14 - padS * 0.5;
+    for (var j = 0; j < 10; j++) {
+        var ry = padT + j * rowH + rowH * 0.55;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = colors.accent;
+        ctx.font = 'bold ' + lnSz + 'px "Prompt",sans-serif';
+        var numStr = String(j + 1) + '.';
+        ctx.fillText(numStr, listX + 8, ry);
+        var numW = ctx.measureText(numStr).width + 6;
+        var nm = getCardName(multiCardSelections[j].card.name);
+        ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.85)';
+        var ns = nSz;
+        ctx.font = ns + 'px "Cormorant Garamond","Prompt",serif';
+        while (ctx.measureText(nm).width > listAvW - numW - 4 && ns > 9) { ns--; ctx.font = ns + 'px "Cormorant Garamond","Prompt",serif'; }
+        ctx.fillText(nm, listX + 8 + numW, ry);
+    }
+
+    _bigSpreadFooter(ctx, W, H, padB, colors);
+}
+
+// ─── 10-Card: Square (no text labels) ────────────────────────
+function drawTenCardSquareLayout(ctx, cardImages, W, H, colors) {
+    var padT = Math.round(H * 0.058), padB = Math.round(H * 0.030), padS = Math.round(W * 0.030);
+    var aW = W - padS * 2, aH = H - padT - padB;
+
+    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.80)';
+    ctx.font = 'bold ' + Math.round(W * 0.042) + 'px "Caveat","Prompt",cursive';
+    ctx.textAlign = 'center';
+    ctx.fillText(getReadingModeTitleEn(), W / 2, Math.round(padT * 0.80));
+
+    var CARD_H = Math.round(Math.min(aH * 0.245, aW * 0.205 / 0.625));
+    var CARD_W = Math.round(CARD_H * 0.625);
+    var smSz   = Math.max(Math.round(CARD_H * 0.09), 10);
+
+    function px(fx) { return padS + fx * aW; }
+    function py(fy) { return padT + fy * aH; }
+
+    for (var i = 0; i < 10; i++) {
+        var p = _CC_POS[i];
+        var dw = p.r ? CARD_H : CARD_W, dh = p.r ? CARD_W : CARD_H;
+        _drawCard(ctx, cardImages[i], px(p.fx), py(p.fy), dw, dh, p.r, colors);
+        if (i !== 1) {
+            _numBadge(ctx, i + 1, px(p.fx) - CARD_W/2 + smSz * 0.72, py(p.fy) - CARD_H/2 + smSz * 0.72, smSz, colors.accent);
+        }
+    }
+    // Badge 2 on landscape card: top-left corner = center ± (CARD_H/2, CARD_W/2)
+    _numBadge(ctx, 2, px(_CC_POS[0].fx) - CARD_H/2 + smSz * 0.72, py(_CC_POS[0].fy) - CARD_W/2 + smSz * 0.72, smSz, colors.accent);
+
+    _bigSpreadFooter(ctx, W, H, padB, colors);
+}
+
+// ─── 12-Card: Story / Wide layouts ───────────────────────────
+function drawTwelveCardLayout(ctx, cardImages, W, H, colors) {
+    if (W > H) { _twelveCardWide(ctx, cardImages, W, H, colors); }
+    else        { _twelveCardTall(ctx, cardImages, W, H, colors); }
+}
+
+function _twelveCardTall(ctx, cardImages, W, H, colors) {
+    var padS    = Math.round(W * 0.050);
+    var titleH  = Math.round(H * 0.048);
+    var wheelH  = Math.round(H * 0.555);
+    var footerH = Math.round(H * 0.038);
+    var listH   = H - titleH - wheelH - footerH;
+    var wheelT  = titleH, listT = wheelT + wheelH;
+
+    // Title
+    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.80)';
+    ctx.font = 'bold ' + Math.round(W * 0.042) + 'px "Caveat","Prompt",cursive';
+    ctx.textAlign = 'center';
+    ctx.fillText(getReadingModeTitleEn(), W / 2, Math.round(titleH * 0.78));
+
+    // Zodiac wheel in top section
+    var aW = W, aH = wheelH;
+    var CARD_H = Math.round(Math.min(aW * 0.165, aH * 0.185));
+    var CARD_W = Math.round(CARD_H * 0.625);
+    var minR   = CARD_W * 1.15 / 0.518;
+    var maxR   = Math.min(aW / 2 - CARD_W/2 - 6, aH / 2 - CARD_H/2 - 6);
+    var radius = Math.max(minR, Math.min(maxR, Math.min(aW, aH) * 0.36));
+    var cx0    = W / 2, cy0 = wheelT + aH / 2;
+    var smSz   = Math.max(Math.round(CARD_H * 0.09), 10);
+
+    // Decorative rings
+    ctx.beginPath(); ctx.arc(cx0, cy0, radius * 0.92, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.10)'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx0, cy0, radius * 0.12, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.18)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    for (var i = 0; i < 12; i++) {
+        var angle = (i * 30 - 90) * Math.PI / 180;
+        var ccx = cx0 + radius * Math.cos(angle);
+        var ccy = cy0 + radius * Math.sin(angle);
+        _drawCard(ctx, cardImages[i], ccx, ccy, CARD_W, CARD_H, 0, colors);
+        _numBadge(ctx, i + 1, ccx - CARD_W/2 + smSz * 0.72, ccy - CARD_H/2 + smSz * 0.72, smSz, colors.accent);
+    }
+
+    // Divider
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.22)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padS * 1.5, listT - 1); ctx.lineTo(W - padS * 1.5, listT - 1); ctx.stroke();
+
+    // 2-column list: months 1-6 left, 7-12 right
+    var colW  = (W - padS * 2) / 2;
+    var rowH  = listH / 6;
+    var lnSz  = Math.max(Math.round(rowH * 0.28), 10);
+    var nSz   = Math.max(Math.round(rowH * 0.26), 9);
+    for (var j = 0; j < 12; j++) {
+        var col  = j < 6 ? 0 : 1;
+        var row  = j < 6 ? j : j - 6;
+        var cx   = padS + col * colW;
+        var ry   = listT + row * rowH + rowH * 0.60;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = colors.accent;
+        ctx.font = 'bold ' + lnSz + 'px "Prompt",sans-serif';
+        var ml = _monthLabelFull(j);
+        ctx.fillText(ml, cx, ry);
+        var mw = ctx.measureText(ml).width;
+        var nm = getCardName(multiCardSelections[j].card.name);
+        ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.85)';
+        var ns = nSz;
+        ctx.font = ns + 'px "Cormorant Garamond","Prompt",serif';
+        var maxNmW = colW - mw - 8 - padS * 0.3;
+        while (ctx.measureText(nm).width > maxNmW && ns > 9) { ns--; ctx.font = ns + 'px "Cormorant Garamond","Prompt",serif'; }
+        ctx.fillText(nm, cx + mw + 7, ry);
+    }
+
+    _bigSpreadFooter(ctx, W, H, footerH, colors);
+}
+
+function _twelveCardWide(ctx, cardImages, W, H, colors) {
+    // Left 65%: Zodiac wheel, Right 33%: month + card name list
+    var padT = Math.round(H * 0.095), padB = Math.round(H * 0.058), padS = Math.round(W * 0.028);
+    var listW  = Math.round(W * 0.32);
+    var wheelW = W - listW - padS * 2;
+    var wheelH = H - padT - padB;
+
+    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.80)';
+    ctx.font = 'bold ' + Math.round(H * 0.075) + 'px "Caveat","Prompt",cursive';
+    ctx.textAlign = 'left';
+    ctx.fillText(getReadingModeTitleEn(), padS, Math.round(padT * 0.78));
+
+    var CARD_H = Math.round(Math.min(wheelW * 0.140, wheelH * 0.135));
+    var CARD_W = Math.round(CARD_H * 0.625);
+    var minR   = CARD_W * 1.15 / 0.518;
+    var maxR   = Math.min(wheelW / 2 - CARD_W/2 - 6, wheelH / 2 - CARD_H/2 - 6);
+    var radius = Math.max(minR, Math.min(maxR, Math.min(wheelW, wheelH) * 0.37));
+    var smSz   = Math.max(Math.round(CARD_H * 0.09), 8);
+    var cx0    = padS + wheelW / 2, cy0 = padT + wheelH / 2;
+
+    ctx.beginPath(); ctx.arc(cx0, cy0, radius * 0.92, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.10)'; ctx.lineWidth = 1; ctx.stroke();
+
+    for (var i = 0; i < 12; i++) {
+        var angle = (i * 30 - 90) * Math.PI / 180;
+        var ccx = cx0 + radius * Math.cos(angle);
+        var ccy = cy0 + radius * Math.sin(angle);
+        _drawCard(ctx, cardImages[i], ccx, ccy, CARD_W, CARD_H, 0, colors);
+        _numBadge(ctx, i + 1, ccx - CARD_W/2 + smSz * 0.72, ccy - CARD_H/2 + smSz * 0.72, smSz, colors.accent);
+    }
+
+    // Divider + list
+    var listX = padS + wheelW + padS * 0.4;
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.18)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(listX, padT); ctx.lineTo(listX, H - padB); ctx.stroke();
+
+    var rowH   = (H - padT - padB) / 12;
+    var mSz2   = Math.max(Math.round(rowH * 0.30), 9);
+    var nSz2   = Math.max(Math.round(rowH * 0.24), 8);
+    var listAvW = W - listX - 10 - padS * 0.5;
+    for (var j = 0; j < 12; j++) {
+        var ry = padT + j * rowH + rowH * 0.58;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = colors.accent;
+        ctx.font = 'bold ' + nSz2 + 'px "Prompt",sans-serif';
+        var ml2 = _monthLabelFull(j);
+        ctx.fillText(ml2, listX + 8, ry);
+        var mw = ctx.measureText(ml2).width;
+        var nm2 = getCardName(multiCardSelections[j].card.name);
+        ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.82)';
+        var ns2 = mSz2;
+        ctx.font = ns2 + 'px "Cormorant Garamond","Prompt",serif';
+        while (ctx.measureText(nm2).width > listAvW - mw - 14 && ns2 > 8) { ns2--; ctx.font = ns2 + 'px "Cormorant Garamond","Prompt",serif'; }
+        ctx.fillText(nm2, listX + mw + 14, ry);
+    }
+
+    _bigSpreadFooter(ctx, W, H, padB, colors);
+}
+
+// ─── 12-Card: Square (cards fill image, no text labels) ──────
+function drawTwelveCardSquareLayout(ctx, cardImages, W, H, colors) {
+    var padT = Math.round(H * 0.058), padB = Math.round(H * 0.030);
+    var aW = W, aH = H - padT - padB;
+
+    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.80)';
+    ctx.font = 'bold ' + Math.round(W * 0.042) + 'px "Caveat","Prompt",cursive';
+    ctx.textAlign = 'center';
+    ctx.fillText(getReadingModeTitleEn(), W / 2, Math.round(padT * 0.80));
+
+    var CARD_H = Math.round(Math.min(aW * 0.188, aH * 0.168));
+    var CARD_W = Math.round(CARD_H * 0.625);
+    var minR   = CARD_W * 1.15 / 0.518;
+    var maxR   = Math.min(aW / 2 - CARD_W/2 - 6, aH / 2 - CARD_H/2 - 6);
+    var radius = Math.max(minR, Math.min(maxR, Math.min(aW, aH) * 0.37));
+    var smSz   = Math.max(Math.round(CARD_H * 0.09), 10);
+    var cx0    = W / 2, cy0 = padT + aH / 2;
+
+    // Decorative rings
+    ctx.beginPath(); ctx.arc(cx0, cy0, radius * 0.97, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.12)'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx0, cy0, radius * 0.14, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.20)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    for (var i = 0; i < 12; i++) {
+        var angle = (i * 30 - 90) * Math.PI / 180;
+        var ccx = cx0 + radius * Math.cos(angle);
+        var ccy = cy0 + radius * Math.sin(angle);
+        _drawCard(ctx, cardImages[i], ccx, ccy, CARD_W, CARD_H, 0, colors);
+        _numBadge(ctx, i + 1, ccx - CARD_W/2 + smSz * 0.72, ccy - CARD_H/2 + smSz * 0.72, smSz, colors.accent);
+    }
+
+    _bigSpreadFooter(ctx, W, H, padB, colors);
 }
 
 function drawShareImage(ctx, cardImg, size, platform) {
@@ -10390,3 +10962,47 @@ waitForResources();
         observer.observe(landingPage, { attributes: true, attributeFilter: ['style'] });
     }
 })();
+
+// ── bfcache restore: reset disabled card states ──────────────────────────────
+// On mobile, the browser may freeze and restore the page from bfcache when the
+// user presses Back or switches apps. This leaves card elements with disabled
+// classes / inline styles from a previous multi-card session still visible.
+// pageshow fires with event.persisted = true in that case — reset everything.
+window.addEventListener('pageshow', function(event) {
+    if (!event.persisted) return; // Normal page load — no action needed
+
+    // Reset all card DOM states
+    document.querySelectorAll('.card-container').forEach(function(c) {
+        c.classList.remove('disabled', 'multi-picked', 'selecting');
+        c.style.opacity = '';
+        c.style.pointerEvents = '';
+        c.style.transform = '';
+    });
+
+    // Reset card grid class
+    var grid = document.querySelector('.card-grid');
+    if (grid) {
+        grid.classList.remove('multi-select-mode');
+        grid.classList.add('stacked');
+    }
+
+    // Reset JS multi-card state
+    _multiDisabledCards = [];
+    multiCardSelections = [];
+    multiCardTarget = 0;
+    multiCardPositions = [];
+    isAnimating = false;
+
+    if (typeof hideMultiPickIndicator === 'function') hideMultiPickIndicator();
+
+    // Reset center card overlay if it was open
+    var centerEl = document.getElementById('centerCard');
+    if (centerEl) {
+        centerEl.classList.remove('active', 'fly-to-header', 'show-info');
+        centerEl.style.transform = '';
+        centerEl.style.opacity = '';
+        centerEl.style.transition = '';
+    }
+    var overlayEl = document.getElementById('overlay');
+    if (overlayEl) overlayEl.classList.remove('active');
+});

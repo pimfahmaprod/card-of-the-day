@@ -52,130 +52,297 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Prompt:wght@200;300;400;500&family=Dancing+Script:wght@400;500;600;700&family=Kanit:wght@200;300&family=Outfit:wght@300;400&family=Gowun+Dodum&family=Zen+Kaku+Gothic+New:wght@400;500&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=260222pwa3">
+    <link rel="stylesheet" href="css/styles.css?v=260222pwa5">
     <!-- PWA Badge — inline so it bypasses SW cache entirely -->
     <style>
-    .pwa-home-badge {
+    /* ── PWA Static Badge (Blessing Screen, bottom-left corner) ── */
+    .pwa-static-badge {
         position: absolute;
-        bottom: 25px;
-        left: 25px;
-        display: inline-flex;
+        bottom: 0;
+        left: 0;
+        display: none;
+        flex-direction: row;
         align-items: center;
-        gap: 10px;
-        padding: 10px 16px 10px 12px;
-        border-radius: 22px;
-        border: 1px solid rgba(154, 170, 212, 0.4);
-        background: linear-gradient(135deg, rgba(20,27,70,0.92), rgba(13,19,51,0.92));
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        color: #C0C8E0;
-        font-family: 'Prompt', sans-serif;
-        font-size: 0.78rem;
+        gap: 12px;
+        /* rounded only on top-right — flush with corner on left/bottom */
+        border-radius: 0 22px 0 0;
+        padding: 13px 22px 20px 16px;
         cursor: pointer;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+        overflow: hidden;
         -webkit-tap-highlight-color: transparent;
-        animation: pwaBadgeIn 0.6s ease 3s both;
-        border: none;
-        background: none;
+        border-top: 1px solid rgba(154,170,212,0.30);
+        border-right: 1px solid rgba(154,170,212,0.30);
+        background: linear-gradient(150deg,
+            rgba(16,25,72,0.97) 0%,
+            rgba(9,15,44,0.98) 100%);
+        backdrop-filter: blur(26px);
+        -webkit-backdrop-filter: blur(26px);
+        box-shadow: 6px -6px 30px rgba(0,0,0,0.48),
+                    inset 1px 0 0 rgba(255,255,255,0.04),
+                    inset 0 1px 0 rgba(255,255,255,0.05);
+        text-align: left;
     }
-    .pwa-home-badge-inner {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 16px 10px 12px;
-        border-radius: 22px;
-        border: 1px solid rgba(154, 170, 212, 0.4);
-        background: linear-gradient(135deg, rgba(20,27,70,0.92), rgba(13,19,51,0.92));
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.45);
-        animation: pwaBadgePing 2.5s ease-in-out 4s infinite;
+    /* Android: brighter gradient — signals a direct action */
+    .pwa-static-badge--android {
+        background: linear-gradient(150deg,
+            rgba(22,36,105,0.97) 0%,
+            rgba(11,19,68,0.98) 100%);
+        border-top-color: rgba(154,170,212,0.48);
+        border-right-color: rgba(154,170,212,0.48);
+        box-shadow: 6px -6px 30px rgba(0,0,0,0.48),
+                    inset 0 0 40px rgba(70,100,200,0.09);
     }
-    .pwa-home-badge-icon { font-size: 1.3rem; color: #9AAAD4; text-shadow: 0 0 12px rgba(154,170,212,0.6); }
-    .pwa-home-badge-title { display: block; font-size: 0.78rem; font-weight: 500; color: #C0C8E0; white-space: nowrap; }
-    .pwa-home-badge-sub   { display: block; font-size: 0.63rem; font-weight: 300; color: rgba(154,170,212,0.65); white-space: nowrap; }
-    @keyframes pwaBadgeIn {
-        from { opacity: 0; transform: translateY(6px); }
+    .pwa-static-badge--visible {
+        animation: pwaStaticIn 0.55s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    /* Android gets a repeating pulse to invite tapping */
+    .pwa-static-badge--android.pwa-static-badge--visible {
+        animation: pwaStaticIn 0.55s cubic-bezier(0.22,1,0.36,1) both,
+                   pwaStaticAndroidPulse 2.8s ease-in-out 2s infinite;
+    }
+    .pwa-static-badge:hover  { filter: brightness(1.12); }
+    .pwa-static-badge:active { filter: brightness(0.88); }
+    .pwa-static-badge-shimmer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(
+            110deg,
+            transparent 25%,
+            rgba(154,170,212,0.09) 50%,
+            transparent 75%
+        );
+        transform: translateX(-100%);
+        animation: pwaStaticShimmer 5s linear 8s infinite;
+    }
+    .pwa-static-badge-appicon {
+        width: 46px; height: 46px;
+        border-radius: 12px;
+        flex-shrink: 0;
+        object-fit: cover;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.6),
+                    0 0 0 1px rgba(255,255,255,0.10);
+    }
+    .pwa-static-badge-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+    }
+    .pwa-static-badge-title {
+        font-family: 'Caveat','Prompt',cursive;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #D0D8EE;
+        white-space: nowrap;
+        line-height: 1.15;
+        letter-spacing: 0.01em;
+    }
+    .pwa-static-badge-cta {
+        font-family: 'Prompt', sans-serif;
+        font-size: 0.7rem;
+        font-weight: 400;
+        color: rgba(180,196,232,0.80);
+        white-space: nowrap;
+        line-height: 1.3;
+    }
+    /* Android CTA text is bolder — it's a direct action */
+    .pwa-static-badge--android .pwa-static-badge-cta {
+        font-size: 0.76rem;
+        font-weight: 600;
+        color: rgba(210,224,252,0.95);
+        letter-spacing: 0.01em;
+    }
+    @keyframes pwaStaticIn {
+        from { opacity: 0; transform: translateY(100%); }
         to   { opacity: 1; transform: translateY(0); }
     }
-    @keyframes pwaBadgePing {
-        0%, 100% { box-shadow: 0 4px 20px rgba(0,0,0,0.45), 0 0 0 0 rgba(154,170,212,0.4); }
-        50%       { box-shadow: 0 4px 20px rgba(0,0,0,0.45), 0 0 0 9px rgba(154,170,212,0); }
+    @keyframes pwaStaticAndroidPulse {
+        0%, 100% {
+            box-shadow: 6px -6px 30px rgba(0,0,0,0.48),
+                        inset 0 0 40px rgba(70,100,200,0.09),
+                        0 0 0 0 rgba(110,140,230,0);
+        }
+        50% {
+            box-shadow: 6px -6px 30px rgba(0,0,0,0.48),
+                        inset 0 0 40px rgba(70,100,200,0.09),
+                        0 -10px 24px rgba(110,140,230,0.18);
+        }
+    }
+    @keyframes pwaStaticShimmer {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
     }
     @media (max-width: 480px) {
-        .pwa-home-badge { bottom: 15px; left: 15px; }
+        .pwa-static-badge {
+            border-radius: 0 18px 0 0;
+            padding: 11px 18px 18px 14px;
+            gap: 10px;
+        }
+        .pwa-static-badge-appicon { width: 40px; height: 40px; }
+        .pwa-static-badge-title { font-size: 0.95rem; }
+    }
+
+    /* ── Android Banner (inline to bypass SW cache) ── */
+    .pwa-banner {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        z-index: 10001;
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .pwa-banner--visible { transform: translateY(0); }
+    .pwa-banner-inner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px calc(14px + env(safe-area-inset-bottom,0)) 16px;
+        background: linear-gradient(135deg, #141b45 0%, #0d1333 100%);
+        border-top: 1px solid rgba(154,170,212,0.22);
+        box-shadow: 0 -6px 28px rgba(0,0,0,0.6);
+    }
+    .pwa-banner-icon {
+        width: 42px; height: 42px;
+        border-radius: 11px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 0 0 1px rgba(154,170,212,0.18);
+        flex-shrink: 0;
+    }
+    .pwa-banner-text { flex: 1; min-width: 0; }
+    .pwa-banner-title {
+        display: block; font-family: 'Prompt', sans-serif;
+        font-size: 14px; font-weight: 500; color: #C0C8E0;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .pwa-banner-sub {
+        display: block; font-family: 'Prompt', sans-serif;
+        font-size: 11.5px; font-weight: 300;
+        color: rgba(154,170,212,0.58); margin-top: 2px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .pwa-banner-btn {
+        flex-shrink: 0;
+        background: linear-gradient(135deg, rgba(154,170,212,0.22), rgba(154,170,212,0.1));
+        border: 1px solid rgba(154,170,212,0.38);
+        border-radius: 20px;
+        color: #C0C8E0; font-family: 'Prompt', sans-serif;
+        font-size: 13px; font-weight: 400;
+        padding: 8px 16px; cursor: pointer;
+        white-space: nowrap;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .pwa-banner-close {
+        flex-shrink: 0;
+        background: none; border: none;
+        color: rgba(154,170,212,0.4); font-size: 18px;
+        padding: 6px; cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
     }
 
     /* ── iOS Modal (inline to bypass SW cache) ── */
     .pwa-ios-modal {
         position: fixed;
-        bottom: 0; left: 0; right: 0;
+        inset: 0;
         z-index: 10002;
-        display: none;
-        transform: translateY(100%);
-        transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        display: none; /* JS sets to 'flex' */
+        flex-direction: column;
+        justify-content: flex-end;
         pointer-events: none;
     }
-    .pwa-ios-modal.pwa-ios-modal--visible {
-        transform: translateY(0);
-        pointer-events: all;
+    .pwa-ios-modal.pwa-ios-modal--visible { pointer-events: all; }
+    .pwa-ios-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        opacity: 0;
+        transition: opacity 0.35s ease;
     }
-    .pwa-ios-inner {
-        background: linear-gradient(160deg, #141b45 0%, #0d1333 60%, #080d24 100%);
-        border-top: 1px solid rgba(154,170,212,0.35);
-        border-radius: 20px 20px 0 0;
-        padding: 24px 24px calc(24px + env(safe-area-inset-bottom,0)) 24px;
-        text-align: center;
-        box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
+    .pwa-ios-modal.pwa-ios-modal--visible .pwa-ios-backdrop { opacity: 1; }
+    .pwa-ios-panel {
         position: relative;
+        z-index: 1;
+        background: linear-gradient(160deg, #141b45 0%, #0d1333 60%, #080d24 100%);
+        border-top: 1px solid rgba(154,170,212,0.28);
+        border-radius: 22px 22px 0 0;
+        padding: 10px 24px calc(28px + env(safe-area-inset-bottom,0)) 24px;
+        box-shadow: 0 -10px 50px rgba(0,0,0,0.7);
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .pwa-ios-modal.pwa-ios-modal--visible .pwa-ios-panel { transform: translateY(0); }
+    .pwa-ios-handle {
+        width: 40px; height: 4px;
+        background: rgba(154,170,212,0.22);
+        border-radius: 2px;
+        margin: 0 auto 18px;
     }
     .pwa-ios-close {
-        position: absolute; top: 16px; right: 16px;
-        background: none; border: none;
-        color: rgba(154,170,212,0.5); font-size: 18px;
-        cursor: pointer; padding: 4px;
+        position: absolute; top: 18px; right: 18px;
+        background: rgba(154,170,212,0.1); border: 1px solid rgba(154,170,212,0.2);
+        color: rgba(154,170,212,0.6); font-size: 15px;
+        cursor: pointer; padding: 0;
+        width: 28px; height: 28px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        -webkit-tap-highlight-color: transparent;
     }
-    .pwa-ios-glyph {
-        font-size: 36px; color: #9AAAD4; margin: 4px 0 0;
-        text-shadow: 0 0 20px rgba(154,170,212,0.5);
+    .pwa-ios-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(154,170,212,0.11);
+    }
+    .pwa-ios-appicon {
+        width: 54px; height: 54px;
+        border-radius: 13px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.45), 0 0 0 1px rgba(154,170,212,0.18);
+        flex-shrink: 0;
+    }
+    .pwa-ios-header-text { min-width: 0; }
+    .pwa-ios-appname {
+        font-family: 'Prompt', sans-serif; font-size: 16px;
+        font-weight: 500; color: #C0C8E0; margin: 0 0 3px;
+    }
+    .pwa-ios-appsub {
+        font-family: 'Prompt', sans-serif; font-size: 12px;
+        font-weight: 300; color: rgba(154,170,212,0.5); margin: 0;
     }
     .pwa-ios-title {
-        font-family: 'Prompt', sans-serif; font-size: 17px;
-        font-weight: 500; color: #C0C8E0; margin: 12px 0 18px;
+        font-family: 'Prompt', sans-serif; font-size: 15px;
+        font-weight: 400; color: #C0C8E0; margin: 0 0 16px;
     }
     .pwa-ios-steps {
         list-style: none; padding: 0; margin: 0 0 20px;
-        text-align: left; display: flex; flex-direction: column;
+        display: flex; flex-direction: column;
         gap: 12px; counter-reset: ios-steps;
     }
     .pwa-ios-steps li {
         font-family: 'Prompt', sans-serif; font-size: 14px;
         font-weight: 300; color: rgba(192,200,224,0.85);
-        padding-left: 32px; position: relative;
+        padding-left: 36px; position: relative;
         counter-increment: ios-steps;
     }
     .pwa-ios-steps li::before {
         content: counter(ios-steps);
         position: absolute; left: 0; top: 0;
-        width: 22px; height: 22px;
-        background: rgba(154,170,212,0.15);
-        border: 1px solid rgba(154,170,212,0.3);
-        border-radius: 50%; display: flex;
-        align-items: center; justify-content: center;
+        width: 24px; height: 24px;
+        background: rgba(154,170,212,0.1);
+        border: 1px solid rgba(154,170,212,0.28);
+        border-radius: 50%;
         font-size: 12px; font-weight: 500; color: #9AAAD4;
-        line-height: 22px; text-align: center;
+        line-height: 24px; text-align: center;
     }
     .pwa-ios-shareicon {
         display: inline-block;
-        background: rgba(154,170,212,0.15);
+        background: rgba(154,170,212,0.12);
         border: 1px solid rgba(154,170,212,0.25);
         border-radius: 6px; padding: 1px 6px;
         font-size: 13px; margin: 0 2px;
     }
     .pwa-ios-arrow {
-        font-size: 22px; color: rgba(154,170,212,0.4);
+        font-size: 20px; color: rgba(154,170,212,0.35);
         animation: pwaArrowBounce2 1.4s ease-in-out infinite;
-        margin-top: 4px;
+        text-align: center; margin-top: 4px;
     }
     @keyframes pwaArrowBounce2 {
         0%, 100% { transform: translateY(0); }
@@ -1055,16 +1222,15 @@
         </div>
         </div><!-- /.blessing-content -->
 
-        <!-- PWA Home Badge - purely CSS-driven, no JS required -->
-        <button class="pwa-home-badge" id="pwaHomeBadge">
-            <span class="pwa-home-badge-inner">
-                <span class="pwa-home-badge-icon">✦</span>
-                <span>
-                    <span class="pwa-home-badge-title">บันทึกเป็นแอป</span>
-                    <span class="pwa-home-badge-sub">แตะเพื่อเพิ่มลงหน้าจอ</span>
-                </span>
-            </span>
-        </button>
+        <!-- PWA Static Badge - JS-driven, shown on mobile blessing screen -->
+        <div class="pwa-static-badge" id="pwaStaticBadge">
+            <div class="pwa-static-badge-shimmer"></div>
+            <img class="pwa-static-badge-appicon" src="images/icons/icon-192.png" alt="">
+            <div class="pwa-static-badge-info">
+                <span class="pwa-static-badge-title">ไพ่ทาโรต์รายวัน</span>
+                <span class="pwa-static-badge-cta" id="pwaStaticCta"></span>
+            </div>
+        </div>
 
         <!-- Restart button - bottom right -->
         <button class="blessing-restart-btn" id="blessingRestartBtn">
@@ -1167,10 +1333,10 @@
     <!-- PWA Install Banner (Android/Chrome) -->
     <div id="pwaInstallBanner" class="pwa-banner" aria-live="polite" aria-atomic="true" style="display:none">
         <div class="pwa-banner-inner">
-            <div class="pwa-banner-icon-wrap">✦</div>
+            <img class="pwa-banner-icon" src="images/icons/icon-48.png" alt="">
             <div class="pwa-banner-text">
                 <strong class="pwa-banner-title">เปิดเป็นแอปบนมือถือ</strong>
-                <span class="pwa-banner-sub">ใช้งานแบบออฟไลน์ · ไม่ต้องเปิดเบราว์เซอร์</span>
+                <span class="pwa-banner-sub">ออฟไลน์ได้ · เปิดเร็ว · ไม่ต้องเปิดเบราว์เซอร์</span>
             </div>
             <button id="pwaInstallBtn" class="pwa-banner-btn">เพิ่มลงหน้าจอ</button>
             <button id="pwaCloseBtn" class="pwa-banner-close" aria-label="ปิด">✕</button>
@@ -1179,10 +1345,18 @@
 
     <!-- PWA iOS Install Instructions Modal -->
     <div id="pwaIosModal" class="pwa-ios-modal" style="display:none">
-        <div class="pwa-ios-inner">
+        <div class="pwa-ios-backdrop"></div>
+        <div class="pwa-ios-panel">
+            <div class="pwa-ios-handle"></div>
             <button id="pwaIosClose" class="pwa-ios-close" aria-label="ปิด">✕</button>
-            <div class="pwa-ios-glyph">✦</div>
-            <p class="pwa-ios-title">เพิ่มไพ่รายวันลงหน้าจอ</p>
+            <div class="pwa-ios-header">
+                <img class="pwa-ios-appicon" src="images/icons/icon-192.png" alt="ไพ่รายวัน">
+                <div class="pwa-ios-header-text">
+                    <p class="pwa-ios-appname">ไพ่ทาโรต์รายวัน</p>
+                    <p class="pwa-ios-appsub">jubpai.com</p>
+                </div>
+            </div>
+            <p class="pwa-ios-title">เพิ่มลงหน้าจอ ใช้งานได้เหมือนแอปจริง</p>
             <ol class="pwa-ios-steps">
                 <li>กดปุ่ม <span class="pwa-ios-shareicon">⬆</span> <strong>แชร์</strong> ที่แถบด้านล่าง</li>
                 <li>เลื่อนลงแล้วกด <strong>"เพิ่มไปที่หน้าจอโฮม"</strong></li>
@@ -1202,7 +1376,7 @@
     <!-- Scripts (auto cache-bust via deploy timestamp) -->
     <script>
     (function(){
-        var v = '260222b';
+        var v = '260222c';
         var scripts = [
             'js/translations.js',
             'js/card-interpretations.js',
@@ -1227,6 +1401,35 @@
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('/sw.js').catch(function() {});
         });
+    }
+    </script>
+
+    <!-- Dev-only PWA test panel (localhost only) -->
+    <script>
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        var panel = document.createElement('div');
+        panel.id = 'pwaDevPanel';
+        panel.style.cssText = [
+            'position:fixed', 'bottom:80px', 'right:12px', 'z-index:99999',
+            'display:flex', 'flex-direction:column', 'gap:6px',
+            'font-family:monospace', 'font-size:11px'
+        ].join(';');
+
+        function mkBtn(label, fn) {
+            var b = document.createElement('button');
+            b.textContent = label;
+            b.style.cssText = [
+                'padding:6px 10px', 'border-radius:6px', 'border:1px solid rgba(154,170,212,0.4)',
+                'background:rgba(13,19,51,0.92)', 'color:#9AAAD4',
+                'cursor:pointer', 'white-space:nowrap'
+            ].join(';');
+            b.onclick = fn;
+            return b;
+        }
+
+        panel.appendChild(mkBtn('▶ Android banner', function () { window._pwaTestBanner && window._pwaTestBanner(); }));
+        panel.appendChild(mkBtn('▶ iOS modal',      function () { window._pwaTestIos    && window._pwaTestIos();    }));
+        document.body.appendChild(panel);
     }
     </script>
 </body>

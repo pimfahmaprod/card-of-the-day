@@ -4,17 +4,19 @@
 // Timing: shown after the user completes a reading (blessing screen).
 // Android/Chrome: uses native beforeinstallprompt.
 // iOS Safari: shows step-by-step modal.
-// Dismissed state stored in localStorage for 14 days.
+// Dismissed state stored in localStorage: 7 days (close button), 1 day (tap outside).
 // ─────────────────────────────────────────────────────────────────────────────
 
 (function () {
     'use strict';
 
-    var DISMISS_KEY = 'pwa_dismiss_until';
-    var DISMISS_DAYS = 14;
+    var DISMISS_KEY      = 'pwa_dismiss_until';
+    var DISMISS_DAYS_BTN = 7;   // close button
+    var DISMISS_DAYS_OUT = 1;   // tap outside
 
     var deferredPrompt = null;
     var bannerShown = false;
+    var outsideClickHandler = null;
 
     // ── Detect environment ───────────────────────────────────────────────────
     var isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
@@ -37,9 +39,16 @@
         return Date.now() < parseInt(until, 10);
     }
 
-    function markDismissed() {
-        var until = Date.now() + DISMISS_DAYS * 24 * 60 * 60 * 1000;
+    function markDismissed(days) {
+        var until = Date.now() + days * 24 * 60 * 60 * 1000;
         localStorage.setItem(DISMISS_KEY, String(until));
+    }
+
+    function removeOutsideHandler() {
+        if (outsideClickHandler) {
+            document.removeEventListener('click', outsideClickHandler, true);
+            outsideClickHandler = null;
+        }
     }
 
     // ── Capture Chrome/Android install event ─────────────────────────────────
@@ -91,17 +100,27 @@
         pwaInitStaticBadge();
     };
 
-    // ── Static Badge (always visible on blessing screen) ─────────────────────
+    // ── Static Badge (blessing screen, bottom-left corner) ───────────────────
     function pwaInitStaticBadge() {
         var badge = document.getElementById('pwaStaticBadge');
         if (!badge) return;
         // Show for iOS (always) or when native prompt is available (Android)
         if (!isIOS && !deferredPrompt) return;
 
-        badge.style.display = 'inline-flex';
+        // Platform-specific styling and CTA text
+        var cta = document.getElementById('pwaStaticCta');
+        if (isIOS) {
+            if (cta) cta.textContent = 'ดูวิธีเพิ่มลงหน้าจอ ›';
+        } else {
+            badge.classList.add('pwa-static-badge--android');
+            if (cta) cta.textContent = '⊕  เพิ่มลงหน้าจอ';
+        }
+
+        badge.style.display = 'flex';
         badge.offsetHeight; // eslint-disable-line no-unused-expressions
         badge.classList.add('pwa-static-badge--visible');
 
+        // iOS → show install instructions modal; Android → trigger native prompt
         badge.onclick = function () {
             var modal = document.getElementById('pwaIosModal');
             if (modal && modal.classList.contains('pwa-ios-modal--visible')) return;
@@ -138,17 +157,32 @@
             deferredPrompt.userChoice.then(function (choice) {
                 deferredPrompt = null;
                 hideBanner();
-                if (choice.outcome !== 'accepted') markDismissed();
+                if (choice.outcome !== 'accepted') markDismissed(DISMISS_DAYS_BTN);
             });
         };
 
         document.getElementById('pwaCloseBtn').onclick = function () {
+            removeOutsideHandler();
             hideBanner();
-            markDismissed();
+            markDismissed(DISMISS_DAYS_BTN);
         };
+
+        // Tap outside the banner → dismiss for 1 day
+        outsideClickHandler = function (e) {
+            var banner = document.getElementById('pwaInstallBanner');
+            if (banner && banner.contains(e.target)) return;
+            removeOutsideHandler();
+            hideBanner();
+            markDismissed(DISMISS_DAYS_OUT);
+        };
+        // Short delay so the tap that triggered showBanner doesn't fire immediately
+        setTimeout(function () {
+            document.addEventListener('click', outsideClickHandler, true);
+        }, 300);
     }
 
     function hideBanner() {
+        removeOutsideHandler();
         var banner = document.getElementById('pwaInstallBanner');
         if (!banner) return;
         banner.classList.remove('pwa-banner--visible');
@@ -162,20 +196,20 @@
         if (!modal) return;
         bannerShown = true;
 
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
         modal.offsetHeight; // eslint-disable-line no-unused-expressions
         modal.classList.add('pwa-ios-modal--visible');
 
         document.getElementById('pwaIosClose').onclick = function () {
             hideIosModal();
-            markDismissed();
+            markDismissed(DISMISS_DAYS_BTN);
         };
 
-        // Tap outside (.pwa-ios-modal backdrop area) to close
+        // Tap backdrop (outside modal content) → dismiss for 1 day
         modal.onclick = function (e) {
-            if (e.target === modal) {
+            if (e.target === modal || e.target.classList.contains('pwa-ios-backdrop')) {
                 hideIosModal();
-                markDismissed();
+                markDismissed(DISMISS_DAYS_OUT);
             }
         };
     }
@@ -185,6 +219,12 @@
         if (!modal) return;
         modal.classList.remove('pwa-ios-modal--visible');
         setTimeout(function () { modal.style.display = 'none'; }, 420);
+    }
+
+    // ── Dev test helpers (localhost only) ────────────────────────────────────
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        window._pwaTestBanner = function () { bannerShown = false; showBanner(); };
+        window._pwaTestIos    = function () { bannerShown = false; showIosModal(); };
     }
 })();
 
