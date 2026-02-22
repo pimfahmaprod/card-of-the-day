@@ -445,36 +445,20 @@
             let lastClickTime = 0;
             const resetDelay = 3000; // Reset if 3 seconds between clicks
 
+            let _eggInit = false;
             function initEasterEgg() {
+                if (_eggInit) return;
                 const trigger = document.getElementById('easterEggTrigger');
                 const profileSwitcher = document.getElementById('profileSwitcher');
-
-                console.log('🔍 Easter Egg Init - Trigger:', trigger);
-                console.log('🔍 Easter Egg Init - ProfileSwitcher:', profileSwitcher);
-
-                if (!trigger) {
-                    console.error('❌ Easter egg trigger not found!');
-                    return;
-                }
-                if (!profileSwitcher) {
-                    console.error('❌ Profile switcher not found!');
-                    return;
-                }
-
-                console.log('✅ Easter egg initialized successfully!');
+                if (!trigger || !profileSwitcher) return;
+                _eggInit = true;
 
                 trigger.addEventListener('click', function(e) {
                     e.preventDefault();
                     const currentTime = Date.now();
-
-                    // Reset counter if too much time passed
                     if (currentTime - lastClickTime > resetDelay) {
-                        if (clickCount > 0) {
-                            console.log('⏰ Time expired, resetting counter');
-                        }
                         clickCount = 0;
                     }
-
                     lastClickTime = currentTime;
                     clickCount++;
 
@@ -483,45 +467,24 @@
                     trigger.style.transition = 'transform 0.1s ease';
                     setTimeout(() => { trigger.style.transform = 'scale(1)'; }, 100);
 
-                    console.log('🎯 Easter egg clicks: ' + clickCount + '/' + requiredClicks);
-
                     if (clickCount >= requiredClicks) {
-                        console.log('🎉 UNLOCKING FACEBOOK BUTTON!');
-
-                        // Remove all hiding styles
                         profileSwitcher.style.cssText = 'position: fixed !important; top: 15px !important; right: 15px !important; z-index: 100000 !important; display: block !important; visibility: visible !important; opacity: 1 !important;';
-
-                        // Celebration animation
                         profileSwitcher.style.animation = 'easterEggReveal 0.5s ease-out';
-
-                        // Show a subtle notification
                         trigger.style.color = '#FFD700';
                         trigger.style.textShadow = '0 0 10px rgba(255, 215, 0, 0.8)';
-
-                        // Show alert for confirmation
                         setTimeout(() => {
                             alert('🎉 Easter Egg Unlocked!\n\nFacebook login button is now visible!');
                         }, 300);
-
-                        clickCount = 0; // Reset for next time
+                        clickCount = 0;
                     }
                 });
 
-                // Add CSS animation
                 const style = document.createElement('style');
                 style.textContent = `
                     @keyframes easterEggReveal {
-                        0% {
-                            transform: scale(0.5) rotate(-10deg);
-                            opacity: 0;
-                        }
-                        50% {
-                            transform: scale(1.1) rotate(5deg);
-                        }
-                        100% {
-                            transform: scale(1) rotate(0deg);
-                            opacity: 1;
-                        }
+                        0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+                        50% { transform: scale(1.1) rotate(5deg); }
+                        100% { transform: scale(1) rotate(0deg); opacity: 1; }
                     }
                     #easterEggTrigger {
                         transition: transform 0.1s ease, color 0.3s ease, text-shadow 0.3s ease;
@@ -530,15 +493,11 @@
                 document.head.appendChild(style);
             }
 
-            // Try multiple times to ensure elements are loaded
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', initEasterEgg);
             } else {
                 initEasterEgg();
             }
-
-            // Also try after a delay as backup
-            setTimeout(initEasterEgg, 1000);
         })();
     </script>
 
