@@ -954,8 +954,8 @@ function initAudioElement() {
     audioElement = document.getElementById('bgMusic');
     if (audioElement) {
         // Set source directly on element for better compatibility
-        audioElement.src = 'audio/tunetank-chinese-new-year-347614.mp3';
-        audioElement.volume = 0.4;
+        audioElement.src = 'audio/background.mp3';
+        audioElement.volume = 0.12;
         audioElement.loop = true;
         audioElement.load();
         console.log('Audio element initialized');
@@ -989,7 +989,7 @@ function tryPlayMusic(muteOnFail = false) {
         return;
     }
 
-    audio.volume = 0.4;
+    audio.volume = 0.12;
 
     const playPromise = audio.play();
     if (playPromise !== undefined) {
@@ -1613,10 +1613,6 @@ function selectCategory(category) {
     var selectedCard = overlay.querySelector('.category-card[data-category="' + category + '"]');
     if (selectedCard) selectedCard.classList.add('selected');
 
-    // Pause background animations immediately to prevent flickering during transition
-    var cnyBg = document.querySelector('.cny-background');
-    if (cnyBg) cnyBg.classList.add('animations-paused');
-
     // Category confirmation flash
     playCategoryFlash(category);
 
@@ -1951,6 +1947,7 @@ function renderCards() {
             <div class="card">
                 <div class="card-face card-back card-back-galaxy">
                     <div class="galaxy-bg"></div>
+                    <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                 </div>
                 <div class="card-face card-front">
                     <img data-src="images/tarot/${card.image}" alt="${card.name}">
@@ -2550,6 +2547,7 @@ function buildCardBackHTML() {
         '<div class="galaxy-bg"></div>' +
         '<div class="galaxy-stars"></div>' +
         '<div class="galaxy-shimmer"></div>' +
+        '<img class="card-back-seal" src="images/seal_transparent.png" alt="">' +
         '</div>';
 }
 
@@ -4173,94 +4171,60 @@ function resetCommentForm() {
 }
 
 // Character count listeners
-// Chinese New Year Lanterns
-(function createCNYLanterns() {
-    const container = document.getElementById('cnyLanterns');
+
+// Starfield — creates twinkling stars and shooting star effects
+(function createStarfield() {
+    const container = document.getElementById('starfield');
     if (!container) return;
+    const sizes = ['sm', 'md', 'lg'];
+    const weights = [0.6, 0.3, 0.1]; // 60% small, 30% medium, 10% large
+    const count = 100;
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+        const r = Math.random();
+        const size = r < weights[0] ? sizes[0] : r < weights[0] + weights[1] ? sizes[1] : sizes[2];
+        const star = document.createElement('div');
+        star.className = 'star star--' + size;
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.setProperty('--star-min', (Math.random() * 0.15 + 0.05).toFixed(2));
+        star.style.setProperty('--star-max', (Math.random() * 0.5 + 0.5).toFixed(2));
+        star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        star.style.animationDelay = (Math.random() * 5) + 's';
+        frag.appendChild(star);
+    }
+    container.appendChild(frag);
 
-    // Traditional Chinese red lantern SVG (like reference image)
-    const lanternSVG = `<svg viewBox="0 0 70 140" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-            <linearGradient id="lanternGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style="stop-color:#DC143C"/>
-                <stop offset="50%" style="stop-color:#B22222"/>
-                <stop offset="100%" style="stop-color:#8B0000"/>
-            </linearGradient>
-            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style="stop-color:#FFD700"/>
-                <stop offset="50%" style="stop-color:#FFA500"/>
-                <stop offset="100%" style="stop-color:#DAA520"/>
-            </linearGradient>
-        </defs>
-        <!-- Hanging string -->
-        <line x1="35" y1="0" x2="35" y2="8" stroke="url(#goldGrad)" stroke-width="2"/>
+    // Shooting stars — thin streaks matching comet direction
+    function spawnShootingStar() {
+        const el = document.createElement('div');
+        el.className = 'shooting-star';
+        el.style.left = (20 + Math.random() * 80) + '%';
+        el.style.top = (Math.random() * 60) + '%';
+        const angle = 136 + Math.random() * 16;
+        const len = 60 + Math.random() * 80;
+        const dist = 100 + Math.random() * 160;
+        const dur = (0.4 + Math.random() * 0.4).toFixed(2);
+        el.style.setProperty('--shoot-angle', angle.toFixed(0) + 'deg');
+        el.style.setProperty('--shoot-len', len.toFixed(0) + 'px');
+        el.style.setProperty('--shoot-dist', dist.toFixed(0) + 'px');
+        el.style.setProperty('--shoot-dur', dur + 's');
+        container.appendChild(el);
+        el.addEventListener('animationend', () => el.remove(), { once: true });
+    }
 
-        <!-- Top gold cap -->
-        <rect x="25" y="8" width="20" height="6" fill="url(#goldGrad)" rx="1"/>
-        <ellipse cx="35" cy="14" rx="12" ry="5" fill="url(#goldGrad)"/>
-
-        <!-- Lantern spherical body -->
-        <ellipse cx="35" cy="45" rx="25" ry="30" fill="url(#lanternGrad)"/>
-
-        <!-- Vertical gold stripes -->
-        <path d="M 35 16 Q 35 20, 35 74" stroke="url(#goldGrad)" stroke-width="1.5" fill="none"/>
-        <path d="M 25 18 Q 23 45, 25 72" stroke="url(#goldGrad)" stroke-width="1.2" fill="none"/>
-        <path d="M 45 18 Q 47 45, 45 72" stroke="url(#goldGrad)" stroke-width="1.2" fill="none"/>
-        <path d="M 18 25 Q 15 45, 18 65" stroke="url(#goldGrad)" stroke-width="1" fill="none"/>
-        <path d="M 52 25 Q 55 45, 52 65" stroke="url(#goldGrad)" stroke-width="1" fill="none"/>
-        <path d="M 12 35 Q 11 45, 12 55" stroke="url(#goldGrad)" stroke-width="0.8" fill="none"/>
-        <path d="M 58 35 Q 59 45, 58 55" stroke="url(#goldGrad)" stroke-width="0.8" fill="none"/>
-
-        <!-- Horizontal gold bands -->
-        <ellipse cx="35" cy="20" rx="22" ry="3" fill="none" stroke="url(#goldGrad)" stroke-width="1.5"/>
-        <ellipse cx="35" cy="45" rx="25" ry="3" fill="none" stroke="url(#goldGrad)" stroke-width="2"/>
-        <ellipse cx="35" cy="70" rx="22" ry="3" fill="none" stroke="url(#goldGrad)" stroke-width="1.5"/>
-
-        <!-- Bottom gold cap with red section -->
-        <ellipse cx="35" cy="74" rx="12" ry="5" fill="url(#goldGrad)"/>
-        <rect x="28" y="74" width="14" height="12" fill="#8B0000"/>
-        <rect x="28" y="74" width="14" height="2" fill="url(#goldGrad)"/>
-        <circle cx="35" cy="80" r="2" fill="url(#goldGrad)"/>
-
-        <!-- Elaborate tassels -->
-        <g opacity="0.95">
-            <path d="M 30 86 L 28 95 L 29 110 L 28.5 125" stroke="url(#goldGrad)" stroke-width="1.5" fill="none"/>
-            <path d="M 32 86 L 31 95 L 31 110 L 30.5 128" stroke="url(#goldGrad)" stroke-width="1.5" fill="none"/>
-            <path d="M 35 86 L 35 95 L 35 110 L 35 130" stroke="url(#goldGrad)" stroke-width="2" fill="none"/>
-            <path d="M 38 86 L 39 95 L 39 110 L 39.5 128" stroke="url(#goldGrad)" stroke-width="1.5" fill="none"/>
-            <path d="M 40 86 L 42 95 L 41 110 L 41.5 125" stroke="url(#goldGrad)" stroke-width="1.5" fill="none"/>
-            <!-- Tassel ends -->
-            <circle cx="28.5" cy="125" r="1.5" fill="url(#goldGrad)"/>
-            <circle cx="30.5" cy="128" r="1.5" fill="url(#goldGrad)"/>
-            <circle cx="35" cy="130" r="2" fill="url(#goldGrad)"/>
-            <circle cx="39.5" cy="128" r="1.5" fill="url(#goldGrad)"/>
-            <circle cx="41.5" cy="125" r="1.5" fill="url(#goldGrad)"/>
-        </g>
-    </svg>`;
-
-    // Create exactly 2 lanterns - left and right, perfectly balanced with equal margins
-    const lanternPositions = [
-        { left: '15%', finalTop: '-10px', swingDuration: '3s', dropDelay: '0.5s' },  // Left lantern
-        { left: '85%', finalTop: '-10px', swingDuration: '3.2s', dropDelay: '0.7s' } // Right lantern
-    ];
-
-    lanternPositions.forEach(function(pos) {
-        const lantern = document.createElement('div');
-        lantern.className = 'cny-lantern';
-        const img = document.createElement("img");
-        img.src = "images/chinese_lamp.png";
-        img.alt = "Chinese Lantern";
-        lantern.appendChild(img);
-
-        // Position settings
-        lantern.style.left = pos.left;
-        lantern.style.setProperty('--drop-delay', pos.dropDelay);
-        lantern.style.setProperty('--drop-duration', '2s');
-        lantern.style.setProperty('--final-top', pos.finalTop);
-        lantern.style.setProperty('--swing-duration', pos.swingDuration);
-
-        container.appendChild(lantern);
-    });
+    // Meteor shower: bursts of 1-3 stars every 1.5-3.5s
+    (function scheduleNext() {
+        const delay = 1500 + Math.random() * 2000;
+        setTimeout(() => {
+            const burst = Math.random() < 0.35 ? (Math.random() < 0.5 ? 3 : 2) : 1;
+            for (let i = 0; i < burst; i++) {
+                setTimeout(spawnShootingStar, i * (100 + Math.random() * 250));
+            }
+            scheduleNext();
+        }, delay);
+    })();
+    setTimeout(spawnShootingStar, 800);
 })();
 
 // Header shooting stars — spawns mini shooting stars inside .comments-panel-header
@@ -4800,10 +4764,6 @@ function goToLandingPage() {
         // Show landing page
         landingPage.classList.remove('hidden');
         landingPage.style.pointerEvents = 'auto';
-
-        // Resume background animations when returning to landing page
-        var cnyBg = document.querySelector('.cny-background');
-        if (cnyBg) cnyBg.classList.remove('animations-paused');
 
         // Refresh draw counter (fresh from Firebase, skip cache)
         if (window.cardCounter && window.cardCounter.refreshDrawCount) {
@@ -8438,11 +8398,11 @@ function getMultiCategoryColors() {
     }
     // Default (no category / single): blue-silver
     return {
-        accent: '#FFD700',
-        accentLight: '#FFF5DC',
-        accentGlow: '#DAA520',
-        accentRgb: '255,215,0',
-        lightRgb: '255,245,220'
+        accent: '#9AAAD4',
+        accentLight: '#C0C8E0',
+        accentGlow: '#7A8AB4',
+        accentRgb: '154,170,212',
+        lightRgb: '192,200,224'
     };
 }
 
@@ -8516,9 +8476,9 @@ function drawMultiShareImage(ctx, cardImages, size, platform) {
 
     // Background gradient with category tint
     var gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#2A0A0A');
-    gradient.addColorStop(0.5, '#3D1010');
-    gradient.addColorStop(1, '#4A1515');
+    gradient.addColorStop(0, '#080C24');
+    gradient.addColorStop(0.5, '#0B1030');
+    gradient.addColorStop(1, '#0d1333');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
 
@@ -8568,18 +8528,18 @@ function drawMultiVerticalLayout(ctx, cardImages, width, height, colors) {
     var padT = 65;
     var curY = padT;
 
-    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.6)';
-    ctx.font = '28px "Cormorant Garamond", "Prompt", serif';
+    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.95)';
+    ctx.font = 'bold 40px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'center';
     ctx.fillText(getReadingModeTitle(), width / 2, curY);
 
     if (catLabel) {
         ctx.fillStyle = colors.accent;
-        ctx.font = 'bold 32px "Prompt", sans-serif';
-        ctx.fillText(catLabel, width / 2, curY + 45);
-        curY += 60;
+        ctx.font = 'bold 38px "Prompt", sans-serif';
+        ctx.fillText(catLabel, width / 2, curY + 55);
+        curY += 70;
     } else {
-        curY += 18;
+        curY += 20;
     }
 
     // Decorative line under title
@@ -8661,7 +8621,7 @@ function drawMultiVerticalLayout(ctx, cardImages, width, height, colors) {
         ctx.fillText('✦ ' + posLabel, textCenterX, textBlockTop + 10);
 
         // Card name (dynamic sizing)
-        ctx.fillStyle = '#FFF5DC';
+        ctx.fillStyle = '#C0C8E0';
         var nameSize = 36;
         ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
         while (ctx.measureText(cardName).width > rightW - 10 && nameSize > 20) {
@@ -8693,7 +8653,7 @@ function drawMultiVerticalLayout(ctx, cardImages, width, height, colors) {
         footerY: height - 92,
         width: width - 100,
         color: 'rgba(' + colors.lightRgb + ', 0.45)',
-        accentColor: colors.accent || '#FFD700'
+        accentColor: colors.accent || '#C8A96E'
     });
 }
 
@@ -8703,8 +8663,8 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
     var safePad = 60;
 
     // Title + category at top
-    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.6)';
-    ctx.font = '22px "Cormorant Garamond", "Prompt", serif';
+    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.95)';
+    ctx.font = 'bold 30px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'center';
     var titleStr = getReadingModeTitle();
     if (catLabel) titleStr += '  ·  ' + catLabel;
@@ -8799,7 +8759,7 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
         ctx.fillText(posLabel, pos.cx, belowY);
 
         // Card name (dynamic sizing)
-        ctx.fillStyle = '#FFF5DC';
+        ctx.fillStyle = '#C0C8E0';
         var nameSize = 22;
         ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
         while (ctx.measureText(cardName).width > maxTextW && nameSize > 14) {
@@ -8823,7 +8783,7 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
         footerY: height - 80,
         width: width - 120,
         color: 'rgba(' + colors.lightRgb + ', 0.45)',
-        accentColor: colors.accent || '#FFD700',
+        accentColor: colors.accent || '#C8A96E',
         compact: true
     });
 }
@@ -8842,17 +8802,17 @@ function drawMultiWideLayout(ctx, cardImages, width, height, colors) {
 
     // --- Title + Category centered at top ---
     var titleStr = getReadingModeTitle();
-    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.6)';
-    ctx.font = '18px "Cormorant Garamond", "Prompt", serif';
+    ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.95)';
+    ctx.font = 'bold 24px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'center';
     ctx.fillText(titleStr, width / 2, padT + 5);
 
-    var headerH = 18;
+    var headerH = 22;
     if (catLabel) {
         ctx.fillStyle = colors.accent;
-        ctx.font = 'bold 20px "Prompt", sans-serif';
-        ctx.fillText(catLabel, width / 2, padT + 30);
-        headerH = 45;
+        ctx.font = 'bold 24px "Prompt", sans-serif';
+        ctx.fillText(catLabel, width / 2, padT + 34);
+        headerH = 52;
     }
 
     // Decorative line
@@ -8916,7 +8876,7 @@ function drawMultiWideLayout(ctx, cardImages, width, height, colors) {
         ctx.fillText(posLabel, cardCenterX, belowY);
 
         // Card name (dynamic sizing, no quotes)
-        ctx.fillStyle = '#FFF5DC';
+        ctx.fillStyle = '#C0C8E0';
         var ns = 16;
         ctx.font = 'bold ' + ns + 'px "Cormorant Garamond", "Prompt", serif';
         var maxNW = cardW + 10;
@@ -8934,7 +8894,7 @@ function drawMultiWideLayout(ctx, cardImages, width, height, colors) {
         footerY: height - 66,
         width: width - 80,
         color: 'rgba(' + colors.lightRgb + ', 0.4)',
-        accentColor: colors.accent || '#FFD700',
+        accentColor: colors.accent || '#C8A96E',
         compact: true
     });
 }
@@ -9400,9 +9360,9 @@ function drawShareImage(ctx, cardImg, size, platform) {
 
     // Background gradient
     const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#2A0A0A');
-    gradient.addColorStop(0.5, '#3D1010');
-    gradient.addColorStop(1, '#4A1515');
+    gradient.addColorStop(0, '#080C24');
+    gradient.addColorStop(0.5, '#0B1030');
+    gradient.addColorStop(1, '#0d1333');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
 
@@ -9517,7 +9477,7 @@ function drawFooterWithPromo(ctx, opts) {
     var iconSize = opts.iconSize || 14;
     var footerY = opts.footerY;
     var color = opts.color || 'rgba(255, 245, 220, 0.6)';
-    var accentColor = opts.accentColor || '#FFD700';
+    var accentColor = opts.accentColor || '#C8A96E';
     var compact = opts.compact || false;
     var centerX = opts.centerX;
     var areaW = opts.width || 600;
@@ -9538,42 +9498,42 @@ function drawFooterWithPromo(ctx, opts) {
     ctx.textAlign = 'left';
     ctx.fillText('Pimfahmaprod · Line: @Pimfah', leftX, labelY);
 
-    // --- Right side: jubpai.com promo ---
-    var promoSize = compact ? 14 : 17;
+    // --- Center: jubpai.com promo (centered, prominent) ---
+    var promoSize = compact ? 20 : 28;
     var promoMidY = footerY + iconSize * 0.35;
 
     // Glow effect
     ctx.save();
     ctx.shadowColor = accentColor;
-    ctx.shadowBlur = 15;
-    ctx.textAlign = 'right';
+    ctx.shadowBlur = 22;
+    ctx.textAlign = 'center';
     ctx.font = 'bold ' + promoSize + 'px "Cormorant Garamond", "Prompt", serif';
     ctx.fillStyle = accentColor;
-    ctx.fillText('✧  jubpai.com  ✧', rightX, promoMidY);
+    ctx.fillText('✦  jubpai.com  ✦', centerX, promoMidY);
     ctx.restore();
 
     // Crisp text on top
-    ctx.textAlign = 'right';
+    ctx.textAlign = 'center';
     ctx.font = 'bold ' + promoSize + 'px "Cormorant Garamond", "Prompt", serif';
     ctx.fillStyle = accentColor;
-    ctx.fillText('✧  jubpai.com  ✧', rightX, promoMidY);
+    ctx.fillText('✦  jubpai.com  ✦', centerX, promoMidY);
 
     // Subtext below
-    var subSize = compact ? 9 : 11;
+    var subSize = compact ? 10 : 13;
     ctx.font = subSize + 'px "Prompt", sans-serif';
-    ctx.fillStyle = 'rgba(200, 169, 110, 0.55)';
-    ctx.textAlign = 'right';
-    ctx.fillText('จับไพ่รายวัน ฟรี!', rightX, promoMidY + (compact ? 14 : 18));
+    ctx.fillStyle = accentColor;
+    ctx.textAlign = 'center';
+    ctx.fillText('จับไพ่ทาโรต์ฟรี ทุกวัน', centerX, promoMidY + (compact ? 15 : 20));
 
     return iconSize + (compact ? 11 : 14) + labelSize + 4;
 }
 
 function drawVerticalLayout(ctx, cardImg, width, height) {
-    // "Card of the Day" title at top
-    ctx.fillStyle = 'rgba(255, 245, 220, 0.7)';
-    ctx.font = '28px "Cormorant Garamond", "Prompt", serif';
+    // Reading mode title at top
+    ctx.fillStyle = '#C0C8E0';
+    ctx.font = 'bold 42px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Card of the Day', width / 2, 80);
+    ctx.fillText(getReadingModeTitle(), width / 2, 80);
 
     // Card image - large and centered
     let cardBottomY = 120;
@@ -9596,7 +9556,7 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
 
     // Card name - right after card
     const nameY = cardBottomY + 80;
-    ctx.fillStyle = '#FFF5DC';
+    ctx.fillStyle = '#C0C8E0';
     ctx.font = 'bold 64px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'center';
     ctx.fillText(getCardName(currentCardData.name), width / 2, nameY);
@@ -9627,12 +9587,12 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
 
     // Interpretation label
     ctx.font = 'bold 28px "Prompt", sans-serif';
-    ctx.fillStyle = '#FFF5DC';
+    ctx.fillStyle = '#C0C8E0';
     ctx.fillText(t('common.prophecy'), width / 2, interpretY + 50);
 
     // Interpretation text - full text with bounds (preserve paragraph breaks)
     ctx.font = '26px "Prompt", sans-serif';
-    ctx.fillStyle = '#FFF5DC';
+    ctx.fillStyle = '#C0C8E0';
     const maxInterpretY = height - 140; // Leave space for footer
     wrapTextWithParagraphsCenter(ctx, getCardInterpretation(currentCardData), width / 2, interpretY + 110, width - 160, 38, maxInterpretY);
 
@@ -9643,7 +9603,7 @@ function drawVerticalLayout(ctx, cardImg, width, height) {
         footerY: height - 100,
         width: width - 100,
         color: 'rgba(255, 245, 220, 0.7)',
-        accentColor: '#FFD700'
+        accentColor: '#C8A96E'
     });
 }
 
@@ -9674,14 +9634,14 @@ function drawSquareLayout(ctx, cardImg, width, height) {
     const textX = cardRightX;
     const textWidth = width - textX - safePadding - 10; // More right padding
 
-    // Title small
-    ctx.fillStyle = 'rgba(255, 245, 220, 0.7)';
-    ctx.font = '22px "Cormorant Garamond", "Prompt", serif';
+    // Reading mode title
+    ctx.fillStyle = '#C0C8E0';
+    ctx.font = 'bold 30px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'left';
-    ctx.fillText('Card of the Day', textX, 140);
+    ctx.fillText(getReadingModeTitle(), textX, 140);
 
     // Card name - large (with dynamic sizing to fit)
-    ctx.fillStyle = '#FFF5DC';
+    ctx.fillStyle = '#C0C8E0';
     let nameFontSize = 48;
     const cardName = getCardName(currentCardData.name);
     ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", "Prompt", serif`;
@@ -9709,7 +9669,7 @@ function drawSquareLayout(ctx, cardImg, width, height) {
 
     // Interpretation - full text with bounds (preserve paragraph breaks)
     ctx.font = '17px "Prompt", sans-serif';
-    ctx.fillStyle = '#FFF5DC';
+    ctx.fillStyle = '#C0C8E0';
     const maxInterpretY = height - safePadding - 80; // Leave space for footer
     wrapTextWithParagraphs(ctx, getCardInterpretation(currentCardData), textX, 360, textWidth, 25, maxInterpretY);
 
@@ -9721,7 +9681,7 @@ function drawSquareLayout(ctx, cardImg, width, height) {
         footerY: height - safePadding - 38,
         width: textWidth,
         color: 'rgba(255, 245, 220, 0.6)',
-        accentColor: '#FFD700',
+        accentColor: '#C8A96E',
         compact: true
     });
 }
@@ -9750,14 +9710,14 @@ function drawWideLayout(ctx, cardImg, width, height) {
     const textX = cardRightX;
     const textWidth = width - textX - 60;
 
-    // Title small
-    ctx.fillStyle = 'rgba(255, 245, 220, 0.7)';
-    ctx.font = '20px "Cormorant Garamond", "Prompt", serif';
+    // Reading mode title
+    ctx.fillStyle = '#C0C8E0';
+    ctx.font = 'bold 26px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'left';
-    ctx.fillText('Card of the Day', textX, 80);
+    ctx.fillText(getReadingModeTitle(), textX, 80);
 
     // Card name - prominent (with dynamic sizing to fit)
-    ctx.fillStyle = '#FFF5DC';
+    ctx.fillStyle = '#C0C8E0';
     let nameFontSize = 42;
     const cardName = getCardName(currentCardData.name);
     ctx.font = `bold ${nameFontSize}px "Cormorant Garamond", "Prompt", serif`;
@@ -9785,7 +9745,7 @@ function drawWideLayout(ctx, cardImg, width, height) {
 
     // Interpretation - full text with bounds (preserve paragraph breaks)
     ctx.font = '16px "Prompt", sans-serif';
-    ctx.fillStyle = '#FFF5DC';
+    ctx.fillStyle = '#C0C8E0';
     const maxInterpretY = height - 85; // Leave space for footer within border
     wrapTextWithParagraphs(ctx, getCardInterpretation(currentCardData), textX, 260, textWidth, 22, maxInterpretY);
 
@@ -9797,7 +9757,7 @@ function drawWideLayout(ctx, cardImg, width, height) {
         footerY: height - 68,
         width: textWidth,
         color: 'rgba(255, 245, 220, 0.6)',
-        accentColor: '#FFD700',
+        accentColor: '#C8A96E',
         compact: true
     });
 }

@@ -52,7 +52,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Prompt:wght@200;300;400;500&family=Dancing+Script:wght@400;500;600;700&family=Kanit:wght@200;300&family=Outfit:wght@300;400&family=Gowun+Dodum&family=Zen+Kaku+Gothic+New:wght@400;500&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=260222pwa6">
+    <link rel="stylesheet" href="css/styles.css?v=260222s1">
     <!-- PWA Badge — inline so it bypasses SW cache entirely -->
     <style>
     /* ── PWA Static Badge (Blessing Screen, bottom-left corner) ── */
@@ -351,40 +351,7 @@
     </style>
 </head>
 <body>
-    <!-- Chinese New Year Layered Background -->
-    <div class="cny-background" id="cnyBackground">
-        <!-- Red wave pattern background -->
-        <div class="cny-wave-bg"></div>
-
-        <!-- Bottom decorative wave layers -->
-        <div class="cny-bottom-waves">
-            <div class="cny-wave-layer cny-wave-1"></div>
-            <div class="cny-wave-layer cny-wave-2"></div>
-            <div class="cny-wave-layer cny-wave-3"></div>
-        </div>
-
-        <!-- Central sun/moon with pattern -->
-        <div class="cny-sun">
-            <div class="cny-sun-pattern"></div>
-        </div>
-
-        <!-- Floating golden clouds -->
-        <div class="cny-clouds">
-            <div class="cny-cloud cny-cloud-1"></div>
-            <div class="cny-cloud cny-cloud-2"></div>
-            <div class="cny-cloud cny-cloud-3"></div>
-            <div class="cny-cloud cny-cloud-4"></div>
-            <div class="cny-cloud cny-cloud-5"></div>
-            <div class="cny-cloud cny-cloud-6"></div>
-            <div class="cny-cloud cny-cloud-7"></div>
-            <div class="cny-cloud cny-cloud-8"></div>
-            <div class="cny-cloud cny-cloud-9"></div>
-        </div>
-
-        <!-- Hanging lanterns -->
-        <div class="cny-lanterns" id="cnyLanterns"></div>
-    </div>
-
+    <div class="starfield" id="starfield"></div>
     <!-- Language Switcher -->
     <div class="lang-switcher" id="langSwitcher">
         <button class="lang-btn" id="langBtn">
@@ -624,6 +591,7 @@
                         <div class="galaxy-shooting-star galaxy-ss-1"></div>
                         <div class="galaxy-shooting-star galaxy-ss-2"></div>
                         <div class="galaxy-shooting-star galaxy-ss-3"></div>
+                        <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                     </div>
                 </div>
             </div>
@@ -644,6 +612,7 @@
                                 <div class="galaxy-shooting-star galaxy-ss-1"></div>
                                 <div class="galaxy-shooting-star galaxy-ss-2"></div>
                                 <div class="galaxy-shooting-star galaxy-ss-3"></div>
+                                <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                                     </div>
                         </div>
                         <div class="three-card-face three-card-front">
@@ -664,6 +633,7 @@
                                 <div class="galaxy-shooting-star galaxy-ss-1"></div>
                                 <div class="galaxy-shooting-star galaxy-ss-2"></div>
                                 <div class="galaxy-shooting-star galaxy-ss-3"></div>
+                                <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                                     </div>
                         </div>
                         <div class="three-card-face three-card-front">
@@ -684,6 +654,7 @@
                                 <div class="galaxy-shooting-star galaxy-ss-1"></div>
                                 <div class="galaxy-shooting-star galaxy-ss-2"></div>
                                 <div class="galaxy-shooting-star galaxy-ss-3"></div>
+                                <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                                     </div>
                         </div>
                         <div class="three-card-face three-card-front">
@@ -697,44 +668,44 @@
         <!-- 4-Card Container -->
         <div class="multi-card-container" id="fourCardContainer" style="display: none;">
             <div class="multi-card-fan four-card-fan">
-                <div class="multi-card-item fc-1"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-stars galaxy-stars-2"></div><div class="galaxy-shimmer"></div><div class="galaxy-orbit"></div><div class="galaxy-aurora"></div><div class="galaxy-shooting-star galaxy-ss-1"></div><div class="galaxy-shooting-star galaxy-ss-2"></div><div class="galaxy-shooting-star galaxy-ss-3"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item fc-2"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-stars galaxy-stars-2"></div><div class="galaxy-shimmer"></div><div class="galaxy-orbit"></div><div class="galaxy-aurora"></div><div class="galaxy-shooting-star galaxy-ss-1"></div><div class="galaxy-shooting-star galaxy-ss-2"></div><div class="galaxy-shooting-star galaxy-ss-3"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item fc-3"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-stars galaxy-stars-2"></div><div class="galaxy-shimmer"></div><div class="galaxy-orbit"></div><div class="galaxy-aurora"></div><div class="galaxy-shooting-star galaxy-ss-1"></div><div class="galaxy-shooting-star galaxy-ss-2"></div><div class="galaxy-shooting-star galaxy-ss-3"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item fc-4"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-stars galaxy-stars-2"></div><div class="galaxy-shimmer"></div><div class="galaxy-orbit"></div><div class="galaxy-aurora"></div><div class="galaxy-shooting-star galaxy-ss-1"></div><div class="galaxy-shooting-star galaxy-ss-2"></div><div class="galaxy-shooting-star galaxy-ss-3"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item fc-1"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-stars galaxy-stars-2"></div><div class="galaxy-shimmer"></div><div class="galaxy-orbit"></div><div class="galaxy-aurora"></div><div class="galaxy-shooting-star galaxy-ss-1"></div><div class="galaxy-shooting-star galaxy-ss-2"></div><div class="galaxy-shooting-star galaxy-ss-3"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item fc-2"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-stars galaxy-stars-2"></div><div class="galaxy-shimmer"></div><div class="galaxy-orbit"></div><div class="galaxy-aurora"></div><div class="galaxy-shooting-star galaxy-ss-1"></div><div class="galaxy-shooting-star galaxy-ss-2"></div><div class="galaxy-shooting-star galaxy-ss-3"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item fc-3"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-stars galaxy-stars-2"></div><div class="galaxy-shimmer"></div><div class="galaxy-orbit"></div><div class="galaxy-aurora"></div><div class="galaxy-shooting-star galaxy-ss-1"></div><div class="galaxy-shooting-star galaxy-ss-2"></div><div class="galaxy-shooting-star galaxy-ss-3"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item fc-4"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-stars galaxy-stars-2"></div><div class="galaxy-shimmer"></div><div class="galaxy-orbit"></div><div class="galaxy-aurora"></div><div class="galaxy-shooting-star galaxy-ss-1"></div><div class="galaxy-shooting-star galaxy-ss-2"></div><div class="galaxy-shooting-star galaxy-ss-3"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
             </div>
             <span class="card-click-hint loading-state" data-i18n="landing.loading">กำลังโหลด...</span>
         </div>
         <!-- 10-Card Container -->
         <div class="multi-card-container" id="tenCardContainer" style="display: none;">
             <div class="multi-card-fan ten-card-fan">
-                <div class="multi-card-item tc-1"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item tc-2"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item tc-3"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item tc-4"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item tc-5"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item tc-6"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item tc-7"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item tc-8"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item tc-9"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item tc-10"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-1"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-2"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-3"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-4"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-5"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-6"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-7"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-8"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-9"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item tc-10"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
             </div>
             <span class="card-click-hint loading-state" data-i18n="landing.loading">กำลังโหลด...</span>
         </div>
         <!-- 12-Card Container -->
         <div class="multi-card-container" id="twelveCardContainer" style="display: none;">
             <div class="multi-card-fan twelve-card-fan">
-                <div class="multi-card-item twc-1"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item twc-2"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item twc-3"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item twc-4"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item twc-5"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item twc-6"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item twc-7"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item twc-8"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item twc-9"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item twc-10"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item twc-11"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
-                <div class="multi-card-item twc-12"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-1"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-2"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-3"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-4"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-5"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-6"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-7"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-8"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-9"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-10"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-11"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
+                <div class="multi-card-item twc-12"><div class="multi-card-flipper"><div class="multi-card-face multi-card-back"><div class="card-back-galaxy mini"><div class="galaxy-bg"></div><div class="galaxy-stars"></div><div class="galaxy-shimmer"></div><img class="card-back-seal" src="images/seal_transparent.png" alt="Seal"></div></div><div class="multi-card-face multi-card-front"><img class="multi-card-front-img" src="" alt=""></div></div></div>
             </div>
             <span class="card-click-hint loading-state" data-i18n="landing.loading">กำลังโหลด...</span>
         </div>
@@ -910,6 +881,7 @@
                 <div class="galaxy-shooting-star galaxy-ss-1"></div>
                 <div class="galaxy-shooting-star galaxy-ss-2"></div>
                 <div class="galaxy-shooting-star galaxy-ss-3"></div>
+                <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                             </div>
             <div class="card-face card-front">
                 <img id="centerCardImage" alt="Card">
@@ -1119,6 +1091,7 @@
                             <div class="galaxy-shooting-star galaxy-ss-1"></div>
                             <div class="galaxy-shooting-star galaxy-ss-2"></div>
                             <div class="galaxy-shooting-star galaxy-ss-3"></div>
+                            <img class="card-back-seal" src="images/seal_transparent.png" alt="Seal">
                             </div>
                     </div>
                 </div>
@@ -1243,7 +1216,7 @@
     <div class="copy-toast" id="copyToast" data-i18n="toast.copied">คัดลอกลิงก์แล้ว!</div>
 
     <!-- Background Music -->
-    <audio id="bgMusic" src="audio/tunetank-chinese-new-year-347614.mp3" loop preload="auto"></audio>
+    <audio id="bgMusic" src="audio/background.mp3" loop preload="auto"></audio>
 
     <!-- Sound Wave Indicator -->
     <div class="sound-indicator" id="soundIndicator">
