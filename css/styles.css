@@ -1547,34 +1547,33 @@ body {
     pointer-events: none;
 }
 
-/* 12 houses — radius 200px, cards upright */
-.twc-1  { transform: translate(-200px, 0px);    animation: twcF1 5s ease-in-out infinite; }
-.twc-2  { transform: translate(-173px, 100px);  animation: twcF2 5s ease-in-out infinite 0.4s; }
-.twc-3  { transform: translate(-100px, 173px);  animation: twcF3 5s ease-in-out infinite 0.8s; }
-.twc-4  { transform: translate(0px, 200px);     animation: twcF4 5s ease-in-out infinite 1.2s; }
-.twc-5  { transform: translate(100px, 173px);   animation: twcF5 5s ease-in-out infinite 1.6s; }
-.twc-6  { transform: translate(173px, 100px);   animation: twcF6 5s ease-in-out infinite 2s; }
-.twc-7  { transform: translate(200px, 0px);     animation: twcF7 5s ease-in-out infinite 2.4s; }
-.twc-8  { transform: translate(173px, -100px);  animation: twcF8 5s ease-in-out infinite 2.8s; }
-.twc-9  { transform: translate(100px, -173px);  animation: twcF9 5s ease-in-out infinite 3.2s; }
-.twc-10 { transform: translate(0px, -200px);    animation: twcF10 5s ease-in-out infinite 3.6s; }
-.twc-11 { transform: translate(-100px, -173px); animation: twcF11 5s ease-in-out infinite 4s; }
-.twc-12 { transform: translate(-173px, -100px); animation: twcF12 5s ease-in-out infinite 4.4s; }
+/* 12 houses — radius 200px, card 1 at 12 o'clock, clockwise */
+.twc-1  { transform: translate(0px, -200px);    animation: twcF1  5s ease-in-out infinite; }         /* 12 o'clock */
+.twc-2  { transform: translate(100px, -173px);  animation: twcF2  5s ease-in-out infinite 0.4s; }    /*  1 o'clock */
+.twc-3  { transform: translate(173px, -100px);  animation: twcF3  5s ease-in-out infinite 0.8s; }    /*  2 o'clock */
+.twc-4  { transform: translate(200px, 0px);     animation: twcF4  5s ease-in-out infinite 1.2s; }    /*  3 o'clock */
+.twc-5  { transform: translate(173px, 100px);   animation: twcF5  5s ease-in-out infinite 1.6s; }    /*  4 o'clock */
+.twc-6  { transform: translate(100px, 173px);   animation: twcF6  5s ease-in-out infinite 2s; }      /*  5 o'clock */
+.twc-7  { transform: translate(0px, 200px);     animation: twcF7  5s ease-in-out infinite 2.4s; }    /*  6 o'clock */
+.twc-8  { transform: translate(-100px, 173px);  animation: twcF8  5s ease-in-out infinite 2.8s; }    /*  7 o'clock */
+.twc-9  { transform: translate(-173px, 100px);  animation: twcF9  5s ease-in-out infinite 3.2s; }    /*  8 o'clock */
+.twc-10 { transform: translate(-200px, 0px);    animation: twcF10 5s ease-in-out infinite 3.6s; }    /*  9 o'clock */
+.twc-11 { transform: translate(-173px, -100px); animation: twcF11 5s ease-in-out infinite 4s; }      /* 10 o'clock */
+.twc-12 { transform: translate(-100px, -173px); animation: twcF12 5s ease-in-out infinite 4.4s; }    /* 11 o'clock */
 
 /* Gentle radial breathing */
-@keyframes twcF1  { 0%,100% { transform: translate(-200px, 0px); }   50% { transform: translate(-208px, 0px); } }
-@keyframes twcF2  { 0%,100% { transform: translate(-173px, 100px); } 50% { transform: translate(-180px, 104px); } }
-@keyframes twcF3  { 0%,100% { transform: translate(-100px, 173px); } 50% { transform: translate(-104px, 180px); } }
-@keyframes twcF4  { 0%,100% { transform: translate(0px, 200px); }    50% { transform: translate(0px, 208px); } }
-@keyframes twcF5  { 0%,100% { transform: translate(100px, 173px); }  50% { transform: translate(104px, 180px); } }
-@keyframes twcF6  { 0%,100% { transform: translate(173px, 100px); }  50% { transform: translate(180px, 104px); } }
-@keyframes twcF7  { 0%,100% { transform: translate(168px, 0px); }    50% { transform: translate(176px, 0px); } }
-@keyframes twcF7  { 0%,100% { transform: translate(200px, 0px); }     50% { transform: translate(208px, 0px); } }
-@keyframes twcF8  { 0%,100% { transform: translate(173px, -100px); } 50% { transform: translate(180px, -104px); } }
-@keyframes twcF9  { 0%,100% { transform: translate(100px, -173px); } 50% { transform: translate(104px, -180px); } }
-@keyframes twcF10 { 0%,100% { transform: translate(0px, -200px); }   50% { transform: translate(0px, -208px); } }
-@keyframes twcF11 { 0%,100% { transform: translate(-100px, -173px); } 50% { transform: translate(-104px, -180px); } }
-@keyframes twcF12 { 0%,100% { transform: translate(-173px, -100px); } 50% { transform: translate(-180px, -104px); } }
+@keyframes twcF1  { 0%,100% { transform: translate(0px, -200px); }    50% { transform: translate(0px, -208px); } }
+@keyframes twcF2  { 0%,100% { transform: translate(100px, -173px); }  50% { transform: translate(104px, -180px); } }
+@keyframes twcF3  { 0%,100% { transform: translate(173px, -100px); }  50% { transform: translate(180px, -104px); } }
+@keyframes twcF4  { 0%,100% { transform: translate(200px, 0px); }     50% { transform: translate(208px, 0px); } }
+@keyframes twcF5  { 0%,100% { transform: translate(173px, 100px); }   50% { transform: translate(180px, 104px); } }
+@keyframes twcF6  { 0%,100% { transform: translate(100px, 173px); }   50% { transform: translate(104px, 180px); } }
+@keyframes twcF7  { 0%,100% { transform: translate(0px, 200px); }     50% { transform: translate(0px, 208px); } }
+@keyframes twcF8  { 0%,100% { transform: translate(-100px, 173px); }  50% { transform: translate(-104px, 180px); } }
+@keyframes twcF9  { 0%,100% { transform: translate(-173px, 100px); }  50% { transform: translate(-180px, 104px); } }
+@keyframes twcF10 { 0%,100% { transform: translate(-200px, 0px); }    50% { transform: translate(-208px, 0px); } }
+@keyframes twcF11 { 0%,100% { transform: translate(-173px, -100px); } 50% { transform: translate(-180px, -104px); } }
+@keyframes twcF12 { 0%,100% { transform: translate(-100px, -173px); } 50% { transform: translate(-104px, -180px); } }
 
 /* Offset galaxy animations for 12-card */
 .twc-2 .galaxy-bg { animation-delay: -2s; }
