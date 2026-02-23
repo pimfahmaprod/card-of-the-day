@@ -2469,7 +2469,24 @@ function showRevealOverlay() {
     document.getElementById('revealCardInfoQuote').textContent = '';
 
     // Initialize reveal state
-    revealQueue = Array.from(fanWrapper.querySelectorAll('.three-card-item, .multi-card-item'));
+    var allItems = Array.from(fanWrapper.querySelectorAll('.three-card-item, .multi-card-item'));
+    // Ten-card (Celtic Cross): reveal center cross first (1,2,3,4,6), then far-left (5), then staff right (7-10)
+    if (currentReadingMode === 'ten-card' && allItems.length === 10) {
+        revealQueue = [
+            allItems[0],  // tc-1 center
+            allItems[1],  // tc-2 crossing (rotated)
+            allItems[2],  // tc-3 top
+            allItems[3],  // tc-4 bottom
+            allItems[5],  // tc-6 near future (right of center)
+            allItems[4],  // tc-5 past (far left)
+            allItems[6],  // tc-7 staff bottom
+            allItems[7],  // tc-8 staff mid-low
+            allItems[8],  // tc-9 staff mid-high
+            allItems[9]   // tc-10 staff top
+        ];
+    } else {
+        revealQueue = allItems;
+    }
     revealIndex = 0;
     revealSkipping = false;
     revealOverlayActive = true;
