@@ -5840,6 +5840,16 @@ footer {
     height: 16px;
 }
 
+.comment-section.minimized .back-home-btn {
+    width: 40px;
+    height: 40px;
+}
+
+.comment-section.minimized .back-home-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
 /* Show arrow when minimized */
 .comment-section.minimized .scroll-down-arrow {
     display: inline-block;
@@ -6069,6 +6079,93 @@ footer {
 
 .comment-input-group textarea + .char-count {
     bottom: 12px;
+}
+
+/* Accept button row — holds the main btn + back-home circle */
+.accept-btn-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.accept-btn-row .comment-submit-btn {
+    flex: 1;
+    width: auto;
+    max-width: none;
+}
+
+/* ── Back to Home — Circular U-turn button ── */
+.back-home-btn {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(154, 170, 212, 0.28);
+    background: linear-gradient(135deg, rgba(20, 27, 69, 0.9) 0%, rgba(26, 34, 85, 0.75) 100%);
+    color: rgba(154, 170, 212, 0.65);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, transform 0.2s ease;
+    box-shadow:
+        0 0 12px rgba(154, 170, 212, 0.08),
+        0 3px 10px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(154, 170, 212, 0.1);
+    animation: acceptBtnPulse 3s ease-in-out infinite;
+}
+
+.back-home-btn svg {
+    width: 20px;
+    height: 20px;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.back-home-btn:hover {
+    color: #C0C8E0;
+    border-color: rgba(154, 170, 212, 0.55);
+    background: linear-gradient(135deg, rgba(26, 34, 85, 0.95) 0%, rgba(36, 48, 114, 0.85) 100%);
+    box-shadow:
+        0 0 20px rgba(154, 170, 212, 0.22),
+        0 0 40px rgba(154, 170, 212, 0.08),
+        0 4px 15px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(154, 170, 212, 0.2);
+    transform: scale(1.06);
+}
+
+.back-home-btn:hover svg {
+    transform: rotate(-20deg) scale(1.1);
+}
+
+.back-home-btn:active {
+    transform: scale(0.94);
+}
+
+/* Soft glow aura (reuses accept-btn-glow approach) */
+.back-home-glow {
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        rgba(154, 170, 212, 0.15) 25%,
+        transparent 50%,
+        rgba(154, 170, 212, 0.08) 75%,
+        transparent 100%
+    );
+    animation: acceptGlowRotate 5s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.back-home-btn:hover .back-home-glow {
+    opacity: 1;
 }
 
 /* Accept Prophecy Button — Mystical Blessing Style */
@@ -12370,23 +12467,26 @@ footer {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 10px 18px;
-    border-radius: 20px;
-    border: none;
-    background: rgba(168, 184, 216, 0.15);
-    color: rgba(168, 184, 216, 0.8);
+    padding: 12px 24px;
+    border-radius: 25px;
+    border: 1.5px solid rgba(168, 184, 216, 0.6);
+    background: rgba(168, 184, 216, 0.2);
+    color: #C0C8E0;
     cursor: pointer;
     font-family: 'Prompt', sans-serif;
-    font-weight: 300;
-    font-size: 0.85rem;
+    font-weight: 400;
+    font-size: 0.95rem;
     transition: all 0.3s ease;
     animation: buttonFadeIn 1s ease 2.8s forwards;
     opacity: 0;
+    box-shadow: 0 0 12px rgba(168, 184, 216, 0.15);
 }
 
 .blessing-restart-btn:hover {
-    background: rgba(168, 184, 216, 0.25);
-    color: #A8B8D8;
+    background: rgba(168, 184, 216, 0.35);
+    border-color: rgba(168, 184, 216, 0.8);
+    color: #E0E4F0;
+    box-shadow: 0 0 20px rgba(168, 184, 216, 0.25);
 }
 
 .restart-arrow {
