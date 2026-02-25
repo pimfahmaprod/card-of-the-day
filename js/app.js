@@ -8746,7 +8746,7 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
     ctx.lineTo(width / 2 + 140, safePad + 25);
     ctx.stroke();
 
-    // --- 2x2 Grid layout (or 2+1 for 3 cards) ---
+    // --- Layout ---
     var gridTop = safePad + 45;
     var footerH = 70; // Space for footer row
     var colGap = 30;
@@ -8754,8 +8754,81 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
     var availH = height - gridTop - footerH - 10;
     var availW = width - safePad * 2;
 
-    // Each cell: card image + position label + card name + quote
-    // 2 columns always
+    // 3 cards: single horizontal row centered (like facebook/wide layout)
+    if (cardCount === 3) {
+        var cardGap3 = 24;
+        var textH3 = 80;
+        var availCardH3 = availH - textH3;
+        var cardW3 = 0;
+        var cardH3 = 0;
+
+        if (cardImages[0]) {
+            var ratio3 = cardImages[0].width / cardImages[0].height;
+            cardH3 = availCardH3;
+            var maxPerCardW3 = (availW - cardGap3 * 2) / 3;
+            cardW3 = cardH3 * ratio3;
+            if (cardW3 > maxPerCardW3) {
+                cardW3 = maxPerCardW3;
+                cardH3 = cardW3 / ratio3;
+            }
+        }
+
+        // Center the entire row of cards
+        var totalCardsW3 = cardW3 * 3 + cardGap3 * 2;
+        var startX3 = (width - totalCardsW3) / 2;
+        var cardY3 = gridTop + (availCardH3 - cardH3) / 2;
+
+        for (var i = 0; i < 3; i++) {
+            var img = cardImages[i];
+            var sel = multiCardSelections[i];
+            var posLabel = getPositionLabel(i);
+            var cardName = getCardName(sel.card.name);
+            var quote = getMultiCardQuote(sel.card);
+            var cx = startX3 + i * (cardW3 + cardGap3);
+            var cardCenterX = cx + cardW3 / 2;
+
+            // Card image
+            if (img) {
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                ctx.shadowBlur = 18;
+                ctx.shadowOffsetY = 6;
+                ctx.drawImage(img, cx, cardY3, cardW3, cardH3);
+                ctx.shadowColor = 'transparent';
+
+                ctx.strokeStyle = 'rgba(' + colors.accentRgb + ', 0.2)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(cx, cardY3, cardW3, cardH3);
+            }
+
+            // Text below card
+            var belowY = cardY3 + cardH3 + 14;
+            var maxTextW = cardW3 + 10;
+            ctx.textAlign = 'center';
+
+            // Position label
+            ctx.fillStyle = colors.accent;
+            ctx.font = 'bold 14px "Prompt", sans-serif';
+            ctx.fillText(posLabel, cardCenterX, belowY);
+
+            // Card name (dynamic sizing)
+            ctx.fillStyle = '#C0C8E0';
+            var nameSize = 22;
+            ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
+            while (ctx.measureText(cardName).width > maxTextW && nameSize > 14) {
+                nameSize -= 2;
+                ctx.font = 'bold ' + nameSize + 'px "Cormorant Garamond", "Prompt", serif';
+            }
+            ctx.fillText(cardName, cardCenterX, belowY + 22);
+
+            // Quote
+            ctx.font = 'italic 14px "Cormorant Garamond", "Prompt", serif';
+            ctx.fillStyle = 'rgba(' + colors.lightRgb + ', 0.6)';
+            var quoteText = '"' + quote + '"';
+            var maxQuoteY = cardY3 + cardH3 + textH3 - 5;
+            wrapText(ctx, quoteText, cardCenterX, belowY + 42, maxTextW, 19, maxQuoteY);
+        }
+    } else {
+    // 4 cards: 2x2 grid
     var colW = (availW - colGap) / 2;
     var rows = (cardCount <= 2) ? 1 : 2;
     var textH = 80; // space for position + name + quote below card
@@ -8775,22 +8848,14 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
     }
 
     // Build grid positions
-    //   3 cards: [0,1] top row, [2] bottom row centered
-    //   4 cards: [0,1] top row, [2,3] bottom row
     var positions = [];
     var leftCX = safePad + colW / 2;
     var rightCX = safePad + colW + colGap + colW / 2;
 
-    if (cardCount === 3) {
-        positions.push({ cx: leftCX, cy: gridTop });
-        positions.push({ cx: rightCX, cy: gridTop });
-        positions.push({ cx: width / 2, cy: gridTop + cellH + rowGap });
-    } else {
-        positions.push({ cx: leftCX, cy: gridTop });
-        positions.push({ cx: rightCX, cy: gridTop });
-        positions.push({ cx: leftCX, cy: gridTop + cellH + rowGap });
-        positions.push({ cx: rightCX, cy: gridTop + cellH + rowGap });
-    }
+    positions.push({ cx: leftCX, cy: gridTop });
+    positions.push({ cx: rightCX, cy: gridTop });
+    positions.push({ cx: leftCX, cy: gridTop + cellH + rowGap });
+    positions.push({ cx: rightCX, cy: gridTop + cellH + rowGap });
 
     // Draw each card cell
     for (var i = 0; i < cardCount; i++) {
@@ -8842,6 +8907,7 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
         var quoteText = '"' + quote + '"';
         var maxQuoteY = drawY + cellH - 5;
         wrapText(ctx, quoteText, pos.cx, belowY + 42, maxTextW, 19, maxQuoteY);
+    }
     }
 
     // Footer with promo
