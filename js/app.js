@@ -2451,6 +2451,7 @@ function _cancelRevealDismiss() {
 }
 
 function showRevealOverlay() {
+    console.log('[DEBUG] showRevealOverlay — revealCardData:', revealCardData?.name);
     var overlay = document.getElementById('revealOverlay');
     var fanWrapper = document.getElementById('revealFanWrapper');
     var skipBtn = document.getElementById('revealSkipBtn');
@@ -2806,6 +2807,7 @@ function showRevealContinuePrompt() {
 }
 
 function dismissRevealOverlay() {
+    console.log('[DEBUG] dismissRevealOverlay — mode:', currentReadingMode);
     var overlay = document.getElementById('revealOverlay');
     revealOverlayActive = false;
 
@@ -2981,6 +2983,7 @@ function reopenRevealOverlay() {
 
 // Select card
 function selectCard(cardId, cardElement) {
+    console.log('[DEBUG] selectCard', cardId, 'isAnimating:', isAnimating);
     if (isAnimating) return;
 
     const card = tarotData.cards.find(c => c.id === cardId);
@@ -3362,6 +3365,7 @@ function proceedToMultiResult() {
 
 // Step 6: Card flies to header + show result panel (called after user taps)
 function proceedToResult(card, skipFlyAnimation) {
+    console.log('[DEBUG] proceedToResult — card:', card?.name, 'skipFly:', skipFlyAnimation);
     currentCardData = card;
 
     gtag('event', 'view_result', {
@@ -3394,6 +3398,10 @@ function proceedToResult(card, skipFlyAnimation) {
             var resultPanel = document.getElementById('resultPanel');
             resultPanel.scrollTop = 0;
             resultPanel.classList.add('active');
+            console.log('[DEBUG] resultPanel.active ADDED — classes:', resultPanel.className);
+            console.log('[DEBUG] resultPanel computed:', getComputedStyle(resultPanel).opacity, getComputedStyle(resultPanel).visibility);
+            console.log('[DEBUG] revealOverlay classes:', document.getElementById('revealOverlay').className);
+            console.log('[DEBUG] landingPage classes:', document.getElementById('landingPage').className);
         }, 100);
     } else {
         // Original flow: animate center card flying to top-left corner
@@ -4637,6 +4645,8 @@ function closeBlessingAndRestart() {
 }
 
 function goToLandingPage() {
+    console.log('[DEBUG] goToLandingPage — isAnimating:', isAnimating);
+    isAnimating = false; // safety reset
     currentReadingCategory = null;
     multiCardSelections = [];
     multiCardTarget = 0;
@@ -4786,11 +4796,13 @@ function goToLandingPage() {
             cardClickHint.style.opacity = '1';
         }
 
-        // Reset landing elements - start invisible
-        landingHeading.style.animation = '';
-        landingHeading.style.opacity = '0';
-        landingHeading.style.transform = '';
-        landingHeading.style.transition = '';
+        // Reset ALL landing headings - start invisible (clear inline styles)
+        document.querySelectorAll('.landing-heading').forEach(function(h) {
+            h.style.animation = '';
+            h.style.opacity = '';
+            h.style.transform = '';
+            h.style.transition = '';
+        });
 
         // Reset mode selector and dots visibility
         var modeSel = document.getElementById('modeSelector');
@@ -4880,11 +4892,8 @@ function goToLandingPage() {
             if (tl) { tl.style.transition = 'opacity 0.5s ease'; tl.style.opacity = '1'; }
             if (sp) { sp.style.transition = 'opacity 0.5s ease'; sp.style.opacity = '1'; }
 
-            // Fade in landing heading (was missing!)
-            if (landingHeading) {
-                landingHeading.style.transition = 'opacity 0.5s ease';
-                landingHeading.style.opacity = '1';
-            }
+            // Heading visibility is handled by CSS .mode-title.active
+            // (set by applyModeVisuals above) — no inline override needed
 
             // Fade in other elements with slight delays
             setTimeout(() => {
