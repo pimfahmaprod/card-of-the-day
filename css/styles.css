@@ -6097,9 +6097,11 @@ footer {
 /* ── Back to Home — Circular U-turn button ── */
 .back-home-btn {
     flex-shrink: 0;
-    width: 56px;
-    height: 56px;
-    min-width: 56px;
+    align-self: stretch;
+    aspect-ratio: 1;
+    width: auto;
+    height: auto;
+    min-width: 0;
     border-radius: 50%;
     border: 1px solid rgba(154, 170, 212, 0.28);
     background: linear-gradient(135deg, rgba(20, 27, 69, 0.9) 0%, rgba(26, 34, 85, 0.75) 100%);
