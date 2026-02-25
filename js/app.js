@@ -4634,6 +4634,16 @@ function goToLandingPage() {
     var _stickyCard = document.getElementById('resultStickyCard');
     if (_stickyCard) _stickyCard.classList.remove('minimized');
 
+    // Reset comment minimizer (matches cleanup in closeResult)
+    var _cs = document.querySelector('.comment-section');
+    if (_cs) _cs.classList.remove('minimized');
+    var _rp = document.getElementById('resultPanel');
+    if (_rp && _rp._commentScrollHandler) {
+        _rp.removeEventListener('scroll', _rp._commentScrollHandler);
+        _rp._commentScrollHandler = null;
+    }
+    _commentMinimized = false;
+
     // Fully clean up reveal overlay (destroy content)
     var _revealOv = document.getElementById('revealOverlay');
     _revealOv.classList.remove('active', 'minimized', 'closing', 'stashed');
