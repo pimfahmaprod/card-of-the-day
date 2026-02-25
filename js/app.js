@@ -4626,6 +4626,14 @@ function goToLandingPage() {
     clearCategoryTheme();
     hideMultiPickIndicator();
 
+    // Hide result panel elements (prevents overlap with landing page)
+    document.getElementById('resultPanel').classList.remove('active');
+    document.getElementById('centerCard').classList.remove('active');
+    document.getElementById('overlay').classList.remove('active');
+    destroyStickyCardObserver();
+    var _stickyCard = document.getElementById('resultStickyCard');
+    if (_stickyCard) _stickyCard.classList.remove('minimized');
+
     // Fully clean up reveal overlay (destroy content)
     var _revealOv = document.getElementById('revealOverlay');
     _revealOv.classList.remove('active', 'minimized', 'closing', 'stashed');
