@@ -1,7 +1,7 @@
 // Card of the Day — Service Worker
 // Cache-first for static assets, network-first for API/Firebase
 
-const CACHE_NAME = 'cotd-v2';
+const CACHE_NAME = 'cotd-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
