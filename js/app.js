@@ -3273,7 +3273,7 @@ function proceedToMultiResult() {
     // Build multi-result HTML
     var html = '';
     var lt = translations[currentLang] && translations[currentLang].landing;
-    var isComingSoonMode = (currentReadingMode === 'ten-card' || currentReadingMode === 'twelve-card');
+    var isComingSoonMode = (currentReadingMode === 'twelve-card');
 
     if (isComingSoonMode) {
         // Coming Soon layout: show card name list only, no interpretations yet
@@ -3288,12 +3288,36 @@ function proceedToMultiResult() {
         for (var k = 0; k < multiCardSelections.length; k++) {
             var sk = multiCardSelections[k];
             html += '<div class="coming-soon-card-row">';
-            html += '<span class="coming-soon-card-num">' + (currentReadingMode === 'twelve-card' ? _monthLabelFull(k) : (k + 1)) + '</span>';
+            html += '<span class="coming-soon-card-num">' + _monthLabelFull(k) + '</span>';
             html += '<img class="coming-soon-card-thumb" src="images/tarot/' + sk.card.image + '" alt="' + sk.card.name + '">';
             html += '<span class="coming-soon-card-name">' + getCardName(sk.card.name) + '</span>';
             html += '</div>';
         }
         html += '</div>';
+    } else if (currentReadingMode === 'ten-card') {
+        // 10-card Celtic Cross layout with per-card interpretations
+        var comingSoonLabel10 = (lt && lt.comingSoon) || 'Coming Soon';
+        for (var k = 0; k < multiCardSelections.length; k++) {
+            var sk = multiCardSelections[k];
+            var posLabel = tenCardPositionLabels[k] || ('ตำแหน่งที่ ' + (k + 1));
+            var cardInterps = (currentLang === 'th') && (typeof tenCardInterpretations !== 'undefined') && tenCardInterpretations[sk.card.name];
+            var interpText10 = cardInterps ? cardInterps[k] : null;
+            html += '<div class="multi-result-section" data-card-index="' + k + '">';
+            html += '<div class="multi-result-position">✦ ' + posLabel + ' ✦</div>';
+            html += '<div class="multi-result-card-name">' + getCardName(sk.card.name) + '</div>';
+            html += '<div class="multi-result-glass">';
+            if (interpText10) {
+                var safe10 = interpText10.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                html += '<div class="multi-result-interpretation"><p>' + safe10 + '</p></div>';
+            } else {
+                html += '<div class="multi-result-interpretation coming-soon-text"><p>' + comingSoonLabel10 + '</p></div>';
+            }
+            html += '</div>';
+            if (k < multiCardSelections.length - 1) {
+                html += '<div class="multi-result-divider"><span></span><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M12 2l2.09 6.26L20.18 9l-4.64 4.14L16.73 20 12 16.77 7.27 20l1.19-6.86L3.82 9l6.09-.74L12 2z" fill="rgba(154,170,212,0.35)" stroke="none"/></svg><span></span></div>';
+            }
+            html += '</div>';
+        }
     } else {
         // Per-card interpretation sections (3-card / 4-card)
         for (var j = 0; j < multiCardSelections.length; j++) {
