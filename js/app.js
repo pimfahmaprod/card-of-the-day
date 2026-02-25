@@ -2412,6 +2412,9 @@ var revealSkipping = false;
 var revealCardData = null;
 var _revealTapHandler = null;
 var _revealSkipHandler = null;
+var _revealAutoDismiss = null;
+var _revealScrollDismiss = null;
+var _revealDismissedFlag = { value: false };
 
 function scaleBigFanToFit(fanEl) {
     if (!fanEl) return;
@@ -2432,6 +2435,19 @@ function scaleBigFanToFit(fanEl) {
     fanEl.style.marginRight = '-' + hLoss + 'px';
     fanEl.style.marginTop    = '-' + vLoss + 'px';
     fanEl.style.marginBottom = '-' + vLoss + 'px';
+}
+
+function _cancelRevealDismiss() {
+    if (_revealAutoDismiss) {
+        clearTimeout(_revealAutoDismiss);
+        _revealAutoDismiss = null;
+    }
+    _revealDismissedFlag.value = true;
+    if (_revealScrollDismiss) {
+        var rp = document.getElementById('resultPanel');
+        if (rp) rp.removeEventListener('scroll', _revealScrollDismiss);
+        _revealScrollDismiss = null;
+    }
 }
 
 function showRevealOverlay() {
@@ -2491,8 +2507,11 @@ function showRevealOverlay() {
     revealSkipping = false;
     revealOverlayActive = true;
 
+    // Cancel stale auto-dismiss from previous reading
+    _cancelRevealDismiss();
+
     // Show overlay
-    overlay.classList.remove('closing');
+    overlay.classList.remove('closing', 'stashed');
     overlay.classList.add('active');
 
     // Clear 78-card grid now (hidden behind overlay) to free GPU for flip animation
@@ -2823,13 +2842,15 @@ function dismissRevealOverlay() {
     setTimeout(function() { scrollHint.classList.add('visible'); }, 500);
 
     // Step 4: Dismiss fully — stash overlay (keep content for re-open)
-    var _dismissed = false;
+    var dismissFlag = _revealDismissedFlag = { value: false };
     function fullyDismiss() {
-        if (_dismissed) return;
-        _dismissed = true;
-        clearTimeout(_autoDismiss);
+        if (dismissFlag.value) return;
+        dismissFlag.value = true;
+        clearTimeout(_revealAutoDismiss);
+        _revealAutoDismiss = null;
         scrollHint.removeEventListener('click', fullyDismiss);
-        resultPanel.removeEventListener('scroll', _scrollDismiss);
+        resultPanel.removeEventListener('scroll', _revealScrollDismiss);
+        _revealScrollDismiss = null;
 
         overlay.classList.add('closing');
         setTimeout(function() {
@@ -2851,15 +2872,15 @@ function dismissRevealOverlay() {
 
     // Scroll result panel to dismiss
     var resultPanel = document.getElementById('resultPanel');
-    function _scrollDismiss() {
+    _revealScrollDismiss = function() {
         if (resultPanel.scrollTop > 30) fullyDismiss();
-    }
+    };
     setTimeout(function() {
-        resultPanel.addEventListener('scroll', _scrollDismiss, { passive: true });
+        resultPanel.addEventListener('scroll', _revealScrollDismiss, { passive: true });
     }, 500);
 
     // Auto-dismiss after 3.5 seconds
-    var _autoDismiss = setTimeout(fullyDismiss, 3500);
+    _revealAutoDismiss = setTimeout(fullyDismiss, 3500);
 }
 
 // ── Re-open reveal overlay from result page ──
@@ -4643,6 +4664,9 @@ function goToLandingPage() {
         _rp._commentScrollHandler = null;
     }
     _commentMinimized = false;
+
+    // Cancel any pending reveal auto-dismiss (prevents stale 'stashed' class)
+    _cancelRevealDismiss();
 
     // Fully clean up reveal overlay (destroy content)
     var _revealOv = document.getElementById('revealOverlay');
