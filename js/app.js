@@ -3000,7 +3000,8 @@ function selectCard(cardId, cardElement) {
     gtag('event', 'select_card', {
         event_category: 'engagement',
         card_name: card.name,
-        card_id: cardId
+        card_id: cardId,
+        reading_mode: currentReadingMode
     });
 
     selectedCardElement = cardElement;
@@ -3149,7 +3150,8 @@ function selectCardMulti(card, cardElement) {
     gtag('event', 'select_card', {
         event_category: 'engagement',
         card_name: card.name,
-        card_id: card.id
+        card_id: card.id,
+        reading_mode: currentReadingMode
     });
 
     var pickIdx = multiCardSelections.length;
