@@ -34,6 +34,19 @@ let selectedCardElement = null;
 let isAnimating = false;
 let isPageReady = false;
 
+function getAppPlatform() {
+    var isStandalone = false;
+    try {
+        isStandalone =
+            window.navigator.standalone === true ||
+            (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+            (typeof document.referrer === 'string' && document.referrer.indexOf('android-app://') === 0);
+    } catch (e) {
+        isStandalone = false;
+    }
+    return isStandalone ? 'pwa' : 'browser';
+}
+
 // Auto-save draw state: tracks the Firebase comment ID for the current draw
 let _currentDrawCommentId = null;
 // Pending draw for non-FB users: saved to Firebase after login
@@ -3001,7 +3014,8 @@ function selectCard(cardId, cardElement) {
         event_category: 'engagement',
         card_name: card.name,
         card_id: cardId,
-        reading_mode: currentReadingMode
+        reading_mode: currentReadingMode,
+        app_platform: getAppPlatform()
     });
 
     selectedCardElement = cardElement;
@@ -3151,7 +3165,8 @@ function selectCardMulti(card, cardElement) {
         event_category: 'engagement',
         card_name: card.name,
         card_id: card.id,
-        reading_mode: currentReadingMode
+        reading_mode: currentReadingMode,
+        app_platform: getAppPlatform()
     });
 
     var pickIdx = multiCardSelections.length;
