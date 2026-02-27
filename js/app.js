@@ -1251,7 +1251,7 @@ async function waitForResources() {
 
     // Render cards (they use card back image which is already loaded)
     renderCards();
-    updatePreloadProgress(100, 100, 'ready โฆ');
+    updatePreloadProgress(100, 100, 'ready ◆');
 
     // Mark page as ready & dismiss overlay
     markPageReady();
@@ -2382,8 +2382,8 @@ function applyGridLayout() {
 // Create sparkle particles for card selection
 var _categoryParticles = {
     love:    ['โฅ', 'โก', 'โค'],
-    work:    ['โ…', 'โฆ', 'โก'],
-    finance: ['โฆ', 'โ—', '$']
+    work:    ['โ…', '◆', 'โก'],
+    finance: ['◆', 'โ—', '$']
 };
 
 function createSparkles(element) {
@@ -3398,7 +3398,7 @@ function proceedToMultiResult() {
         var comingSoonLabel = (lt && lt.comingSoon) || 'Coming Soon';
         var comingSoonDesc = (lt && lt.comingSoonDesc) || 'Under development';
         html += '<div class="coming-soon-result-banner">';
-        html += '<div class="coming-soon-result-icon">โฆ</div>';
+        html += '<div class="coming-soon-result-icon">◆</div>';
         html += '<div class="coming-soon-result-title">' + comingSoonLabel + '</div>';
         html += '<div class="coming-soon-result-desc">' + comingSoonDesc + '</div>';
         html += '</div>';
@@ -3421,7 +3421,7 @@ function proceedToMultiResult() {
             var cardInterps = (currentLang === 'th') && (typeof tenCardInterpretations !== 'undefined') && tenCardInterpretations[sk.card.name];
             var interpText10 = cardInterps ? cardInterps[k] : null;
             html += '<div class="multi-result-section" data-card-index="' + k + '">';
-            html += '<div class="multi-result-position">โฆ ' + posLabel + ' โฆ</div>';
+            html += '<div class="multi-result-position">◆ ' + posLabel + ' ◆</div>';
             html += '<div class="multi-result-card-name">' + getCardName(sk.card.name) + '</div>';
             html += '<div class="multi-result-glass">';
             if (interpText10) {
@@ -3443,12 +3443,12 @@ function proceedToMultiResult() {
             var pLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[s.positionKey]) || s.positionKey;
             var prophecyTitle = (translations[currentLang] && translations[currentLang].result && translations[currentLang].result.prophecyTitle) || 'เธเธณเธ—เธณเธเธฒเธข';
             html += '<div class="multi-result-section" data-card-index="' + j + '">';
-            html += '<div class="multi-result-position">โฆ ' + pLabel + ' โฆ</div>';
+            html += '<div class="multi-result-position">◆ ' + pLabel + ' ◆</div>';
             html += '<div class="multi-result-card-name">' + getCardName(s.card.name) + '</div>';
             html += '<div class="multi-result-quote">"' + getMultiCardQuote(s.card) + '"</div>';
             html += '<div class="multi-result-glass">';
             html += '<div class="result-section-header">';
-            html += '<span>โฆ ' + prophecyTitle + ' โฆ</span>';
+            html += '<span>◆ ' + prophecyTitle + ' ◆</span>';
             html += '</div>';
             var interpText = getMultiCardInterpretation(s.card);
             var interpParas = interpText.split(/\n\s*\n/).map(function(p) {
@@ -3917,7 +3917,7 @@ function buildSocialLoadingCta() {
         '<div class="tarot-loader" style="width:48px;height:48px">' +
             '<div class="tarot-loader-ring"></div>' +
             '<div class="tarot-loader-ring-inner"></div>' +
-            '<div class="tarot-loader-star">โฆ</div>' +
+            '<div class="tarot-loader-star">◆</div>' +
             '<div class="tarot-loader-orbit"></div>' +
             '<div class="tarot-loader-orbit"></div>' +
             '<div class="tarot-loader-orbit"></div>' +
@@ -5340,7 +5340,7 @@ async function loadFeed(reset) {
 
     if (result.comments.length === 0 && reset && displayedCommentIds.size === 0) {
         newestCommentTimestamp = Date.now();
-        commentsList.innerHTML = '<div class="comments-empty"><div class="comments-empty-icon">โฆ</div><div class="comments-empty-text">' + t('feed.empty') + '</div></div>';
+        commentsList.innerHTML = '<div class="comments-empty"><div class="comments-empty-icon">◆</div><div class="comments-empty-text">' + t('feed.empty') + '</div></div>';
         isLoadingComments = false;
         if (window.cardCounter && window.cardCounter.subscribeToNewComments) {
             window.cardCounter.subscribeToNewComments(handleNewFeedItem);
@@ -5471,7 +5471,7 @@ function createFeedCard(comment) {
                 var mQuote = feedCat ? (getCardCategoryField(mTarot, feedCat + 'Quote') || getCardQuote(mTarot)) : getCardQuote(mTarot);
                 var mInterp = feedCat ? (getCardCategoryField(mTarot, feedCat) || getCardInterpretation(mTarot)) : getCardInterpretation(mTarot);
                 expandedInfoHtml += '<div class="feed-multi-interp" data-index="' + mj + '"' + (mj !== 0 ? ' style="display:none"' : '') + '>';
-                expandedInfoHtml += '<div class="feed-multi-interp-pos">โฆ ' + escapeHtml(mPos) + '</div>';
+                expandedInfoHtml += '<div class="feed-multi-interp-pos">◆ ' + escapeHtml(mPos) + '</div>';
                 expandedInfoHtml += '<div class="feed-multi-interp-name">' + escapeHtml(getCardName(mCard.cardName) || mCard.cardName) + '</div>';
                 if (mQuote) expandedInfoHtml += '<div class="feed-card-quote">"' + escapeHtml(mQuote) + '"</div>';
                 if (mInterp) expandedInfoHtml += '<div class="feed-card-interpretation">' + escapeHtml(mInterp) + '</div>';
@@ -5778,7 +5778,7 @@ function buildTarotLoaderHtml() {
     return '<div class="tarot-loader">' +
         '<div class="tarot-loader-ring"></div>' +
         '<div class="tarot-loader-ring-inner"></div>' +
-        '<div class="tarot-loader-star">โฆ</div>' +
+        '<div class="tarot-loader-star">◆</div>' +
         '<div class="tarot-loader-orbit"></div>' +
         '<div class="tarot-loader-orbit"></div>' +
         '<div class="tarot-loader-orbit"></div>' +
@@ -5790,9 +5790,9 @@ function buildTarotLoaderHtml() {
 function buildMiniLoaderHtml() {
     return '<div class="tarot-loader-mini">' +
         '<div class="tarot-loader-mini-dot"></div>' +
-        '<div class="tarot-loader-mini-star">โฆ</div>' +
+        '<div class="tarot-loader-mini-star">◆</div>' +
         '<div class="tarot-loader-mini-dot"></div>' +
-        '<div class="tarot-loader-mini-star">โฆ</div>' +
+        '<div class="tarot-loader-mini-star">◆</div>' +
         '<div class="tarot-loader-mini-dot"></div>' +
         '</div>';
 }
@@ -6311,9 +6311,9 @@ async function loadMyComments() {
         commentsList.innerHTML = `
             <div class="comments-empty comments-empty-cta">
                 <div class="cta-sparkles">
-                    <span class="sparkle s1">โฆ</span>
+                    <span class="sparkle s1">◆</span>
                     <span class="sparkle s2">โง</span>
-                    <span class="sparkle s3">โฆ</span>
+                    <span class="sparkle s3">◆</span>
                 </div>
                 <div class="cta-card-icon">
                     <svg viewBox="0 0 60 80" fill="none">
@@ -6618,9 +6618,9 @@ function getFacebookFriendIds() {
 function buildLoginRequiredCta(messageKey, subtitleKey) {
     return '<div class="comments-empty comments-empty-cta friends-cta">' +
         '<div class="cta-sparkles">' +
-            '<span class="sparkle s1">โฆ</span>' +
+            '<span class="sparkle s1">◆</span>' +
             '<span class="sparkle s2">โง</span>' +
-            '<span class="sparkle s3">โฆ</span>' +
+            '<span class="sparkle s3">◆</span>' +
         '</div>' +
         '<div class="friends-cta-icon">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">' +
@@ -6643,9 +6643,9 @@ function buildLoginRequiredCta(messageKey, subtitleKey) {
 function buildMyCardEmptyCta() {
     return '<div class="comments-empty comments-empty-cta draw-cta">' +
         '<div class="cta-sparkles">' +
-            '<span class="sparkle s1">โฆ</span>' +
+            '<span class="sparkle s1">◆</span>' +
             '<span class="sparkle s2">โง</span>' +
-            '<span class="sparkle s3">โฆ</span>' +
+            '<span class="sparkle s3">◆</span>' +
         '</div>' +
         '<div class="cta-card-icon">' +
             '<svg viewBox="0 0 60 80" fill="none">' +
@@ -6686,9 +6686,9 @@ function buildFriendsLoginCta() {
 function buildFriendsInviteCta() {
     return '<div class="comments-empty comments-empty-cta friends-cta">' +
         '<div class="cta-sparkles">' +
-            '<span class="sparkle s1">โฆ</span>' +
+            '<span class="sparkle s1">◆</span>' +
             '<span class="sparkle s2">โง</span>' +
-            '<span class="sparkle s3">โฆ</span>' +
+            '<span class="sparkle s3">◆</span>' +
         '</div>' +
         '<div class="friends-cta-icon">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">' +
@@ -6711,9 +6711,9 @@ function buildFriendsInviteCta() {
 function buildFriendsReconnectCta() {
     return '<div class="comments-empty comments-empty-cta friends-cta">' +
         '<div class="cta-sparkles">' +
-            '<span class="sparkle s1">โฆ</span>' +
+            '<span class="sparkle s1">◆</span>' +
             '<span class="sparkle s2">โง</span>' +
-            '<span class="sparkle s3">โฆ</span>' +
+            '<span class="sparkle s3">◆</span>' +
         '</div>' +
         '<div class="friends-cta-icon">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">' +
@@ -8828,7 +8828,7 @@ function drawMultiVerticalLayout(ctx, cardImages, width, height, colors) {
         ctx.fillStyle = colors.accent;
         ctx.font = 'bold 22px "Prompt", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('โฆ ' + posLabel, textCenterX, textBlockTop + 10);
+        ctx.fillText('◆ ' + posLabel, textCenterX, textBlockTop + 10);
 
         // Card name (dynamic sizing)
         ctx.fillStyle = '#C0C8E0';
@@ -9796,14 +9796,14 @@ function drawFooterWithPromo(ctx, opts) {
     ctx.textAlign = 'center';
     ctx.font = 'bold ' + promoSize + 'px "Cormorant Garamond", "Prompt", serif';
     ctx.fillStyle = accentColor;
-    ctx.fillText('โฆ  jubpai.com  โฆ', centerX, promoMidY);
+    ctx.fillText('◆  jubpai.com  ◆', centerX, promoMidY);
     ctx.restore();
 
     // Crisp text on top
     ctx.textAlign = 'center';
     ctx.font = 'bold ' + promoSize + 'px "Cormorant Garamond", "Prompt", serif';
     ctx.fillStyle = accentColor;
-    ctx.fillText('โฆ  jubpai.com  โฆ', centerX, promoMidY);
+    ctx.fillText('◆  jubpai.com  ◆', centerX, promoMidY);
 
     // Subtext below
     var subSize = compact ? 10 : 13;
