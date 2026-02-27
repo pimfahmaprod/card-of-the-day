@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Card of the Day - Main Application Script
  *
  * @description Core application logic for the tarot card reading app
@@ -71,6 +71,17 @@ let currentModeIndex = 0;
 let currentReadingMode = 'single';
 let currentReadingCategory = null; // 'love', 'work', or 'finance'
 var _modeAnimTimer = null; // cancel overlapping mode switch animations
+var TEN_CARD_LAYOUT_STORAGE_KEY = 'tarot-ten-card-layout';
+var tenCardLayoutMode = 'classic';
+
+try {
+    var _savedTenCardLayoutMode = localStorage.getItem(TEN_CARD_LAYOUT_STORAGE_KEY);
+    if (_savedTenCardLayoutMode === 'new' || _savedTenCardLayoutMode === 'classic') {
+        tenCardLayoutMode = _savedTenCardLayoutMode;
+    }
+} catch (e) {
+    tenCardLayoutMode = 'classic';
+}
 
 // Multi-card selection state
 var multiCardSelections = [];   // [{card, positionKey}]
@@ -274,13 +285,13 @@ function updateLangButton() {
     if (!langBtn) return;
 
     const flags = {
-        'th': '🇹🇭',
-        'en': '🇬🇧',
-        'zh-CN': '🇨🇳',
-        'zh-TW': '🇹🇼',
-        'ko': '🇰🇷',
-        'ja': '🇯🇵',
-        'fr': '🇫🇷'
+        'th': '๐น๐ญ',
+        'en': '๐ฌ๐ง',
+        'zh-CN': '๐จ๐ณ',
+        'zh-TW': '๐น๐ผ',
+        'ko': '๐ฐ๐ท',
+        'ja': '๐ฏ๐ต',
+        'fr': '๐ซ๐ท'
     };
 
     const codes = {
@@ -296,7 +307,7 @@ function updateLangButton() {
     const flagEl = langBtn.querySelector('.lang-flag');
     const codeEl = langBtn.querySelector('.lang-code');
 
-    if (flagEl) flagEl.textContent = flags[currentLang] || '🇹🇭';
+    if (flagEl) flagEl.textContent = flags[currentLang] || '๐น๐ญ';
     if (codeEl) codeEl.textContent = codes[currentLang] || 'TH';
 
     // Update active state in dropdown
@@ -454,7 +465,7 @@ function switchMode(direction) {
 
 // Only show positive-meaning cards on the landing page peek-flip
 var POSITIVE_CARD_NAMES = [
-    // Major Arcana — positive
+    // Major Arcana โ€” positive
     'THE MAGICIAN', 'THE EMPRESS', 'THE LOVERS', 'THE CHARIOT',
     'STRENGTH', 'WHEEL OF FORTUNE', 'TEMPERANCE', 'THE STAR',
     'THE SUN', 'THE WORLD',
@@ -462,13 +473,13 @@ var POSITIVE_CARD_NAMES = [
     'PAGE OF WANDS', 'KNIGHT OF WANDS', 'QUEEN OF WANDS', 'KING OF WANDS',
     'PAGE OF CUPS', 'KNIGHT OF CUPS', 'QUEEN OF CUPS', 'KING OF CUPS',
     'PAGE OF PENTACLES', 'KNIGHT OF PENTACLES', 'QUEEN OF PENTACLES', 'KING OF PENTACLES',
-    // Wands — positive
+    // Wands โ€” positive
     'ACE OF WANDS', 'THREE OF WANDS', 'FOUR OF WANDS', 'SIX OF WANDS', 'EIGHT OF WANDS',
-    // Cups — positive
+    // Cups โ€” positive
     'ACE OF CUPS', 'TWO OF CUPS', 'THREE OF CUPS', 'SIX OF CUPS', 'NINE OF CUPS', 'TEN OF CUPS',
-    // Swords — positive
+    // Swords โ€” positive
     'ACE OF SWORDS',
-    // Pentacles — positive
+    // Pentacles โ€” positive
     'ACE OF PENTACLES', 'THREE OF PENTACLES', 'SIX OF PENTACLES',
     'EIGHT OF PENTACLES', 'NINE OF PENTACLES', 'TEN OF PENTACLES'
 ];
@@ -595,7 +606,7 @@ function resetThreeCardAnimations(container) {
     });
     container.offsetHeight; // force reflow
     cards.forEach(function(card) {
-        // Random delay between 0–3s so each card starts at a different phase
+        // Random delay between 0โ€“3s so each card starts at a different phase
         var delay = (Math.random() * 3).toFixed(2);
         card.style.animationDelay = '-' + delay + 's';
         card.style.animation = '';
@@ -858,7 +869,7 @@ function playSoundEffect(soundName) {
     }
 }
 
-// Blessing burst effect — expanding rings + particles from the accept button
+// Blessing burst effect โ€” expanding rings + particles from the accept button
 function triggerBlessingBurst(btn) {
     if (!btn) return;
     var rect = btn.getBoundingClientRect();
@@ -1088,9 +1099,9 @@ function preloadImage(src) {
     });
 }
 
-// ── Preload overlay ──
+// โ”€โ”€ Preload overlay โ”€โ”€
 function createPreloadOverlay() {
-    // Overlay is already in HTML — just return it
+    // Overlay is already in HTML โ€” just return it
     return document.getElementById('preloadOverlay');
 }
 
@@ -1216,8 +1227,8 @@ async function waitForResources() {
         createFloatingSparkles();
     }
 
-    // ── Phase 1: Load tarot data + essential images only ──
-    updatePreloadProgress(0, 100, 'loading card data…');
+    // โ”€โ”€ Phase 1: Load tarot data + essential images only โ”€โ”€
+    updatePreloadProgress(0, 100, 'loading card dataโ€ฆ');
 
     const essentialImages = [
         'images/card_back_blue.png',
@@ -1240,17 +1251,17 @@ async function waitForResources() {
 
     // Render cards (they use card back image which is already loaded)
     renderCards();
-    updatePreloadProgress(100, 100, 'ready ✦');
+    updatePreloadProgress(100, 100, 'ready โฆ');
 
     // Mark page as ready & dismiss overlay
     markPageReady();
     setTimeout(dismissPreloadOverlay, 300);
 
-    // ── Phase 2: Lazy-load remaining images in background ──
+    // โ”€โ”€ Phase 2: Lazy-load remaining images in background โ”€โ”€
     _lazyLoadRemainingImages();
 }
 
-// Background image preloader — does not block page interaction
+// Background image preloader โ€” does not block page interaction
 var _lazyLoadPaused = false;
 
 function _pauseLazyLoad() { _lazyLoadPaused = true; }
@@ -1293,7 +1304,7 @@ function _lazyLoadRemainingImages() {
         preloadImage(src).then(loadNext).catch(loadNext);
     }
 
-    // Start a few parallel streams — low priority, won't compete with user interactions
+    // Start a few parallel streams โ€” low priority, won't compete with user interactions
     for (var i = 0; i < concurrent && i < allImages.length; i++) {
         loadNext();
     }
@@ -1345,7 +1356,7 @@ function startCardRotation() {
 }
 
 // JS face-visibility sync: toggles front/back opacity in the same RAF callback
-// so both changes always land in the same rendered frame — no mobile flicker.
+// so both changes always land in the same rendered frame โ€” no mobile flicker.
 let _faceVisRAF = null;
 function startFaceVisibilitySync(wrapper) {
     stopFaceVisibilitySync(); // prevent double-RAF
@@ -1646,7 +1657,7 @@ function selectCategory(category) {
         });
     });
 
-    // Back button — close overlay and return to landing
+    // Back button โ€” close overlay and return to landing
     var backBtn = document.getElementById('categoryBackBtn');
     if (backBtn) {
         backBtn.addEventListener('click', function() {
@@ -1846,7 +1857,7 @@ function startExperience() {
         if (profileSwitcher) profileSwitcher.style.display = 'none';
     }, 400);
 
-    // Step 3: Shrink the card and move to stack center — become the top card of the stack
+    // Step 3: Shrink the card and move to stack center โ€” become the top card of the stack
     setTimeout(() => {
         // Calculate scale to match grid card size (grid is now visible)
         const layout = calculateCardLayout();
@@ -1866,7 +1877,7 @@ function startExperience() {
         const gridCenterY = gridRect.top + gridRect.height / 2;
         const moveY = gridCenterY - spinningCenterY;
 
-        // Apply shrink transition — card shrinks into the stack position
+        // Apply shrink transition โ€” card shrinks into the stack position
         spinningCardContainer.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         requestAnimationFrame(() => {
             spinningCardContainer.style.transform = `translateY(${moveY}px) scale(${scale})`;
@@ -1886,13 +1897,13 @@ function startExperience() {
         }, 400);
     }, 450);
 
-    // Step 4: Spinning card is now aligned with stack — hide it and spread immediately
+    // Step 4: Spinning card is now aligned with stack โ€” hide it and spread immediately
     setTimeout(() => {
         spinningCardContainer.style.transition = 'none';
         spinningCardContainer.style.opacity = '0';
         spinningCardContainer.style.visibility = 'hidden';
 
-        // Spread immediately — the stack was already visible, so cards fly out from the same spot
+        // Spread immediately โ€” the stack was already visible, so cards fly out from the same spot
         animateToGrid();
 
         // Hide landing page
@@ -1992,7 +2003,7 @@ function renderCards() {
     }
 }
 
-// Drag upward to select a card — drag up ≥ half the card height to confirm
+// Drag upward to select a card โ€” drag up โฅ half the card height to confirm
 function setupCardDrag(cardGrid) {
     var dragCard = null;
     var startY = 0;
@@ -2079,7 +2090,7 @@ function setupCardDrag(cardGrid) {
         preventNextClick = true;
         setTimeout(function() { preventNextClick = false; }, 100);
 
-        // Didn't reach threshold — snap back
+        // Didn't reach threshold โ€” snap back
         card.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease';
         card.style.transform = '';
         card.style.opacity = '';
@@ -2180,7 +2191,7 @@ function calculateCardLayout() {
     const V_OVERLAP = 0.08;     // 8% vertical overlap between rows
     const MAX_H_OVERLAP = 0.65; // max 65% horizontal overlap (35% of card visible)
     const NUM_ROWS = 6;
-    const NUM_COLS = 13;        // 6 × 13 = 78 cards
+    const NUM_COLS = 13;        // 6 ร— 13 = 78 cards
 
     // Use hardcoded padding (matches CSS media queries) to avoid stacked-state issues
     const { padTop, padBottom, padSide } = getGridPadding();
@@ -2270,7 +2281,7 @@ function animateToGrid() {
     // Make all stacked cards visible so the stack appears
     containers.forEach(c => { c.style.opacity = '1'; });
 
-    // Deal cards: top-left first → right → next row (grid index 0 flies first)
+    // Deal cards: top-left first โ’ right โ’ next row (grid index 0 flies first)
     const DELAY_PER_CARD = 18;  // ms between each card (~1 card per frame at 60fps)
     const FLY_DURATION = 380;   // ms for each card's flight
 
@@ -2370,9 +2381,9 @@ function applyGridLayout() {
 
 // Create sparkle particles for card selection
 var _categoryParticles = {
-    love:    ['♥', '♡', '❤'],
-    work:    ['★', '✦', '⚡'],
-    finance: ['✦', '◆', '$']
+    love:    ['โฅ', 'โก', 'โค'],
+    work:    ['โ…', 'โฆ', 'โก'],
+    finance: ['โฆ', 'โ—', '$']
 };
 
 function createSparkles(element) {
@@ -2428,6 +2439,91 @@ var _revealSkipHandler = null;
 var _revealAutoDismiss = null;
 var _revealScrollDismiss = null;
 var _revealDismissedFlag = { value: false };
+var _revealLayoutSwitchHandler = null;
+
+function getTenCardLayoutMode() {
+    return tenCardLayoutMode === 'new' ? 'new' : 'classic';
+}
+
+function isTenCardNewLayout() {
+    return getTenCardLayoutMode() === 'new';
+}
+
+function setTenCardLayoutMode(mode) {
+    var nextMode = (mode === 'new') ? 'new' : 'classic';
+    tenCardLayoutMode = nextMode;
+    try {
+        localStorage.setItem(TEN_CARD_LAYOUT_STORAGE_KEY, nextMode);
+    } catch (e) {
+        // Ignore storage failures (private mode / blocked storage)
+    }
+    _syncRevealLayoutSwitchState();
+    _applyTenCardLayoutToReveal();
+}
+
+function _syncRevealLayoutSwitchState() {
+    var switchEl = document.getElementById('revealLayoutSwitch');
+    if (!switchEl) return;
+    var activeMode = getTenCardLayoutMode();
+    switchEl.classList.toggle('is-new', activeMode === 'new');
+    switchEl.querySelectorAll('[data-layout-mode]').forEach(function(btn) {
+        var mode = btn.getAttribute('data-layout-mode');
+        var isActive = mode === activeMode;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+}
+
+function _applyTenCardLayoutToReveal() {
+    var fan = document.querySelector('#revealFanWrapper .ten-card-fan');
+    if (!fan) return;
+    fan.classList.toggle('layout-new', isTenCardNewLayout());
+    requestAnimationFrame(function() {
+        scaleBigFanToFit(fan);
+    });
+}
+
+function setupRevealLayoutSwitch() {
+    var switchEl = document.getElementById('revealLayoutSwitch');
+    var segmentEl = document.getElementById('revealLayoutSegment');
+    if (!switchEl || !segmentEl) return;
+
+    var isTenMode = currentReadingMode === 'ten-card';
+    switchEl.style.display = isTenMode ? 'flex' : 'none';
+    if (!isTenMode) return;
+
+    _syncRevealLayoutSwitchState();
+    _applyTenCardLayoutToReveal();
+
+    // Prevent toggle touches from triggering reveal tap-to-flip.
+    switchEl.ontouchstart = function(e) { e.stopPropagation(); };
+
+    if (_revealLayoutSwitchHandler) {
+        switchEl.removeEventListener('click', _revealLayoutSwitchHandler);
+    }
+    _revealLayoutSwitchHandler = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var currentMode = getTenCardLayoutMode();
+        var target = e.target.closest('[data-layout-mode]');
+        var nextMode;
+
+        // Clicking the active option toggles to the other side,
+        // and clicking anywhere else on the control toggles as well.
+        if (target) {
+            var clickedMode = target.getAttribute('data-layout-mode');
+            nextMode = (clickedMode === currentMode)
+                ? (currentMode === 'classic' ? 'new' : 'classic')
+                : clickedMode;
+        } else {
+            nextMode = (currentMode === 'classic') ? 'new' : 'classic';
+        }
+
+        setTenCardLayoutMode(nextMode);
+    };
+    switchEl.addEventListener('click', _revealLayoutSwitchHandler);
+}
 
 function scaleBigFanToFit(fanEl) {
     if (!fanEl) return;
@@ -2464,7 +2560,7 @@ function _cancelRevealDismiss() {
 }
 
 function showRevealOverlay() {
-    console.log('[DEBUG] showRevealOverlay — revealCardData:', revealCardData?.name);
+    console.log('[DEBUG] showRevealOverlay โ€” revealCardData:', revealCardData?.name);
     var overlay = document.getElementById('revealOverlay');
     var fanWrapper = document.getElementById('revealFanWrapper');
     var skipBtn = document.getElementById('revealSkipBtn');
@@ -2472,6 +2568,7 @@ function showRevealOverlay() {
 
     // Build fan HTML based on reading mode
     fanWrapper.innerHTML = buildRevealFan();
+    setupRevealLayoutSwitch();
 
     // Scale big fans (10/12 cards) to fit viewport
     if (currentReadingMode === 'ten-card' || currentReadingMode === 'twelve-card') {
@@ -2486,7 +2583,7 @@ function showRevealOverlay() {
     // Show/hide skip button
     skipBtn.style.display = (totalCards > 1) ? 'block' : 'none';
     var t = translations[currentLang] && translations[currentLang].reveal;
-    skipBtn.textContent = (t && t.skip) || 'Skip ›';
+    skipBtn.textContent = (t && t.skip) || 'Skip โ€บ';
 
     // Set prompt text
     prompt.textContent = (t && t.tapToReveal) || 'Tap to reveal';
@@ -2500,15 +2597,15 @@ function showRevealOverlay() {
 
     // Initialize reveal state
     var allItems = Array.from(fanWrapper.querySelectorAll('.three-card-item, .multi-card-item'));
-    // Ten-card (Celtic Cross): reveal center cross first (1,2,3,4,6), then far-left (5), then staff right (7-10)
+    // Ten-card: reveal strictly in numeric order (1-10)
     if (currentReadingMode === 'ten-card' && allItems.length === 10) {
         revealQueue = [
             allItems[0],  // tc-1 center
             allItems[1],  // tc-2 crossing (rotated)
             allItems[2],  // tc-3 top
             allItems[3],  // tc-4 bottom
-            allItems[5],  // tc-6 near future (right of center)
             allItems[4],  // tc-5 past (far left)
+            allItems[5],  // tc-6 near future (right of center)
             allItems[6],  // tc-7 staff bottom
             allItems[7],  // tc-8 staff mid-low
             allItems[8],  // tc-9 staff mid-high
@@ -2574,6 +2671,9 @@ function buildRevealFan() {
 function buildBigMultiCardReveal() {
     var isTen = currentReadingMode === 'ten-card';
     var modeClass = isTen ? 'ten-card-fan' : 'twelve-card-fan';
+    if (isTen && isTenCardNewLayout()) {
+        modeClass += ' layout-new';
+    }
     var itemPrefix = isTen ? 'tc-' : 'twc-';
     var html = '<div class="multi-card-fan ' + modeClass + ' reveal-big-fan">';
     for (var i = 0; i < multiCardSelections.length; i++) {
@@ -2660,6 +2760,7 @@ function buildFourCardReveal() {
 function handleRevealTap(e) {
     // Ignore clicks on the skip button
     if (e.target.closest('.reveal-skip-btn')) return;
+    if (e.target.closest('.reveal-layout-switch')) return;
     if (revealSkipping) return;
 
     if (revealIndex < revealQueue.length) {
@@ -2820,7 +2921,7 @@ function showRevealContinuePrompt() {
 }
 
 function dismissRevealOverlay() {
-    console.log('[DEBUG] dismissRevealOverlay — mode:', currentReadingMode);
+    console.log('[DEBUG] dismissRevealOverlay โ€” mode:', currentReadingMode);
     var overlay = document.getElementById('revealOverlay');
     revealOverlayActive = false;
 
@@ -2856,7 +2957,7 @@ function dismissRevealOverlay() {
     document.body.appendChild(scrollHint);
     setTimeout(function() { scrollHint.classList.add('visible'); }, 500);
 
-    // Step 4: Dismiss fully — stash overlay (keep content for re-open)
+    // Step 4: Dismiss fully โ€” stash overlay (keep content for re-open)
     var dismissFlag = _revealDismissedFlag = { value: false };
     function fullyDismiss() {
         if (dismissFlag.value) return;
@@ -2898,7 +2999,7 @@ function dismissRevealOverlay() {
     _revealAutoDismiss = setTimeout(fullyDismiss, 3500);
 }
 
-// ── Re-open reveal overlay from result page ──
+// โ”€โ”€ Re-open reveal overlay from result page โ”€โ”€
 
 function _addRevealReopenBtn() {
     if (document.querySelector('.reveal-reopen-btn')) return;
@@ -3128,7 +3229,7 @@ function hideMultiPickIndicator() {
 }
 
 function selectCardMulti(card, cardElement) {
-    // Check if already selected — toggle off
+    // Check if already selected โ€” toggle off
     var existingIdx = -1;
     for (var i = 0; i < multiCardSelections.length; i++) {
         if (multiCardSelections[i].card.id === card.id) {
@@ -3155,7 +3256,7 @@ function selectCardMulti(card, cardElement) {
         return;
     }
 
-    // Already at max — ignore
+    // Already at max โ€” ignore
     if (multiCardSelections.length >= multiCardTarget) return;
 
     // Select
@@ -3181,7 +3282,7 @@ function selectCardMulti(card, cardElement) {
 
     updateMultiPickIndicator();
 
-    // All cards selected → proceed after a short delay
+    // All cards selected โ’ proceed after a short delay
     if (multiCardSelections.length >= multiCardTarget) {
         isAnimating = true;
         hideMultiPickIndicator();
@@ -3274,7 +3375,7 @@ function proceedToMultiResult() {
         }, 50);
     }
 
-    // Click sticky card item → scroll to that section + center in header
+    // Click sticky card item โ’ scroll to that section + center in header
     stickyCard.querySelectorAll('.multi-result-card-item').forEach(function(item) {
         item.addEventListener('click', function() {
             var idx = parseInt(item.dataset.index);
@@ -3297,7 +3398,7 @@ function proceedToMultiResult() {
         var comingSoonLabel = (lt && lt.comingSoon) || 'Coming Soon';
         var comingSoonDesc = (lt && lt.comingSoonDesc) || 'Under development';
         html += '<div class="coming-soon-result-banner">';
-        html += '<div class="coming-soon-result-icon">✦</div>';
+        html += '<div class="coming-soon-result-icon">โฆ</div>';
         html += '<div class="coming-soon-result-title">' + comingSoonLabel + '</div>';
         html += '<div class="coming-soon-result-desc">' + comingSoonDesc + '</div>';
         html += '</div>';
@@ -3316,11 +3417,11 @@ function proceedToMultiResult() {
         var comingSoonLabel10 = (lt && lt.comingSoon) || 'Coming Soon';
         for (var k = 0; k < multiCardSelections.length; k++) {
             var sk = multiCardSelections[k];
-            var posLabel = tenCardPositionLabels[k] || ('ตำแหน่งที่ ' + (k + 1));
+            var posLabel = tenCardPositionLabels[k] || ('เธ•เธณเนเธซเธเนเธเธ—เธตเน ' + (k + 1));
             var cardInterps = (currentLang === 'th') && (typeof tenCardInterpretations !== 'undefined') && tenCardInterpretations[sk.card.name];
             var interpText10 = cardInterps ? cardInterps[k] : null;
             html += '<div class="multi-result-section" data-card-index="' + k + '">';
-            html += '<div class="multi-result-position">✦ ' + posLabel + ' ✦</div>';
+            html += '<div class="multi-result-position">โฆ ' + posLabel + ' โฆ</div>';
             html += '<div class="multi-result-card-name">' + getCardName(sk.card.name) + '</div>';
             html += '<div class="multi-result-glass">';
             if (interpText10) {
@@ -3340,14 +3441,14 @@ function proceedToMultiResult() {
         for (var j = 0; j < multiCardSelections.length; j++) {
             var s = multiCardSelections[j];
             var pLabel = (translations[currentLang] && translations[currentLang].landing && translations[currentLang].landing[s.positionKey]) || s.positionKey;
-            var prophecyTitle = (translations[currentLang] && translations[currentLang].result && translations[currentLang].result.prophecyTitle) || 'คำทำนาย';
+            var prophecyTitle = (translations[currentLang] && translations[currentLang].result && translations[currentLang].result.prophecyTitle) || 'เธเธณเธ—เธณเธเธฒเธข';
             html += '<div class="multi-result-section" data-card-index="' + j + '">';
-            html += '<div class="multi-result-position">✦ ' + pLabel + ' ✦</div>';
+            html += '<div class="multi-result-position">โฆ ' + pLabel + ' โฆ</div>';
             html += '<div class="multi-result-card-name">' + getCardName(s.card.name) + '</div>';
             html += '<div class="multi-result-quote">"' + getMultiCardQuote(s.card) + '"</div>';
             html += '<div class="multi-result-glass">';
             html += '<div class="result-section-header">';
-            html += '<span>✦ ' + prophecyTitle + ' ✦</span>';
+            html += '<span>โฆ ' + prophecyTitle + ' โฆ</span>';
             html += '</div>';
             var interpText = getMultiCardInterpretation(s.card);
             var interpParas = interpText.split(/\n\s*\n/).map(function(p) {
@@ -3406,7 +3507,7 @@ function proceedToMultiResult() {
 
 // Step 6: Card flies to header + show result panel (called after user taps)
 function proceedToResult(card, skipFlyAnimation) {
-    console.log('[DEBUG] proceedToResult — card:', card?.name, 'skipFly:', skipFlyAnimation);
+    console.log('[DEBUG] proceedToResult โ€” card:', card?.name, 'skipFly:', skipFlyAnimation);
     currentCardData = card;
 
     gtag('event', 'view_result', {
@@ -3423,11 +3524,11 @@ function proceedToResult(card, skipFlyAnimation) {
     document.getElementById('resultQuote').textContent = getCardQuote(card);
     setInterpretationHTML(document.getElementById('resultInterpretation'), getCardInterpretation(card));
 
-    // Start sticky card expanded (hero state) — minimizes on scroll
+    // Start sticky card expanded (hero state) โ€” minimizes on scroll
     document.getElementById('resultStickyCard').classList.remove('minimized');
 
     if (skipFlyAnimation) {
-        // Coming from reveal overlay — skip center card animation, just show result
+        // Coming from reveal overlay โ€” skip center card animation, just show result
         var centerCard = document.getElementById('centerCard');
         centerCard.classList.remove('active', 'show-info', 'fly-to-header');
         centerCard.style.transition = '';
@@ -3439,7 +3540,7 @@ function proceedToResult(card, skipFlyAnimation) {
             var resultPanel = document.getElementById('resultPanel');
             resultPanel.scrollTop = 0;
             resultPanel.classList.add('active');
-            console.log('[DEBUG] resultPanel.active ADDED — classes:', resultPanel.className);
+            console.log('[DEBUG] resultPanel.active ADDED โ€” classes:', resultPanel.className);
             console.log('[DEBUG] resultPanel computed:', getComputedStyle(resultPanel).opacity, getComputedStyle(resultPanel).visibility);
             console.log('[DEBUG] revealOverlay classes:', document.getElementById('revealOverlay').className);
             console.log('[DEBUG] landingPage classes:', document.getElementById('landingPage').className);
@@ -3731,7 +3832,7 @@ function getCurrentProfilePicture() {
 // ========================================
 // Display Name & Profile Picture Resolution (live from Firebase profiles)
 // ========================================
-// In-memory caches: fbUserId (without prefix) → value
+// In-memory caches: fbUserId (without prefix) โ’ value
 const userDisplayNames = new Map();
 const userProfilePictures = new Map();
 const userProfileCacheTime = new Map();
@@ -3805,7 +3906,7 @@ async function resolveDisplayNames(items) {
     });
 }
 
-// Check localStorage directly — works before facebook.js or FB SDK is ready
+// Check localStorage directly โ€” works before facebook.js or FB SDK is ready
 function wasPreviouslyConnected() {
     return localStorage.getItem('tarot_fb_connected') === 'true';
 }
@@ -3816,7 +3917,7 @@ function buildSocialLoadingCta() {
         '<div class="tarot-loader" style="width:48px;height:48px">' +
             '<div class="tarot-loader-ring"></div>' +
             '<div class="tarot-loader-ring-inner"></div>' +
-            '<div class="tarot-loader-star">✦</div>' +
+            '<div class="tarot-loader-star">โฆ</div>' +
             '<div class="tarot-loader-orbit"></div>' +
             '<div class="tarot-loader-orbit"></div>' +
             '<div class="tarot-loader-orbit"></div>' +
@@ -3896,7 +3997,7 @@ async function savePendingDrawAfterLogin() {
         var blessingName = document.getElementById('blessingName');
         var blessingComment = document.getElementById('blessingComment');
         if (commentOverlay) commentOverlay.style.display = '';
-        if (blessingName) blessingName.textContent = userName === 'Me' ? '' : '— ' + userName + ' —';
+        if (blessingName) blessingName.textContent = userName === 'Me' ? '' : 'โ€” ' + userName + ' โ€”';
         if (blessingComment) blessingComment.textContent = commentText ? '"' + commentText + '"' : '';
     }
 }
@@ -4005,7 +4106,7 @@ function initStickyCardObserver() {
     var _lastActiveIdx = 0;
     var _scrollTicking = false;
 
-    // Cache DOM queries once — avoid querySelectorAll on every scroll
+    // Cache DOM queries once โ€” avoid querySelectorAll on every scroll
     var _cachedSections = null;
     var _cachedItems = null;
     var _isMultiSticky = stickyCard.classList.contains('multi-sticky');
@@ -4259,7 +4360,7 @@ function resetCommentForm() {
 
 // Character count listeners
 
-// Starfield — creates twinkling stars and shooting star effects
+// Starfield โ€” creates twinkling stars and shooting star effects
 (function createStarfield() {
     const container = document.getElementById('starfield');
     if (!container) return;
@@ -4282,7 +4383,7 @@ function resetCommentForm() {
     }
     container.appendChild(frag);
 
-    // Shooting stars — thin streaks matching comet direction
+    // Shooting stars โ€” thin streaks matching comet direction
     function spawnShootingStar() {
         const el = document.createElement('div');
         el.className = 'shooting-star';
@@ -4314,7 +4415,7 @@ function resetCommentForm() {
     setTimeout(spawnShootingStar, 800);
 })();
 
-// Header shooting stars — spawns mini shooting stars inside .comments-panel-header
+// Header shooting stars โ€” spawns mini shooting stars inside .comments-panel-header
 (function() {
     function spawnHeaderStar() {
         var header = document.querySelector('.comments-panel-header');
@@ -4346,7 +4447,7 @@ function resetCommentForm() {
     })();
 })();
 
-// Result panel shooting stars — spawns into result-panel and minimized sticky card
+// Result panel shooting stars โ€” spawns into result-panel and minimized sticky card
 (function() {
     function spawnResultPanelStar() {
         var panel = document.getElementById('resultPanel');
@@ -4412,7 +4513,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function submitComment() {
-    // If minimized, expand and scroll to bottom — then stop (don't submit)
+    // If minimized, expand and scroll to bottom โ€” then stop (don't submit)
     var commentSection = document.querySelector('.comment-section');
     if (commentSection && commentSection.classList.contains('minimized')) {
         _commentMinimized = false;
@@ -4500,7 +4601,7 @@ async function submitComment() {
             showBlessingScreen(userName, commentText);
         }, 800);
     } else {
-        // FB user but auto-save failed or no comment ID — submit fresh
+        // FB user but auto-save failed or no comment ID โ€” submit fresh
         var userId = getUserId();
         var result = await window.cardCounter.submitComment(
             currentCardData.id, currentCardData.name, currentCardData.image,
@@ -4565,7 +4666,7 @@ function showBlessingScreen(userName, comment) {
 
     // Always show comment overlay with user's text
     if (commentOverlay) commentOverlay.style.display = '';
-    blessingName.textContent = userName === 'Me' ? '' : `— ${userName} —`;
+    blessingName.textContent = userName === 'Me' ? '' : `โ€” ${userName} โ€”`;
     blessingComment.textContent = `"${comment}"`;
 
     if (isLoggedIn) {
@@ -4686,7 +4787,7 @@ function closeBlessingAndRestart() {
 }
 
 function goToLandingPage() {
-    console.log('[DEBUG] goToLandingPage — isAnimating:', isAnimating);
+    console.log('[DEBUG] goToLandingPage โ€” isAnimating:', isAnimating);
     isAnimating = false; // safety reset
     currentReadingCategory = null;
     multiCardSelections = [];
@@ -4805,7 +4906,7 @@ function goToLandingPage() {
         spinningCardContainer.style.animation = '';
         spinningCardContainer.style.filter = '';
 
-        // Reset card faces — visibility & animation were forced during transition
+        // Reset card faces โ€” visibility & animation were forced during transition
         var frontFace = spinningCard.querySelector('.spinning-card-front');
         var backFace = spinningCard.querySelector('.spinning-card-back');
         var allFaces = spinningCardContainer.querySelectorAll('.spinning-card-face');
@@ -4934,7 +5035,7 @@ function goToLandingPage() {
             if (sp) { sp.style.transition = 'opacity 0.5s ease'; sp.style.opacity = '1'; }
 
             // Heading visibility is handled by CSS .mode-title.active
-            // (set by applyModeVisuals above) — no inline override needed
+            // (set by applyModeVisuals above) โ€” no inline override needed
 
             // Fade in other elements with slight delays
             setTimeout(() => {
@@ -5084,13 +5185,13 @@ function initCommentsPanel() {
             var now = Date.now();
 
             if (!headerCollapsed && st > scrollThreshold && delta > 5) {
-                // Scrolling down past threshold with enough momentum — collapse
+                // Scrolling down past threshold with enough momentum โ€” collapse
                 headerCollapsed = true;
                 collapseTime = now;
                 panelHeader.classList.add('collapsed');
                 if (tabsBar) tabsBar.classList.add('collapsed');
             } else if (headerCollapsed && (st <= scrollThreshold || (delta < -8 && now - collapseTime > 300))) {
-                // Scrolling up significantly (with cooldown) or back near top — expand
+                // Scrolling up significantly (with cooldown) or back near top โ€” expand
                 headerCollapsed = false;
                 panelHeader.classList.remove('collapsed');
                 if (tabsBar) tabsBar.classList.remove('collapsed');
@@ -5100,7 +5201,7 @@ function initCommentsPanel() {
     }
 
     // Badge is driven solely by notification polling (friend draws + replies).
-    // No fallback to total comments count — badge only shows when logged in via FB.
+    // No fallback to total comments count โ€” badge only shows when logged in via FB.
 }
 
 // Update comments button visibility based on current page state
@@ -5239,7 +5340,7 @@ async function loadFeed(reset) {
 
     if (result.comments.length === 0 && reset && displayedCommentIds.size === 0) {
         newestCommentTimestamp = Date.now();
-        commentsList.innerHTML = '<div class="comments-empty"><div class="comments-empty-icon">✦</div><div class="comments-empty-text">' + t('feed.empty') + '</div></div>';
+        commentsList.innerHTML = '<div class="comments-empty"><div class="comments-empty-icon">โฆ</div><div class="comments-empty-text">' + t('feed.empty') + '</div></div>';
         isLoadingComments = false;
         if (window.cardCounter && window.cardCounter.subscribeToNewComments) {
             window.cardCounter.subscribeToNewComments(handleNewFeedItem);
@@ -5329,7 +5430,7 @@ function createFeedCard(comment) {
     // Category badge
     var catBadge = '';
     if (comment.readingCategory) {
-        var catLabels = { love: '♥', work: '★', finance: '◆' };
+        var catLabels = { love: 'โฅ', work: 'โ…', finance: 'โ—' };
         var catIcon = catLabels[comment.readingCategory] || '';
         var catName = (translations[currentLang] && translations[currentLang].category && translations[currentLang].category[comment.readingCategory]) || comment.readingCategory;
         catBadge = '<span class="feed-cat-badge feed-cat-' + comment.readingCategory + '">' + catIcon + ' ' + escapeHtml(catName) + '</span>';
@@ -5370,7 +5471,7 @@ function createFeedCard(comment) {
                 var mQuote = feedCat ? (getCardCategoryField(mTarot, feedCat + 'Quote') || getCardQuote(mTarot)) : getCardQuote(mTarot);
                 var mInterp = feedCat ? (getCardCategoryField(mTarot, feedCat) || getCardInterpretation(mTarot)) : getCardInterpretation(mTarot);
                 expandedInfoHtml += '<div class="feed-multi-interp" data-index="' + mj + '"' + (mj !== 0 ? ' style="display:none"' : '') + '>';
-                expandedInfoHtml += '<div class="feed-multi-interp-pos">✦ ' + escapeHtml(mPos) + '</div>';
+                expandedInfoHtml += '<div class="feed-multi-interp-pos">โฆ ' + escapeHtml(mPos) + '</div>';
                 expandedInfoHtml += '<div class="feed-multi-interp-name">' + escapeHtml(getCardName(mCard.cardName) || mCard.cardName) + '</div>';
                 if (mQuote) expandedInfoHtml += '<div class="feed-card-quote">"' + escapeHtml(mQuote) + '"</div>';
                 if (mInterp) expandedInfoHtml += '<div class="feed-card-interpretation">' + escapeHtml(mInterp) + '</div>';
@@ -5460,7 +5561,7 @@ function createFeedCard(comment) {
 
     function expandCard(e) {
         if (e.target.closest('.feed-card-replies-section') || e.target.closest('.reply-form')) return;
-        // Already expanded — do nothing
+        // Already expanded โ€” do nothing
         if (card.classList.contains('expanded')) return;
         // Collapse any other expanded card in the list
         var list = card.closest('.comments-list');
@@ -5677,7 +5778,7 @@ function buildTarotLoaderHtml() {
     return '<div class="tarot-loader">' +
         '<div class="tarot-loader-ring"></div>' +
         '<div class="tarot-loader-ring-inner"></div>' +
-        '<div class="tarot-loader-star">✦</div>' +
+        '<div class="tarot-loader-star">โฆ</div>' +
         '<div class="tarot-loader-orbit"></div>' +
         '<div class="tarot-loader-orbit"></div>' +
         '<div class="tarot-loader-orbit"></div>' +
@@ -5689,9 +5790,9 @@ function buildTarotLoaderHtml() {
 function buildMiniLoaderHtml() {
     return '<div class="tarot-loader-mini">' +
         '<div class="tarot-loader-mini-dot"></div>' +
-        '<div class="tarot-loader-mini-star">✦</div>' +
+        '<div class="tarot-loader-mini-star">โฆ</div>' +
         '<div class="tarot-loader-mini-dot"></div>' +
-        '<div class="tarot-loader-mini-star">✦</div>' +
+        '<div class="tarot-loader-mini-star">โฆ</div>' +
         '<div class="tarot-loader-mini-dot"></div>' +
         '</div>';
 }
@@ -5749,10 +5850,10 @@ function openCommentsPanel(skipLoadComments = false) {
     // Update user name display
     updateCommentsPanelUser();
 
-    // Check if user has comments and show/hide "ของฉัน" tab
+    // Check if user has comments and show/hide "เธเธญเธเธเธฑเธ" tab
     checkUserHasComments();
 
-    // Check if user has picked a card and show/hide "ไพ่ฉัน" tab
+    // Check if user has picked a card and show/hide "เนเธเนเธเธฑเธ" tab
     checkMyCardTab();
 
     // Restore tab badges (checkMyCardTab resets textContent)
@@ -5872,9 +5973,9 @@ async function checkUserHasComments() {
     }
 }
 
-// Check if user has any comments and show/hide the "ไพ่ฉัน" tab
+// Check if user has any comments and show/hide the "เนเธเนเธเธฑเธ" tab
 async function checkMyCardTab() {
-    // MyCard tab is always visible — no need to hide/show
+    // MyCard tab is always visible โ€” no need to hide/show
     const commentsTabs = document.getElementById('commentsTabs');
     if (!commentsTabs) return;
 
@@ -6077,7 +6178,7 @@ async function loadComments(reset = false) {
 
         commentsList.innerHTML = `
             <div class="comments-empty">
-                <div class="comments-empty-icon">💬</div>
+                <div class="comments-empty-icon">๐’ฌ</div>
                 <div class="comments-empty-text">${t('cta.beFirstComment')}</div>
             </div>
         `;
@@ -6152,7 +6253,7 @@ async function loadHotComments() {
     if (comments.length === 0) {
         commentsList.innerHTML = `
             <div class="comments-empty">
-                <div class="comments-empty-icon">🔥</div>
+                <div class="comments-empty-icon">๐”ฅ</div>
                 <div class="comments-empty-text">${t('common.noHotComments')}<br>${t('common.tryReply')}</div>
             </div>
         `;
@@ -6210,9 +6311,9 @@ async function loadMyComments() {
         commentsList.innerHTML = `
             <div class="comments-empty comments-empty-cta">
                 <div class="cta-sparkles">
-                    <span class="sparkle s1">✦</span>
-                    <span class="sparkle s2">✧</span>
-                    <span class="sparkle s3">✦</span>
+                    <span class="sparkle s1">โฆ</span>
+                    <span class="sparkle s2">โง</span>
+                    <span class="sparkle s3">โฆ</span>
                 </div>
                 <div class="cta-card-icon">
                     <svg viewBox="0 0 60 80" fill="none">
@@ -6320,7 +6421,7 @@ async function loadMyCardComments() {
         return;
     }
 
-    // Use feed card style — same as วงไพ่ tab
+    // Use feed card style โ€” same as เธงเธเนเธเน tab
     myComments.forEach(comment => {
         if (displayedCommentIds.has(comment.id)) return;
         var card = createFeedCard(comment);
@@ -6517,9 +6618,9 @@ function getFacebookFriendIds() {
 function buildLoginRequiredCta(messageKey, subtitleKey) {
     return '<div class="comments-empty comments-empty-cta friends-cta">' +
         '<div class="cta-sparkles">' +
-            '<span class="sparkle s1">✦</span>' +
-            '<span class="sparkle s2">✧</span>' +
-            '<span class="sparkle s3">✦</span>' +
+            '<span class="sparkle s1">โฆ</span>' +
+            '<span class="sparkle s2">โง</span>' +
+            '<span class="sparkle s3">โฆ</span>' +
         '</div>' +
         '<div class="friends-cta-icon">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">' +
@@ -6542,9 +6643,9 @@ function buildLoginRequiredCta(messageKey, subtitleKey) {
 function buildMyCardEmptyCta() {
     return '<div class="comments-empty comments-empty-cta draw-cta">' +
         '<div class="cta-sparkles">' +
-            '<span class="sparkle s1">✦</span>' +
-            '<span class="sparkle s2">✧</span>' +
-            '<span class="sparkle s3">✦</span>' +
+            '<span class="sparkle s1">โฆ</span>' +
+            '<span class="sparkle s2">โง</span>' +
+            '<span class="sparkle s3">โฆ</span>' +
         '</div>' +
         '<div class="cta-card-icon">' +
             '<svg viewBox="0 0 60 80" fill="none">' +
@@ -6585,9 +6686,9 @@ function buildFriendsLoginCta() {
 function buildFriendsInviteCta() {
     return '<div class="comments-empty comments-empty-cta friends-cta">' +
         '<div class="cta-sparkles">' +
-            '<span class="sparkle s1">✦</span>' +
-            '<span class="sparkle s2">✧</span>' +
-            '<span class="sparkle s3">✦</span>' +
+            '<span class="sparkle s1">โฆ</span>' +
+            '<span class="sparkle s2">โง</span>' +
+            '<span class="sparkle s3">โฆ</span>' +
         '</div>' +
         '<div class="friends-cta-icon">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">' +
@@ -6610,9 +6711,9 @@ function buildFriendsInviteCta() {
 function buildFriendsReconnectCta() {
     return '<div class="comments-empty comments-empty-cta friends-cta">' +
         '<div class="cta-sparkles">' +
-            '<span class="sparkle s1">✦</span>' +
-            '<span class="sparkle s2">✧</span>' +
-            '<span class="sparkle s3">✦</span>' +
+            '<span class="sparkle s1">โฆ</span>' +
+            '<span class="sparkle s2">โง</span>' +
+            '<span class="sparkle s3">โฆ</span>' +
         '</div>' +
         '<div class="friends-cta-icon">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">' +
@@ -6660,7 +6761,7 @@ function inviteFriendsViaMessenger() {
 }
 
 // ========================================
-// Friends New Cards – Profile Circle Stack
+// Friends New Cards โ€“ Profile Circle Stack
 // ========================================
 
 async function checkFriendsNewCards() {
@@ -6714,7 +6815,7 @@ async function checkFriendsNewCards() {
 }
 
 function onFriendCircleClick(circleEl) {
-    // Update poll state — remove this friend's draws
+    // Update poll state โ€” remove this friend's draws
     var userId = circleEl ? circleEl.dataset.userId : null;
     if (userId && _pollState.friendDrawsData.length > 0) {
         _pollState.friendDrawsData = _pollState.friendDrawsData.filter(function(c) {
@@ -6908,7 +7009,7 @@ function onReplyNotifClick(commentId, replyId, circleEl, replyTimestamp) {
         openCommentsPanel(true);
     }
 
-    // Switch to "ไพ่ฉัน" tab
+    // Switch to "เนเธเนเธเธฑเธ" tab
     var commentsTabs = document.getElementById('commentsTabs');
     if (commentsTabs) {
         commentsTabs.querySelectorAll('.comments-tab').forEach(function(tab) {
@@ -7556,7 +7657,7 @@ function renderReplyNotifCirclesFromState() {
     if (bar) buildUnifiedNotifCircles(bar);
 }
 
-// Load comments for cardview tab (viewing a specific card's comments from ส่อง button)
+// Load comments for cardview tab (viewing a specific card's comments from เธชเนเธญเธ button)
 async function loadCardViewComments() {
     if (isLoadingComments) return;
     isLoadingComments = true;
@@ -7572,7 +7673,7 @@ async function loadCardViewComments() {
     if (!cardViewData) {
         commentsList.innerHTML = `
             <div class="comments-empty">
-                <div class="comments-empty-icon">🃏</div>
+                <div class="comments-empty-icon">๐</div>
                 <div class="comments-empty-text">${t('error.cardNotFound')}</div>
             </div>
         `;
@@ -7597,7 +7698,7 @@ async function loadCardViewComments() {
     if (comments.length === 0) {
         commentsList.innerHTML = `
             <div class="comments-empty">
-                <div class="comments-empty-icon">💬</div>
+                <div class="comments-empty-icon">๐’ฌ</div>
                 <div class="comments-empty-text">${t('comments.noComments')}<br>${t('comments.beFirst')}</div>
             </div>
         `;
@@ -7644,7 +7745,7 @@ function createCommentCard(comment, showReplyBadge = false) {
 
     // Reply count badge for top comments
     const replyBadgeHtml = (showReplyBadge && comment.replyCount > 0)
-        ? `<div class="comment-reply-badge">💬 ${comment.replyCount} ${t('common.replyCount')}</div>`
+        ? `<div class="comment-reply-badge">๐’ฌ ${comment.replyCount} ${t('common.replyCount')}</div>`
         : '';
 
     const avatarHtml = getProfilePictureHtml(comment);
@@ -7848,7 +7949,7 @@ function markRepliesAsRead(card, commentId) {
         replyCountEl.classList.remove('unread-replies');
     }
 
-    // Update poll state — remove replies for this comment from unseen
+    // Update poll state โ€” remove replies for this comment from unseen
     if (_pollState.repliesData.length > 0) {
         var removedReplies = _pollState.repliesData.filter(function(item) {
             return item.commentId === commentId;
@@ -8071,7 +8172,7 @@ async function expandCommentCard(card, comment) {
                 const rcDate = rc.timestamp ? new Date(rc.timestamp) : new Date();
                 const rcDateStr = formatCommentDate(rcDate);
                 const replyBadge = rc.replyCount > 0
-                    ? `<span class="related-comment-replies">💬 ${rc.replyCount}</span>`
+                    ? `<span class="related-comment-replies">๐’ฌ ${rc.replyCount}</span>`
                     : '';
                 // Store full comment data as JSON for direct use
                 const commentDataJson = JSON.stringify({
@@ -8354,7 +8455,7 @@ function showSavePreview(canvas, filename) {
     closeBtn.addEventListener('click', closePopup);
     overlay.addEventListener('click', closePopup);
 
-    // Download — fresh user gesture
+    // Download โ€” fresh user gesture
     var dlBtn = popup.querySelector('.save-preview-download');
     dlBtn.addEventListener('click', function() {
         gtag('event', 'download_image', { event_category: 'engagement' });
@@ -8366,7 +8467,7 @@ function showSavePreview(canvas, filename) {
         closePopup();
     });
 
-    // Share — fresh user gesture on mobile
+    // Share โ€” fresh user gesture on mobile
     if (canShare) {
         var shareBtn = popup.querySelector('.save-preview-share');
         shareBtn.addEventListener('click', function() {
@@ -8727,7 +8828,7 @@ function drawMultiVerticalLayout(ctx, cardImages, width, height, colors) {
         ctx.fillStyle = colors.accent;
         ctx.font = 'bold 22px "Prompt", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('✦ ' + posLabel, textCenterX, textBlockTop + 10);
+        ctx.fillText('โฆ ' + posLabel, textCenterX, textBlockTop + 10);
 
         // Card name (dynamic sizing)
         ctx.fillStyle = '#C0C8E0';
@@ -8776,7 +8877,7 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
     ctx.font = 'bold 30px "Cormorant Garamond", "Prompt", serif';
     ctx.textAlign = 'center';
     var titleStr = getReadingModeTitle();
-    if (catLabel) titleStr += '  ·  ' + catLabel;
+    if (catLabel) titleStr += '  ยท  ' + catLabel;
     ctx.fillText(titleStr, width / 2, safePad + 10);
 
     // Category accent line
@@ -9080,22 +9181,22 @@ function drawMultiWideLayout(ctx, cardImages, width, height, colors) {
 
 // --- Shared data ---
 var _MONTH_SHORT = {
-    th:    ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'],
+    th:    ['เธก.เธ.','เธ.เธ.','เธกเธต.เธ.','เน€เธก.เธข.','เธ.เธ.','เธกเธด.เธข.','เธ.เธ.','เธช.เธ.','เธ.เธข.','เธ•.เธ.','เธ.เธข.','เธ.เธ.'],
     en:    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-    'zh-CN': ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
-    'zh-TW': ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
-    ko:    ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-    ja:    ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
-    fr:    ['Jan','Fév','Mars','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc']
+    'zh-CN': ['1ๆ','2ๆ','3ๆ','4ๆ','5ๆ','6ๆ','7ๆ','8ๆ','9ๆ','10ๆ','11ๆ','12ๆ'],
+    'zh-TW': ['1ๆ','2ๆ','3ๆ','4ๆ','5ๆ','6ๆ','7ๆ','8ๆ','9ๆ','10ๆ','11ๆ','12ๆ'],
+    ko:    ['1์”','2์”','3์”','4์”','5์”','6์”','7์”','8์”','9์”','10์”','11์”','12์”'],
+    ja:    ['1ๆ','2ๆ','3ๆ','4ๆ','5ๆ','6ๆ','7ๆ','8ๆ','9ๆ','10ๆ','11ๆ','12ๆ'],
+    fr:    ['Jan','Fรฉv','Mars','Avr','Mai','Juin','Juil','Aoรปt','Sep','Oct','Nov','Dรฉc']
 };
 var _MONTH_FULL = {
-    th:    ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'],
+    th:    ['เธกเธเธฃเธฒเธเธก','เธเธธเธกเธ เธฒเธเธฑเธเธเน','เธกเธตเธเธฒเธเธก','เน€เธกเธฉเธฒเธขเธ','เธเธคเธฉเธ เธฒเธเธก','เธกเธดเธ–เธธเธเธฒเธขเธ','เธเธฃเธเธเธฒเธเธก','เธชเธดเธเธซเธฒเธเธก','เธเธฑเธเธขเธฒเธขเธ','เธ•เธธเธฅเธฒเธเธก','เธเธคเธจเธเธดเธเธฒเธขเธ','เธเธฑเธเธงเธฒเธเธก'],
     en:    ['January','February','March','April','May','June','July','August','September','October','November','December'],
-    'zh-CN': ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'],
-    'zh-TW': ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'],
-    ko:    ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-    ja:    ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
-    fr:    ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
+    'zh-CN': ['ไธ€ๆ','ไบๆ','ไธๆ','ๅๆ','ไบ”ๆ','ๅ…ญๆ','ไธๆ','ๅ…ซๆ','ไนๆ','ๅๆ','ๅไธ€ๆ','ๅไบๆ'],
+    'zh-TW': ['ไธ€ๆ','ไบๆ','ไธๆ','ๅๆ','ไบ”ๆ','ๅ…ญๆ','ไธๆ','ๅ…ซๆ','ไนๆ','ๅๆ','ๅไธ€ๆ','ๅไบๆ'],
+    ko:    ['1์”','2์”','3์”','4์”','5์”','6์”','7์”','8์”','9์”','10์”','11์”','12์”'],
+    ja:    ['1ๆ','2ๆ','3ๆ','4ๆ','5ๆ','6ๆ','7ๆ','8ๆ','9ๆ','10ๆ','11ๆ','12ๆ'],
+    fr:    ['Janvier','Fรฉvrier','Mars','Avril','Mai','Juin','Juillet','Aoรปt','Septembre','Octobre','Novembre','Dรฉcembre']
 };
 function _monthLabel(i) {
     var ms = _MONTH_SHORT[currentLang] || _MONTH_SHORT.en;
@@ -9110,7 +9211,7 @@ function _monthLabelFull(i) {
 
 // Celtic Cross normalized card positions [fx, fy, rotateDeg]
 // Coordinate space: (0,0)=top-left of layout area, (1,1)=bottom-right
-var _CC_POS = [
+var _CC_POS_CLASSIC = [
     { fx: 0.350, fy: 0.500, r:  0 },   // 1: significator (cross center)
     { fx: 0.350, fy: 0.500, r:  90 },  // 2: crossing (same pos, rotated)
     { fx: 0.350, fy: 0.240, r:  0 },   // 3: crown
@@ -9123,13 +9224,30 @@ var _CC_POS = [
     { fx: 0.910, fy: 0.125, r:  0 },   // 10: staff (top)
 ];
 
+var _CC_POS_NEW = [
+    { fx: 0.350, fy: 0.500, r: 0 },  // 1
+    { fx: 0.095, fy: 0.500, r: 0 },  // 2
+    { fx: 0.350, fy: 0.240, r: 0 },  // 3
+    { fx: 0.350, fy: 0.760, r: 0 },  // 4
+    { fx: 0.605, fy: 0.500, r: 0 },  // 5
+    { fx: 0.095, fy: 0.240, r: 0 },  // 6
+    { fx: 0.860, fy: 0.760, r: 0 },  // 7
+    { fx: 0.860, fy: 0.500, r: 0 },  // 8
+    { fx: 0.860, fy: 0.240, r: 0 },  // 9
+    { fx: 0.605, fy: 0.240, r: 0 },  // 10
+];
+
+function _getTenCardSpreadPositions() {
+    return isTenCardNewLayout() ? _CC_POS_NEW : _CC_POS_CLASSIC;
+}
+
 // --- Private helpers ---
 function _drawCard(ctx, img, cx, cy, w, h, angle, colors) {
     ctx.save();
     ctx.translate(cx, cy);
     if (angle) ctx.rotate(angle * Math.PI / 180);
     // After rotation the canvas axes are swapped, so swap draw dimensions
-    // to preserve the intended visual size (w × h in screen space)
+    // to preserve the intended visual size (w ร— h in screen space)
     var dw = angle ? h : w, dh = angle ? w : h;
     ctx.shadowColor = 'rgba(0,0,0,0.5)';
     ctx.shadowBlur = 14;
@@ -9163,6 +9281,14 @@ function _numBadge(ctx, n, x, y, sz, color) {
     ctx.restore();
 }
 
+function _drawCardCornerBadge(ctx, n, cx, cy, cardW, cardH, angle, sz, color) {
+    var normalizedAngle = Math.abs((angle || 0) % 180);
+    var isSideways = normalizedAngle === 90;
+    var halfW = isSideways ? (cardH / 2) : (cardW / 2);
+    var halfH = isSideways ? (cardW / 2) : (cardH / 2);
+    _numBadge(ctx, n, cx - halfW + sz * 0.72, cy - halfH + sz * 0.72, sz, color);
+}
+
 function _fitText(ctx, text, x, y, maxW, sz, minSz, color) {
     ctx.fillStyle = color;
     var s = sz;
@@ -9186,7 +9312,7 @@ function _bigSpreadFooter(ctx, W, H, padB, colors) {
     });
 }
 
-// ─── 10-Card: Story / Wide layouts ───────────────────────────
+// โ”€โ”€โ”€ 10-Card: Story / Wide layouts โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
 function drawTenCardLayout(ctx, cardImages, W, H, colors) {
     if (W > H) { _tenCardWide(ctx, cardImages, W, H, colors); }
     else        { _tenCardTall(ctx, cardImages, W, H, colors); }
@@ -9213,21 +9339,18 @@ function _tenCardTall(ctx, cardImages, W, H, colors) {
     var CARD_H = Math.round(Math.min(aH * 0.215, aW * 0.175 / 0.625));
     var CARD_W = Math.round(CARD_H * 0.625);
     var smSz   = Math.max(Math.round(CARD_H * 0.10), 13);
+    var ccPos  = _getTenCardSpreadPositions();
     var lc = colors.accent;
 
     function px(fx) { return padS + fx * aW; }
     function py(fy) { return crossT + fy * aH; }
 
     for (var i = 0; i < 10; i++) {
-        var p = _CC_POS[i];
+        var p = ccPos[i];
         var dw = p.r ? CARD_H : CARD_W, dh = p.r ? CARD_W : CARD_H;
         _drawCard(ctx, cardImages[i], px(p.fx), py(p.fy), dw, dh, p.r, colors);
-        if (i !== 1) {  // card 2 badge placed separately on landscape card
-            _numBadge(ctx, i + 1, px(p.fx) - CARD_W/2 + smSz * 0.72, py(p.fy) - CARD_H/2 + smSz * 0.72, smSz, lc);
-        }
+        _drawCardCornerBadge(ctx, i + 1, px(p.fx), py(p.fy), CARD_W, CARD_H, p.r, smSz, lc);
     }
-    // Badge 2 on landscape card: top-left corner = center ± (CARD_H/2, CARD_W/2)
-    _numBadge(ctx, 2, px(_CC_POS[0].fx) - CARD_H/2 + smSz * 0.72, py(_CC_POS[0].fy) - CARD_W/2 + smSz * 0.72, smSz, lc);
 
     // Divider
     var divY = listT - 1;
@@ -9264,7 +9387,6 @@ function _tenCardTall(ctx, cardImages, W, H, colors) {
 
     _bigSpreadFooter(ctx, W, H, footerH, colors);
 }
-
 function _tenCardWide(ctx, cardImages, W, H, colors) {
     // Left ~65%: Celtic Cross (no text labels), Right ~33%: numbered card list
     var padT = Math.round(H * 0.095), padB = Math.round(H * 0.058), padS = Math.round(W * 0.030);
@@ -9281,20 +9403,17 @@ function _tenCardWide(ctx, cardImages, W, H, colors) {
     var CARD_H = Math.round(Math.min(crossH * 0.225, crossW * 0.178 / 0.625));
     var CARD_W = Math.round(CARD_H * 0.625);
     var smSz   = Math.max(Math.round(CARD_H * 0.105), 9);
+    var ccPos  = _getTenCardSpreadPositions();
 
     function px(fx) { return padS + fx * crossW; }
     function py(fy) { return padT + fy * crossH; }
 
     for (var i = 0; i < 10; i++) {
-        var p = _CC_POS[i];
+        var p = ccPos[i];
         var dw = p.r ? CARD_H : CARD_W, dh = p.r ? CARD_W : CARD_H;
         _drawCard(ctx, cardImages[i], px(p.fx), py(p.fy), dw, dh, p.r, colors);
-        if (i !== 1) {
-            _numBadge(ctx, i + 1, px(p.fx) - CARD_W/2 + smSz * 0.72, py(p.fy) - CARD_H/2 + smSz * 0.72, smSz, colors.accent);
-        }
+        _drawCardCornerBadge(ctx, i + 1, px(p.fx), py(p.fy), CARD_W, CARD_H, p.r, smSz, colors.accent);
     }
-    // Badge 2 on landscape card: top-left corner = center ± (CARD_H/2, CARD_W/2)
-    _numBadge(ctx, 2, px(_CC_POS[0].fx) - CARD_H/2 + smSz * 0.72, py(_CC_POS[0].fy) - CARD_W/2 + smSz * 0.72, smSz, colors.accent);
 
     // Divider
     var listX = padS + crossW + padS * 0.5;
@@ -9325,8 +9444,6 @@ function _tenCardWide(ctx, cardImages, W, H, colors) {
 
     _bigSpreadFooter(ctx, W, H, padB, colors);
 }
-
-// ─── 10-Card: Square (no text labels) ────────────────────────
 function drawTenCardSquareLayout(ctx, cardImages, W, H, colors) {
     var padT = Math.round(H * 0.058), padB = Math.round(H * 0.030), padS = Math.round(W * 0.030);
     var aW = W - padS * 2, aH = H - padT - padB;
@@ -9339,25 +9456,20 @@ function drawTenCardSquareLayout(ctx, cardImages, W, H, colors) {
     var CARD_H = Math.round(Math.min(aH * 0.245, aW * 0.205 / 0.625));
     var CARD_W = Math.round(CARD_H * 0.625);
     var smSz   = Math.max(Math.round(CARD_H * 0.09), 10);
+    var ccPos  = _getTenCardSpreadPositions();
 
     function px(fx) { return padS + fx * aW; }
     function py(fy) { return padT + fy * aH; }
 
     for (var i = 0; i < 10; i++) {
-        var p = _CC_POS[i];
+        var p = ccPos[i];
         var dw = p.r ? CARD_H : CARD_W, dh = p.r ? CARD_W : CARD_H;
         _drawCard(ctx, cardImages[i], px(p.fx), py(p.fy), dw, dh, p.r, colors);
-        if (i !== 1) {
-            _numBadge(ctx, i + 1, px(p.fx) - CARD_W/2 + smSz * 0.72, py(p.fy) - CARD_H/2 + smSz * 0.72, smSz, colors.accent);
-        }
+        _drawCardCornerBadge(ctx, i + 1, px(p.fx), py(p.fy), CARD_W, CARD_H, p.r, smSz, colors.accent);
     }
-    // Badge 2 on landscape card: top-left corner = center ± (CARD_H/2, CARD_W/2)
-    _numBadge(ctx, 2, px(_CC_POS[0].fx) - CARD_H/2 + smSz * 0.72, py(_CC_POS[0].fy) - CARD_W/2 + smSz * 0.72, smSz, colors.accent);
 
     _bigSpreadFooter(ctx, W, H, padB, colors);
 }
-
-// ─── 12-Card: Story / Wide layouts ───────────────────────────
 function drawTwelveCardLayout(ctx, cardImages, W, H, colors) {
     if (W > H) { _twelveCardWide(ctx, cardImages, W, H, colors); }
     else        { _twelveCardTall(ctx, cardImages, W, H, colors); }
@@ -9493,7 +9605,7 @@ function _twelveCardWide(ctx, cardImages, W, H, colors) {
     _bigSpreadFooter(ctx, W, H, padB, colors);
 }
 
-// ─── 12-Card: Square (cards fill image, no text labels) ──────
+// โ”€โ”€โ”€ 12-Card: Square (cards fill image, no text labels) โ”€โ”€โ”€โ”€โ”€โ”€
 function drawTwelveCardSquareLayout(ctx, cardImages, W, H, colors) {
     var padT = Math.round(H * 0.058), padB = Math.round(H * 0.030);
     var aW = W, aH = H - padT - padB;
@@ -9646,7 +9758,7 @@ function drawLineIcon(ctx, x, y, size, color) {
     ctx.fillText('L', x + size/2, y + size * 0.68);
 }
 
-// Unified footer: social left, jubpai.com right — same row
+// Unified footer: social left, jubpai.com right โ€” same row
 // opts: { iconSize, centerX, footerY, width, color, accentColor, compact }
 function drawFooterWithPromo(ctx, opts) {
     var iconSize = opts.iconSize || 14;
@@ -9671,7 +9783,7 @@ function drawFooterWithPromo(ctx, opts) {
     ctx.font = labelSize + 'px "Prompt", sans-serif';
     ctx.fillStyle = color;
     ctx.textAlign = 'left';
-    ctx.fillText('Pimfahmaprod · Line: @Pimfah', leftX, labelY);
+    ctx.fillText('Pimfahmaprod ยท Line: @Pimfah', leftX, labelY);
 
     // --- Center: jubpai.com promo (centered, prominent) ---
     var promoSize = compact ? 20 : 28;
@@ -9684,21 +9796,21 @@ function drawFooterWithPromo(ctx, opts) {
     ctx.textAlign = 'center';
     ctx.font = 'bold ' + promoSize + 'px "Cormorant Garamond", "Prompt", serif';
     ctx.fillStyle = accentColor;
-    ctx.fillText('✦  jubpai.com  ✦', centerX, promoMidY);
+    ctx.fillText('โฆ  jubpai.com  โฆ', centerX, promoMidY);
     ctx.restore();
 
     // Crisp text on top
     ctx.textAlign = 'center';
     ctx.font = 'bold ' + promoSize + 'px "Cormorant Garamond", "Prompt", serif';
     ctx.fillStyle = accentColor;
-    ctx.fillText('✦  jubpai.com  ✦', centerX, promoMidY);
+    ctx.fillText('โฆ  jubpai.com  โฆ', centerX, promoMidY);
 
     // Subtext below
     var subSize = compact ? 10 : 13;
     ctx.font = subSize + 'px "Prompt", sans-serif';
     ctx.fillStyle = accentColor;
     ctx.textAlign = 'center';
-    ctx.fillText('จับไพ่ทาโรต์ฟรี ทุกวัน', centerX, promoMidY + (compact ? 15 : 20));
+    ctx.fillText('เธเธฑเธเนเธเนเธ—เธฒเนเธฃเธ•เนเธเธฃเธต เธ—เธธเธเธงเธฑเธ', centerX, promoMidY + (compact ? 15 : 20));
 
     return iconSize + (compact ? 11 : 14) + labelSize + 4;
 }
@@ -10261,7 +10373,7 @@ waitForResources();
                 audioElement.pause();
             }
         } else {
-            // Tab visible again — resume if was playing and not muted
+            // Tab visible again โ€” resume if was playing and not muted
             if (wasPlayingBeforeHidden && audioElement && !isMuted && musicStarted) {
                 audioElement.play().catch(() => {});
             }
@@ -10358,7 +10470,7 @@ waitForResources();
     // Load all analytics data
     async function loadAnalyticsData() {
         if (!window.cardCounter || !window.cardCounter.isEnabled()) {
-            showAnalyticsError('Firebase ยังไม่ได้เชื่อมต่อ');
+            showAnalyticsError('Firebase เธขเธฑเธเนเธกเนเนเธ”เนเน€เธเธทเนเธญเธกเธ•เนเธญ');
             return;
         }
 
@@ -10440,7 +10552,7 @@ waitForResources();
 
             // Get all 78 cards from tarotData
             if (!tarotData || !tarotData.cards) {
-                container.innerHTML = '<div class="analytics-empty">ยังไม่โหลดข้อมูลไพ่</div>';
+                container.innerHTML = '<div class="analytics-empty">เธขเธฑเธเนเธกเนเนเธซเธฅเธ”เธเนเธญเธกเธนเธฅเนเธเน</div>';
                 return;
             }
 
@@ -10475,7 +10587,7 @@ waitForResources();
 
         } catch (error) {
             console.error('Error loading all cards:', error);
-            container.innerHTML = '<div class="analytics-empty">เกิดข้อผิดพลาด</div>';
+            container.innerHTML = '<div class="analytics-empty">เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”</div>';
         }
     }
 
@@ -10489,7 +10601,7 @@ waitForResources();
             const data = snapshot.val();
 
             if (!data) {
-                container.innerHTML = '<div class="analytics-empty">ยังไม่มีข้อมูล</div>';
+                container.innerHTML = '<div class="analytics-empty">เธขเธฑเธเนเธกเนเธกเธตเธเนเธญเธกเธนเธฅ</div>';
                 return;
             }
 
@@ -10524,7 +10636,7 @@ waitForResources();
 
         } catch (error) {
             console.error('Error loading save format stats:', error);
-            container.innerHTML = '<div class="analytics-empty">เกิดข้อผิดพลาด</div>';
+            container.innerHTML = '<div class="analytics-empty">เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”</div>';
         }
     }
 
@@ -10538,7 +10650,7 @@ waitForResources();
             const data = snapshot.val();
 
             if (!data) {
-                container.innerHTML = '<div class="analytics-empty">ยังไม่มีข้อมูล</div>';
+                container.innerHTML = '<div class="analytics-empty">เธขเธฑเธเนเธกเนเธกเธตเธเนเธญเธกเธนเธฅ</div>';
                 return;
             }
 
@@ -10572,7 +10684,7 @@ waitForResources();
 
         } catch (error) {
             console.error('Error loading share stats:', error);
-            container.innerHTML = '<div class="analytics-empty">เกิดข้อผิดพลาด</div>';
+            container.innerHTML = '<div class="analytics-empty">เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”</div>';
         }
     }
 
@@ -10621,7 +10733,7 @@ waitForResources();
 
         } catch (error) {
             console.error('Error loading social stats:', error);
-            container.innerHTML = '<div class="analytics-empty">เกิดข้อผิดพลาด</div>';
+            container.innerHTML = '<div class="analytics-empty">เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”</div>';
         }
     }
 
@@ -10634,7 +10746,7 @@ waitForResources();
             await resolveDisplayNames(hotComments);
 
             if (!hotComments || hotComments.length === 0) {
-                container.innerHTML = '<div class="analytics-empty">ยังไม่มีความคิดเห็น</div>';
+                container.innerHTML = '<div class="analytics-empty">เธขเธฑเธเนเธกเนเธกเธตเธเธงเธฒเธกเธเธดเธ”เน€เธซเนเธ</div>';
                 return;
             }
 
@@ -10661,7 +10773,7 @@ waitForResources();
 
         } catch (error) {
             console.error('Error loading hot comments:', error);
-            container.innerHTML = '<div class="analytics-empty">เกิดข้อผิดพลาด</div>';
+            container.innerHTML = '<div class="analytics-empty">เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”</div>';
         }
     }
 
@@ -10675,7 +10787,7 @@ waitForResources();
             const data = snapshot.val();
 
             if (!data) {
-                container.innerHTML = '<div class="analytics-empty">ยังไม่มีข้อมูล</div>';
+                container.innerHTML = '<div class="analytics-empty">เธขเธฑเธเนเธกเนเธกเธตเธเนเธญเธกเธนเธฅ</div>';
                 return;
             }
 
@@ -10715,7 +10827,7 @@ waitForResources();
 
         } catch (error) {
             console.error('Error loading journey funnel:', error);
-            container.innerHTML = '<div class="analytics-empty">เกิดข้อผิดพลาด</div>';
+            container.innerHTML = '<div class="analytics-empty">เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”</div>';
         }
     }
 
@@ -10729,7 +10841,7 @@ waitForResources();
             const data = snapshot.val();
 
             if (!data) {
-                container.innerHTML = '<div class="analytics-empty">ยังไม่มีข้อมูล</div>';
+                container.innerHTML = '<div class="analytics-empty">เธขเธฑเธเนเธกเนเธกเธตเธเนเธญเธกเธนเธฅ</div>';
                 return;
             }
 
@@ -10764,7 +10876,7 @@ waitForResources();
 
         } catch (error) {
             console.error('Error loading time to pick stats:', error);
-            container.innerHTML = '<div class="analytics-empty">เกิดข้อผิดพลาด</div>';
+            container.innerHTML = '<div class="analytics-empty">เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”</div>';
         }
     }
 
@@ -10778,7 +10890,7 @@ waitForResources();
             const data = snapshot.val();
 
             if (!data) {
-                container.innerHTML = '<div class="analytics-empty">ยังไม่มีข้อมูล</div>';
+                container.innerHTML = '<div class="analytics-empty">เธขเธฑเธเนเธกเนเธกเธตเธเนเธญเธกเธนเธฅ</div>';
                 return;
             }
 
@@ -10821,7 +10933,7 @@ waitForResources();
 
         } catch (error) {
             console.error('Error loading device stats:', error);
-            container.innerHTML = '<div class="analytics-empty">เกิดข้อผิดพลาด</div>';
+            container.innerHTML = '<div class="analytics-empty">เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”</div>';
         }
     }
 
@@ -10835,7 +10947,7 @@ waitForResources();
             const data = snapshot.val();
 
             if (!data) {
-                container.innerHTML = '<div class="analytics-empty">ยังไม่มีข้อมูล</div>';
+                container.innerHTML = '<div class="analytics-empty">เธขเธฑเธเนเธกเนเธกเธตเธเนเธญเธกเธนเธฅ</div>';
                 return;
             }
 
@@ -10857,7 +10969,7 @@ waitForResources();
                 },
                 {
                     key: 'viewCardComments',
-                    label: 'View Card Comments (ส่อง)',
+                    label: 'View Card Comments (เธชเนเธญเธ)',
                     actions: ['click']
                 },
                 {
@@ -10887,7 +10999,7 @@ waitForResources();
                 },
                 {
                     key: 'myCardTab',
-                    label: 'My Card Tab (ไพ่ฉัน)',
+                    label: 'My Card Tab (เนเธเนเธเธฑเธ)',
                     actions: ['view']
                 }
             ];
@@ -10925,7 +11037,7 @@ waitForResources();
 
         } catch (error) {
             console.error('Error loading feature usage stats:', error);
-            container.innerHTML = '<div class="analytics-empty">เกิดข้อผิดพลาด</div>';
+            container.innerHTML = '<div class="analytics-empty">เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”</div>';
         }
     }
 
@@ -10939,7 +11051,7 @@ waitForResources();
             const data = snapshot.val();
 
             if (!data) {
-                container.innerHTML = '<div class="analytics-empty">ยังไม่มีข้อมูล</div>';
+                container.innerHTML = '<div class="analytics-empty">เธขเธฑเธเนเธกเนเธกเธตเธเนเธญเธกเธนเธฅ</div>';
                 return;
             }
 
@@ -10986,7 +11098,7 @@ waitForResources();
 
         } catch (error) {
             console.error('Error loading position heatmap:', error);
-            container.innerHTML = '<div class="analytics-empty">เกิดข้อผิดพลาด</div>';
+            container.innerHTML = '<div class="analytics-empty">เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”</div>';
         }
     }
 
@@ -11000,7 +11112,7 @@ waitForResources();
             const data = snapshot.val();
 
             if (!data) {
-                container.innerHTML = '<div class="analytics-empty">ยังไม่มีข้อมูล</div>';
+                container.innerHTML = '<div class="analytics-empty">เธขเธฑเธเนเธกเนเธกเธตเธเนเธญเธกเธนเธฅ</div>';
                 return;
             }
 
@@ -11034,7 +11146,7 @@ waitForResources();
 
         } catch (error) {
             console.error('Error loading scroll depth stats:', error);
-            container.innerHTML = '<div class="analytics-empty">เกิดข้อผิดพลาด</div>';
+            container.innerHTML = '<div class="analytics-empty">เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”</div>';
         }
     }
 
@@ -11098,13 +11210,13 @@ waitForResources();
     }
 })();
 
-// ── bfcache restore: reset disabled card states ──────────────────────────────
+// โ”€โ”€ bfcache restore: reset disabled card states โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
 // On mobile, the browser may freeze and restore the page from bfcache when the
 // user presses Back or switches apps. This leaves card elements with disabled
 // classes / inline styles from a previous multi-card session still visible.
-// pageshow fires with event.persisted = true in that case — reset everything.
+// pageshow fires with event.persisted = true in that case โ€” reset everything.
 window.addEventListener('pageshow', function(event) {
-    if (!event.persisted) return; // Normal page load — no action needed
+    if (!event.persisted) return; // Normal page load โ€” no action needed
 
     // Reset all card DOM states
     document.querySelectorAll('.card-container').forEach(function(c) {
@@ -11141,3 +11253,4 @@ window.addEventListener('pageshow', function(event) {
     var overlayEl = document.getElementById('overlay');
     if (overlayEl) overlayEl.classList.remove('active');
 });
+

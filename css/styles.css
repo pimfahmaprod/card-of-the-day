@@ -925,6 +925,28 @@ body {
 .tc-9  { transform: translate(180px, -65px); z-index: 1; animation: ccFloat 5s ease-in-out infinite 4s; }
 .tc-10 { transform: translate(180px, -195px); z-index: 1; animation: ccFloat 5s ease-in-out infinite 4.5s; }
 
+/* New 10-card layout
+   [6] [3] [10] [9]
+   [2] [1] [5]  [8]
+       [4]      [7]
+*/
+.ten-card-fan.layout-new .tc-1  { transform: translate(-65px, 0px); z-index: 3; }
+.ten-card-fan.layout-new .tc-2  { transform: translate(-185px, 0px); z-index: 2; }
+.ten-card-fan.layout-new .tc-3  { transform: translate(-65px, -140px); z-index: 2; }
+.ten-card-fan.layout-new .tc-4  { transform: translate(-65px, 140px); z-index: 2; }
+.ten-card-fan.layout-new .tc-5  { transform: translate(55px, 0px); z-index: 2; }
+.ten-card-fan.layout-new .tc-6  { transform: translate(-185px, -140px); z-index: 1; }
+.ten-card-fan.layout-new .tc-7  { transform: translate(180px, 140px); z-index: 1; }
+.ten-card-fan.layout-new .tc-8  { transform: translate(180px, 0px); z-index: 1; }
+.ten-card-fan.layout-new .tc-9  { transform: translate(180px, -140px); z-index: 1; }
+.ten-card-fan.layout-new .tc-10 { transform: translate(55px, -140px); z-index: 2; }
+
+.ten-card-fan.layout-new .card-position-label {
+    bottom: -30px;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+}
+
 @keyframes ccFloat {
     0%, 100% { margin-top: 0; }
     50% { margin-top: -8px; }
@@ -9802,7 +9824,8 @@ footer {
 
 .reveal-overlay.minimized .reveal-card-info,
 .reveal-overlay.minimized .reveal-prompt,
-.reveal-overlay.minimized .reveal-skip-btn {
+.reveal-overlay.minimized .reveal-skip-btn,
+.reveal-overlay.minimized .reveal-layout-switch {
     opacity: 0 !important;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -9897,6 +9920,66 @@ footer {
     -webkit-backdrop-filter: blur(16px);
 }
 
+.reveal-layout-switch {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 3003;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    cursor: pointer;
+}
+
+.reveal-layout-title {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(192, 204, 228, 0.82);
+}
+
+.reveal-layout-segment {
+    display: inline-flex;
+    padding: 2px;
+    border-radius: 999px;
+    background: rgba(154, 170, 212, 0.10);
+    border: 1px solid rgba(154, 170, 212, 0.20);
+    gap: 2px;
+}
+
+.reveal-layout-option {
+    border: 0;
+    background: transparent;
+    color: rgba(192, 204, 228, 0.72);
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    min-width: 54px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.reveal-layout-option.active {
+    color: rgba(230, 236, 248, 0.96);
+    background: linear-gradient(135deg, rgba(154, 170, 212, 0.35), rgba(120, 139, 188, 0.36));
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.22);
+}
+
+.reveal-layout-option:hover {
+    color: rgba(230, 236, 248, 0.94);
+}
+
 .reveal-fan-wrapper {
     position: relative;
     z-index: 1;
@@ -9914,6 +9997,10 @@ footer {
 .reveal-overlay [class*="tc-"],
 .reveal-overlay [class*="twc-"] {
     animation: none !important;
+}
+
+.reveal-overlay .ten-card-fan .multi-card-item {
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Highlight next card to reveal */
@@ -10119,6 +10206,21 @@ footer {
 
 /* Responsive reveal overlay */
 @media (max-width: 768px) {
+    .reveal-layout-switch {
+        top: 10px;
+        right: 10px;
+        padding: 0;
+        gap: 6px;
+    }
+    .reveal-layout-title {
+        font-size: 0.66rem;
+    }
+    .reveal-layout-option {
+        min-width: 48px;
+        padding: 4px 8px;
+        font-size: 0.66rem;
+    }
+
     .reveal-prompt {
         margin-top: 40px;
         font-size: 0.9rem;
@@ -10138,6 +10240,18 @@ footer {
 }
 
 @media (max-width: 480px) {
+    .reveal-layout-title {
+        display: none;
+    }
+    .reveal-layout-switch {
+        padding: 0;
+    }
+    .reveal-layout-option {
+        min-width: 44px;
+        padding: 4px 7px;
+        font-size: 0.64rem;
+    }
+
     .reveal-prompt {
         margin-top: 30px;
         font-size: 0.85rem;
@@ -10400,6 +10514,17 @@ footer {
     .tc-8  { transform: translate(152px, 52px); }
     .tc-9  { transform: translate(152px, -52px); }
     .tc-10 { transform: translate(152px, -155px); }
+    .ten-card-fan.layout-new .tc-1  { transform: translate(-55px, 0px); }
+    .ten-card-fan.layout-new .tc-2  { transform: translate(-155px, 0px); }
+    .ten-card-fan.layout-new .tc-3  { transform: translate(-55px, -120px); }
+    .ten-card-fan.layout-new .tc-4  { transform: translate(-55px, 120px); }
+    .ten-card-fan.layout-new .tc-5  { transform: translate(45px, 0px); }
+    .ten-card-fan.layout-new .tc-6  { transform: translate(-155px, -120px); }
+    .ten-card-fan.layout-new .tc-7  { transform: translate(152px, 120px); }
+    .ten-card-fan.layout-new .tc-8  { transform: translate(152px, 0px); }
+    .ten-card-fan.layout-new .tc-9  { transform: translate(152px, -120px); }
+    .ten-card-fan.layout-new .tc-10 { transform: translate(45px, -120px); }
+    .ten-card-fan.layout-new .card-position-label { bottom: -26px; font-size: 10.5px; }
 
     /* 12-card zodiac responsive — radius 168px */
     .twelve-card-fan { width: 450px; height: 450px; }
@@ -10644,6 +10769,17 @@ footer {
     .tc-8  { transform: translate(124px, 43px); }
     .tc-9  { transform: translate(124px, -43px); }
     .tc-10 { transform: translate(124px, -130px); }
+    .ten-card-fan.layout-new .tc-1  { transform: translate(-44px, 0px); }
+    .ten-card-fan.layout-new .tc-2  { transform: translate(-126px, 0px); }
+    .ten-card-fan.layout-new .tc-3  { transform: translate(-44px, -98px); }
+    .ten-card-fan.layout-new .tc-4  { transform: translate(-44px, 98px); }
+    .ten-card-fan.layout-new .tc-5  { transform: translate(38px, 0px); }
+    .ten-card-fan.layout-new .tc-6  { transform: translate(-126px, -98px); }
+    .ten-card-fan.layout-new .tc-7  { transform: translate(124px, 98px); }
+    .ten-card-fan.layout-new .tc-8  { transform: translate(124px, 0px); }
+    .ten-card-fan.layout-new .tc-9  { transform: translate(124px, -98px); }
+    .ten-card-fan.layout-new .tc-10 { transform: translate(38px, -98px); }
+    .ten-card-fan.layout-new .card-position-label { bottom: -23px; font-size: 9px; letter-spacing: 0.8px; }
 
     /* 12-card zodiac small screen — radius 140px */
     .twelve-card-fan { width: 380px; height: 380px; }
