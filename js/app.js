@@ -887,7 +887,7 @@ function switchMode(direction) {
 
 var POSITIVE_CARD_NAMES = [
 
-    // Major Arcana โ€” positive
+    // Major Arcana — positive
 
     'THE MAGICIAN', 'THE EMPRESS', 'THE LOVERS', 'THE CHARIOT',
 
@@ -903,19 +903,19 @@ var POSITIVE_CARD_NAMES = [
 
     'PAGE OF PENTACLES', 'KNIGHT OF PENTACLES', 'QUEEN OF PENTACLES', 'KING OF PENTACLES',
 
-    // Wands โ€” positive
+    // Wands — positive
 
     'ACE OF WANDS', 'THREE OF WANDS', 'FOUR OF WANDS', 'SIX OF WANDS', 'EIGHT OF WANDS',
 
-    // Cups โ€” positive
+    // Cups — positive
 
     'ACE OF CUPS', 'TWO OF CUPS', 'THREE OF CUPS', 'SIX OF CUPS', 'NINE OF CUPS', 'TEN OF CUPS',
 
-    // Swords โ€” positive
+    // Swords — positive
 
     'ACE OF SWORDS',
 
-    // Pentacles โ€” positive
+    // Pentacles — positive
 
     'ACE OF PENTACLES', 'THREE OF PENTACLES', 'SIX OF PENTACLES',
 
@@ -1169,7 +1169,7 @@ function resetThreeCardAnimations(container) {
 
     cards.forEach(function(card) {
 
-        // Random delay between 0โ€“3s so each card starts at a different phase
+        // Random delay between 0–3s so each card starts at a different phase
 
         var delay = (Math.random() * 3).toFixed(2);
 
@@ -1695,7 +1695,7 @@ function playSoundEffect(soundName) {
 
 
 
-// Blessing burst effect โ€” expanding rings + particles from the accept button
+// Blessing burst effect — expanding rings + particles from the accept button
 
 function triggerBlessingBurst(btn) {
 
@@ -2155,11 +2155,11 @@ function preloadImage(src) {
 
 
 
-// โ”€โ”€ Preload overlay โ”€โ”€
+// ── Preload overlay ──
 
 function createPreloadOverlay() {
 
-    // Overlay is already in HTML โ€” just return it
+    // Overlay is already in HTML — just return it
 
     return document.getElementById('preloadOverlay');
 
@@ -2411,9 +2411,9 @@ async function waitForResources() {
 
 
 
-    // โ”€โ”€ Phase 1: Load tarot data + essential images only โ”€โ”€
+    // ── Phase 1: Load tarot data + essential images only ──
 
-    updatePreloadProgress(0, 100, 'loading card dataโ€ฆ');
+    updatePreloadProgress(0, 100, 'loading card data…');
 
 
 
@@ -2471,7 +2471,7 @@ async function waitForResources() {
 
 
 
-    // โ”€โ”€ Phase 2: Lazy-load remaining images in background โ”€โ”€
+    // ── Phase 2: Lazy-load remaining images in background ──
 
     _lazyLoadRemainingImages();
 
@@ -2479,7 +2479,7 @@ async function waitForResources() {
 
 
 
-// Background image preloader โ€” does not block page interaction
+// Background image preloader — does not block page interaction
 
 var _lazyLoadPaused = false;
 
@@ -2565,7 +2565,7 @@ function _lazyLoadRemainingImages() {
 
 
 
-    // Start a few parallel streams โ€” low priority, won't compete with user interactions
+    // Start a few parallel streams — low priority, won't compete with user interactions
 
     for (var i = 0; i < concurrent && i < allImages.length; i++) {
 
@@ -2669,7 +2669,7 @@ function startCardRotation() {
 
 // JS face-visibility sync: toggles front/back opacity in the same RAF callback
 
-// so both changes always land in the same rendered frame โ€” no mobile flicker.
+// so both changes always land in the same rendered frame — no mobile flicker.
 
 let _faceVisRAF = null;
 
@@ -3271,7 +3271,7 @@ function selectCategory(category) {
 
 
 
-    // Back button โ€” close overlay and return to landing
+    // Back button — close overlay and return to landing
 
     var backBtn = document.getElementById('categoryBackBtn');
 
@@ -3671,7 +3671,7 @@ function startExperience() {
 
 
 
-    // Step 3: Shrink the card and move to stack center โ€” become the top card of the stack
+    // Step 3: Shrink the card and move to stack center — become the top card of the stack
 
     setTimeout(() => {
 
@@ -3711,7 +3711,7 @@ function startExperience() {
 
 
 
-        // Apply shrink transition โ€” card shrinks into the stack position
+        // Apply shrink transition — card shrinks into the stack position
 
         spinningCardContainer.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
 
@@ -3751,7 +3751,7 @@ function startExperience() {
 
 
 
-    // Step 4: Spinning card is now aligned with stack โ€” hide it and spread immediately
+    // Step 4: Spinning card is now aligned with stack — hide it and spread immediately
 
     setTimeout(() => {
 
@@ -3763,7 +3763,7 @@ function startExperience() {
 
 
 
-        // Spread immediately โ€” the stack was already visible, so cards fly out from the same spot
+        // Spread immediately — the stack was already visible, so cards fly out from the same spot
 
         animateToGrid();
 
@@ -3963,7 +3963,7 @@ function renderCards() {
 
 
 
-// Drag upward to select a card โ€” drag up โฅ half the card height to confirm
+// Drag upward to select a card — drag up ≥ half the card height to confirm
 
 function setupCardDrag(cardGrid) {
 
@@ -4137,7 +4137,7 @@ function setupCardDrag(cardGrid) {
 
 
 
-        // Didn't reach threshold โ€” snap back
+        // Didn't reach threshold — snap back
 
         card.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease';
 
@@ -4339,7 +4339,7 @@ function calculateCardLayout() {
 
     const NUM_ROWS = 6;
 
-    const NUM_COLS = 13;        // 6 ร— 13 = 78 cards
+    const NUM_COLS = 13;        // 6 × 13 = 78 cards
 
 
 
@@ -4519,7 +4519,7 @@ function animateToGrid() {
 
 
 
-    // Deal cards: top-left first โ’ right โ’ next row (grid index 0 flies first)
+    // Deal cards: top-left first → right → next row (grid index 0 flies first)
 
     const DELAY_PER_CARD = 18;  // ms between each card (~1 card per frame at 60fps)
 
@@ -4719,11 +4719,11 @@ function applyGridLayout() {
 
 var _categoryParticles = {
 
-    love:    ['โฅ', 'โก', 'โค'],
+    love:    ['♥', '♡', '❤'],
 
-    work:    ['โ…', '◆', 'โก'],
+    work:    ['★', '◆', '⚡'],
 
-    finance: ['◆', 'โ—', '$']
+    finance: ['◆', '◆', '$']
 
 };
 
@@ -4987,7 +4987,7 @@ function _cancelRevealDismiss() {
 
 function showRevealOverlay() {
 
-    console.log('[DEBUG] showRevealOverlay โ€” revealCardData:', revealCardData?.name);
+    console.log('[DEBUG] showRevealOverlay — revealCardData:', revealCardData?.name);
 
     var overlay = document.getElementById('revealOverlay');
 
@@ -5025,7 +5025,7 @@ function showRevealOverlay() {
 
     var t = translations[currentLang] && translations[currentLang].reveal;
 
-    skipBtn.textContent = (t && t.skip) || 'Skip โ€บ';
+    skipBtn.textContent = (t && t.skip) || 'Skip ›';
 
 
 
@@ -5674,7 +5674,7 @@ function showRevealContinuePrompt() {
 
 function dismissRevealOverlay() {
 
-    console.log('[DEBUG] dismissRevealOverlay โ€” mode:', currentReadingMode);
+    console.log('[DEBUG] dismissRevealOverlay — mode:', currentReadingMode);
 
     var overlay = document.getElementById('revealOverlay');
 
@@ -5746,7 +5746,7 @@ function dismissRevealOverlay() {
 
 
 
-    // Step 4: Dismiss fully โ€” stash overlay (keep content for re-open)
+    // Step 4: Dismiss fully — stash overlay (keep content for re-open)
 
     var dismissFlag = _revealDismissedFlag = { value: false };
 
@@ -5830,7 +5830,7 @@ function dismissRevealOverlay() {
 
 
 
-// โ”€โ”€ Re-open reveal overlay from result page โ”€โ”€
+// ── Re-open reveal overlay from result page ──
 
 
 
@@ -6283,7 +6283,7 @@ function hideMultiPickIndicator() {
 
 function selectCardMulti(card, cardElement) {
 
-    // Check if already selected โ€” toggle off
+    // Check if already selected — toggle off
 
     var existingIdx = -1;
 
@@ -6337,7 +6337,7 @@ function selectCardMulti(card, cardElement) {
 
 
 
-    // Already at max โ€” ignore
+    // Already at max — ignore
 
     if (multiCardSelections.length >= multiCardTarget) return;
 
@@ -6382,7 +6382,7 @@ function selectCardMulti(card, cardElement) {
 
 
 
-    // All cards selected โ’ proceed after a short delay
+    // All cards selected → proceed after a short delay
 
     if (multiCardSelections.length >= multiCardTarget) {
 
@@ -6568,7 +6568,7 @@ function proceedToMultiResult() {
 
 
 
-    // Click sticky card item โ’ scroll to that section + center in header
+    // Click sticky card item → scroll to that section + center in header
 
     stickyCard.querySelectorAll('.multi-result-card-item').forEach(function(item) {
 
@@ -6832,7 +6832,7 @@ function proceedToMultiResult() {
 
 function proceedToResult(card, skipFlyAnimation) {
 
-    console.log('[DEBUG] proceedToResult โ€” card:', card?.name, 'skipFly:', skipFlyAnimation);
+    console.log('[DEBUG] proceedToResult — card:', card?.name, 'skipFly:', skipFlyAnimation);
 
     currentCardData = card;
 
@@ -6866,7 +6866,7 @@ function proceedToResult(card, skipFlyAnimation) {
 
 
 
-    // Start sticky card expanded (hero state) โ€” minimizes on scroll
+    // Start sticky card expanded (hero state) — minimizes on scroll
 
     document.getElementById('resultStickyCard').classList.remove('minimized');
 
@@ -6874,7 +6874,7 @@ function proceedToResult(card, skipFlyAnimation) {
 
     if (skipFlyAnimation) {
 
-        // Coming from reveal overlay โ€” skip center card animation, just show result
+        // Coming from reveal overlay — skip center card animation, just show result
 
         var centerCard = document.getElementById('centerCard');
 
@@ -6898,7 +6898,7 @@ function proceedToResult(card, skipFlyAnimation) {
 
             resultPanel.classList.add('active');
 
-            console.log('[DEBUG] resultPanel.active ADDED โ€” classes:', resultPanel.className);
+            console.log('[DEBUG] resultPanel.active ADDED — classes:', resultPanel.className);
 
             console.log('[DEBUG] resultPanel computed:', getComputedStyle(resultPanel).opacity, getComputedStyle(resultPanel).visibility);
 
@@ -7482,7 +7482,7 @@ function getCurrentProfilePicture() {
 
 // ========================================
 
-// In-memory caches: fbUserId (without prefix) โ’ value
+// In-memory caches: fbUserId (without prefix) → value
 
 const userDisplayNames = new Map();
 
@@ -7630,7 +7630,7 @@ async function resolveDisplayNames(items) {
 
 
 
-// Check localStorage directly โ€” works before facebook.js or FB SDK is ready
+// Check localStorage directly — works before facebook.js or FB SDK is ready
 
 function wasPreviouslyConnected() {
 
@@ -7812,7 +7812,7 @@ async function savePendingDrawAfterLogin() {
 
         if (commentOverlay) commentOverlay.style.display = '';
 
-        if (blessingName) blessingName.textContent = userName === 'Me' ? '' : 'โ€” ' + userName + ' โ€”';
+        if (blessingName) blessingName.textContent = userName === 'Me' ? '' : '— ' + userName + ' —';
 
         if (blessingComment) blessingComment.textContent = commentText ? '"' + commentText + '"' : '';
 
@@ -8030,7 +8030,7 @@ function initStickyCardObserver() {
 
 
 
-    // Cache DOM queries once โ€” avoid querySelectorAll on every scroll
+    // Cache DOM queries once — avoid querySelectorAll on every scroll
 
     var _cachedSections = null;
 
@@ -8538,7 +8538,7 @@ function resetCommentForm() {
 
 
 
-// Starfield โ€” creates twinkling stars and shooting star effects
+// Starfield — creates twinkling stars and shooting star effects
 
 (function createStarfield() {
 
@@ -8584,7 +8584,7 @@ function resetCommentForm() {
 
 
 
-    // Shooting stars โ€” thin streaks matching comet direction
+    // Shooting stars — thin streaks matching comet direction
 
     function spawnShootingStar() {
 
@@ -8648,7 +8648,7 @@ function resetCommentForm() {
 
 
 
-// Header shooting stars โ€” spawns mini shooting stars inside .comments-panel-header
+// Header shooting stars — spawns mini shooting stars inside .comments-panel-header
 
 (function() {
 
@@ -8712,7 +8712,7 @@ function resetCommentForm() {
 
 
 
-// Result panel shooting stars โ€” spawns into result-panel and minimized sticky card
+// Result panel shooting stars — spawns into result-panel and minimized sticky card
 
 (function() {
 
@@ -8844,7 +8844,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function submitComment() {
 
-    // If minimized, expand and scroll to bottom โ€” then stop (don't submit)
+    // If minimized, expand and scroll to bottom — then stop (don't submit)
 
     var commentSection = document.querySelector('.comment-section');
 
@@ -9020,7 +9020,7 @@ async function submitComment() {
 
     } else {
 
-        // FB user but auto-save failed or no comment ID โ€” submit fresh
+        // FB user but auto-save failed or no comment ID — submit fresh
 
         var userId = getUserId();
 
@@ -9150,7 +9150,7 @@ function showBlessingScreen(userName, comment) {
 
     if (commentOverlay) commentOverlay.style.display = '';
 
-    blessingName.textContent = userName === 'Me' ? '' : `โ€” ${userName} โ€”`;
+    blessingName.textContent = userName === 'Me' ? '' : `— ${userName} —`;
 
     blessingComment.textContent = `"${comment}"`;
 
@@ -9392,7 +9392,7 @@ function closeBlessingAndRestart() {
 
 function goToLandingPage() {
 
-    console.log('[DEBUG] goToLandingPage โ€” isAnimating:', isAnimating);
+    console.log('[DEBUG] goToLandingPage — isAnimating:', isAnimating);
 
     isAnimating = false; // safety reset
 
@@ -9630,7 +9630,7 @@ function goToLandingPage() {
 
 
 
-        // Reset card faces โ€” visibility & animation were forced during transition
+        // Reset card faces — visibility & animation were forced during transition
 
         var frontFace = spinningCard.querySelector('.spinning-card-front');
 
@@ -9888,7 +9888,7 @@ function goToLandingPage() {
 
             // Heading visibility is handled by CSS .mode-title.active
 
-            // (set by applyModeVisuals above) โ€” no inline override needed
+            // (set by applyModeVisuals above) — no inline override needed
 
 
 
@@ -10188,7 +10188,7 @@ function initCommentsPanel() {
 
             if (!headerCollapsed && st > scrollThreshold && delta > 5) {
 
-                // Scrolling down past threshold with enough momentum โ€” collapse
+                // Scrolling down past threshold with enough momentum — collapse
 
                 headerCollapsed = true;
 
@@ -10200,7 +10200,7 @@ function initCommentsPanel() {
 
             } else if (headerCollapsed && (st <= scrollThreshold || (delta < -8 && now - collapseTime > 300))) {
 
-                // Scrolling up significantly (with cooldown) or back near top โ€” expand
+                // Scrolling up significantly (with cooldown) or back near top — expand
 
                 headerCollapsed = false;
 
@@ -10220,7 +10220,7 @@ function initCommentsPanel() {
 
     // Badge is driven solely by notification polling (friend draws + replies).
 
-    // No fallback to total comments count โ€” badge only shows when logged in via FB.
+    // No fallback to total comments count — badge only shows when logged in via FB.
 
 }
 
@@ -10678,7 +10678,7 @@ function createFeedCard(comment) {
 
     if (comment.readingCategory) {
 
-        var catLabels = { love: 'โฅ', work: 'โ…', finance: 'โ—' };
+        var catLabels = { love: '♥', work: '★', finance: '◆' };
 
         var catIcon = catLabels[comment.readingCategory] || '';
 
@@ -10940,7 +10940,7 @@ function createFeedCard(comment) {
 
         if (e.target.closest('.feed-card-replies-section') || e.target.closest('.reply-form')) return;
 
-        // Already expanded โ€” do nothing
+        // Already expanded — do nothing
 
         if (card.classList.contains('expanded')) return;
 
@@ -11768,7 +11768,7 @@ async function checkUserHasComments() {
 
 async function checkMyCardTab() {
 
-    // MyCard tab is always visible โ€” no need to hide/show
+    // MyCard tab is always visible — no need to hide/show
 
     const commentsTabs = document.getElementById('commentsTabs');
 
@@ -12174,7 +12174,7 @@ async function loadComments(reset = false) {
 
             <div class="comments-empty">
 
-                <div class="comments-empty-icon">๐’ฌ</div>
+                <div class="comments-empty-icon">💬</div>
 
                 <div class="comments-empty-text">${t('cta.beFirstComment')}</div>
 
@@ -12324,7 +12324,7 @@ async function loadHotComments() {
 
             <div class="comments-empty">
 
-                <div class="comments-empty-icon">๐”ฅ</div>
+                <div class="comments-empty-icon">🔥</div>
 
                 <div class="comments-empty-text">${t('common.noHotComments')}<br>${t('common.tryReply')}</div>
 
@@ -12442,7 +12442,7 @@ async function loadMyComments() {
 
                     <span class="sparkle s1">◆</span>
 
-                    <span class="sparkle s2">โง</span>
+                    <span class="sparkle s2">✧</span>
 
                     <span class="sparkle s3">◆</span>
 
@@ -12660,7 +12660,7 @@ async function loadMyCardComments() {
 
 
 
-    // Use feed card style โ€” same as วงไพ่ tab
+    // Use feed card style — same as วงไพ่ tab
 
     myComments.forEach(comment => {
 
@@ -13056,7 +13056,7 @@ function buildLoginRequiredCta(messageKey, subtitleKey) {
 
             '<span class="sparkle s1">◆</span>' +
 
-            '<span class="sparkle s2">โง</span>' +
+            '<span class="sparkle s2">✧</span>' +
 
             '<span class="sparkle s3">◆</span>' +
 
@@ -13106,7 +13106,7 @@ function buildMyCardEmptyCta() {
 
             '<span class="sparkle s1">◆</span>' +
 
-            '<span class="sparkle s2">โง</span>' +
+            '<span class="sparkle s2">✧</span>' +
 
             '<span class="sparkle s3">◆</span>' +
 
@@ -13192,7 +13192,7 @@ function buildFriendsInviteCta() {
 
             '<span class="sparkle s1">◆</span>' +
 
-            '<span class="sparkle s2">โง</span>' +
+            '<span class="sparkle s2">✧</span>' +
 
             '<span class="sparkle s3">◆</span>' +
 
@@ -13242,7 +13242,7 @@ function buildFriendsReconnectCta() {
 
             '<span class="sparkle s1">◆</span>' +
 
-            '<span class="sparkle s2">โง</span>' +
+            '<span class="sparkle s2">✧</span>' +
 
             '<span class="sparkle s3">◆</span>' +
 
@@ -13340,7 +13340,7 @@ function inviteFriendsViaMessenger() {
 
 // ========================================
 
-// Friends New Cards โ€“ Profile Circle Stack
+// Friends New Cards – Profile Circle Stack
 
 // ========================================
 
@@ -13448,7 +13448,7 @@ async function checkFriendsNewCards() {
 
 function onFriendCircleClick(circleEl) {
 
-    // Update poll state โ€” remove this friend's draws
+    // Update poll state — remove this friend's draws
 
     var userId = circleEl ? circleEl.dataset.userId : null;
 
@@ -15164,7 +15164,7 @@ async function loadCardViewComments() {
 
             <div class="comments-empty">
 
-                <div class="comments-empty-icon">๐</div>
+                <div class="comments-empty-icon">🃏</div>
 
                 <div class="comments-empty-text">${t('error.cardNotFound')}</div>
 
@@ -15214,7 +15214,7 @@ async function loadCardViewComments() {
 
             <div class="comments-empty">
 
-                <div class="comments-empty-icon">๐’ฌ</div>
+                <div class="comments-empty-icon">💬</div>
 
                 <div class="comments-empty-text">${t('comments.noComments')}<br>${t('comments.beFirst')}</div>
 
@@ -15308,7 +15308,7 @@ function createCommentCard(comment, showReplyBadge = false) {
 
     const replyBadgeHtml = (showReplyBadge && comment.replyCount > 0)
 
-        ? `<div class="comment-reply-badge">๐’ฌ ${comment.replyCount} ${t('common.replyCount')}</div>`
+        ? `<div class="comment-reply-badge">💬 ${comment.replyCount} ${t('common.replyCount')}</div>`
 
         : '';
 
@@ -15716,7 +15716,7 @@ function markRepliesAsRead(card, commentId) {
 
 
 
-    // Update poll state โ€” remove replies for this comment from unseen
+    // Update poll state — remove replies for this comment from unseen
 
     if (_pollState.repliesData.length > 0) {
 
@@ -16162,7 +16162,7 @@ async function expandCommentCard(card, comment) {
 
                 const replyBadge = rc.replyCount > 0
 
-                    ? `<span class="related-comment-replies">๐’ฌ ${rc.replyCount}</span>`
+                    ? `<span class="related-comment-replies">💬 ${rc.replyCount}</span>`
 
                     : '';
 
@@ -16728,7 +16728,7 @@ function showSavePreview(canvas, filename) {
 
 
 
-    // Download โ€” fresh user gesture
+    // Download — fresh user gesture
 
     var dlBtn = popup.querySelector('.save-preview-download');
 
@@ -16752,7 +16752,7 @@ function showSavePreview(canvas, filename) {
 
 
 
-    // Share โ€” fresh user gesture on mobile
+    // Share — fresh user gesture on mobile
 
     if (canShare) {
 
@@ -17572,7 +17572,7 @@ function drawMultiSquareLayout(ctx, cardImages, width, height, colors) {
 
     var titleStr = getReadingModeTitle();
 
-    if (catLabel) titleStr += '  ยท  ' + catLabel;
+    if (catLabel) titleStr += '  ·  ' + catLabel;
 
     ctx.fillText(titleStr, width / 2, safePad + 10);
 
@@ -18184,15 +18184,15 @@ var _MONTH_SHORT = {
 
     en:    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
 
-    'zh-CN': ['1ๆ','2ๆ','3ๆ','4ๆ','5ๆ','6ๆ','7ๆ','8ๆ','9ๆ','10ๆ','11ๆ','12ๆ'],
+    'zh-CN': ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
 
-    'zh-TW': ['1ๆ','2ๆ','3ๆ','4ๆ','5ๆ','6ๆ','7ๆ','8ๆ','9ๆ','10ๆ','11ๆ','12ๆ'],
+    'zh-TW': ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
 
-    ko:    ['1์”','2์”','3์”','4์”','5์”','6์”','7์”','8์”','9์”','10์”','11์”','12์”'],
+    ko:    ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
 
-    ja:    ['1ๆ','2ๆ','3ๆ','4ๆ','5ๆ','6ๆ','7ๆ','8ๆ','9ๆ','10ๆ','11ๆ','12ๆ'],
+    ja:    ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
 
-    fr:    ['Jan','Fรฉv','Mars','Avr','Mai','Juin','Juil','Aoรปt','Sep','Oct','Nov','Dรฉc']
+    fr:    ['Jan','Fév','Mars','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc']
 
 };
 
@@ -18202,15 +18202,15 @@ var _MONTH_FULL = {
 
     en:    ['January','February','March','April','May','June','July','August','September','October','November','December'],
 
-    'zh-CN': ['ไธ€ๆ','ไบๆ','ไธๆ','ๅๆ','ไบ”ๆ','ๅ…ญๆ','ไธๆ','ๅ…ซๆ','ไนๆ','ๅๆ','ๅไธ€ๆ','ๅไบๆ'],
+    'zh-CN': ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'],
 
-    'zh-TW': ['ไธ€ๆ','ไบๆ','ไธๆ','ๅๆ','ไบ”ๆ','ๅ…ญๆ','ไธๆ','ๅ…ซๆ','ไนๆ','ๅๆ','ๅไธ€ๆ','ๅไบๆ'],
+    'zh-TW': ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'],
 
-    ko:    ['1์”','2์”','3์”','4์”','5์”','6์”','7์”','8์”','9์”','10์”','11์”','12์”'],
+    ko:    ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
 
-    ja:    ['1ๆ','2ๆ','3ๆ','4ๆ','5ๆ','6ๆ','7ๆ','8ๆ','9ๆ','10ๆ','11ๆ','12ๆ'],
+    ja:    ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
 
-    fr:    ['Janvier','Fรฉvrier','Mars','Avril','Mai','Juin','Juillet','Aoรปt','Septembre','Octobre','Novembre','Dรฉcembre']
+    fr:    ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
 
 };
 
@@ -18285,7 +18285,7 @@ function _drawCard(ctx, img, cx, cy, w, h, angle, colors) {
 
     // After rotation the canvas axes are swapped, so swap draw dimensions
 
-    // to preserve the intended visual size (w ร— h in screen space)
+    // to preserve the intended visual size (w × h in screen space)
 
     var dw = angle ? h : w, dh = angle ? w : h;
 
@@ -18405,7 +18405,7 @@ function _bigSpreadFooter(ctx, W, H, padB, colors) {
 
 
 
-// โ”€โ”€โ”€ 10-Card: Story / Wide layouts โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+// ─── 10-Card: Story / Wide layouts ───────────────────────────
 
 function drawTenCardLayout(ctx, cardImages, W, H, colors) {
 
@@ -18839,7 +18839,7 @@ function _twelveCardWide(ctx, cardImages, W, H, colors) {
 
 
 
-// โ”€โ”€โ”€ 12-Card: Square (cards fill image, no text labels) โ”€โ”€โ”€โ”€โ”€โ”€
+// ─── 12-Card: Square (cards fill image, no text labels) ──────
 
 function drawTwelveCardSquareLayout(ctx, cardImages, W, H, colors) {
 
@@ -19145,7 +19145,7 @@ function drawLineIcon(ctx, x, y, size, color) {
 
 
 
-// Unified footer: social left, jubpai.com right โ€” same row
+// Unified footer: social left, jubpai.com right — same row
 
 // opts: { iconSize, centerX, footerY, width, color, accentColor, compact }
 
@@ -19195,7 +19195,7 @@ function drawFooterWithPromo(ctx, opts) {
 
     ctx.textAlign = 'left';
 
-    ctx.fillText('Pimfahmaprod ยท Line: @Pimfah', leftX, labelY);
+    ctx.fillText('Pimfahmaprod · Line: @Pimfah', leftX, labelY);
 
 
 
@@ -20375,7 +20375,7 @@ waitForResources();
 
         } else {
 
-            // Tab visible again โ€” resume if was playing and not muted
+            // Tab visible again — resume if was playing and not muted
 
             if (wasPlayingBeforeHidden && audioElement && !isMuted && musicStarted) {
 
@@ -22049,7 +22049,7 @@ waitForResources();
 
 
 
-// โ”€โ”€ bfcache restore: reset disabled card states โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+// ── bfcache restore: reset disabled card states ──────────────────────────────
 
 // On mobile, the browser may freeze and restore the page from bfcache when the
 
@@ -22057,11 +22057,11 @@ waitForResources();
 
 // classes / inline styles from a previous multi-card session still visible.
 
-// pageshow fires with event.persisted = true in that case โ€” reset everything.
+// pageshow fires with event.persisted = true in that case — reset everything.
 
 window.addEventListener('pageshow', function(event) {
 
-    if (!event.persisted) return; // Normal page load โ€” no action needed
+    if (!event.persisted) return; // Normal page load — no action needed
 
 
 
